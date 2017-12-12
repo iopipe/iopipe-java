@@ -17,9 +17,15 @@ This project requires Maven and at least Java 7.
 The project is structured into multiple sub-projects:
 
  * `iopipe-core` -- This is the base library and is required for everything
-   to function properly. The classes within this project are
+   to function properly.
+   * Knows how to contact the IOPipe servers to provide results.
  * `iopipe-aws-lambda` -- This library provides support for wrapping AWS
    Lambdas for communication with the IOPipe service.
+   * This depends on`iopipe-core` to provide the needed support for interacting
+     with IOPipe's service.
+   * Provides implementations of `RequestHandler` and `RequestStreamHandler`
+     which wrap existing instances of those classes but setting them up for
+     communication with IOPipe.
 
 ## Building
 
@@ -48,9 +54,9 @@ variables are supported.
    * If you need help looking for your token you can visit:
      [Find your project token](https://dashboard.iopipe.com/install).
 
-# Integration Into Your Maven Project
+# Integration Into Your Maven Project With Amazon AWS Lambdas
 
-***To be written completely.***
+***TO BE WRITTEN COMPLETELY***
 
 The instructions here for setting up your Maven project are similar to the ones
 listed on the Amazon site:
@@ -89,4 +95,5 @@ In your `pom.xml` have the following
 </build>
 ```
 
+***TO BE WRITTEN COMPLETELY***
 
