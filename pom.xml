@@ -7,5 +7,6 @@
   <packaging>pom</packaging>
   <modules>
     <module>iopipe-core</module>
+    <module>iopipe-aws-lambda</module>
   </modules>
 </project>

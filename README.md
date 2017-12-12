@@ -17,7 +17,9 @@ This project requires Maven and at least Java 7.
 The project is structured into multiple sub-projects:
 
  * `iopipe-core` -- This is the base library and is required for everything
-   to function properly.
+   to function properly. The classes within this project are
+ * `iopipe-aws-lambda` -- This library provides support for wrapping AWS
+   Lambdas for communication with the IOPipe service.
 
 ## Building
 
@@ -45,4 +47,46 @@ variables are supported.
      the client.
    * If you need help looking for your token you can visit:
      [Find your project token](https://dashboard.iopipe.com/install).
+
+# Integration Into Your Maven Project
+
+***To be written completely.***
+
+The instructions here for setting up your Maven project are similar to the ones
+listed on the Amazon site:
+<https://docs.aws.amazon.com/lambda/latest/dg/java-create-jar-pkg-maven-no-ide.html>.
+There are however differences since your lambda will need to be wrapped
+accordingly for it to function and record any statistics.
+
+In your `pom.xml` have the following
+
+```
+<dependency>
+  <groupId>com.iopipe.iopipe.awslambda</groupId>
+  <artifactId>iopipe-aws-lambda</artifactId>
+  <version>1.0-SNAPSHOT</version>
+</dependency>
+
+<build>
+  <plugins>
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-shade-plugin</artifactId>
+      <version>2.3</version>
+      <configuration>
+        <createDependencyReducedPom>false</createDependencyReducedPom>
+      </configuration>
+      <executions>
+        <execution>
+          <phase>package</phase>
+          <goals>
+            <goal>shade</goal>
+          </goals>
+        </execution>
+      </executions>
+    </plugin>
+  </plugins>
+</build>
+```
+
 
