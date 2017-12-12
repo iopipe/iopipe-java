@@ -6,5 +6,5 @@
  * @since 2017/12/12
  */
 
-package com.iopipe.iopipe.awslambda;
+package com.iopipe.awslambda;
 

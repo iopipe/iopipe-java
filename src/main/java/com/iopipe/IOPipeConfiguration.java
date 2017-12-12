@@ -1,4 +1,4 @@
-package com.iopipe.iopipe.core;
+package com.iopipe;
 
 /**
  * This class contains the configuration for IOPipe and specifies the settings

@@ -5,4 +5,4 @@
  * @since 2017/12/12
  */
 
-package com.iopipe.iopipe.core;
+package com.iopipe;

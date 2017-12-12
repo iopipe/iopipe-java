@@ -1,12 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.iopipe.iopipe</groupId>
+  <groupId>com.iopipe</groupId>
   <artifactId>iopipe</artifactId>
   <version>1.0-SNAPSHOT</version>
-  <packaging>pom</packaging>
-  <modules>
-    <module>iopipe-core</module>
-    <module>iopipe-aws-lambda</module>
-  </modules>
+  <packaging>jar</packaging>
+  <name>iopipe</name>
+  <url>https://github.com/iopipe/iopipe-java-core</url>
+  <description>
+    This contains the support library for the IOPipe service and additionally
+    provides support for wrapping AWS services.
+  </description>
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>javax.json</groupId>
+      <artifactId>javax.json-api</artifactId>
+      <version>1.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish</groupId>
+      <artifactId>javax.json</artifactId>
+      <version>1.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.amazonaws</groupId>
+      <artifactId>aws-lambda-java-core</artifactId>
+      <version>1.1.0</version>
+    </dependency>
+  </dependencies>
+  <!-- Note that there is no build step for deployment because this is a
+       supporting library and NOT a deployment library. -->
 </project>
+
