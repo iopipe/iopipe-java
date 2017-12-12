@@ -12,21 +12,6 @@ lambda services.
 
 This project requires Maven and at least Java 7.
 
-## Structure
-
-The project is structured into multiple sub-projects:
-
- * `iopipe-core` -- This is the base library and is required for everything
-   to function properly.
-   * Knows how to contact the IOPipe servers to provide results.
- * `iopipe-aws-lambda` -- This library provides support for wrapping AWS
-   Lambdas for communication with the IOPipe service.
-   * This depends on`iopipe-core` to provide the needed support for interacting
-     with IOPipe's service.
-   * Provides implementations of `RequestHandler` and `RequestStreamHandler`
-     which wrap existing instances of those classes but setting them up for
-     communication with IOPipe.
-
 ## Building
 
 Building requires Maven and a Java 7 Virtual Machine.
@@ -68,8 +53,8 @@ In your `pom.xml` have the following
 
 ```
 <dependency>
-  <groupId>com.iopipe.iopipe.awslambda</groupId>
-  <artifactId>iopipe-aws-lambda</artifactId>
+  <groupId>com.iopipe</groupId>
+  <artifactId>iopipe</artifactId>
   <version>1.0-SNAPSHOT</version>
 </dependency>
 
