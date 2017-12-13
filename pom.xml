@@ -33,6 +33,11 @@
       <artifactId>aws-lambda-java-core</artifactId>
       <version>1.1.0</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>4.5.4</version>
+    </dependency>
   </dependencies>
   <!-- Note that there is no build step for deployment because this is a
        supporting library and NOT a deployment library. -->
