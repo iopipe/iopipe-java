@@ -16,6 +16,19 @@ public final class IOPipeService
 	protected final IOPipeConfiguration config;
 	
 	/**
+	 * Initializes the IOPipe service using the default system configuration.
+	 *
+	 * @throws IllegalArgumentException If the default parameters are not
+	 * valid.
+	 * @since 2017/12/13
+	 */
+	public IOPipeService()
+		throws IllegalArgumentException
+	{
+		this(IOPipeConfiguration.byDefault());
+	}
+	
+	/**
 	 * Initializes the IOPipe service using the specified configuration.
 	 *
 	 * @param __config The configuration to use.
