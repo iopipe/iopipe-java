@@ -7,10 +7,8 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 
 /**
- * This class is used to call other stream handlers.
- *
- * To see more information on how this class is to be used, see the package
- * information.
+ * This class is used to call other stream handlers, it dynamically looks up
+ * the other class and initializes the IOPipe interface.
  *
  * This class may be extended by a sub-class or initialized by another class
  * when it is needed to call an existing handler, it is recommended that it

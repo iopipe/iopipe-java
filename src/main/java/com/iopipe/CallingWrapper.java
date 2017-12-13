@@ -7,9 +7,6 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
  * This class is used to call other request handlers for input and output
  * of basic Java types and Plain Old Java Objects.
  *
- * To see more information on how this class is to be used, see the package
- * information.
- *
  * This class may be extended by a sub-class or initialized by another class
  * when it is needed to call an existing handler, it is recommended that it
  * is extended.
