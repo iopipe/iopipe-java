@@ -27,11 +27,12 @@ public final class IOPipeConfiguration
 	}
 	
 	/**
-	 * {@inheritDoc}
-	 * @since 2017/12/12
+	 * Returns the token for the project to write statistics for.
+	 *
+	 * @return The project's token.
+	 * @since 2017/12/13
 	 */
-	@Override
-	public int hashCode()
+	public final String getProjectToken()
 	{
 		throw new Error("TODO");
 	}
@@ -41,7 +42,29 @@ public final class IOPipeConfiguration
 	 * @since 2017/12/12
 	 */
 	@Override
-	public String toString()
+	public final int hashCode()
+	{
+		throw new Error("TODO");
+	}
+	
+	/**
+	 * Returns {@code true} if IOPipe logging is to be enabled, this allows
+	 * the service to be disabled for testing.
+	 *
+	 * @return {@code true} if logging is enabled.
+	 * @since 2017/12/13
+	 */
+	public final boolean isEnabled()
+	{
+		throw new Error("TODO");
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @since 2017/12/12
+	 */
+	@Override
+	public final String toString()
 	{
 		throw new Error("TODO");
 	}
