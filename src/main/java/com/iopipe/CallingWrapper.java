@@ -1,8 +1,7 @@
-package com.iopipe.awslambda;
+package com.iopipe;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-import com.iopipe.IOPipeConfiguration;
 
 /**
  * This class is used to call other request handlers for input and output

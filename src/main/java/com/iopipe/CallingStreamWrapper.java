@@ -1,11 +1,10 @@
-package com.iopipe.awslambda;
+package com.iopipe;
 
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
-import com.iopipe.IOPipeConfiguration;
 
 /**
  * This class is used to call other stream handlers.
