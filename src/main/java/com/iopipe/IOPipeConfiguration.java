@@ -22,6 +22,9 @@ public final class IOPipeConfiguration
 	/** The project token to gather statistics for. */
 	protected final String token;
 	
+	/** The factory used to initialize new HTTP connections. */
+	protected final IOPipeHTTPConnectionFactory connectionfactory;
+	
 	/**
 	 * Initializes the configuration from the specified builder.
 	 *
@@ -40,14 +43,21 @@ public final class IOPipeConfiguration
 		PrintStream debug = __builder._debug;
 		boolean enabled = __builder._enabled;
 		String token = __builder._token;
+		IOPipeHTTPConnectionFactory connectionfactory =
+			__builder._connectionfactory;
 		
 		if (token == null)
 			throw new IllegalArgumentException("A project token must be " +
 				"specified.");
 		
+		if (connectionfactory == null)
+			throw new IllegalArgumentException("No connection factory " +
+				"was specified.");
+		
 		this.debug = debug;
 		this.enabled = enabled;
 		this.token = token;
+		this.connectionfactory = connectionfactory;
 	}
 	
 	/**
@@ -64,6 +74,17 @@ public final class IOPipeConfiguration
 			return false;
 		
 		throw new Error("TODO");
+	}
+	
+	/**
+	 * Returns the factory which is used to connect to the IOPipe service.
+	 *
+	 * @return The factory used to connect to the IOPipe service.
+	 * @since 2017/12/13
+	 */
+	public final IOPipeHTTPConnectionFactory getHTTPConnectionFactory()
+	{
+		return this.connectionfactory;
 	}
 	
 	/**

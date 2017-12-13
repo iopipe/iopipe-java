@@ -25,6 +25,9 @@ public class IOPipeConfigurationBuilder
 	/** Debug stream, this is optional. */
 	volatile PrintStream _debug;
 	
+	/** The factory to use for connections. */
+	volatile IOPipeHTTPConnectionFactory _connectionfactory;
+	
 	/**
 	 * This constructs an instance of the configuration settings from the
 	 * requested configuration values.
@@ -40,6 +43,21 @@ public class IOPipeConfigurationBuilder
 		synchronized (this.lock)
 		{
 			return new IOPipeConfiguration(this);
+		}
+	}
+	
+	/**
+	 * Sets the factory to be used to make HTTP connections to the sevrice.
+	 *
+	 * @param __cf The factory to use for creating new HTTP connections.
+	 * @since 2017/12/13
+	 */
+	public final void setHTTPConnectionFactory(
+		IOPipeHTTPConnectionFactory __cf)
+	{
+		synchronized (this.lock)
+		{
+			this._connectionfactory = __cf;
 		}
 	}
 	

@@ -34,6 +34,7 @@ public final class TestingConfiguration
 		rv.setEnabled(true);
 		rv.setDebugStream(System.err);
 		rv.setProjectToken(TestingConfiguration.VALID_TOKEN);
+		rv.setHTTPConnectionFactory(new TestingHTTPConnectionFactory());
 		
 		return rv.build();
 	}
