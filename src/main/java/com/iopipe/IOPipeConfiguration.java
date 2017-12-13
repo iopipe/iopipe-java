@@ -68,5 +68,17 @@ public final class IOPipeConfiguration
 	{
 		throw new Error("TODO");
 	}
+	
+	/**
+	 * This returns a configuration which is initialized by values using the
+	 * default means of obtaining them (via environment variables).
+	 *
+	 * @return The default configuration to use.
+	 * @since 2017/12/13
+	 */
+	public static final IOPipeConfiguration byDefault()
+	{
+		throw new Error("TODO");
+	}
 }
 

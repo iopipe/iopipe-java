@@ -33,20 +33,6 @@ public class IOPipeConfigurationBuilder
 	}
 	
 	/**
-	 * This loads the configuration settings from the host environment
-	 * variables if they have not already been set.
-	 *
-	 * @since 2017/12/13
-	 */
-	public final void loadFromEnvironment()
-	{
-		synchronized (this.lock)
-		{
-			throw new Error("TODO");
-		}
-	}
-	
-	/**
 	 * Sets whether the IOPipe service to to be enabled.
 	 *
 	 * @param __enabled If {@code true} then the IOPipe service is to be used,
