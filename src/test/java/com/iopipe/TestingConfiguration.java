@@ -8,6 +8,10 @@ package com.iopipe;
  */
 public final class TestingConfiguration
 {
+	/** This is the token which is considered to be valid for the service. */
+	public static final String VALID_TOKEN =
+		"ThisIsNotARealIOPipeTokenAndIsUsedForTesting";
+	
 	/**
 	 * Not used.
 	 *
@@ -25,6 +29,12 @@ public final class TestingConfiguration
 	 */
 	public static final IOPipeConfiguration testConfig()
 	{
-		throw new Error("TODO");
+		IOPipeConfigurationBuilder rv = new IOPipeConfigurationBuilder();
+		
+		rv.setEnabled(true);
+		rv.setDebugStream(System.err);
+		rv.setProjectToken(TestingConfiguration.VALID_TOKEN);
+		
+		return rv.build();
 	}
 }

@@ -21,17 +21,22 @@ Building requires Maven and a Java 7 Virtual Machine.
  * `mvn test`    -- Run tests.
  * `mvn clean`   -- Clean build.
 
-# Environment Variables
+# System Properties And Environment Variables.
 
-For compatibility with other IOPipe clients the following environment
-variables are supported.
+These are used to configure IOPipe from the outside environment.
 
- * `IOPIPE_ENABLED`
-   * If this is set and if the value is `True` (ignoring case) then the library
+For compatibility with other IOPipe clients the environment variables are
+supported. System properties take precedence.
+
+ * `com.iopipe.enabled` or `IOPIPE_ENABLED`
+   * If this is set and if the value is `true` (ignoring case) then the library
      will be enabled.
-   * If this is set to `False`.
-   * If this is not set then internally it is treated as being `True`.
- * `IOPIPE_TOKEN`
+   * If this is set to `false`.
+   * If this is not set then internally it is treated as being `true`.
+ * `com.iopipe.debug` or `IOPIPE_DEBUG`
+   * If this is set to `true` then
+   * If this is not set then it defaults to `false`.
+ * `com.iopipe.token` or `IOPIPE_TOKEN`
    * This represents the token of the IOPipe collector which is to obtain
      statistics.
    * This is the default token which will be used if no token was specified in

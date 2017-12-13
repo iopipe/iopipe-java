@@ -1,5 +1,7 @@
 package com.iopipe;
 
+import java.io.PrintStream;
+
 /**
  * This class is used to initialize instances of {@link IOPipeConfiguration}
  *
@@ -13,6 +15,15 @@ public class IOPipeConfigurationBuilder
 	 */
 	protected final Object lock =
 		new Object();
+	
+	/** Is the service enabled? */
+	volatile boolean _enabled;
+	
+	/** The project token. */
+	volatile String _token;
+	
+	/** Debug stream, this is optional. */
+	volatile PrintStream _debug;
 	
 	/**
 	 * This constructs an instance of the configuration settings from the
@@ -28,7 +39,22 @@ public class IOPipeConfigurationBuilder
 	{
 		synchronized (this.lock)
 		{
-			throw new Error("TODO");
+			return new IOPipeConfiguration(this);
+		}
+	}
+	
+	/**
+	 * Specifies that debugging should be enabled and that all debugging output
+	 * is to be written to the given stream.
+	 *
+	 * @param __ps The stream to print debugging messages to.
+	 * @since 2017/12/13
+	 */
+	public final void setDebugStream(PrintStream __ps)
+	{
+		synchronized (this.lock)
+		{
+			this._debug = __ps;
 		}
 	}
 	
@@ -43,7 +69,7 @@ public class IOPipeConfigurationBuilder
 	{
 		synchronized (this.lock)
 		{
-			throw new Error("TODO");
+			this._enabled = __enabled;
 		}
 	}
 	
@@ -52,18 +78,13 @@ public class IOPipeConfigurationBuilder
 	 *
 	 * @param __token The token which specifies the project to measure
 	 * the statistics for.
-	 * @throws NullPointerException On null arguments.
 	 * @since 2017/12/13
 	 */
 	public final void setProjectToken(String __token)
-		throws NullPointerException
 	{
-		if (__token == null)
-			throw new NullPointerException();
-		
 		synchronized (this.lock)
 		{
-			throw new Error("TODO");
+			this._token = __token;
 		}
 	}
 }
