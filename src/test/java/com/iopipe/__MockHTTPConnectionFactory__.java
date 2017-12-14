@@ -18,7 +18,7 @@ final class __MockHTTPConnectionFactory__
 	public IOPipeHTTPConnection connect()
 		throws IOException
 	{
-		throw new Error("TODO");
+		return new __MockHTTPConnection__();
 	}
 }
 
