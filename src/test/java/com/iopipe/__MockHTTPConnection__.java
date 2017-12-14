@@ -1,6 +1,7 @@
 package com.iopipe;
 
 import java.io.IOException;
+import javax.json.JsonValue;
 
 /**
  * This implements a basic testing connection which verifies the input request
@@ -32,8 +33,13 @@ final class __MockHTTPConnection__
 	{
 		if (__r == null)
 			throw new NullPointerException();
-	
-		throw new Error("TODO");
+		
+		// Just check the authorization token
+		if (true)
+			throw new Error("TODO");
+		
+		// Everything is okay so treat it as such
+		return new IOPipeHTTPResult(200, JsonValue.NULL);
 	}
 }
 

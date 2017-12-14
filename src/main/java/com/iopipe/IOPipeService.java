@@ -7,6 +7,9 @@ import java.util.Arrays;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 
 /**
  * This class provides access to the IOPipe service and allows for sending
@@ -227,6 +230,23 @@ public final class IOPipeService
 		// transparent
 		if (e != null)
 			throw e;
+		return rv;
+	}
+	
+	/**
+	 * This initializes a base Json object and fills it with the common
+	 * and well known information that is common between all requests.
+	 *
+	 * @return The builder for the report containing the shared information.
+	 * @since 2017/12/13
+	 */
+	private JsonObjectBuilder __initializeJsonObject()
+	{
+		JsonObjectBuilder rv = Json.createObjectBuilder();
+		
+		if (true)
+			throw new Error("TODO");
+		
 		return rv;
 	}
 }
