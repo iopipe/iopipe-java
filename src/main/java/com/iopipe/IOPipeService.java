@@ -1,6 +1,7 @@
 package com.iopipe;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import java.io.PrintStream;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -130,8 +131,17 @@ public final class IOPipeService
 			throw new NullPointerException();
 		
 		IOPipeConfiguration config = this.config;
+		PrintStream debug = config.getDebugStream();
+		
+		// When disabled do not bother generating reports because they will
+		// not go anywhere anyway
 		if (!config.isEnabled())
+		{
+			if (debug != null)
+				debug.println("IOPipe: Disabled, not wrapping function.");
+			
 			return __func.apply(__a, __b);
+		}
 		
 		throw new Error("TODO");
 	}

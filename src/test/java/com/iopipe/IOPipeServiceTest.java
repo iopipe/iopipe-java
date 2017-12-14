@@ -47,6 +47,18 @@ public class IOPipeServiceTest
 	}
 	
 	/**
+	 * This tests the empty method when the service is disabled, it should
+	 * not call the IOPipe service at all.
+	 *
+	 * @since 2017/12/13
+	 */
+	public void testEmptyFunctionWhenDisabled()
+	{
+		new IOPipeService(__MockConfiguration__.testConfig(false)).run(
+			new __MockContext__("testEmptyFunctionWhenDisabled"), () -> {});
+	}
+	
+	/**
 	 * Used to locate this test.
 	 *
 	 * @return The test used.

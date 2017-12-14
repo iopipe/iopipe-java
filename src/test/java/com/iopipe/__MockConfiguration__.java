@@ -22,16 +22,28 @@ final class __MockConfiguration__
 	}
 	
 	/**
-	 * Returns a new test configuration.
+	 * Returns a new test configuration, one which is always enabled.
 	 *
 	 * @return A new test configuration.
 	 * @since 2017/12/13
 	 */
 	public static final IOPipeConfiguration testConfig()
 	{
+		return __MockConfiguration__.testConfig(true);
+	}
+	
+	/**
+	 * Returns a new test configuration.
+	 *
+	 * @param __enabled A flag which specifies if the test is enabled.
+	 * @return A new test configuration.
+	 * @since 2017/12/13
+	 */
+	public static final IOPipeConfiguration testConfig(boolean __enabled)
+	{
 		IOPipeConfigurationBuilder rv = new IOPipeConfigurationBuilder();
 		
-		rv.setEnabled(true);
+		rv.setEnabled(__enabled);
 		rv.setDebugStream(System.err);
 		rv.setProjectToken(__MockConfiguration__.VALID_TOKEN);
 		rv.setHTTPConnectionFactory(new __MockHTTPConnectionFactory__());
