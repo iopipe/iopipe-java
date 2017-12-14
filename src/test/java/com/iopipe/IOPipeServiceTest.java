@@ -31,7 +31,7 @@ public class IOPipeServiceTest
 	 */
 	public void testConstruction()
 	{
-		new IOPipeService(TestingConfiguration.testConfig());
+		new IOPipeService(__MockConfiguration__.testConfig());
 	}
 	
 	/**

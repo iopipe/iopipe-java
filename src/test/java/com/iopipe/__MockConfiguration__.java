@@ -6,7 +6,7 @@ package com.iopipe;
  *
  * @since 2017/12/13
  */
-public final class TestingConfiguration
+final class __MockConfiguration__
 {
 	/** This is the token which is considered to be valid for the service. */
 	public static final String VALID_TOKEN =
@@ -17,7 +17,7 @@ public final class TestingConfiguration
 	 *
 	 * @since 2017/12/13
 	 */
-	private TestingConfiguration()
+	private __MockConfiguration__()
 	{
 	}
 	
@@ -33,8 +33,8 @@ public final class TestingConfiguration
 		
 		rv.setEnabled(true);
 		rv.setDebugStream(System.err);
-		rv.setProjectToken(TestingConfiguration.VALID_TOKEN);
-		rv.setHTTPConnectionFactory(new TestingHTTPConnectionFactory());
+		rv.setProjectToken(__MockConfiguration__.VALID_TOKEN);
+		rv.setHTTPConnectionFactory(new __MockHTTPConnectionFactory__());
 		
 		return rv.build();
 	}

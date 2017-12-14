@@ -7,7 +7,7 @@ import java.io.IOException;
  *
  * @since 2017/12/13
  */
-public class TestingHTTPConnectionFactory
+final class __MockHTTPConnectionFactory__
 	implements IOPipeHTTPConnectionFactory
 {
 	/**

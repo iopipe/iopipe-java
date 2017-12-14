@@ -8,7 +8,7 @@ import java.io.IOException;
  *
  * @since 2017/12/13
  */
-public class TestingHTTPConnection
+final class __MockHTTPConnection__
 	implements IOPipeHTTPConnection
 {
 	/**
