@@ -35,6 +35,18 @@ public class IOPipeServiceTest
 	}
 	
 	/**
+	 * Tests the empty function which does absolutely nothing to make sure that
+	 * it operates correctly.
+	 *
+	 * @since 2017/12/13
+	 */
+	public void testEmptyFunction()
+	{
+		new IOPipeService(__MockConfiguration__.testConfig()).run(
+			new __MockContext__("testEmptyFunction"), () -> {});
+	}
+	
+	/**
 	 * Used to locate this test.
 	 *
 	 * @return The test used.

@@ -1,8 +1,9 @@
 package com.iopipe;
 
 import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.RequestHandler;
-import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * This class provides access to the IOPipe service and allows for sending
@@ -39,30 +40,88 @@ public final class IOPipeService
 		throws NullPointerException
 	{
 		if (__config == null)
-			throw new NullPointerException("NARG");
+			throw new NullPointerException();
 		
 		this.config = __config;
 	}
 	
 	/**
-	 * Runs the specified request handler and performs all of the required
-	 * metric handling which is then sent to the IOPipe servers.
+	 * Runs the specified function and gathers metrics during the operation.
 	 *
-	 * @param <I> The input object type.
-	 * @param <O> The output object type.
-	 * @param __handler The handler to be called with the given input and
-	 * output.
-	 * @param __i The input object for the handler.
-	 * @param __c The context for the handler.
-	 * @return The result of execution.
+	 * @param __cont The Amazon AWS context this is running under.
+	 * @param __func The function to execute.
 	 * @throws NullPointerException On null arguments.
 	 * @since 2017/12/13
 	 */
-	public <I, O> O run(RequestHandler<I, O> __handler, I __i, Context __c)
+	public final void run(Context __cont, Runnable __func)
 		throws NullPointerException
 	{
-		if (__handler == null || __c == null)
-			throw new NullPointerException("NARG");
+		if (__cont == null || __func == null)
+			throw new NullPointerException();
+		
+		this.<Object, Object, Object>run(__cont, (__a, __b) ->
+			{
+				__func.run();
+				return null;
+			});
+	}
+	
+	/**
+	 * Runs the specified function and gathers metrics during the operation.
+	 *
+	 * @param <R> The return value.
+	 * @param __cont The Amazon AWS context this is running under.
+	 * @param __func The function to execute.
+	 * @return The result of the function call.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2017/12/13
+	 */
+	public final <R> R run(Context __cont, Supplier<R> __func)
+		throws NullPointerException
+	{
+		if (__cont == null || __func == null)
+			throw new NullPointerException();
+		
+		return this.<Object, Object, R>run(__cont, (__a, __b) -> __func.get());
+	}
+	
+	/**
+	 * Runs the specified function and gathers metrics during the operation.
+	 *
+	 * @param <A> The input type.
+	 * @param <R> The return value.
+	 * @param __cont The Amazon AWS context this is running under.
+	 * @param __func The function to execute.
+	 * @return The result of the function call.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2017/12/13
+	 */
+	public final <A, R> R run(Context __cont, Function<A, R> __func)
+		throws NullPointerException
+	{
+		if (__cont == null || __func == null)
+			throw new NullPointerException();
+		
+		return this.<A, Object, R>run(__cont, (__a, __b) -> __func.apply(__a));
+	}
+	
+	/**
+	 * Runs the specified function and gathers metrics during the operation.
+	 *
+	 * @param <A> The first parameter type.
+	 * @param <B> The second parameter type.
+	 * @param <R> The return value.
+	 * @param __cont The Amazon AWS context this is running under.
+	 * @param __func The function to execute.
+	 * @return The result of the function call.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2017/12/13
+	 */
+	public final <A, B, R> R run(Context __cont, BiFunction<A, B, R> __func)
+		throws NullPointerException
+	{
+		if (__cont == null || __func == null)
+			throw new NullPointerException();
 		
 		throw new Error("TODO");
 	}
