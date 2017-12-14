@@ -41,7 +41,7 @@ supported. System properties take precedence.
      the service, if 
    * If this is zero then the window is disabled.
    * If this is not set then it defaults to `150`.
- * `com.iopipe.token` or `IOPIPE_TOKEN`
+ * `com.iopipe.token`, `IOPIPE_TOKEN`, or `IOPIPE_CLIENTID`
    * This represents the token of the IOPipe collector which is to obtain
      statistics.
    * This is the default token which will be used if no token was specified in

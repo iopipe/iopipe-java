@@ -183,7 +183,8 @@ public final class IOPipeConfiguration
 			rv.setDebugStream(System.err);
 		
 		rv.setProjectToken(System.getProperty("com.iopipe.token",
-			System.getenv("IOPIPE_TOKEN")));
+			Objects.toString(System.getenv("IOPIPE_TOKEN"),
+				System.getenv("IOPIPE_CLIENTID")));
 		
 		try
 		{
