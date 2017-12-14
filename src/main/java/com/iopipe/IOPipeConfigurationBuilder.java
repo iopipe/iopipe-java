@@ -28,6 +28,9 @@ public class IOPipeConfigurationBuilder
 	/** The factory to use for connections. */
 	volatile IOPipeHTTPConnectionFactory _connectionfactory;
 	
+	/** The timeout window in milliseconds. */
+	volatile int _timeoutwindow;
+	
 	/**
 	 * This constructs an instance of the configuration settings from the
 	 * requested configuration values.
@@ -103,6 +106,26 @@ public class IOPipeConfigurationBuilder
 		synchronized (this.lock)
 		{
 			this._token = __token;
+		}
+	}
+	
+	/**
+	 * Sets the timeout window in milliseconds.
+	 *
+	 * @param __ms The length of the timeout window.
+	 * @throws IllegalArgumentException If the length is negative.
+	 * @since 2017/12/13
+	 */
+	public final void setTimeOutWindow(int __ms)
+		throws IllegalArgumentException
+	{
+		if (__ms < 0)
+			throw new IllegalArgumentException("The timeout window " +
+				"cannot be negative.");
+		
+		synchronized (this.lock)
+		{
+			this._timeoutwindow = __ms;
 		}
 	}
 }

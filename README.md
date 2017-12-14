@@ -36,6 +36,11 @@ supported. System properties take precedence.
  * `com.iopipe.debug` or `IOPIPE_DEBUG`
    * If this is set to `true` then
    * If this is not set then it defaults to `false`.
+ * `com.iopipe.timeoutwindow` or `IOPIPE_TIMEOUT_WINDOW`
+   * This time is subtracted from the duration that a lambda may operate on
+     the service, if 
+   * If this is zero then the window is disabled.
+   * If this is not set then it defaults to `150`.
  * `com.iopipe.token` or `IOPIPE_TOKEN`
    * This represents the token of the IOPipe collector which is to obtain
      statistics.

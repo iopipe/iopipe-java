@@ -25,6 +25,9 @@ public final class IOPipeConfiguration
 	/** The factory used to initialize new HTTP connections. */
 	protected final IOPipeHTTPConnectionFactory connectionfactory;
 	
+	/** The timeout window in milliseconds. */
+	protected final int timeoutwindow;
+	
 	/**
 	 * Initializes the configuration from the specified builder.
 	 *
@@ -45,6 +48,7 @@ public final class IOPipeConfiguration
 		String token = __builder._token;
 		IOPipeHTTPConnectionFactory connectionfactory =
 			__builder._connectionfactory;
+		int timeoutwindow = __builder._timeoutwindow;
 		
 		if (token == null)
 			throw new IllegalArgumentException("A project token must be " +
@@ -54,10 +58,15 @@ public final class IOPipeConfiguration
 			throw new IllegalArgumentException("No connection factory " +
 				"was specified.");
 		
+		if (timeoutwindow < 0)
+			throw new IllegalArgumentException("The timeout window cannot " +
+				"be negative.");
+		
 		this.debug = debug;
 		this.enabled = enabled;
 		this.token = token;
 		this.connectionfactory = connectionfactory;
+		this.timeoutwindow = timeoutwindow;
 	}
 	
 	/**
@@ -107,6 +116,17 @@ public final class IOPipeConfiguration
 	public final String getProjectToken()
 	{
 		return this.token;
+	}
+	
+	/**
+	 * Returns the timeout window in milliseconds.
+	 *
+	 * @return The timeout window in milliseconds.
+	 * @since 2017/12/13
+	 */
+	public final int getTimeOutWindow()
+	{
+		return this.timeoutwindow;
 	}
 	
 	/**
@@ -164,6 +184,17 @@ public final class IOPipeConfiguration
 		
 		rv.setProjectToken(System.getProperty("com.iopipe.token",
 			System.getenv("IOPIPE_TOKEN")));
+		
+		try
+		{
+			rv.setTimeOutWindow(Integer.valueOf(Objects.toString(
+				System.getProperty("com.iopipe.timeoutwindow",
+				System.getenv("IOPIPE_TIMEOUT_WINDOW")), "true")));
+		}
+		catch (NumberFormatException e)
+		{
+			rv.setTimeOutWindow(150);
+		}
 		
 		return rv.build();
 	}

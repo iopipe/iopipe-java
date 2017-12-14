@@ -31,7 +31,8 @@ public class IOPipeServiceTest
 	 */
 	public void testConstruction()
 	{
-		new IOPipeService(__MockConfiguration__.testConfig());
+		new IOPipeService(new __MockContext__("testConstruction"),
+			__MockConfiguration__.testConfig());
 	}
 	
 	/**
@@ -42,8 +43,9 @@ public class IOPipeServiceTest
 	 */
 	public void testEmptyFunction()
 	{
-		new IOPipeService(__MockConfiguration__.testConfig()).run(
-			new __MockContext__("testEmptyFunction"), () -> {});
+		new IOPipeService(new __MockContext__("testEmptyFunction"),
+			__MockConfiguration__.testConfig()).run(
+			() -> {});
 	}
 	
 	/**
@@ -54,8 +56,9 @@ public class IOPipeServiceTest
 	 */
 	public void testEmptyFunctionWhenDisabled()
 	{
-		new IOPipeService(__MockConfiguration__.testConfig(false)).run(
-			new __MockContext__("testEmptyFunctionWhenDisabled"), () -> {});
+		new IOPipeService(new __MockContext__("testEmptyFunctionWhenDisabled"),
+			__MockConfiguration__.testConfig(false)).run(
+			() -> {});
 	}
 	
 	/**
