@@ -3,10 +3,14 @@ package com.iopipe;
 import com.amazonaws.services.lambda.runtime.Context;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.lang.management.ManagementFactory;
+import java.lang.management.OperatingSystemMXBean;
+import java.lang.management.RuntimeMXBean;
 import java.util.Arrays;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.Objects;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -19,6 +23,10 @@ import javax.json.JsonObjectBuilder;
  */
 public final class IOPipeService
 {
+	/** The version for this agent. */
+	public static final String IOPIPE_AGENT_VERSION =
+		"1.0-SNAPSHOT";
+	
 	/** The execution context. */
 	protected final Context context;
 	
@@ -223,6 +231,7 @@ public final class IOPipeService
 			monodur = System.nanoTime() - monostart;
 		}
 		
+		// "duration": "i"
 		if (true)
 			throw new Error("TODO");
 		
@@ -244,8 +253,71 @@ public final class IOPipeService
 	{
 		JsonObjectBuilder rv = Json.createObjectBuilder();
 		
-		if (true)
-			throw new Error("TODO");
+		Context context = this.context;
+		IOPipeConfiguration config = this.config;
+		RuntimeMXBean runtimemx = ManagementFactory.getRuntimeMXBean();
+		OperatingSystemMXBean osbean =
+			ManagementFactory.getOperatingSystemMXBean();
+		
+		// User provided information
+		rv.add("client_id", config.getProjectToken());
+		rv.add("installMethod", config.getInstallMethod());
+		
+		// System provided information
+		rv.add("processId", runtimemx.getName());
+		rv.add("timestamp", runtimemx.getStartTime() / 1000);
+		
+		// If the process has been cold started
+		//rv.add("coldstart", ???);
+		
+		// Memory
+		JsonObjectBuilder memory = Json.createObjectBuilder();
+		//rv.add("rssMiB", ???);
+		//rv.add("totalMiB", ???);
+		//rv.add("rssTotalPercentage", ???);
+		rv.add("memory", memory); 
+		
+		// Information provided by Amazon
+		JsonObjectBuilder aws = Json.createObjectBuilder();
+		aws.add("functionName", context.getFunctionName());
+		aws.add("functionVersion", context.getFunctionVersion());
+		aws.add("awsRequestId", context.getAwsRequestId());
+		aws.add("invokedFunctionArn", context.getInvokedFunctionArn());
+		aws.add("logGroupName", context.getLogGroupName());
+		aws.add("logStreamName", context.getLogStreamName());
+		aws.add("memoryLimitInMB", context.getMemoryLimitInMB());
+		aws.add("getRemainingTimeInMillis",
+			context.getRemainingTimeInMillis());
+		aws.add("traceId", Objects.toString(
+			System.getenv("_X_AMZN_TRACE_ID"), "unknown"));
+		rv.add("aws", aws);
+		
+		// IOPipe Agent
+		JsonObjectBuilder agent = Json.createObjectBuilder();
+		agent.add("runtime", "java");
+		agent.add("version", IOPIPE_AGENT_VERSION);
+		//agent.add("load_time", ???);
+		
+		// Operating System information
+		JsonObjectBuilder os = Json.createObjectBuilder();
+		//os.add("hostname", ???);
+		//os.add("totalmem", ???);
+		//os.add("freemem", ???);
+		//os.add("usedmem", ???);
+		//os.add("cpus", ???);
+		
+		// JVM information
+		JsonObjectBuilder java = Json.createObjectBuilder();
+		java.add("java.vm.name", System.getProperty("java.vm.name"));
+		java.add("java.vm.vendor", System.getProperty("java.vm.vendor"));
+		java.add("java.vm.version", System.getProperty("java.vm.version"));
+		
+		// Place these together in one object
+		JsonObjectBuilder environment = Json.createObjectBuilder();
+		environment.add("agent", agent);
+		environment.add("java", java);
+		environment.add("os", os);
+		rv.add("environment", environment);
 		
 		return rv;
 	}

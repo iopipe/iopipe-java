@@ -31,6 +31,9 @@ public class IOPipeConfigurationBuilder
 	/** The timeout window in milliseconds. */
 	volatile int _timeoutwindow;
 	
+	/** Install method. */
+	volatile String _installmethod;
+	
 	/**
 	 * This constructs an instance of the configuration settings from the
 	 * requested configuration values.
@@ -91,6 +94,20 @@ public class IOPipeConfigurationBuilder
 		synchronized (this.lock)
 		{
 			this._enabled = __enabled;
+		}
+	}
+	
+	/**
+	 * Sets the install method.
+	 *
+	 * @param __im The install method.
+	 * @since 2017/12/13
+	 */
+	public final void setInstallMethod(String __im)
+	{
+		synchronized (this.lock)
+		{
+			this._installmethod = __im;
 		}
 	}
 	

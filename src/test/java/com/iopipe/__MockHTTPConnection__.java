@@ -39,7 +39,7 @@ final class __MockHTTPConnection__
 			throw new Error("TODO");
 		
 		// Everything is okay so treat it as such
-		return new IOPipeHTTPResult(200, JsonValue.NULL);
+		return new IOPipeHTTPResult(202, JsonValue.NULL);
 	}
 }
 

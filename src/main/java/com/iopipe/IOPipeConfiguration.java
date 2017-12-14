@@ -28,6 +28,9 @@ public final class IOPipeConfiguration
 	/** The timeout window in milliseconds. */
 	protected final int timeoutwindow;
 	
+	/** Install method. */
+	protected final String installmethod;
+	
 	/**
 	 * Initializes the configuration from the specified builder.
 	 *
@@ -49,6 +52,7 @@ public final class IOPipeConfiguration
 		IOPipeHTTPConnectionFactory connectionfactory =
 			__builder._connectionfactory;
 		int timeoutwindow = __builder._timeoutwindow;
+		String installmethod = __builder._installmethod;
 		
 		if (token == null)
 			throw new IllegalArgumentException("A project token must be " +
@@ -67,6 +71,7 @@ public final class IOPipeConfiguration
 		this.token = token;
 		this.connectionfactory = connectionfactory;
 		this.timeoutwindow = timeoutwindow;
+		this.installmethod = installmethod;
 	}
 	
 	/**
@@ -105,6 +110,17 @@ public final class IOPipeConfiguration
 	public final PrintStream getDebugStream()
 	{
 		return this.debug;
+	}
+	
+	/**
+	 * Returns the install method.
+	 *
+	 * @return The install method.
+	 * @since 2017/12/13
+	 */
+	public final String getInstallMethod()
+	{
+		return this.installmethod;
 	}
 	
 	/**
@@ -184,7 +200,11 @@ public final class IOPipeConfiguration
 		
 		rv.setProjectToken(System.getProperty("com.iopipe.token",
 			Objects.toString(System.getenv("IOPIPE_TOKEN"),
-				System.getenv("IOPIPE_CLIENTID")));
+				System.getenv("IOPIPE_CLIENTID"))));
+		
+		rv.setInstallMethod(System.getProperty("com.iopipe.installmethod",
+			Objects.toString(System.getenv("IOPIPE_INSTALL_METHOD"),
+			"manual")));
 		
 		try
 		{
