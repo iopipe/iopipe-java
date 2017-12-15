@@ -37,6 +37,9 @@ public class IOPipeServiceTest
 		try (IOPipeService sv = new IOPipeService(testConfig()))
 		{
 		}
+		
+		// Worked okay
+		assertTrue(true);
 	}
 	
 	/**
@@ -50,6 +53,9 @@ public class IOPipeServiceTest
 		{
 			sv.createContext(new __MockContext__("testConstructionContext"));
 		}
+		
+		// Worked okay
+		assertTrue(true);
 	}
 	
 	/**
@@ -63,7 +69,11 @@ public class IOPipeServiceTest
 		try (IOPipeService sv = new IOPipeService(testConfig()))
 		{
 			sv.createContext(new __MockContext__("testEmptyFunction")).run(
-				() -> null);
+				() ->
+				{
+					assertTrue(true);
+					return null;
+				});
 		}
 	}
 	
@@ -79,7 +89,11 @@ public class IOPipeServiceTest
 		{
 			sv.createContext(
 				new __MockContext__("testEmptyFunctionWhenDisabled")).run(
-				() -> null);
+				() ->
+				{
+					assertTrue(true);
+					return null;
+				});
 		}
 	}
 	
@@ -97,9 +111,11 @@ public class IOPipeServiceTest
 				sv.createContext(
 					new __MockContext__("testThrow")).run(
 					() -> new __MockException__("Something went wrong!"));
+				assertTrue(false);
 			}
 			catch (__MockException__ e)
 			{
+				assertTrue(true);
 			}
 		}
 	}
@@ -119,10 +135,12 @@ public class IOPipeServiceTest
 					new __MockContext__("testThrowWithCause")).run(
 					() -> new __MockException__("Not our fault!",
 						new __MockException__("Not my fault this failed!")));
+				assertTrue(false);
 			}
 			
 			catch (__MockException__ e)
 			{
+				assertTrue(true);
 			}
 		}
 	}
