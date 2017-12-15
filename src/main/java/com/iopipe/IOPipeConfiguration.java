@@ -113,6 +113,21 @@ public final class IOPipeConfiguration
 	}
 	
 	/**
+	 * Returns a stream which can be used to report fatal errors, if a debug
+	 * stream was not specified then standard error is used.
+	 *
+	 * @return The debug stream or standard error.
+	 * @since 2017/12/15
+	 */
+	public final PrintStream getFatalErrorStream()
+	{
+		PrintStream rv = this.debug;
+		if (rv != null)
+			return rv;
+		return System.err;
+	}
+	
+	/**
 	 * Returns the install method.
 	 *
 	 * @return The install method.

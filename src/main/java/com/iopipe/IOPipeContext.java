@@ -22,6 +22,9 @@ public final class IOPipeContext
 	/** Used to track call timeouts. */
 	protected final IOPipeTimeoutManager timeout;
 	
+	/** Connection to the server. */
+	protected final IOPipeHTTPConnection connection;
+	
 	/** The number of times this context has been executed. */
 	private volatile int _execcount;
 	
@@ -31,19 +34,21 @@ public final class IOPipeContext
 	 * @param __context The context to manage.
 	 * @param __config The configuration for the service.
 	 * @param __timeout The timeout manager.
+	 * @param __connection The connection to the IOPipe service.
 	 * @throws NullPointerException On null arguments.
 	 * @since 2017/12/14
 	 */
 	IOPipeContext(Context __context, IOPipeConfiguration __config,
-		IOPipeTimeoutManager __timeout)
+		IOPipeTimeoutManager __timeout, IOPipeHTTPConnection __connection)
 		throws NullPointerException
 	{
-		if (__context == null || __config == null)
+		if (__context == null || __config == null || __connection == null)
 			throw new NullPointerException();
 		
 		this.context = __context;
 		this.config = __config;
 		this.timeout = __timeout;
+		this.connection = __connection;
 	}
 	
 	/**

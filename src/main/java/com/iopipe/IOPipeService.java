@@ -23,9 +23,11 @@ public final class IOPipeService
 	/** The configuration used to connect to the service. */
 	protected final IOPipeConfiguration config;
 	
+	/** The connection to the server. */
+	protected final IOPipeHTTPConnection connection;
+	
 	/** Used to report timeouts. */
-	protected final IOPipeTimeoutManager timeouts =
-		new IOPipeTimeoutManager();
+	protected final IOPipeTimeoutManager timeouts;
 	
 	/** Has this been closed? */
 	private volatile boolean _closed;
@@ -53,7 +55,28 @@ public final class IOPipeService
 		if (__config == null)
 			throw new NullPointerException();
 		
+		// Try to open a connection to the IOPipe service, if that fails
+		// then fall back to a disabled connection
+		IOPipeHTTPConnection connection = null;
+		if (!__config.isEnabled())
+			try
+			{
+				connection = __config.getHTTPConnectionFactory().connect();
+			}
+			
+			// Cannot report error to IOPipe so print to the console
+			catch (IOException e)
+			{
+				e.printStackTrace(__config.getFatalErrorStream());
+			}
+		
+		// If the connection failed, use one which does nothing
+		if (connection == null)
+			connection = new IOPipeNullHTTPConnection();
+		
+		this.connection = connection;
 		this.config = __config;
+		this.timeouts = new IOPipeTimeoutManager(connection);
 	}
 	
 	/**
@@ -65,9 +88,17 @@ public final class IOPipeService
 	{
 		boolean closed = this._closed;
 		if (!closed)
-		{
-			// Close socket if any
-		}
+			try
+			{
+				this.connection.close();
+			}
+			
+			// The connection is probably not valid so it cannot be reported
+			// to IOPipe
+			catch (IOException e)
+			{
+				e.printStackTrace(this.config.getFatalErrorStream());
+			}
 	}
 	
 	/**
@@ -91,7 +122,7 @@ public final class IOPipeService
 			debug.printf("IOPipe: createContext(%s)%n", __c);
 		
 		// Contexts may timeout after a given amount of time
-		return new IOPipeContext(__c, config, this.timeouts);
+		return new IOPipeContext(__c, config, this.timeouts, this.connection);
 	}
 }
 

@@ -34,6 +34,9 @@ final class __MockHTTPConnection__
 		if (__r == null)
 			throw new NullPointerException();
 		
+		// Print the sent JSON data
+		System.err.printf("Request: %s%n", __r);
+		
 		// Just check the authorization token
 		if (true)
 			throw new Error("TODO");

@@ -18,6 +18,9 @@ import java.util.TreeSet;
  */
 public final class IOPipeTimeoutManager
 {
+	/** The connection to the server. */
+	protected final IOPipeHTTPConnection connection;
+	
 	/** Current contexts which are being tracked. */
 	private final Map<IOPipeContext, Active> _actives =
 		new IdentityHashMap<>();
@@ -25,10 +28,17 @@ public final class IOPipeTimeoutManager
 	/**
 	 * Not publically initialized.
 	 *
+	 * @param __connection The connection to the service.
+	 * @throws NullPointerException On null arguments.
 	 * @since 2017/12/15
 	 */
-	IOPipeTimeoutManager()
+	IOPipeTimeoutManager(IOPipeHTTPConnection __connection)
+		throws NullPointerException
 	{
+		if (__connection == null)
+			throw new NullPointerException();
+		
+		this.connection = __connection;
 	}
 	
 	/**
