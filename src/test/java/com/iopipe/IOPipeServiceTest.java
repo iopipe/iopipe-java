@@ -84,6 +84,50 @@ public class IOPipeServiceTest
 	}
 	
 	/**
+	 * Tests throwing of an exception.
+	 *
+	 * @since 2017/12/15
+	 */
+	public void testThrow()
+	{
+		try (IOPipeService sv = new IOPipeService(testConfig()))
+		{
+			try
+			{
+				sv.createContext(
+					new __MockContext__("testThrow")).run(
+					() -> new __MockException__("Something went wrong!"));
+			}
+			catch (__MockException__ e)
+			{
+			}
+		}
+	}
+	
+	/**
+	 * Tests throwing of an exception with a cause.
+	 *
+	 * @since 2017/12/15
+	 */
+	public void testThrowWithCause()
+	{
+		try (IOPipeService sv = new IOPipeService(testConfig()))
+		{
+			try
+			{
+				sv.createContext(
+					new __MockContext__("testThrowWithCause")).run(
+					() -> new __MockException__("Not our fault!",
+						new __MockException__("Not my fault this failed!")));
+			}
+			
+			catch (__MockException__ e)
+			{
+			}
+		}
+	}
+	
+	/**
 	 * Tests timing out of the service.
 	 *
 	 * @since 2017/12/15
