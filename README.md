@@ -16,10 +16,12 @@ This project requires Maven and at least Java 7.
 
 Building requires Maven and a Java 7 Virtual Machine.
 
- * `mvn compile` -- Compile the project.
- * `mvn package` -- Compile JAR package.
- * `mvn test`    -- Run tests.
- * `mvn clean`   -- Clean build.
+ * `mvn compile`         -- Compile the project.
+ * `mvn package`         -- Compile JAR package.
+ * `mvn test`            -- Run tests.
+ * `mvn clean`           -- Clean build.
+ * `mvn site`            -- Generate Maven informational site.
+ * `mvn javadoc:javadoc` -- Generate JavaDoc
 
 # System Properties And Environment Variables.
 
