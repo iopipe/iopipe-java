@@ -7,9 +7,11 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
 import java.lang.management.RuntimeMXBean;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.List;
 import java.util.Objects;
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -26,6 +28,22 @@ public final class IOPipeService
 	/** The version for this agent. */
 	public static final String IOPIPE_AGENT_VERSION =
 		"1.0-SNAPSHOT";
+	
+	/** The time at which the class was initialized. */
+	private static final long _LOAD_TIME =
+		System.currentTimeMillis();
+	
+	/** The system properties to copy in the environment report. */
+	private static final List<String> _COPY_PROPERTIES =
+		Collections.<String>unmodifiableList(Arrays.<String>asList(
+			"java.version", "java.vendor", "java.vendor.url",
+			"java.vm.specification.version",
+			"java.vm.specification.vendor", "java.vm.specification.name",
+			"java.vm.version", "java.vm.vendor", "java.vm.name",
+			"java.specification.version", "java.specification.vendor",
+			"java.specification.name", "java.class.version",
+			"java.compiler", "os.name", "os.arch", "os.version",
+			"file.separator", "path.separator"));
 	
 	/** The execution context. */
 	protected final Context context;
@@ -243,6 +261,99 @@ public final class IOPipeService
 	}
 	
 	/**
+	 * Builds the AWS information object to be placed in the request.
+	 *
+	 * @param __context The context to source information from.
+	 * @return The built object.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2017/12/14
+	 */
+	private JsonObject __buildJsonAwsObject(Context __context)
+		throws NullPointerException
+	{
+		if (__context == null)
+			throw new NullPointerException();
+		
+		JsonObjectBuilder rv = Json.createObjectBuilder();
+		
+		rv.add("functionName", __context.getFunctionName());
+		rv.add("functionVersion", __context.getFunctionVersion());
+		rv.add("awsRequestId", __context.getAwsRequestId());
+		rv.add("invokedFunctionArn", __context.getInvokedFunctionArn());
+		rv.add("logGroupName", __context.getLogGroupName());
+		rv.add("logStreamName", __context.getLogStreamName());
+		rv.add("memoryLimitInMB", __context.getMemoryLimitInMB());
+		rv.add("getRemainingTimeInMillis",
+			__context.getRemainingTimeInMillis());
+		rv.add("traceId", Objects.toString(
+			System.getenv("_X_AMZN_TRACE_ID"), "unknown"));
+		
+		return rv.build();
+	}
+	
+	/**
+	 * Builds the host environment information object.
+	 *
+	 * @return The host environment information.
+	 * @since 2017/12/24
+	 */
+	private JsonObject __buildJsonEnvironmentObject()
+	{
+		JsonObjectBuilder rv = Json.createObjectBuilder();
+		
+		// The IOPipe Agent
+		JsonObjectBuilder agent = Json.createObjectBuilder();
+		
+		agent.add("runtime", "java");
+		agent.add("version", IOPIPE_AGENT_VERSION);
+		agent.add("load_time", _LOAD_TIME);
+		
+		rv.add("agent", agent);
+		
+		// Java VM info, just copy from system properties
+		JsonObjectBuilder java = Json.createObjectBuilder();
+		
+		for (String p : IOPipeService._COPY_PROPERTIES)
+			java.add(p, System.getProperty(p, ""));
+		
+		rv.add("java", java);
+		
+		// Operating System information
+		JsonObjectBuilder os = Json.createObjectBuilder();
+		
+		//os.add("hostname", ???);
+		//os.add("totalmem", ???);
+		//os.add("freemem", ???);
+		//os.add("usedmem", ???);
+		//os.add("cpus", ???);
+		
+		rv.add("os", os);
+		
+		return rv.build();
+	}
+	
+	/**
+	 * Builds the memory information object.
+	 *
+	 * @return Thec urrent state of memory.
+	 * @since 2017/12/24
+	 */
+	private JsonObject __buildJsonMemoryObject()
+	{
+		JsonObjectBuilder rv = Json.createObjectBuilder();
+		
+		if ("linux".compareToIgnoreCase(
+			System.getProperty("os.name", "unknown")) == 0)
+		{
+			//rv.add("rssMiB", ???);
+			//rv.add("totalMiB", ???);
+			//rv.add("rssTotalPercentage", ???);
+		}
+		
+		return rv.build();
+	}
+	
+	/**
 	 * This initializes a base Json object and fills it with the common
 	 * and well known information that is common between all requests.
 	 *
@@ -255,69 +366,23 @@ public final class IOPipeService
 		
 		Context context = this.context;
 		IOPipeConfiguration config = this.config;
-		RuntimeMXBean runtimemx = ManagementFactory.getRuntimeMXBean();
-		OperatingSystemMXBean osbean =
-			ManagementFactory.getOperatingSystemMXBean();
 		
 		// User provided information
 		rv.add("client_id", config.getProjectToken());
 		rv.add("installMethod", config.getInstallMethod());
 		
 		// System provided information
+		RuntimeMXBean runtimemx = ManagementFactory.getRuntimeMXBean();
 		rv.add("processId", runtimemx.getName());
 		rv.add("timestamp", runtimemx.getStartTime() / 1000);
 		
+		// Sub-structures
+		rv.add("aws", __buildJsonAwsObject(context));
+		rv.add("environment", __buildJsonEnvironmentObject());
+		rv.add("memory", __buildJsonMemoryObject()); 
+		
 		// If the process has been cold started
 		//rv.add("coldstart", ???);
-		
-		// Memory
-		JsonObjectBuilder memory = Json.createObjectBuilder();
-		//rv.add("rssMiB", ???);
-		//rv.add("totalMiB", ???);
-		//rv.add("rssTotalPercentage", ???);
-		rv.add("memory", memory); 
-		
-		// Information provided by Amazon
-		JsonObjectBuilder aws = Json.createObjectBuilder();
-		aws.add("functionName", context.getFunctionName());
-		aws.add("functionVersion", context.getFunctionVersion());
-		aws.add("awsRequestId", context.getAwsRequestId());
-		aws.add("invokedFunctionArn", context.getInvokedFunctionArn());
-		aws.add("logGroupName", context.getLogGroupName());
-		aws.add("logStreamName", context.getLogStreamName());
-		aws.add("memoryLimitInMB", context.getMemoryLimitInMB());
-		aws.add("getRemainingTimeInMillis",
-			context.getRemainingTimeInMillis());
-		aws.add("traceId", Objects.toString(
-			System.getenv("_X_AMZN_TRACE_ID"), "unknown"));
-		rv.add("aws", aws);
-		
-		// IOPipe Agent
-		JsonObjectBuilder agent = Json.createObjectBuilder();
-		agent.add("runtime", "java");
-		agent.add("version", IOPIPE_AGENT_VERSION);
-		//agent.add("load_time", ???);
-		
-		// Operating System information
-		JsonObjectBuilder os = Json.createObjectBuilder();
-		//os.add("hostname", ???);
-		//os.add("totalmem", ???);
-		//os.add("freemem", ???);
-		//os.add("usedmem", ???);
-		//os.add("cpus", ???);
-		
-		// JVM information
-		JsonObjectBuilder java = Json.createObjectBuilder();
-		java.add("java.vm.name", System.getProperty("java.vm.name"));
-		java.add("java.vm.vendor", System.getProperty("java.vm.vendor"));
-		java.add("java.vm.version", System.getProperty("java.vm.version"));
-		
-		// Place these together in one object
-		JsonObjectBuilder environment = Json.createObjectBuilder();
-		environment.add("agent", agent);
-		environment.add("java", java);
-		environment.add("os", os);
-		rv.add("environment", environment);
 		
 		return rv;
 	}
