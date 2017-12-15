@@ -66,8 +66,6 @@ public final class IOPipeService
 		boolean closed = this._closed;
 		if (!closed)
 		{
-			this.timeouts.close();
-			
 			throw new Error("TODO");
 		}
 	}

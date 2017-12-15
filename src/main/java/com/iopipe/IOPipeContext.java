@@ -47,6 +47,17 @@ public final class IOPipeContext
 	}
 	
 	/**
+	 * Returns the context configuration.
+	 *
+	 * @return The configuration for the context.
+	 * @since 2017/12/15
+	 */
+	public final IOPipeConfiguration config()
+	{
+		return this.config;
+	}
+	
+	/**
 	 * Returns the context this is executing for.
 	 *
 	 * @return The executing context.
