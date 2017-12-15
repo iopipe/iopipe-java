@@ -52,7 +52,7 @@ final class __MockContext__
 	@Override
 	public final String getAwsRequestId()
 	{
-		throw new Error("TODO");
+		return "mockawsrequestid";
 	}
 	
 	/**
@@ -104,7 +104,7 @@ final class __MockContext__
 	@Override
 	public final String getInvokedFunctionArn()
 	{
-		throw new Error("TODO");
+		return "mockinvokedfunctionarn";
 	}
 	
 	/**
@@ -114,7 +114,7 @@ final class __MockContext__
 	@Override
 	public final LambdaLogger getLogger()
 	{
-		throw new Error("TODO");
+		return null;
 	}
 	
 	/**
@@ -124,7 +124,7 @@ final class __MockContext__
 	@Override
 	public final String getLogGroupName()
 	{
-		throw new Error("TODO");
+		return "mockloggroupname";
 	}
 	
 	/**
@@ -134,7 +134,7 @@ final class __MockContext__
 	@Override
 	public final String getLogStreamName()
 	{
-		throw new Error("TODO");
+		return "mocklogstreamname";
 	}
 	
 	/**
@@ -144,7 +144,7 @@ final class __MockContext__
 	@Override
 	public final int getMemoryLimitInMB()
 	{
-		throw new Error("TODO");
+		return Integer.MAX_VALUE;
 	}
 	
 	/**
