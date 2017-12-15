@@ -15,6 +15,30 @@ public final class IOPipeMetrics
 		Long.MIN_VALUE;
 	
 	/**
+	 * Returns the execution duration.
+	 *
+	 * @return The execution duration, if this is negative then it is not
+	 * valid.
+	 * @since 2017/12/15
+	 */
+	public long getDuration()
+	{
+		return this._duration;
+	}
+	
+	/**
+	 * Returns the thrown throwable.
+	 *
+	 * @return The throwable which was thrown or {@code null} if none was
+	 * thrown.
+	 * @since 2017/12/15
+	 */
+	public Throwable getThrown()
+	{
+		return this._thrown;
+	}
+	
+	/**
 	 * Sets the duration of execution.
 	 *
 	 * @param __d The execution duration in nanoseconds.
