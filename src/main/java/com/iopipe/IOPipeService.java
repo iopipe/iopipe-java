@@ -93,9 +93,7 @@ public final class IOPipeService
 			debug.printf("IOPipe: createContext(%s)%n", __c);
 		
 		// Contexts may timeout after a given amount of time
-		IOPipeContext rv = new IOPipeContext(__c, config);
-		this.timeouts.register(rv);
-		return rv;
+		return new IOPipeContext(__c, config, this.timeouts);
 	}
 }
 

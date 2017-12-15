@@ -19,15 +19,23 @@ public final class IOPipeContext
 	/** The service configuration. */
 	protected final IOPipeConfiguration config;
 	
+	/** Used to track call timeouts. */
+	protected final IOPipeTimeoutManager timeout;
+	
+	/** The number of times this context has been executed. */
+	private volatile int _execcount;
+	
 	/**
 	 * Initializes this class and wraps the given execution context.
 	 *
 	 * @param __context The context to manage.
 	 * @param __config The configuration for the service.
+	 * @param __timeout The timeout manager.
 	 * @throws NullPointerException On null arguments.
 	 * @since 2017/12/14
 	 */
-	IOPipeContext(Context __context, IOPipeConfiguration __config)
+	IOPipeContext(Context __context, IOPipeConfiguration __config,
+		IOPipeTimeoutManager __timeout)
 		throws NullPointerException
 	{
 		if (__context == null || __config == null)
@@ -35,6 +43,18 @@ public final class IOPipeContext
 		
 		this.context = __context;
 		this.config = __config;
+		this.timeout = __timeout;
+	}
+	
+	/**
+	 * Returns the context this is executing for.
+	 *
+	 * @return The executing context.
+	 * @since 2017/12/15
+	 */
+	public final Context context()
+	{
+		return this.context;
 	}
 	
 	/**
@@ -43,16 +63,59 @@ public final class IOPipeContext
 	 * @param <R> The value to return.
 	 * @param __func The function to call which will get a generated report.
 	 * @return The returned value.
+	 * @throws Error If the called function threw an error.
 	 * @throws NullPointerException On null arguments.
+	 * @throws RuntimeException If the called function threw an exception.
 	 * @since 2017/12/14
 	 */
 	public final <R> R run(Supplier<R> __func)
-		throws NullPointerException
+		throws Error, NullPointerException, RuntimeException
 	{
 		if (__func == null)
 			throw new NullPointerException();
 		
-		throw new Error("TODO");
+		IOPipeTimeoutManager timeout = this.timeout;
+		
+		// Register timeout with this execution number so if execution takes
+		// longer than expected a timeout is generated
+		int execcount = this._execcount++;
+		timeout.register(this, execcount);
+		
+		// This method either returns a value or throwsn
+		R rv = null;
+		Throwable rt = null;
+		
+		// Regardless of any error, timeouts must be handled
+		long starttime = System.nanoTime(),
+			duration;
+		try
+		{
+			rv = __func.get();
+		}
+		
+		// An exception or error was thrown, so that will be reported
+		// Error is very fatal, but still report that it occured
+		catch (RuntimeException|Error e)
+		{
+			rt = e;
+		}
+		
+		// Indicate that execution has finished to the timeout manager
+		// so that it no longer reports timeouts
+		finally
+		{
+			duration = starttime = System.nanoTime() - starttime;
+			timeout.finished(this, execcount);
+		}
+		
+		// Throw the called exception as if the wrapper did not have any
+		// trouble
+		if (rt != null)
+			if (rt instanceof Error)
+				throw (Error)rt;
+			else
+				throw (RuntimeException)rt;
+		return rv;
 	}
 }
 
