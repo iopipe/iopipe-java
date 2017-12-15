@@ -1,6 +1,7 @@
 package com.iopipe;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -35,10 +36,12 @@ public final class IOPipeTimeoutManager
 	 * and that it should not have a timeout reported for it.
 	 *
 	 * @param __exec The execution number of the context.
+	 * @return {@code true} if this actually timed out before this method
+	 * was called.
 	 * @throws NullPointerException On null arguments.
 	 * @since 2017/12/15
 	 */
-	public void finished(IOPipeContext __c, int __exec)
+	public boolean finished(IOPipeContext __c, int __exec)
 		throws NullPointerException
 	{
 		if (__c == null)
@@ -51,12 +54,14 @@ public final class IOPipeTimeoutManager
 			// but it can safely be ignored
 			Active rv = actives.get(__c);
 			if (rv == null)
-				return;
+				return false;
 			
 			// Remove the active because it will not be useable after the
 			// thread is destroyed
 			if (rv.__finished(__exec))
 				actives.remove(__c);
+			
+			return rv._timedout;
 		}
 	}
 	
@@ -108,6 +113,9 @@ public final class IOPipeTimeoutManager
 		
 		/** Set to true when execution has been terminated, exit the thread. */
 		private volatile boolean _terminated;
+		
+		/** If this context actually timed out. */
+		volatile boolean _timedout;
 		
 		/**
 		 * Initializes the context timeout manager.
@@ -195,23 +203,21 @@ public final class IOPipeTimeoutManager
 			// The timeout window is always constant
 			long windowtime = config.getTimeOutWindow() * 1_000_000L;
 			
+			boolean reported = false;
 			for (;;)
 				synchronized (execs)
 				{
 					// Determine the amount of time to wait on the lock based
 					// on the time that is left for execution
-					long nowtime = System.nanoTime(),
-						remtime = awscontext.getRemainingTimeInMillis() *
-							1_000_000L,
-						endtime = nowtime + remtime,
-						duration = (endtime - nowtime) - windowtime;
+					long remtime = (awscontext.getRemainingTimeInMillis() *
+						1_000_000L) - windowtime;
 					
 					// Wait until interrupted or notification occurs
-					if (duration > windowtime)
+					if (remtime > 0)
 						try
 						{
-							execs.wait(duration / 1_000_000L,
-								(int)(duration % 1_000_000L));
+							execs.wait(remtime / 1_000_000L,
+								(int)(remtime % 1_000_000L));
 						}
 						catch (InterruptedException e)
 						{
@@ -224,9 +230,19 @@ public final class IOPipeTimeoutManager
 					// Only when the timer reaches zero, this will cause the
 					// thread to constantly poll as it very nearly approaches
 					// the window
-					if (duration <= 0)
+					if (remtime <= 0)
 					{
-						throw new Error("TODO");
+						// Specificy that actually timed out and report it
+						// so that reported timeouts that actually do finish
+						// execution within the window can be reported
+						this._timedout = true;
+						
+						PrintStream debug = config.getDebugStream();
+						if (debug != null)
+							debug.printf("IOPipe: Time out by %s%n", context);
+						
+						// Stop the reporting thread
+						return;
 					}
 				}
 		}

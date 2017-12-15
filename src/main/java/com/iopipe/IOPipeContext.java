@@ -85,12 +85,15 @@ public final class IOPipeContext
 		if (__func == null)
 			throw new NullPointerException();
 		
+		IOPipeConfiguration config = this.config;
 		IOPipeTimeoutManager timeout = this.timeout;
+		boolean usewindow = (config.getTimeOutWindow() > 0);
 		
 		// Register timeout with this execution number so if execution takes
 		// longer than expected a timeout is generated
 		int execcount = this._execcount++;
-		timeout.register(this, execcount);
+		if (usewindow)
+			timeout.register(this, execcount);
 		
 		// This method either returns a value or throwsn
 		R rv = null;
@@ -99,6 +102,7 @@ public final class IOPipeContext
 		// Regardless of any error, timeouts must be handled
 		long starttime = System.nanoTime(),
 			duration;
+		boolean timedout = false;
 		try
 		{
 			rv = __func.get();
@@ -116,8 +120,12 @@ public final class IOPipeContext
 		finally
 		{
 			duration = starttime = System.nanoTime() - starttime;
-			timeout.finished(this, execcount);
+			if (usewindow)
+				timedout = timeout.finished(this, execcount);
 		}
+		
+		// Generate report
+		// TODO
 		
 		// Throw the called exception as if the wrapper did not have any
 		// trouble

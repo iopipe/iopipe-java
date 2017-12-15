@@ -66,7 +66,7 @@ public final class IOPipeService
 		boolean closed = this._closed;
 		if (!closed)
 		{
-			throw new Error("TODO");
+			// Close socket if any
 		}
 	}
 	

@@ -129,7 +129,8 @@ public class IOPipeConfigurationBuilder
 	/**
 	 * Sets the timeout window in milliseconds.
 	 *
-	 * @param __ms The length of the timeout window.
+	 * @param __ms The length of the timeout window, zero disables this
+	 * feature.
 	 * @throws IllegalArgumentException If the length is negative.
 	 * @since 2017/12/13
 	 */

@@ -137,7 +137,8 @@ public final class IOPipeConfiguration
 	/**
 	 * Returns the timeout window in milliseconds.
 	 *
-	 * @return The timeout window in milliseconds.
+	 * @return The timeout window in milliseconds, if the return value is
+	 * zero the timeouts will not be reported.
 	 * @since 2017/12/13
 	 */
 	public final int getTimeOutWindow()

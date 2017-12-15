@@ -1,5 +1,6 @@
 package com.iopipe;
 
+import com.amazonaws.services.lambda.runtime.Context;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -79,6 +80,61 @@ public class IOPipeServiceTest
 			sv.createContext(
 				new __MockContext__("testEmptyFunctionWhenDisabled")).run(
 				() -> null);
+		}
+	}
+	
+	/**
+	 * Tests timing out of the service.
+	 *
+	 * @since 2017/12/15
+	 */
+	public void testTimeOut()
+	{
+		try (IOPipeService sv = new IOPipeService(testConfig()))
+		{
+			Context context;
+			sv.createContext(
+				(context = new __MockContext__("testTimeOut"))).run(
+				() ->
+				{
+					int extratime = __MockContext__.CONTEXT_DURATION_MS +
+						(__MockContext__.CONTEXT_DURATION_MS >>> 4);
+					
+					// Sleep for the duration time
+					System.err.println("Timeout test is waiting...");
+					for (;;)
+					{
+						// Determine how long to sleep for
+						int sleepdur = context.getRemainingTimeInMillis();
+						
+						// Finished sleeping
+						if (sleepdur <= 0)
+							break;
+						
+						// Sleep
+						try
+						{
+							Thread.sleep(sleepdur + extratime);
+						}
+						catch (InterruptedException e)
+						{
+						}
+					}
+					
+					// Sleep for an extra half-second
+					System.err.println("Timeout test is waiting more...");
+					try
+					{
+						Thread.sleep(500);
+					}
+					catch (InterruptedException e)
+					{
+					}
+					
+					System.err.println("Timeout test finished!");
+					
+					return null;
+				});
 		}
 	}
 	

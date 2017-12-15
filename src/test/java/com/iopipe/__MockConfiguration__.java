@@ -47,6 +47,7 @@ final class __MockConfiguration__
 		rv.setDebugStream(System.err);
 		rv.setProjectToken(__MockConfiguration__.VALID_TOKEN);
 		rv.setHTTPConnectionFactory(new __MockHTTPConnectionFactory__());
+		rv.setTimeOutWindow(150);
 		
 		return rv.build();
 	}
