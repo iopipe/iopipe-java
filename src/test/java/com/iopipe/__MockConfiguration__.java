@@ -52,3 +52,4 @@ final class __MockConfiguration__
 		return rv.build();
 	}
 }
+

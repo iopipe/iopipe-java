@@ -1,7 +1,10 @@
 package com.iopipe;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.util.function.Supplier;
+import javax.json.JsonObject;
 
 /**
  * This class provides a means of wrapping the IOPipe service and then
@@ -108,6 +111,7 @@ public final class IOPipeContext
 		long starttime = System.nanoTime(),
 			duration;
 		boolean timedout = false;
+		IOPipeMetrics metrics = new IOPipeMetrics();
 		try
 		{
 			rv = __func.get();
@@ -118,6 +122,8 @@ public final class IOPipeContext
 		catch (RuntimeException|Error e)
 		{
 			rt = e;
+			
+			metrics.setThrown(e);
 		}
 		
 		// Indicate that execution has finished to the timeout manager
@@ -127,10 +133,12 @@ public final class IOPipeContext
 			duration = starttime = System.nanoTime() - starttime;
 			if (usewindow)
 				timedout = timeout.finished(this, execcount);
+			
+			metrics.setDuration(duration);
 		}
 		
-		// Generate report
-		// TODO
+		// Generate and send result to server
+		__sendReport(IOPipeRequestBuilder.ofMetrics(this, metrics));
 		
 		// Throw the called exception as if the wrapper did not have any
 		// trouble
@@ -140,6 +148,43 @@ public final class IOPipeContext
 			else
 				throw (RuntimeException)rt;
 		return rv;
+	}
+	
+	/**
+	 * Sends the specified report to the server.
+	 *
+	 * @param __o The object to send.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2017/12/15
+	 */
+	final void __sendReport(JsonObject __o)
+		throws NullPointerException
+	{
+		if (__o == null)
+			throw new NullPointerException();
+		
+		// Generate report
+		try
+		{
+			// Report what is to be sent
+			PrintStream debug = config.getDebugStream();
+			if (debug != null)
+				debug.printf("IOPipe: Send: %s%n", __o);
+			
+			IOPipeHTTPResult result = this.connection.sendRequest(
+				new IOPipeHTTPRequest(__o));
+			
+			// Report what was received
+			if (debug != null)
+				debug.printf("IOPipe: Result %d: %s%n", result.code(),
+					result.body());
+		}
+		
+		// Failed to write to the server
+		catch (IOException e)
+		{
+			e.printStackTrace(this.config.getFatalErrorStream());
+		}
 	}
 }
 

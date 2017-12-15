@@ -251,6 +251,10 @@ public final class IOPipeTimeoutManager
 						if (debug != null)
 							debug.printf("IOPipe: Time out by %s%n", context);
 						
+						// Send report
+						context.__sendReport(IOPipeRequestBuilder.ofTimeout(
+							context, execs.size()));
+						
 						// Stop the reporting thread
 						return;
 					}

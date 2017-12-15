@@ -29,3 +29,4 @@ public interface IOPipeHTTPConnection
 	public abstract IOPipeHTTPResult sendRequest(IOPipeHTTPRequest __r)
 		throws IOException, NullPointerException;
 }
+
