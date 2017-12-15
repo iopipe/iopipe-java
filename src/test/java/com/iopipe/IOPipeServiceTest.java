@@ -4,6 +4,8 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import static com.iopipe.__MockConfiguration__.testConfig;
+
 /**
  * This tests the {@link IOPipeServiceTest} class.
  *
@@ -31,8 +33,22 @@ public class IOPipeServiceTest
 	 */
 	public void testConstruction()
 	{
-		new IOPipeService(new __MockContext__("testConstruction"),
-			__MockConfiguration__.testConfig());
+		try (IOPipeService sv = new IOPipeService(testConfig()))
+		{
+		}
+	}
+	
+	/**
+	 * Tests the construction of a context.
+	 *
+	 * @since 2017/12/15
+	 */
+	public void testConstructionContext()
+	{
+		try (IOPipeService sv = new IOPipeService(testConfig()))
+		{
+			sv.createContext(new __MockContext__("testConstructionContext"));
+		}
 	}
 	
 	/**
@@ -43,9 +59,11 @@ public class IOPipeServiceTest
 	 */
 	public void testEmptyFunction()
 	{
-		new IOPipeService(new __MockContext__("testEmptyFunction"),
-			__MockConfiguration__.testConfig()).run(
-			() -> {});
+		try (IOPipeService sv = new IOPipeService(testConfig()))
+		{
+			sv.createContext(new __MockContext__("testEmptyFunction")).run(
+				() -> null);
+		}
 	}
 	
 	/**
@@ -56,9 +74,12 @@ public class IOPipeServiceTest
 	 */
 	public void testEmptyFunctionWhenDisabled()
 	{
-		new IOPipeService(new __MockContext__("testEmptyFunctionWhenDisabled"),
-			__MockConfiguration__.testConfig(false)).run(
-			() -> {});
+		try (IOPipeService sv = new IOPipeService(testConfig()))
+		{
+			sv.createContext(
+				new __MockContext__("testEmptyFunctionWhenDisabled")).run(
+				() -> null);
+		}
 	}
 	
 	/**
