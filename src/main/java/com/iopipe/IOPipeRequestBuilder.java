@@ -1,6 +1,11 @@
 package com.iopipe;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -14,6 +19,18 @@ import javax.json.JsonObjectBuilder;
  */
 public final class IOPipeRequestBuilder
 {
+	/** The system properties to copy in the environment report. */
+	private static final List<String> _COPY_PROPERTIES =
+		Collections.<String>unmodifiableList(Arrays.<String>asList(
+			"java.version", "java.vendor", "java.vendor.url",
+			"java.vm.specification.version",
+			"java.vm.specification.vendor", "java.vm.specification.name",
+			"java.vm.version", "java.vm.vendor", "java.vm.name",
+			"java.specification.version", "java.specification.vendor",
+			"java.specification.name", "java.class.version",
+			"java.compiler", "os.name", "os.arch", "os.version",
+			"file.separator", "path.separator"));
+	
 	/**
 	 * Not used.
 	 *
@@ -96,10 +113,24 @@ public final class IOPipeRequestBuilder
 		if (__c == null || __o == null)
 			throw new NullPointerException();
 		
-		__o.add("aws", __generateAws(__c));
+		IOPipeConfiguration config = __c.config();
 		
-		if (true)
-			throw new Error("TODO");
+		// The first report that gets generated gets the coldstart flag, but
+		// after that point all other reports are considered thawed
+		__o.add("coldstart", !IOPipeService._THAWED.getAndSet(true));
+		
+		__o.add("client_id", config.getProjectToken());
+		__o.add("installMethod", Objects.toString(config.getInstallMethod(),
+			"unknown"));
+		
+		__o.add("aws", __generateAws(__c));
+		__o.add("memory", __generateMemory());
+		__o.add("environment", __generateEnvironment());
+		
+		// System provided information
+		RuntimeMXBean runtimemx = ManagementFactory.getRuntimeMXBean();
+		__o.add("processId", runtimemx.getName());
+		__o.add("timestamp", runtimemx.getStartTime() / 1000);
 	}
 	
 	/**
@@ -129,6 +160,88 @@ public final class IOPipeRequestBuilder
 			awscontext.getRemainingTimeInMillis());
 		rv.add("traceId", Objects.toString(
 			System.getenv("_X_AMZN_TRACE_ID"), "unknown"));
+		
+		return rv.build();
+	}
+	
+	/**
+	 * Generates the environment information.
+	 *
+	 * @return The environment information.
+	 * @since 2017/12/16
+	 */
+	private static JsonObject __generateEnvironment()
+	{
+		JsonObjectBuilder rv = Json.createObjectBuilder();
+		
+		rv.add("agent", __generateEnvironmentAgent());
+		rv.add("java", __generateEnvironmentJava());
+		rv.add("os", __generateEnvironmentOs());
+		
+		return rv.build();
+	}
+	
+	/**
+	 * Generates the agent information.
+	 *
+	 * @return The agent information.
+	 * @since 2017/12/26
+	 */
+	private static JsonObject __generateEnvironmentAgent()
+	{
+		JsonObjectBuilder rv = Json.createObjectBuilder();
+		
+		rv.add("runtime", "java");
+		rv.add("version", IOPipeService.AGENT_VERSION);
+		rv.add("load_time", IOPipeService._LOAD_TIME / 1_000_000L);
+		
+		return rv.build();
+	}
+	
+	/**
+	 * Generates the Java VM information.
+	 *
+	 * @return The VM information.
+	 * @since 2017/12/16
+	 */
+	private static JsonObject __generateEnvironmentJava()
+	{
+		JsonObjectBuilder rv = Json.createObjectBuilder();
+		
+		for (String p : IOPipeRequestBuilder._COPY_PROPERTIES)
+			rv.add(p, System.getProperty(p, ""));
+			
+		return rv.build();
+	}
+	
+	/**
+	 * Generates Operating System information.
+	 *
+	 * @return The operating system information.
+	 * @since 2017/12/16
+	 */
+	private static JsonObject __generateEnvironmentOs()
+	{
+		JsonObjectBuilder rv = Json.createObjectBuilder();
+		
+		if (true)
+			throw new Error("TODO");
+		
+		return rv.build();
+	}
+	
+	/**
+	 * Generates the process memory information.
+	 *
+	 * @return The memory information.
+	 * @since 2017/12/16
+	 */
+	private static JsonObject __generateMemory()
+	{
+		JsonObjectBuilder rv = Json.createObjectBuilder();
+		
+		if (true)
+			throw new Error("TODO");
 		
 		return rv.build();
 	}

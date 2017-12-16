@@ -4,6 +4,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * This class provides a single connection to the IOPipe service which may then
@@ -20,6 +21,18 @@ import java.io.PrintStream;
 public final class IOPipeService
 	implements AutoCloseable
 {
+	/** The version for this agent. */
+	public static final String AGENT_VERSION =
+		"1.0-SNAPSHOT";
+	
+	/** This is used to detect cold starts. */
+	static final AtomicBoolean _THAWED =
+		new AtomicBoolean();
+	
+	/** The time this class was initialized, used for load time. */
+	static final long _LOAD_TIME =
+		System.currentTimeMillis();
+	
 	/** The configuration used to connect to the service. */
 	protected final IOPipeConfiguration config;
 	
