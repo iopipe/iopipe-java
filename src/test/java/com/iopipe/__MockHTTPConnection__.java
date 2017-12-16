@@ -1,6 +1,7 @@
 package com.iopipe;
 
 import java.io.IOException;
+import java.util.function.Consumer;
 import javax.json.JsonValue;
 
 /**
@@ -12,6 +13,21 @@ import javax.json.JsonValue;
 final class __MockHTTPConnection__
 	implements IOPipeHTTPConnection
 {
+	/** When a request is made this function will be called. */
+	protected final Consumer<IOPipeHTTPRequest> function;
+	
+	/**
+	 * Initializes the connection, where requests may be passed to the
+	 * specified function.
+	 *
+	 * @param __func The function which receives requests.
+	 * @since 2017/12/16
+	 */
+	__MockHTTPConnection__(Consumer<IOPipeHTTPRequest> __func)
+	{
+		this.function = __func;
+	}
+	
 	/**
 	 * {@inheritDoc}
 	 * @since 2017/12/13
@@ -34,12 +50,11 @@ final class __MockHTTPConnection__
 		if (__r == null)
 			throw new NullPointerException();
 		
-		// Print the sent JSON data
-		System.err.printf("Request: %s%n", __r);
-		
-		// Just check the authorization token
-		if (true)
-			throw new Error("TODO");
+		// Send the request to the consumer so that it may test the remote
+		// end accordingly
+		Consumer<IOPipeHTTPRequest> function = this.function;
+		if (function != null)
+			function.accept(__r);
 		
 		// Everything is okay so treat it as such
 		return new IOPipeHTTPResult(202, JsonValue.NULL);
