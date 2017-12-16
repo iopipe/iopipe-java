@@ -140,7 +140,7 @@ public final class IOPipeContext
 		}
 		
 		// Generate and send result to server
-		if (active == null || !active._timedout)
+		if (active == null || !active._generated.getAndSet(true))
 			__sendReport(IOPipeRequestBuilder.ofMetrics(this, metrics));
 		
 		// Throw the called exception as if the wrapper did not have any

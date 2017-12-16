@@ -4,6 +4,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.List;
 import java.util.Map;
 import java.util.IdentityHashMap;
@@ -72,7 +73,7 @@ public final class IOPipeTimeoutManager
 			if (rv.__finished(__exec))
 				actives.remove(__c);
 			
-			return rv._timedout;
+			return rv._generated.get();
 		}
 	}
 	
@@ -124,11 +125,12 @@ public final class IOPipeTimeoutManager
 		private final Map<Integer, Thread> _execs =
 			new TreeMap<>();
 		
+		/** Has a report been generated? */
+		final AtomicBoolean _generated =
+			new AtomicBoolean();
+		
 		/** Set to true when execution has been terminated, exit the thread. */
 		private volatile boolean _terminated;
-		
-		/** If this context actually timed out. */
-		volatile boolean _timedout;
 		
 		/**
 		 * Initializes the context timeout manager.
@@ -246,10 +248,11 @@ public final class IOPipeTimeoutManager
 					// the window
 					if (remtime <= 0)
 					{
-						// Specificy that actually timed out and report it
-						// so that reported timeouts that actually do finish
-						// execution within the window can be reported
-						this._timedout = true;
+						// Only generate a single report, if execution times
+						// out at the exact right time as the method finishes
+						// execution then both reports will be generated.
+						if (this._generated.getAndSet(true))
+							return;
 						
 						PrintStream debug = config.getDebugStream();
 						if (debug != null)
