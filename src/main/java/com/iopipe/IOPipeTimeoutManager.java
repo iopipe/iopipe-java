@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.IdentityHashMap;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
@@ -81,14 +82,16 @@ public final class IOPipeTimeoutManager
 	 * service terminates the context.
 	 *
 	 * @param __c The context to register.
+	 * @param __t The thread executing this method, used to obtain the stack
+	 * trace in the event of timeout.
 	 * @param __exec The current execution count for the context.
 	 * @throws NullPointerException On null arguments.
 	 * @since 2017/12/15
 	 */
-	public Active register(IOPipeContext __c, int __exec)
+	public Active register(IOPipeContext __c, int __exec, Thread __t)
 		throws NullPointerException
 	{
-		if (__c == null)
+		if (__c == null || __t == null)
 			throw new NullPointerException("NARG");
 		
 		Map<IOPipeContext, Active> actives = this._actives;
@@ -96,9 +99,9 @@ public final class IOPipeTimeoutManager
 		{
 			Active rv = actives.get(__c);
 			if (rv == null)
-				actives.put(__c, (rv = new Active(__c, __exec)));
-			
-			rv.__register(__exec);
+				actives.put(__c, (rv = new Active(__c, __exec, __t)));
+			else
+				rv.__register(__exec, __t);
 			
 			return rv;
 		}
@@ -118,8 +121,8 @@ public final class IOPipeTimeoutManager
 		protected final Thread thread;
 		
 		/** Current executions which are active. */
-		private final Set<Integer> _execs =
-			new TreeSet<>();
+		private final Map<Integer, Thread> _execs =
+			new TreeMap<>();
 		
 		/** Set to true when execution has been terminated, exit the thread. */
 		private volatile boolean _terminated;
@@ -132,10 +135,11 @@ public final class IOPipeTimeoutManager
 		 *
 		 * @param __context The context to track executions for.
 		 * @param __exec The initial execution to register.
+		 * @param __t The thread of the execution context.
 		 * @throws NullPointerException On null arguments.
 		 * @since 2017/12/15
 		 */
-		private Active(IOPipeContext __context, int __exec)
+		private Active(IOPipeContext __context, int __exec, Thread __t)
 			throws NullPointerException
 		{
 			if (__context == null)
@@ -150,7 +154,7 @@ public final class IOPipeTimeoutManager
 			this.thread = thread;
 			
 			// Register the first execution
-			__register(__exec);
+			__register(__exec, __t);
 			
 			// Start thread after setting the initial execution because when
 			// execution finishes this will be terminated
@@ -170,7 +174,7 @@ public final class IOPipeTimeoutManager
 		private boolean __finished(int __exec)
 			throws NullPointerException
 		{
-			Set<Integer> execs = this._execs;
+			Set<Integer> execs = this._execs.keySet();
 			synchronized (execs)
 			{
 				// Removing executions which do not actually exist? Ignore
@@ -205,7 +209,7 @@ public final class IOPipeTimeoutManager
 		 */
 		private void __pollingLoop()
 		{
-			Set<Integer> execs = this._execs;
+			Map<Integer, Thread> execs = this._execs;
 			IOPipeContext context = this.context;
 			Context awscontext = context.context();
 			IOPipeConfiguration config = context.config();
@@ -251,9 +255,10 @@ public final class IOPipeTimeoutManager
 						if (debug != null)
 							debug.printf("IOPipe: Time out by %s%n", context);
 						
-						// Send report
-						context.__sendReport(IOPipeRequestBuilder.ofTimeout(
-							context, execs.size()));
+						// Send reports for each execution
+						for (Thread t : execs.values())
+							context.__sendReport(
+								IOPipeRequestBuilder.ofTimeout(context, t));
 						
 						// Stop the reporting thread
 						return;
@@ -265,14 +270,20 @@ public final class IOPipeTimeoutManager
 		 * Registers the specified execution number.
 		 *
 		 * @param __exec The execution count to register.
+		 * @param __t The thread of this execution for stack trace generation.
+		 * @throws NullPointerException On null arguments.
 		 * @since 2017/12/15
 		 */
-		private void __register(int __exec)
+		private void __register(int __exec, Thread __t)
+			throws NullPointerException
 		{
-			Set<Integer> execs = this._execs;
+			if (__t == null)
+				throw new NullPointerException();
+			
+			Map<Integer, Thread> execs = this._execs;
 			synchronized (execs)
 			{
-				execs.add(__exec);
+				execs.put(__exec, __t);
 			}
 		}
 	}
