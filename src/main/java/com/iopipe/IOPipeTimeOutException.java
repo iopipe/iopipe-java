@@ -3,7 +3,7 @@ package com.iopipe;
 /**
  * This is used when a request being executed has timed out.
  *
- * @since 2017
+ * @since 2017/12/16
  */
 public class IOPipeTimeOutException
 	extends RuntimeException

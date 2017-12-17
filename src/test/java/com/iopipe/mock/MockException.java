@@ -1,4 +1,4 @@
-package com.iopipe;
+package com.iopipe.mock;
 
 /**
  * This is a mock exception which is not really an error but is used for
@@ -6,7 +6,7 @@ package com.iopipe;
  *
  * @since 2017/12/15
  */
-public final class __MockException__
+public final class MockException
 	extends RuntimeException
 {
 	/**
@@ -14,7 +14,7 @@ public final class __MockException__
 	 *
 	 * @since 2017/12/15
 	 */
-	public __MockException__()
+	public MockException()
 	{
 	}
 	
@@ -24,7 +24,7 @@ public final class __MockException__
 	 * @param __m The reason to use.
 	 * @since 2017/12/15
 	 */
-	public __MockException__(String __m)
+	public MockException(String __m)
 	{
 		super(__m);
 	}
@@ -35,7 +35,7 @@ public final class __MockException__
 	 * @param __c The cause of the exception.
 	 * @since 2017/12/15
 	 */
-	public __MockException__(Throwable __c)
+	public MockException(Throwable __c)
 	{
 		super(__c);
 	}
@@ -47,7 +47,7 @@ public final class __MockException__
 	 * @param __c The cause of the exception.
 	 * @since 2017/12/15
 	 */
-	public __MockException__(String __m, Throwable __c)
+	public MockException(String __m, Throwable __c)
 	{
 		super(__m, __c);
 	}

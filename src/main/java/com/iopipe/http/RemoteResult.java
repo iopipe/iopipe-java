@@ -1,8 +1,12 @@
-package com.iopipe;
+package com.iopipe.http;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
-import javax.json.JsonValue;
+import javax.json.Json;
+import javax.json.JsonException;
+import javax.json.JsonStructure;
 
 /**
  * This is used to store the result of a request made to the service.
@@ -11,16 +15,19 @@ import javax.json.JsonValue;
  *
  * @since 2017/12/13
  */
-public final class IOPipeHTTPResult
+public final class RemoteResult
 {
 	/** The response code of the result. */
 	protected final int code;
 	
 	/** The body of the result. */
-	protected final JsonValue body;
+	protected final String body;
 	
 	/** String representation. */
 	private volatile Reference<String> _string;
+	
+	/** Json representation of the body. */
+	private volatile Reference<JsonStructure> _jsonvalue;
 	
 	/**
 	 * Initializes the result.
@@ -30,7 +37,7 @@ public final class IOPipeHTTPResult
 	 * @throws NullPointerException On null arguments.
 	 * @since 2017/12/13
 	 */
-	public IOPipeHTTPResult(int __code, JsonValue __body)
+	public RemoteResult(int __code, String __body)
 		throws NullPointerException
 	{
 		if (__body == null)
@@ -46,9 +53,36 @@ public final class IOPipeHTTPResult
 	 * @return The message body.
 	 * @since 2017/12/13
 	 */
-	public JsonValue body()
+	public String body()
 	{
 		return this.body;
+	}
+	
+	/**
+	 * Returns the value of the body as a structure.
+	 *
+	 * @return The value of the body as a structure.
+	 * @throws RemoteException If the body could not be parsed.
+	 * @since 2017/12/17
+	 */
+	public JsonStructure bodyValue()
+		throws RemoteException
+	{
+		Reference<JsonStructure> ref = this._jsonvalue;
+		JsonStructure rv;
+		
+		if (ref == null || null == (rv = ref.get()))
+			try
+			{
+				this._jsonvalue = new WeakReference<>((rv =
+					Json.createReader(new StringReader(this.body)).read()));
+			}
+			catch (JsonException e)
+			{
+				throw new RemoteException("Failed to parse the body.", e);
+			}
+		
+		return rv;
 	}
 	
 	/**
@@ -72,10 +106,10 @@ public final class IOPipeHTTPResult
 		if (this == __o)
 			return true;
 		
-		if (!(__o instanceof IOPipeHTTPResult))
+		if (!(__o instanceof RemoteResult))
 			return false;
 		
-		IOPipeHTTPResult o = (IOPipeHTTPResult)__o;
+		RemoteResult o = (RemoteResult)__o;
 		return this.code == o.code &&
 			this.body.equals(o.body);
 	}

@@ -1,6 +1,9 @@
-package com.iopipe;
+package com.iopipe.mock;
 
-import java.io.IOException;
+import com.iopipe.http.RemoteConnection;
+import com.iopipe.http.RemoteConnectionFactory;
+import com.iopipe.http.RemoteException;
+import com.iopipe.http.RemoteRequest;
 import java.util.function.Consumer;
 
 /**
@@ -8,11 +11,11 @@ import java.util.function.Consumer;
  *
  * @since 2017/12/13
  */
-final class __MockHTTPConnectionFactory__
-	implements IOPipeHTTPConnectionFactory
+public final class MockConnectionFactory
+	implements RemoteConnectionFactory
 {
 	/** When a request is made this function will be called. */
-	protected final Consumer<IOPipeHTTPRequest> function;
+	protected final Consumer<RemoteRequest> function;
 	
 	/**
 	 * Initializes the factory where requests are passed to the given consumer
@@ -21,7 +24,7 @@ final class __MockHTTPConnectionFactory__
 	 * @param __func The function which receives requests.
 	 * @since 2017/12/16
 	 */
-	__MockHTTPConnectionFactory__(Consumer<IOPipeHTTPRequest> __func)
+	public MockConnectionFactory(Consumer<RemoteRequest> __func)
 	{
 		this.function = __func;
 	}
@@ -31,10 +34,10 @@ final class __MockHTTPConnectionFactory__
 	 * @since 2017/12/13
 	 */
 	@Override
-	public IOPipeHTTPConnection connect()
-		throws IOException
+	public RemoteConnection connect()
+		throws RemoteException
 	{
-		return new __MockHTTPConnection__(this.function);
+		return new MockConnection(this.function);
 	}
 }
 

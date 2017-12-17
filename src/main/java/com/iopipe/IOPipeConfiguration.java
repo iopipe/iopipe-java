@@ -1,5 +1,6 @@
 package com.iopipe;
 
+import com.iopipe.http.RemoteConnectionFactory;
 import java.io.PrintStream;
 import java.util.Objects;
 
@@ -23,7 +24,7 @@ public final class IOPipeConfiguration
 	protected final String token;
 	
 	/** The factory used to initialize new HTTP connections. */
-	protected final IOPipeHTTPConnectionFactory connectionfactory;
+	protected final RemoteConnectionFactory connectionfactory;
 	
 	/** The timeout window in milliseconds. */
 	protected final int timeoutwindow;
@@ -49,7 +50,7 @@ public final class IOPipeConfiguration
 		PrintStream debug = __builder._debug;
 		boolean enabled = __builder._enabled;
 		String token = __builder._token;
-		IOPipeHTTPConnectionFactory connectionfactory =
+		RemoteConnectionFactory connectionfactory =
 			__builder._connectionfactory;
 		int timeoutwindow = __builder._timeoutwindow;
 		String installmethod = __builder._installmethod;
@@ -96,7 +97,7 @@ public final class IOPipeConfiguration
 	 * @return The factory used to connect to the IOPipe service.
 	 * @since 2017/12/13
 	 */
-	public final IOPipeHTTPConnectionFactory getHTTPConnectionFactory()
+	public final RemoteConnectionFactory getRemoteConnectionFactory()
 	{
 		return this.connectionfactory;
 	}

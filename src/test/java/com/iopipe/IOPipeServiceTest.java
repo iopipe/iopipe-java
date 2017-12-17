@@ -1,12 +1,14 @@
 package com.iopipe;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import com.iopipe.mock.MockContext;
+import com.iopipe.mock.MockException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.json.JsonObject;
 import org.junit.Test;
 
-import static com.iopipe.__MockConfiguration__.testConfig;
+import static com.iopipe.mock.MockConfiguration.testConfig;
 import static org.junit.Assert.*;
 
 /**
@@ -40,7 +42,7 @@ public class IOPipeServiceTest
 	{
 		try (IOPipeService sv = new IOPipeService(testConfig(true, null)))
 		{
-			sv.createContext(new __MockContext__("testConstructionContext"));
+			sv.createContext(new MockContext("testConstructionContext"));
 		}
 	}
 	
@@ -57,7 +59,7 @@ public class IOPipeServiceTest
 		
 		try (IOPipeService sv = new IOPipeService(testConfig(true, null)))
 		{
-			sv.createContext(new __MockContext__("testEmptyFunction")).run(
+			sv.createContext(new MockContext("testEmptyFunction")).run(
 				() ->
 				{
 					ranfunc.set(true);
@@ -86,7 +88,7 @@ public class IOPipeServiceTest
 			})))
 		{
 			sv.createContext(
-				new __MockContext__("testEmptyFunctionWhenDisabled")).run(
+				new MockContext("testEmptyFunctionWhenDisabled")).run(
 				() ->
 				{
 					ranfunc.set(true);
@@ -114,21 +116,21 @@ public class IOPipeServiceTest
 		try (IOPipeService sv = new IOPipeService(testConfig(true, (__r) ->
 			{
 				requestmade.set(true);
-				if (((JsonObject)__r.body()).containsKey("errors"))
+				if (((JsonObject)__r.bodyValue()).containsKey("errors"))
 					haserror.set(true);
 			})))
 		{
 			try
 			{
 				sv.createContext(
-					new __MockContext__("testThrow")).run(
+					new MockContext("testThrow")).run(
 					() ->
 					{
 						ranfunc.set(true);
-						throw new __MockException__("Something went wrong!");
+						throw new MockException("Something went wrong!");
 					});
 			}
-			catch (__MockException__ e)
+			catch (MockException e)
 			{
 				exceptioncaught.set(true);
 			}
@@ -156,23 +158,23 @@ public class IOPipeServiceTest
 		try (IOPipeService sv = new IOPipeService(testConfig(true, (__r) ->
 			{
 				requestmade.set(true);
-				if (((JsonObject)__r.body()).containsKey("errors"))
+				if (((JsonObject)__r.bodyValue()).containsKey("errors"))
 					haserror.set(true);
 			})))
 		{
 			try
 			{
 				sv.createContext(
-					new __MockContext__("testThrowWithCause")).run(
+					new MockContext("testThrowWithCause")).run(
 					() ->
 					{
 						ranfunc.set(true);
-						throw new __MockException__("Not our fault!",
-							new __MockException__("This is why!"));
+						throw new MockException("Not our fault!",
+							new MockException("This is why!"));
 					});
 			}
 			
-			catch (__MockException__ e)
+			catch (MockException e)
 			{
 				exceptioncaught.set(true);
 			}
@@ -201,7 +203,7 @@ public class IOPipeServiceTest
 		try (IOPipeService sv = new IOPipeService(testConfig(true, (__r) ->
 			{
 				requestmade.set(true);
-				if (((JsonObject)__r.body()).containsKey("errors"))
+				if (((JsonObject)__r.bodyValue()).containsKey("errors"))
 					errorcount.incrementAndGet();
 				else
 					nonerrorcount.incrementAndGet();
@@ -209,13 +211,13 @@ public class IOPipeServiceTest
 		{
 			Context context;
 			sv.createContext(
-				(context = new __MockContext__("testTimeOut"))).run(
+				(context = new MockContext("testTimeOut"))).run(
 				() ->
 				{
 					ranfunc.set(true);
 					
-					int extratime = __MockContext__.CONTEXT_DURATION_MS +
-						(__MockContext__.CONTEXT_DURATION_MS >>> 4);
+					int extratime = MockContext.CONTEXT_DURATION_MS +
+						(MockContext.CONTEXT_DURATION_MS >>> 4);
 					
 					// Sleep for the duration time
 					System.err.println("Timeout test is waiting...");

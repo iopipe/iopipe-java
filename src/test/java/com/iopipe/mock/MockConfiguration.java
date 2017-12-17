@@ -1,5 +1,8 @@
-package com.iopipe;
+package com.iopipe.mock;
 
+import com.iopipe.http.RemoteRequest;
+import com.iopipe.IOPipeConfiguration;
+import com.iopipe.IOPipeConfigurationBuilder;
 import java.util.function.Consumer;
 import junit.framework.TestCase;
 
@@ -9,7 +12,7 @@ import junit.framework.TestCase;
  *
  * @since 2017/12/13
  */
-final class __MockConfiguration__
+public final class MockConfiguration
 {
 	/** This is the token which is considered to be valid for the service. */
 	public static final String VALID_TOKEN =
@@ -20,7 +23,7 @@ final class __MockConfiguration__
 	 *
 	 * @since 2017/12/13
 	 */
-	private __MockConfiguration__()
+	private MockConfiguration()
 	{
 	}
 	
@@ -33,14 +36,14 @@ final class __MockConfiguration__
 	 * @since 2017/12/13
 	 */
 	public static final IOPipeConfiguration testConfig(boolean __enabled,
-		Consumer<IOPipeHTTPRequest> __rrh)
+		Consumer<RemoteRequest> __rrh)
 	{
 		IOPipeConfigurationBuilder rv = new IOPipeConfigurationBuilder();
 		
 		rv.setEnabled(__enabled);
 		rv.setDebugStream(System.err);
-		rv.setProjectToken(__MockConfiguration__.VALID_TOKEN);
-		rv.setHTTPConnectionFactory(new __MockHTTPConnectionFactory__(__rrh));
+		rv.setProjectToken(MockConfiguration.VALID_TOKEN);
+		rv.setRemoteConnectionFactory(new MockConnectionFactory(__rrh));
 		rv.setTimeOutWindow(150);
 		
 		return rv.build();

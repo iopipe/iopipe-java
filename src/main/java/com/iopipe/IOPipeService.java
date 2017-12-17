@@ -1,8 +1,11 @@
 package com.iopipe;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import com.iopipe.http.NullConnection;
+import com.iopipe.http.RemoteConnection;
+import com.iopipe.http.RemoteConnectionFactory;
+import com.iopipe.http.RemoteException;
 import java.io.Closeable;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -37,10 +40,10 @@ public final class IOPipeService
 	protected final IOPipeConfiguration config;
 	
 	/** The connection to the server. */
-	protected final IOPipeHTTPConnection connection;
+	protected final RemoteConnection connection;
 	
 	/** Used to report timeouts. */
-	protected final IOPipeTimeoutManager timeouts;
+	protected final IOPipeTimeOutManager timeouts;
 	
 	/** Is the service enabled and working? */
 	protected final boolean enabled;
@@ -73,29 +76,29 @@ public final class IOPipeService
 		
 		// Try to open a connection to the IOPipe service, if that fails
 		// then fall back to a disabled connection
-		IOPipeHTTPConnection connection = null;
+		RemoteConnection connection = null;
 		boolean enabled = false;
 		if (__config.isEnabled())
 			try
 			{
-				connection = __config.getHTTPConnectionFactory().connect();
+				connection = __config.getRemoteConnectionFactory().connect();
 				enabled = true;
 			}
 			
 			// Cannot report error to IOPipe so print to the console
-			catch (IOException e)
+			catch (RemoteException e)
 			{
 				e.printStackTrace(__config.getFatalErrorStream());
 			}
 		
 		// If the connection failed, use one which does nothing
 		if (connection == null)
-			connection = new IOPipeNullHTTPConnection();
+			connection = new NullConnection();
 		
 		this.enabled = enabled;
 		this.connection = connection;
 		this.config = __config;
-		this.timeouts = new IOPipeTimeoutManager(connection);
+		this.timeouts = new IOPipeTimeOutManager(connection);
 	}
 	
 	/**
@@ -114,7 +117,7 @@ public final class IOPipeService
 			
 			// The connection is probably not valid so it cannot be reported
 			// to IOPipe
-			catch (IOException e)
+			catch (RemoteException e)
 			{
 				e.printStackTrace(this.config.getFatalErrorStream());
 			}

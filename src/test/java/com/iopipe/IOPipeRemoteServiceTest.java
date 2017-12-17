@@ -5,7 +5,6 @@ import java.util.Objects;
 import javax.json.JsonObject;
 import org.junit.Test;
 
-import static com.iopipe.__MockConfiguration__.testConfig;
 import static org.junit.Assume.*;
 import static org.junit.Assert.*;
 

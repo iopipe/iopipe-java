@@ -1,6 +1,4 @@
-package com.iopipe;
-
-import java.io.IOException;
+package com.iopipe.http;
 
 /**
  * This interface is used to create connections to the IOPipe server for the
@@ -8,16 +6,16 @@ import java.io.IOException;
  *
  * @since 2017/12/13
  */
-public interface IOPipeHTTPConnectionFactory
+public interface RemoteConnectionFactory
 {
 	/**
 	 * Initializes the connection to the IOPipe service.
 	 *
 	 * @return A HTTP connection to the IOPipe service.
-	 * @throws IOException If the connection could not be made.
+	 * @throws RemoteException If the connection could not be made.
 	 * @since 2017/12/13
 	 */
-	public abstract IOPipeHTTPConnection connect()
-		throws IOException;
+	public abstract RemoteConnection connect()
+		throws RemoteException;
 }
 

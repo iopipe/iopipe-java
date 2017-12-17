@@ -1,4 +1,4 @@
-package com.iopipe;
+package com.iopipe.http;
 
 import javax.json.JsonValue;
 
@@ -8,8 +8,8 @@ import javax.json.JsonValue;
  *
  * @since 2017/12/15
  */
-public final class IOPipeNullHTTPConnection
-	implements IOPipeHTTPConnection
+public final class NullConnection
+	implements RemoteConnection
 {
 	/**
 	 * {@inheritDoc}
@@ -17,6 +17,7 @@ public final class IOPipeNullHTTPConnection
 	 */
 	@Override
 	public void close()
+		throws RemoteException
 	{
 	}
 	
@@ -25,14 +26,14 @@ public final class IOPipeNullHTTPConnection
 	 * @since 2017/12/15
 	 */
 	@Override
-	public IOPipeHTTPResult sendRequest(IOPipeHTTPRequest __r)
-		throws NullPointerException
+	public RemoteResult send(RemoteRequest __r)
+		throws NullPointerException, RemoteException
 	{
 		if (__r == null)
 			throw new NullPointerException();
 		
 		// Report service not available
-		return new IOPipeHTTPResult(503, JsonValue.NULL);
+		return new RemoteResult(503, "");
 	}
 }
 

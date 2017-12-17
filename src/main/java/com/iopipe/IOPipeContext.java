@@ -1,7 +1,10 @@
 package com.iopipe;
 
 import com.amazonaws.services.lambda.runtime.Context;
-import java.io.IOException;
+import com.iopipe.http.RemoteConnection;
+import com.iopipe.http.RemoteException;
+import com.iopipe.http.RemoteRequest;
+import com.iopipe.http.RemoteResult;
 import java.io.PrintStream;
 import java.util.function.Supplier;
 import javax.json.JsonObject;
@@ -23,10 +26,10 @@ public final class IOPipeContext
 	protected final IOPipeConfiguration config;
 	
 	/** Used to track call timeouts. */
-	protected final IOPipeTimeoutManager timeout;
+	protected final IOPipeTimeOutManager timeout;
 	
 	/** Connection to the server. */
-	protected final IOPipeHTTPConnection connection;
+	protected final RemoteConnection connection;
 	
 	/** The number of times this context has been executed. */
 	private volatile int _execcount;
@@ -42,7 +45,7 @@ public final class IOPipeContext
 	 * @since 2017/12/14
 	 */
 	IOPipeContext(Context __context, IOPipeConfiguration __config,
-		IOPipeTimeoutManager __timeout, IOPipeHTTPConnection __connection)
+		IOPipeTimeOutManager __timeout, RemoteConnection __connection)
 		throws NullPointerException
 	{
 		if (__context == null || __config == null || __connection == null)
@@ -95,13 +98,13 @@ public final class IOPipeContext
 		
 		Thread thread = Thread.currentThread();
 		IOPipeConfiguration config = this.config;
-		IOPipeTimeoutManager timeout = this.timeout;
+		IOPipeTimeOutManager timeout = this.timeout;
 		boolean usewindow = (config.getTimeOutWindow() > 0);
 		
 		// Register timeout with this execution number so if execution takes
 		// longer than expected a timeout is generated
 		int execcount = this._execcount++;
-		IOPipeTimeoutManager.Active active = null; 
+		IOPipeTimeOutManager.Active active = null; 
 		if (usewindow)
 			active = timeout.register(this, execcount, thread);
 		
@@ -113,7 +116,7 @@ public final class IOPipeContext
 		long starttime = System.nanoTime(),
 			duration;
 		boolean timedout = false;
-		IOPipeMetrics metrics = new IOPipeMetrics();
+		IOPipeMeasurement measurement = new IOPipeMeasurement(this);
 		try
 		{
 			rv = __func.get();
@@ -125,7 +128,7 @@ public final class IOPipeContext
 		{
 			rt = e;
 			
-			metrics.setThrown(e);
+			measurement.setThrown(e);
 		}
 		
 		// Indicate that execution has finished to the timeout manager
@@ -136,12 +139,12 @@ public final class IOPipeContext
 			if (usewindow)
 				timedout = timeout.finished(this, execcount);
 			
-			metrics.setDuration(duration);
+			measurement.setDuration(duration);
 		}
 		
 		// Generate and send result to server
 		if (active == null || !active._generated.getAndSet(true))
-			__sendReport(IOPipeRequestBuilder.ofMetrics(this, metrics));
+			this.__sendRequest(measurement.buildRequest());
 		
 		// Throw the called exception as if the wrapper did not have any
 		// trouble
@@ -154,16 +157,17 @@ public final class IOPipeContext
 	}
 	
 	/**
-	 * Sends the specified report to the server.
+	 * Sends the specified request to the server.
 	 *
-	 * @param __o The object to send.
+	 * @param __r The request to send to the server.
+	 * @return The result of the report.
 	 * @throws NullPointerException On null arguments.
 	 * @since 2017/12/15
 	 */
-	final void __sendReport(JsonObject __o)
+	final RemoteResult __sendRequest(RemoteRequest __r)
 		throws NullPointerException
 	{
-		if (__o == null)
+		if (__r == null)
 			throw new NullPointerException();
 		
 		// Generate report
@@ -172,21 +176,24 @@ public final class IOPipeContext
 			// Report what is to be sent
 			PrintStream debug = config.getDebugStream();
 			if (debug != null)
-				debug.printf("IOPipe: Send: %s%n", __o);
+				debug.printf("IOPipe: Send: %s%n", __r);
 			
-			IOPipeHTTPResult result = this.connection.sendRequest(
-				new IOPipeHTTPRequest(__o));
+			RemoteResult result = this.connection.send(__r);
 			
 			// Report what was received
 			if (debug != null)
 				debug.printf("IOPipe: Result %d: %s%n", result.code(),
 					result.body());
+			
+			return result;
 		}
 		
 		// Failed to write to the server
-		catch (IOException e)
+		catch (RemoteException e)
 		{
 			e.printStackTrace(this.config.getFatalErrorStream());
+			
+			return new RemoteResult(503, "");
 		}
 	}
 }

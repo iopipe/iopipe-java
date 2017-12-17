@@ -1,7 +1,6 @@
-package com.iopipe;
+package com.iopipe.http;
 
 import java.io.Closeable;
-import java.io.IOException;
 
 /**
  * This interface is used to represent a single connection to the IOPipe
@@ -14,19 +13,27 @@ import java.io.IOException;
  *
  * @since 2017/12/13
  */
-public interface IOPipeHTTPConnection
+public interface RemoteConnection
 	extends Closeable
 {
+	/**
+	 * {@inheritDoc}
+	 * @throws RemoteException If the connection could not be closed.
+	 * @since 2017/12/17
+	 */
+	public void close()
+		throws RemoteException;
+	
 	/**
 	 * Sends the specified request to the remote server.
 	 *
 	 * @param __r The request to send to the remote server.
 	 * @return The result of the request.
-	 * @throws IOException On read/write errors.
 	 * @throws NullPointerException On null arguments.
+	 * @throws RemoteException If the request could not be sent.
 	 * @since 2017/12/13
 	 */
-	public abstract IOPipeHTTPResult sendRequest(IOPipeHTTPRequest __r)
-		throws IOException, NullPointerException;
+	public abstract RemoteResult send(RemoteRequest __r)
+		throws NullPointerException, RemoteException;
 }
 

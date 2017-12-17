@@ -1,4 +1,4 @@
-package com.iopipe;
+package com.iopipe.mock;
 
 import com.amazonaws.services.lambda.runtime.CognitoIdentity;
 import com.amazonaws.services.lambda.runtime.ClientContext;
@@ -11,7 +11,7 @@ import com.amazonaws.services.lambda.runtime.LambdaLogger;
  *
  * @since 2017/12/13
  */
-final class __MockContext__
+public final class MockContext
 	implements Context
 {
 	/** The duration of contexts in milliseconds. */
@@ -36,7 +36,7 @@ final class __MockContext__
 	 * @throws NullPointerException On null arguments.
 	 * @since 2017/12/13
 	 */
-	__MockContext__(String __funcname)
+	public MockContext(String __funcname)
 		throws NullPointerException
 	{
 		if (__funcname == null)

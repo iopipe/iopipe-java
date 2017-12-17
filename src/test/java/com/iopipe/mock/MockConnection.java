@@ -1,6 +1,9 @@
-package com.iopipe;
+package com.iopipe.mock;
 
-import java.io.IOException;
+import com.iopipe.http.RemoteConnection;
+import com.iopipe.http.RemoteException;
+import com.iopipe.http.RemoteRequest;
+import com.iopipe.http.RemoteResult;
 import java.util.function.Consumer;
 import javax.json.JsonValue;
 
@@ -10,11 +13,11 @@ import javax.json.JsonValue;
  *
  * @since 2017/12/13
  */
-final class __MockHTTPConnection__
-	implements IOPipeHTTPConnection
+public final class MockConnection
+	implements RemoteConnection
 {
 	/** When a request is made this function will be called. */
-	protected final Consumer<IOPipeHTTPRequest> function;
+	protected final Consumer<RemoteRequest> function;
 	
 	/**
 	 * Initializes the connection, where requests may be passed to the
@@ -23,7 +26,7 @@ final class __MockHTTPConnection__
 	 * @param __func The function which receives requests.
 	 * @since 2017/12/16
 	 */
-	__MockHTTPConnection__(Consumer<IOPipeHTTPRequest> __func)
+	public MockConnection(Consumer<RemoteRequest> __func)
 	{
 		this.function = __func;
 	}
@@ -34,7 +37,7 @@ final class __MockHTTPConnection__
 	 */
 	@Override
 	public void close()
-		throws IOException
+		throws RemoteException
 	{
 	}
 	
@@ -43,20 +46,20 @@ final class __MockHTTPConnection__
 	 * @since 2017/12/13
 	 */
 	@Override
-	public IOPipeHTTPResult sendRequest(IOPipeHTTPRequest __r)
-		throws IOException, NullPointerException
+	public RemoteResult send(RemoteRequest __r)
+		throws NullPointerException, RemoteException
 	{
 		if (__r == null)
 			throw new NullPointerException();
 		
 		// Send the request to the consumer so that it may test the remote
 		// end accordingly
-		Consumer<IOPipeHTTPRequest> function = this.function;
+		Consumer<RemoteRequest> function = this.function;
 		if (function != null)
 			function.accept(__r);
 		
 		// Everything is okay so treat it as such
-		return new IOPipeHTTPResult(202, JsonValue.NULL);
+		return new RemoteResult(202, "");
 	}
 }
 

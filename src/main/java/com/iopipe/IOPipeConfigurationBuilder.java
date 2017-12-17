@@ -1,5 +1,6 @@
 package com.iopipe;
 
+import com.iopipe.http.RemoteConnectionFactory;
 import java.io.PrintStream;
 
 /**
@@ -26,7 +27,7 @@ public class IOPipeConfigurationBuilder
 	volatile PrintStream _debug;
 	
 	/** The factory to use for connections. */
-	volatile IOPipeHTTPConnectionFactory _connectionfactory;
+	volatile RemoteConnectionFactory _connectionfactory;
 	
 	/** The timeout window in milliseconds. */
 	volatile int _timeoutwindow;
@@ -58,8 +59,8 @@ public class IOPipeConfigurationBuilder
 	 * @param __cf The factory to use for creating new HTTP connections.
 	 * @since 2017/12/13
 	 */
-	public final void setHTTPConnectionFactory(
-		IOPipeHTTPConnectionFactory __cf)
+	public final void setRemoteConnectionFactory(
+		RemoteConnectionFactory __cf)
 	{
 		synchronized (this.lock)
 		{
