@@ -71,7 +71,7 @@ public final class IOPipeService
 		// Try to open a connection to the IOPipe service, if that fails
 		// then fall back to a disabled connection
 		IOPipeHTTPConnection connection = null;
-		if (!__config.isEnabled())
+		if (__config.isEnabled())
 			try
 			{
 				connection = __config.getHTTPConnectionFactory().connect();
