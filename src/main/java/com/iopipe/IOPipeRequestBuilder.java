@@ -2,6 +2,8 @@ package com.iopipe;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.net.InetAddress;
@@ -76,7 +78,25 @@ public final class IOPipeRequestBuilder
 		Throwable thrown = __m.getThrown();
 		if (thrown != null)
 		{
-			throw new Error("TODO");
+			JsonObjectBuilder errors = Json.createObjectBuilder();
+			
+			errors.add("name", thrown.getClass().getName());
+			errors.add("message", Objects.toString(thrown.getMessage(), ""));
+			
+			// Write the stack as if it were normally output on the console
+			try (StringWriter sw = new StringWriter();
+				PrintWriter pw = new PrintWriter(sw))
+			{
+				thrown.printStackTrace(pw);
+				
+				pw.flush();
+				errors.add("stack", sw.toString());
+			}
+			catch (IOException e)
+			{
+			}
+			
+			rv.add("errors", errors);
 		}
 		
 		return rv.build();
