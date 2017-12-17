@@ -36,7 +36,6 @@ final class __MockHTTPConnection__
 	public void close()
 		throws IOException
 	{
-		throw new Error("TODO");
 	}
 	
 	/**
