@@ -24,17 +24,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public final class IOPipeService
 	implements AutoCloseable
 {
-	/** The version for this agent. */
-	public static final String AGENT_VERSION =
-		"1.0-SNAPSHOT";
-	
 	/** This is used to detect cold starts. */
 	static final AtomicBoolean _THAWED =
 		new AtomicBoolean();
 	
-	/** The time this class was initialized, used for load time. */
+	/** The time this class was loaded. */
 	static final long _LOAD_TIME =
-		System.currentTimeMillis();
+		IOPipeConstants.LOAD_TIME;
 	
 	/** The configuration used to connect to the service. */
 	protected final IOPipeConfiguration config;
