@@ -56,6 +56,11 @@
       <artifactId>okhttp</artifactId>
       <version>3.9.1</version>
     </dependency>
+    <dependency>
+      <groupId>com.github.oshi</groupId>
+      <artifactId>oshi-core</artifactId>
+      <version>3.4.4</version>
+    </dependency>
   </dependencies>
   <!-- Note that there is no build step for deployment because this is a
        supporting library and NOT a deployment library. -->

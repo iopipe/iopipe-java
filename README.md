@@ -6,6 +6,9 @@
 This project provides the capability of using the IOPipe service for AWS
 lambda services.
 
+This project uses OSHI <https://github.com/oshi/oshi> (which is under the
+EPL 1.0 license) to obtain information about the native system.
+
 # Project
 
 ## Requirements
