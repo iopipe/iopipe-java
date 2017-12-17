@@ -1,13 +1,19 @@
 package com.iopipe;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
+import java.net.InetAddress;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import javax.json.Json;
+import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
@@ -19,6 +25,11 @@ import javax.json.JsonObjectBuilder;
  */
 public final class IOPipeRequestBuilder
 {
+	/** Is this a Linux system? */
+	private static final boolean _IS_LINUX =
+		"linux".compareToIgnoreCase(
+			System.getProperty("os.name", "unknown")) == 0;
+	
 	/** The system properties to copy in the environment report. */
 	private static final List<String> _COPY_PROPERTIES =
 		Collections.<String>unmodifiableList(Arrays.<String>asList(
@@ -175,6 +186,7 @@ public final class IOPipeRequestBuilder
 		JsonObjectBuilder rv = Json.createObjectBuilder();
 		
 		rv.add("agent", __generateEnvironmentAgent());
+		rv.add("host", __generateEnvironmentHost());
 		rv.add("java", __generateEnvironmentJava());
 		rv.add("os", __generateEnvironmentOs());
 		
@@ -194,6 +206,27 @@ public final class IOPipeRequestBuilder
 		rv.add("runtime", "java");
 		rv.add("version", IOPipeService.AGENT_VERSION);
 		rv.add("load_time", IOPipeService._LOAD_TIME / 1_000_000L);
+		
+		return rv.build();
+	}
+	
+	/**
+	 * Generates host information.
+	 *
+	 * @return The host information.
+	 * @since 2017/12/17
+	 */
+	private static JsonObject __generateEnvironmentHost()
+	{
+		JsonObjectBuilder rv = Json.createObjectBuilder();
+		
+		if (_IS_LINUX)
+		{
+			String bootid = __readFirstLine(
+				Paths.get("/proc/sys/kernel/random/boot_id"));
+			if (bootid != null)
+				rv.add("boot_id", bootid);
+		}
 		
 		return rv.build();
 	}
@@ -223,9 +256,38 @@ public final class IOPipeRequestBuilder
 	private static JsonObject __generateEnvironmentOs()
 	{
 		JsonObjectBuilder rv = Json.createObjectBuilder();
+		JsonArrayBuilder cpus = Json.createArrayBuilder();
 		
-		if (true)
-			throw new Error("TODO");
+		boolean addedhostname = false;
+		
+		if (_IS_LINUX)
+		{
+			// Getting the hostname from /etc/hostname is the most reliable on
+			// Linux because the standard Java means does not work that great
+			String hostname = __readFirstLine(Paths.get("/etc/hostname"));
+			if ((addedhostname = (hostname != null)))
+				rv.add("hostname", hostname);
+			
+			//rv.add("totalmem", ???);
+			//rv.add("freemem", ???);
+			//rv.add("usedmem", ???);
+			//rv.add("cpus", ???);
+		}
+		
+		// Use this as a fallback for determining the hostname, in the VM it
+		// is not really reliable at all because it could return the hostname
+		// for any interface (such as localhost for 127.0.0.1).
+		if (!addedhostname)
+			try
+			{
+				rv.add("hostname", InetAddress.getLocalHost().getHostName());
+			}
+			catch (IOException e)
+			{
+				rv.add("hostname", "unknown");
+			}
+		
+		rv.add("cpus", cpus.build());
 		
 		return rv.build();
 	}
@@ -240,10 +302,47 @@ public final class IOPipeRequestBuilder
 	{
 		JsonObjectBuilder rv = Json.createObjectBuilder();
 		
-		if (true)
-			throw new Error("TODO");
+		if (_IS_LINUX)
+		{
+			//rv.add("rssMiB", ???);
+			//rv.add("totalMiB", ???);
+			//rv.add("rssTotalPercentage", ???);
+		}
 		
 		return rv.build();
+	}
+	
+	/**
+	 * Reads the first non-empty line for the given path.
+	 *
+	 * @param __p The path to read.
+	 * @return The first non-empty line or {@code null} if the file could not
+	 * be read or has only empty lines.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2017/12/17
+	 */
+	private static String __readFirstLine(Path __p)
+		throws NullPointerException
+	{
+		if (__p == null)
+			throw new NullPointerException();
+		
+		try
+		{
+			for (String l : Files.readAllLines(__p))
+			{
+				l = l.trim();
+				if (!l.isEmpty())
+					return l;
+			}
+			
+			return null;
+		}
+		
+		catch (IOException e)
+		{
+			return null;
+		}
 	}
 }
 
