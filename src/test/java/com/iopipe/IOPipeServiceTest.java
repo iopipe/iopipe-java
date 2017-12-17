@@ -89,12 +89,12 @@ public class IOPipeServiceTest
 				new __MockContext__("testEmptyFunctionWhenDisabled")).run(
 				() ->
 				{
-					assertTrue(true);
+					ranfunc.set(true);
 					return null;
 				});
 		}
 		
-		assertFalse("requestmade", ranfunc.get());
+		assertFalse("requestmade", requestmade.get());
 		assertTrue("ranfunc", ranfunc.get());
 	}
 	
