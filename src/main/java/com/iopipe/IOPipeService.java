@@ -42,6 +42,9 @@ public final class IOPipeService
 	/** Used to report timeouts. */
 	protected final IOPipeTimeoutManager timeouts;
 	
+	/** Is the service enabled and working? */
+	protected final boolean enabled;
+	
 	/** Has this been closed? */
 	private volatile boolean _closed;
 	
@@ -71,10 +74,12 @@ public final class IOPipeService
 		// Try to open a connection to the IOPipe service, if that fails
 		// then fall back to a disabled connection
 		IOPipeHTTPConnection connection = null;
+		boolean enabled = false;
 		if (__config.isEnabled())
 			try
 			{
 				connection = __config.getHTTPConnectionFactory().connect();
+				enabled = true;
 			}
 			
 			// Cannot report error to IOPipe so print to the console
@@ -87,6 +92,7 @@ public final class IOPipeService
 		if (connection == null)
 			connection = new IOPipeNullHTTPConnection();
 		
+		this.enabled = enabled;
 		this.connection = connection;
 		this.config = __config;
 		this.timeouts = new IOPipeTimeoutManager(connection);
@@ -97,7 +103,7 @@ public final class IOPipeService
 	 * @since 2017/12/14
 	 */
 	@Override
-	public void close()
+	public final void close()
 	{
 		boolean closed = this._closed;
 		if (!closed)
@@ -122,7 +128,7 @@ public final class IOPipeService
 	 * @throws NullPointerException On null arguments.
 	 * @since 2017/12/24
 	 */
-	public IOPipeContext createContext(Context __c)
+	public final IOPipeContext createContext(Context __c)
 		throws NullPointerException
 	{
 		if (__c == null)
@@ -136,6 +142,17 @@ public final class IOPipeService
 		
 		// Contexts may timeout after a given amount of time
 		return new IOPipeContext(__c, config, this.timeouts, this.connection);
+	}
+	
+	/**
+	 * Is this service actually enabled?
+	 *
+	 * @return {@code true} if the service is truly enabled.
+	 * @since 2017/12/17
+	 */
+	public final boolean isEnabled()
+	{
+		return this.enabled;
 	}
 }
 
