@@ -21,7 +21,7 @@ public interface RemoteConnection
 	 * @throws RemoteException If the connection could not be closed.
 	 * @since 2017/12/17
 	 */
-	public void close()
+	public abstract void close()
 		throws RemoteException;
 	
 	/**

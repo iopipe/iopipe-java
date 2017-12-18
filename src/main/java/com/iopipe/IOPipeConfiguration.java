@@ -245,8 +245,9 @@ public final class IOPipeConfiguration
 			awsregion = IOPipeConstants.DEFAULT_REGION;
 		
 		// Build hostname from region
-		String hostname = String.format("metrics-api.%s.iopipe.com",
-			awsregion);
+		String hostname = (awsregion.equals(IOPipeConstants.DEFAULT_REGION) ?
+			"metrics-api.iopipe.com" :
+			String.format("metrics-api.%s.iopipe.com", awsregion));
 		HttpUrl url;
 		rv.setRemoteConnectionFactory(new ServiceConnectionFactory(
 			(url = new HttpUrl.Builder().

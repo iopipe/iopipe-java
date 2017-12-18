@@ -1,6 +1,9 @@
 package com.iopipe;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import com.iopipe.mock.MockContext;
+import com.iopipe.mock.MockException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.Objects;
 import javax.json.JsonObject;
 import org.junit.Test;
@@ -36,5 +39,29 @@ public class IOPipeRemoteServiceTest
 		try (IOPipeService sv = new IOPipeService())
 		{
 		}
+	}
+	
+	/**
+	 * Tests the empty function which does absolutely nothing to make sure that
+	 * it operates correctly.
+	 *
+	 * @since 2017/12/17
+	 */
+	@Test
+	public void testEmptyFunction()
+	{
+		AtomicBoolean ranfunc = new AtomicBoolean();
+		
+		try (IOPipeService sv = new IOPipeService())
+		{
+			sv.createContext(new MockContext("testEmptyFunction")).run(
+				() ->
+				{
+					ranfunc.set(true);
+					return null;
+				});
+		};
+		
+		assertTrue("ranfunc", ranfunc.get());
 	}
 }

@@ -43,7 +43,7 @@ public final class ServiceConnectionFactory
 	public RemoteConnection connect()
 		throws RemoteException
 	{
-		throw new Error("TODO");
+		return new ServiceConnection(this.client, this.url);
 	}
 }
 
