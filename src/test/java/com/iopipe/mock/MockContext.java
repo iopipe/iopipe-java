@@ -104,7 +104,7 @@ public final class MockContext
 	@Override
 	public final String getInvokedFunctionArn()
 	{
-		return "mockinvokedfunctionarn";
+		return this.functionname;
 	}
 	
 	/**

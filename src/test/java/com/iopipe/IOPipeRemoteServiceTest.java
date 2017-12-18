@@ -20,6 +20,7 @@ import static org.junit.Assert.*;
  * @since 2017/12/17
  */
 public class IOPipeRemoteServiceTest
+	extends GenericTester
 {
 	/** If this is set then the tests here are ran. */
 	public static boolean ENABLE_TESTS =
@@ -50,18 +51,71 @@ public class IOPipeRemoteServiceTest
 	@Test
 	public void testEmptyFunction()
 	{
-		AtomicBoolean ranfunc = new AtomicBoolean();
+		assumeTrue(ENABLE_TESTS);
 		
-		try (IOPipeService sv = new IOPipeService())
-		{
-			sv.createContext(new MockContext("testEmptyFunction")).run(
-				() ->
-				{
-					ranfunc.set(true);
-					return null;
-				});
-		};
+		super.runTest("testEmptyFunction",
+			null,
+			super::baseEmptyFunction);
+	}
+	
+	/**
+	 * This tests the empty method when the service is disabled, it should
+	 * not call the IOPipe service at all.
+	 *
+	 * @since 2017/12/17
+	 */
+	@Test
+	public void testEmptyFunctionWhenDisabled()
+	{
+		assumeTrue(ENABLE_TESTS);
 		
-		assertTrue("ranfunc", ranfunc.get());
+		// Requests cannot be tested locally
+		super.runTest("testEmptyFunction", null,
+			super::baseEmptyFunctionWhenDisabled);
+	}
+	
+	/**
+	 * Tests throwing of an exception.
+	 *
+	 * @since 2017/12/17
+	 */
+	@Test
+	public void testThrow()
+	{
+		assumeTrue(ENABLE_TESTS);
+		
+		// Requests cannot be tested locally
+		super.runTest("testThrow", null,
+			super::baseThrow);
+	}
+	
+	/**
+	 * Tests throwing of an exception with a cause.
+	 *
+	 * @since 2017/12/17
+	 */
+	@Test
+	public void testThrowWithCause()
+	{
+		assumeTrue(ENABLE_TESTS);
+		
+		// Requests cannot be tested locally
+		super.runTest("testThrowWithCause", null,
+			super::baseThrowWithCause);
+	}
+	
+	/**
+	 * Tests timing out of the service.
+	 *
+	 * @since 2017/12/17
+	 */
+	@Test
+	public void testTimeOut()
+	{
+		assumeTrue(ENABLE_TESTS);
+		
+		// Requests cannot be tested locally
+		super.runTest("testTimeOut", null,
+			super::baseTimeOut);
 	}
 }

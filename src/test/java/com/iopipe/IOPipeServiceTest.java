@@ -17,6 +17,7 @@ import static org.junit.Assert.*;
  * @since 2017/12/13
  */
 public class IOPipeServiceTest
+	extends GenericTester
 {
 	/**
 	 * Tests to make sure that the class can be constructed properly using
@@ -55,19 +56,9 @@ public class IOPipeServiceTest
 	@Test
 	public void testEmptyFunction()
 	{
-		AtomicBoolean ranfunc = new AtomicBoolean();
-		
-		try (IOPipeService sv = new IOPipeService(testConfig(true, null)))
-		{
-			sv.createContext(new MockContext("testEmptyFunction")).run(
-				() ->
-				{
-					ranfunc.set(true);
-					return null;
-				});
-		};
-		
-		assertTrue("ranfunc", ranfunc.get());
+		super.runTest("testEmptyFunction",
+			() -> testConfig(true, null),
+			super::baseEmptyFunction);
 	}
 	
 	/**
@@ -79,25 +70,15 @@ public class IOPipeServiceTest
 	@Test
 	public void testEmptyFunctionWhenDisabled()
 	{
-		AtomicBoolean requestmade = new AtomicBoolean(),
-			ranfunc = new AtomicBoolean();
+		AtomicBoolean requestmade = new AtomicBoolean();
 		
-		try (IOPipeService sv = new IOPipeService(testConfig(false, (__r) ->
+		super.runTest("testEmptyFunction", () -> testConfig(false, (__r) ->
 			{
 				requestmade.set(true);
-			})))
-		{
-			sv.createContext(
-				new MockContext("testEmptyFunctionWhenDisabled")).run(
-				() ->
-				{
-					ranfunc.set(true);
-					return null;
-				});
-		}
+			}),
+			super::baseEmptyFunctionWhenDisabled);
 		
 		assertFalse("requestmade", requestmade.get());
-		assertTrue("ranfunc", ranfunc.get());
 	}
 	
 	/**
@@ -109,37 +90,18 @@ public class IOPipeServiceTest
 	public void testThrow()
 	{
 		AtomicBoolean requestmade = new AtomicBoolean(),
-			haserror = new AtomicBoolean(),
-			ranfunc = new AtomicBoolean(),
-			exceptioncaught = new AtomicBoolean();
+			haserror = new AtomicBoolean();
 		
-		try (IOPipeService sv = new IOPipeService(testConfig(true, (__r) ->
+		super.runTest("testThrow", () -> testConfig(true, (__r) ->
 			{
 				requestmade.set(true);
 				if (((JsonObject)__r.bodyValue()).containsKey("errors"))
 					haserror.set(true);
-			})))
-		{
-			try
-			{
-				sv.createContext(
-					new MockContext("testThrow")).run(
-					() ->
-					{
-						ranfunc.set(true);
-						throw new MockException("Something went wrong!");
-					});
-			}
-			catch (MockException e)
-			{
-				exceptioncaught.set(true);
-			}
-		}
+			}),
+			super::baseThrow);
 		
 		assertTrue("requestmade", requestmade.get());
-		assertTrue("ranfunc", ranfunc.get());
 		assertTrue("haserror", haserror.get());
-		assertTrue("exceptioncaught", exceptioncaught.get());
 	}
 	
 	/**
@@ -151,39 +113,18 @@ public class IOPipeServiceTest
 	public void testThrowWithCause()
 	{
 		AtomicBoolean requestmade = new AtomicBoolean(),
-			haserror = new AtomicBoolean(),
-			ranfunc = new AtomicBoolean(),
-			exceptioncaught = new AtomicBoolean();
+			haserror = new AtomicBoolean();
 		
-		try (IOPipeService sv = new IOPipeService(testConfig(true, (__r) ->
+		super.runTest("testThrowWithCause", () -> testConfig(true, (__r) ->
 			{
 				requestmade.set(true);
 				if (((JsonObject)__r.bodyValue()).containsKey("errors"))
 					haserror.set(true);
-			})))
-		{
-			try
-			{
-				sv.createContext(
-					new MockContext("testThrowWithCause")).run(
-					() ->
-					{
-						ranfunc.set(true);
-						throw new MockException("Not our fault!",
-							new MockException("This is why!"));
-					});
-			}
-			
-			catch (MockException e)
-			{
-				exceptioncaught.set(true);
-			}
-		}
+			}),
+			super::baseThrowWithCause);
 		
 		assertTrue("requestmade", requestmade.get());
-		assertTrue("ranfunc", ranfunc.get());
 		assertTrue("haserror", haserror.get());
-		assertTrue("exceptioncaught", exceptioncaught.get());
 	}
 	
 	/**
@@ -195,69 +136,21 @@ public class IOPipeServiceTest
 	public void testTimeOut()
 	{
 		AtomicBoolean requestmade = new AtomicBoolean(),
-			haserror = new AtomicBoolean(),
-			ranfunc = new AtomicBoolean();
+			haserror = new AtomicBoolean();
 		AtomicInteger errorcount = new AtomicInteger(),
 			nonerrorcount = new AtomicInteger();
 		
-		try (IOPipeService sv = new IOPipeService(testConfig(true, (__r) ->
+		super.runTest("testTimeOut", () -> testConfig(true, (__r) ->
 			{
 				requestmade.set(true);
 				if (((JsonObject)__r.bodyValue()).containsKey("errors"))
 					errorcount.incrementAndGet();
 				else
 					nonerrorcount.incrementAndGet();
-			})))
-		{
-			Context context;
-			sv.createContext(
-				(context = new MockContext("testTimeOut"))).run(
-				() ->
-				{
-					ranfunc.set(true);
-					
-					int extratime = MockContext.CONTEXT_DURATION_MS +
-						(MockContext.CONTEXT_DURATION_MS >>> 4);
-					
-					// Sleep for the duration time
-					System.err.println("Timeout test is waiting...");
-					for (;;)
-					{
-						// Determine how long to sleep for
-						int sleepdur = context.getRemainingTimeInMillis();
-						
-						// Finished sleeping
-						if (sleepdur <= 0)
-							break;
-						
-						// Sleep
-						try
-						{
-							Thread.sleep(sleepdur + extratime);
-						}
-						catch (InterruptedException e)
-						{
-						}
-					}
-					
-					// Sleep for an extra half-second
-					System.err.println("Timeout test is waiting more...");
-					try
-					{
-						Thread.sleep(500);
-					}
-					catch (InterruptedException e)
-					{
-					}
-					
-					System.err.println("Timeout test finished!");
-					
-					return null;
-				});
-		}
+			}),
+			super::baseTimeOut);
 		
 		assertTrue("requestmade", requestmade.get());
-		assertTrue("ranfunc", ranfunc.get());
 		assertEquals("errorcount", errorcount.get(), 1);
 		assertEquals("nonerrorcount", nonerrorcount.get(), 0);
 	}
