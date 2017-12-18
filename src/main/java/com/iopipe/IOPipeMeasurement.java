@@ -111,7 +111,7 @@ public final class IOPipeMeasurement
 			if (duration >= 0)
 				gen.write("duration", duration);
 			
-			gen.write("processId", mypid.getProcessID());
+			gen.write("processId", "" + mypid.getProcessID());
 			gen.write("timestamp", IOPipeConstants.LOAD_TIME);
 			gen.write("timestampEnd", System.currentTimeMillis());
 			
