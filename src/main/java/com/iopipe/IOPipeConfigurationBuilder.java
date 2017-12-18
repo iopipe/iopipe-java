@@ -2,6 +2,8 @@ package com.iopipe;
 
 import com.iopipe.http.RemoteConnectionFactory;
 import java.io.PrintStream;
+import java.net.URI;
+import okhttp3.HttpUrl;
 
 /**
  * This class is used to initialize instances of {@link IOPipeConfiguration}
@@ -50,21 +52,6 @@ public class IOPipeConfigurationBuilder
 		synchronized (this.lock)
 		{
 			return new IOPipeConfiguration(this);
-		}
-	}
-	
-	/**
-	 * Sets the factory to be used to make HTTP connections to the sevrice.
-	 *
-	 * @param __cf The factory to use for creating new HTTP connections.
-	 * @since 2017/12/13
-	 */
-	public final void setRemoteConnectionFactory(
-		RemoteConnectionFactory __cf)
-	{
-		synchronized (this.lock)
-		{
-			this._connectionfactory = __cf;
 		}
 	}
 	
@@ -124,6 +111,21 @@ public class IOPipeConfigurationBuilder
 		synchronized (this.lock)
 		{
 			this._token = __token;
+		}
+	}
+	
+	/**
+	 * Sets the factory to be used to make HTTP connections to the sevrice.
+	 *
+	 * @param __cf The factory to use for creating new HTTP connections.
+	 * @since 2017/12/13
+	 */
+	public final void setRemoteConnectionFactory(
+		RemoteConnectionFactory __cf)
+	{
+		synchronized (this.lock)
+		{
+			this._connectionfactory = __cf;
 		}
 	}
 	

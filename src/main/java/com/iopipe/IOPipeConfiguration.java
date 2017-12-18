@@ -1,8 +1,10 @@
 package com.iopipe;
 
 import com.iopipe.http.RemoteConnectionFactory;
+import com.iopipe.http.ServiceConnectionFactory;
 import java.io.PrintStream;
 import java.util.Objects;
+import okhttp3.HttpUrl;
 
 /**
  * This class contains the configuration for IOPipe and specifies the settings
@@ -211,9 +213,10 @@ public final class IOPipeConfiguration
 			System.getProperty("com.iopipe.enabled",
 			System.getenv("IOPIPE_ENABLED")), "true")));
 		
+		PrintStream debugstream = null;
 		if (Boolean.valueOf(System.getProperty("com.iopipe.debug",
 			System.getenv("IOPIPE_DEBUG"))))
-			rv.setDebugStream(System.err);
+			rv.setDebugStream((debugstream = System.err));
 		
 		rv.setProjectToken(System.getProperty("com.iopipe.token",
 			Objects.toString(System.getenv("IOPIPE_TOKEN"),
@@ -233,6 +236,28 @@ public final class IOPipeConfiguration
 		{
 			rv.setTimeOutWindow(150);
 		}
+		
+		// Determine the URI which is used to collect resources, use the same
+		// region as the AWS service if it is supported.
+		String awsregion = Objects.toString(System.getenv("AWS_REGION"),
+			IOPipeConstants.DEFAULT_REGION);
+		if (!IOPipeConstants.SUPPORTED_REGIONS.contains(awsregion))
+			awsregion = IOPipeConstants.DEFAULT_REGION;
+		
+		// Build hostname from region
+		String hostname = String.format("metrics-api.%s.iopipe.com",
+			awsregion);
+		HttpUrl url;
+		rv.setRemoteConnectionFactory(new ServiceConnectionFactory(
+			(url = new HttpUrl.Builder().
+				scheme("https").
+				host(hostname).
+				addPathSegment("v0").
+				addPathSegment("event").
+				build())));
+		
+		if (debugstream != null)
+			debugstream.printf("IOPipe: Remote URL `%s`%n", url);
 		
 		return rv.build();
 	}
