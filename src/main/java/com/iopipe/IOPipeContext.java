@@ -31,6 +31,9 @@ public final class IOPipeContext
 	/** Connection to the server. */
 	protected final RemoteConnection connection;
 	
+	/** Was this context cold started? */
+	final boolean _coldstarted;
+	
 	/** The number of times this context has been executed. */
 	private volatile int _execcount;
 	
@@ -55,6 +58,7 @@ public final class IOPipeContext
 		this.config = __config;
 		this.timeout = __timeout;
 		this.connection = __connection;
+		this._coldstarted = !IOPipeService._THAWED.getAndSet(true);
 	}
 	
 	/**

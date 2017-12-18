@@ -8,6 +8,12 @@ import com.iopipe.http.RemoteException;
 import java.io.Closeable;
 import java.io.PrintStream;
 import java.util.concurrent.atomic.AtomicBoolean;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import oshi.software.os.OperatingSystem;
+import oshi.software.os.OSProcess;
+import oshi.SystemInfo;
 
 /**
  * This class provides a single connection to the IOPipe service which may then
@@ -32,6 +38,9 @@ public final class IOPipeService
 	static final long _LOAD_TIME =
 		IOPipeConstants.LOAD_TIME;
 	
+	/** The process stat when the process started. */
+	static final JsonObject _STAT_START;
+	
 	/** The configuration used to connect to the service. */
 	protected final IOPipeConfiguration config;
 	
@@ -46,6 +55,25 @@ public final class IOPipeService
 	
 	/** Has this been closed? */
 	private volatile boolean _closed;
+	
+	/**
+	 * Initializes the process start information.
+	 *
+	 * @since 2017/12/17
+	 */
+	static
+	{
+		JsonObjectBuilder ss = Json.createObjectBuilder();
+		OperatingSystem os = new SystemInfo().getOperatingSystem();
+		OSProcess mypid = os.getProcess(os.getProcessId());
+		
+		ss.add("utime", mypid.getUserTime());
+		ss.add("stime", mypid.getKernelTime());
+		ss.add("cutime", mypid.getUserTime());
+		ss.add("cstime", mypid.getKernelTime());
+		
+		_STAT_START = ss.build();
+	}
 	
 	/**
 	 * Initializes the service using the default configuration.
