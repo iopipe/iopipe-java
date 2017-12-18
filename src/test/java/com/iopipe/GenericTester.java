@@ -202,12 +202,14 @@ public abstract class GenericTester
 	 * Runs the specified test.
 	 *
 	 * @param __funcname The name of the function.
+	 * @param __wantbad If {@code true} then 
 	 * @param __getconf The supplier for the configuration, if this is
 	 * {@code null} then the default configuration will be used.
 	 * @param __run The runner to use for the test.
+	 * @return The context which was generated.
 	 * @since 2017/12/17
 	 */
-	public final void runTest(String __funcname,
+	public final IOPipeContext runTest(String __funcname, boolean __wantbad,
 		Supplier<IOPipeConfiguration> __getconf,
 		Consumer<IOPipeContext> __run)
 	{
@@ -221,6 +223,13 @@ public abstract class GenericTester
 			IOPipeContext context = sv.createContext(
 				new MockContext(__funcname));
 			__run.accept(context);
+			
+			// Expecting a bad response on purpose?
+			assertTrue("badresponse",
+				__wantbad == (context.getBadResultCount() != 0));
+			
+			// Return the used context, which might be useful
+			return context;
 		}
 	}
 }

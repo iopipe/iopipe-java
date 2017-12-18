@@ -56,7 +56,7 @@ public class IOPipeServiceTest
 	@Test
 	public void testEmptyFunction()
 	{
-		super.runTest("testEmptyFunction",
+		super.runTest("testEmptyFunction", false,
 			() -> testConfig(true, null),
 			super::baseEmptyFunction);
 	}
@@ -72,7 +72,8 @@ public class IOPipeServiceTest
 	{
 		AtomicBoolean requestmade = new AtomicBoolean();
 		
-		super.runTest("testEmptyFunction", () -> testConfig(false, (__r) ->
+		super.runTest("testEmptyFunctionWhenDisabled", true,
+			() -> testConfig(false, (__r) ->
 			{
 				requestmade.set(true);
 			}),
@@ -89,7 +90,7 @@ public class IOPipeServiceTest
 	@Test
 	public void testInvalidToken()
 	{
-		super.runTest("testInvalidToken",
+		super.runTest("testInvalidToken", true,
 			() -> super.invalidateToken(testConfig(true, null)),
 			super::baseEmptyFunction);
 	}
@@ -105,7 +106,7 @@ public class IOPipeServiceTest
 		AtomicBoolean requestmade = new AtomicBoolean(),
 			haserror = new AtomicBoolean();
 		
-		super.runTest("testThrow", () -> testConfig(true, (__r) ->
+		super.runTest("testThrow",  false, () -> testConfig(true, (__r) ->
 			{
 				requestmade.set(true);
 				if (((JsonObject)__r.bodyValue()).containsKey("errors"))
@@ -128,7 +129,8 @@ public class IOPipeServiceTest
 		AtomicBoolean requestmade = new AtomicBoolean(),
 			haserror = new AtomicBoolean();
 		
-		super.runTest("testThrowWithCause", () -> testConfig(true, (__r) ->
+		super.runTest("testThrowWithCause", false,
+			() -> testConfig(true, (__r) ->
 			{
 				requestmade.set(true);
 				if (((JsonObject)__r.bodyValue()).containsKey("errors"))
@@ -153,7 +155,7 @@ public class IOPipeServiceTest
 		AtomicInteger errorcount = new AtomicInteger(),
 			nonerrorcount = new AtomicInteger();
 		
-		super.runTest("testTimeOut", () -> testConfig(true, (__r) ->
+		super.runTest("testTimeOut", false, () -> testConfig(true, (__r) ->
 			{
 				requestmade.set(true);
 				if (((JsonObject)__r.bodyValue()).containsKey("errors"))

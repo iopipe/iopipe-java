@@ -37,6 +37,9 @@ public final class IOPipeContext
 	/** The number of times this context has been executed. */
 	private volatile int _execcount;
 	
+	/** The number of times the server replied with a code other than 2xx. */
+	private volatile int _badresultcount;
+	
 	/**
 	 * Initializes this class and wraps the given execution context.
 	 *
@@ -81,6 +84,18 @@ public final class IOPipeContext
 	public final Context context()
 	{
 		return this.context;
+	}
+	
+	/**
+	 * Returns the number of requests which returned with a result with
+	 * an error.
+	 *
+	 * @return The number of requests which return a failure code.
+	 * @since 2017/12/18
+	 */
+	public final int getBadResultCount()
+	{
+		return this._badresultcount;
 	}
 	
 	/**
@@ -189,6 +204,10 @@ public final class IOPipeContext
 				debug.printf("IOPipe: Result %d: %s%n", result.code(),
 					result.body());
 			
+			// Only the 200 range is valid for okay responses
+			if ((result.code() / 100) != 2)
+				this._badresultcount++;
+			
 			return result;
 		}
 		
@@ -197,6 +216,7 @@ public final class IOPipeContext
 		{
 			e.printStackTrace(this.config.getFatalErrorStream());
 			
+			this._badresultcount++;
 			return new RemoteResult(503, "");
 		}
 	}

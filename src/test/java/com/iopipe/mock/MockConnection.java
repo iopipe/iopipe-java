@@ -59,9 +59,6 @@ public final class MockConnection
 		if (function != null)
 			function.accept(__r);
 		
-		System.err.printf("DEBUG -- %s%n", ((JsonObject)__r.bodyValue()).
-			get("client_id"));
-		
 		// Check the authorization token
 		if (MockConfiguration.VALID_TOKEN.equals(((JsonString)
 			((JsonObject)__r.bodyValue()).get("client_id")).getString()))

@@ -53,7 +53,7 @@ public class IOPipeRemoteServiceTest
 	{
 		assumeTrue(ENABLE_TESTS);
 		
-		super.runTest("testEmptyFunction",
+		super.runTest("testEmptyFunction", false,
 			null,
 			super::baseEmptyFunction);
 	}
@@ -70,7 +70,13 @@ public class IOPipeRemoteServiceTest
 		assumeTrue(ENABLE_TESTS);
 		
 		// Requests cannot be tested locally
-		super.runTest("testEmptyFunction", null,
+		super.runTest("testEmptyFunctionWhenDisabled", true, () ->
+			{
+				IOPipeConfigurationBuilder rv = new IOPipeConfigurationBuilder(
+					IOPipeConfiguration.byDefault());
+				rv.setEnabled(false);
+				return rv.build();
+			},
 			super::baseEmptyFunctionWhenDisabled);
 	}
 	
@@ -84,7 +90,7 @@ public class IOPipeRemoteServiceTest
 	{
 		assumeTrue(ENABLE_TESTS);
 		
-		super.runTest("testInvalidToken",
+		super.runTest("testInvalidToken", true,
 			() -> super.invalidateToken(IOPipeConfiguration.byDefault()),
 			super::baseEmptyFunction);
 	}
@@ -100,7 +106,7 @@ public class IOPipeRemoteServiceTest
 		assumeTrue(ENABLE_TESTS);
 		
 		// Requests cannot be tested locally
-		super.runTest("testThrow", null,
+		super.runTest("testThrow", false, null,
 			super::baseThrow);
 	}
 	
@@ -115,7 +121,7 @@ public class IOPipeRemoteServiceTest
 		assumeTrue(ENABLE_TESTS);
 		
 		// Requests cannot be tested locally
-		super.runTest("testThrowWithCause", null,
+		super.runTest("testThrowWithCause", false, null,
 			super::baseThrowWithCause);
 	}
 	
@@ -130,7 +136,7 @@ public class IOPipeRemoteServiceTest
 		assumeTrue(ENABLE_TESTS);
 		
 		// Requests cannot be tested locally
-		super.runTest("testTimeOut", null,
+		super.runTest("testTimeOut", false, null,
 			super::baseTimeOut);
 	}
 }
