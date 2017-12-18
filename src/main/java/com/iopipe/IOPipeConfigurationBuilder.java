@@ -38,6 +38,37 @@ public class IOPipeConfigurationBuilder
 	volatile String _installmethod;
 	
 	/**
+	 * Initializes the builder with uninitialized values.
+	 *
+	 * @since 2017/12/18
+	 */
+	public IOPipeConfigurationBuilder()
+	{
+	}
+	
+	/**
+	 * This initializes the builder with values copied from the specified
+	 * configuration.
+	 *
+	 * @param __c The configuration with values to copy.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2017/12/18
+	 */
+	public IOPipeConfigurationBuilder(IOPipeConfiguration __c)
+		throws NullPointerException
+	{
+		if (__c == null)
+			throw new NullPointerException();
+		
+		this._enabled = __c.isEnabled();
+		this._token = __c.getProjectToken();
+		this._debug = __c.getDebugStream();
+		this._connectionfactory = __c.getRemoteConnectionFactory();
+		this._timeoutwindow = __c.getTimeOutWindow();
+		this._installmethod = __c.getInstallMethod();
+	}
+	
+	/**
 	 * This constructs an instance of the configuration settings from the
 	 * requested configuration values.
 	 *

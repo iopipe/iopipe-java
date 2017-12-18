@@ -18,6 +18,10 @@ public final class MockConfiguration
 	public static final String VALID_TOKEN =
 		"ThisIsNotARealIOPipeTokenAndIsUsedForTesting";
 	
+	/** This is an invalid project token. */
+	public static final String INVALID_TOKEN =
+		"ThisIsAnInvalidTokenAndIsNotCorrect";
+	
 	/**
 	 * Not used.
 	 *

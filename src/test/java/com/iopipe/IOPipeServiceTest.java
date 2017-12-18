@@ -82,6 +82,19 @@ public class IOPipeServiceTest
 	}
 	
 	/**
+	 * This ensures that invalid tokens fail on the remote end. 
+	 *
+	 * @since 2017/12/17
+	 */
+	@Test
+	public void testInvalidToken()
+	{
+		super.runTest("testInvalidToken",
+			() -> super.invalidateToken(testConfig(true, null)),
+			super::baseEmptyFunction);
+	}
+	
+	/**
 	 * Tests throwing of an exception.
 	 *
 	 * @since 2017/12/15

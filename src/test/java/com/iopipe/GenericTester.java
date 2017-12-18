@@ -1,6 +1,7 @@
 package com.iopipe;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import com.iopipe.mock.MockConfiguration;
 import com.iopipe.mock.MockContext;
 import com.iopipe.mock.MockException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -174,6 +175,27 @@ public abstract class GenericTester
 			});
 		
 		assertTrue("ranfunc", ranfunc.get());
+	}
+	
+	/**
+	 * Invalidates the project token.
+	 *
+	 * @param __c The configuration to invalidate.
+	 * @return The project with the invalidated token.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2017/12/18
+	 */
+	public final IOPipeConfiguration invalidateToken(IOPipeConfiguration __c)
+		throws NullPointerException
+	{
+		if (__c == null)
+			throw new NullPointerException();
+		
+		IOPipeConfigurationBuilder rv = new IOPipeConfigurationBuilder(__c);
+		
+		rv.setProjectToken(MockConfiguration.INVALID_TOKEN);
+		
+		return rv.build();
 	}
 	
 	/**

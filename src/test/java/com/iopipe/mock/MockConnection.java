@@ -5,7 +5,8 @@ import com.iopipe.http.RemoteException;
 import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RemoteResult;
 import java.util.function.Consumer;
-import javax.json.JsonValue;
+import javax.json.JsonObject;
+import javax.json.JsonString;
 
 /**
  * This implements a basic testing connection which verifies the input request
@@ -58,8 +59,15 @@ public final class MockConnection
 		if (function != null)
 			function.accept(__r);
 		
-		// Everything is okay so treat it as such
-		return new RemoteResult(202, "");
+		System.err.printf("DEBUG -- %s%n", ((JsonObject)__r.bodyValue()).
+			get("client_id"));
+		
+		// Check the authorization token
+		if (MockConfiguration.VALID_TOKEN.equals(((JsonString)
+			((JsonObject)__r.bodyValue()).get("client_id")).getString()))
+			return new RemoteResult(202, "Accepted");
+		return new RemoteResult(401,
+			"{\"message\":\"Invalid client id sent.\"}");
 	}
 }
 
