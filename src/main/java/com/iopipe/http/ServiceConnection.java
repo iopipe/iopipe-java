@@ -7,6 +7,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 /**
  * This class sends requests to the remote server.
@@ -73,10 +74,10 @@ public final class ServiceConnection
 				url(this.url).
 				post(RequestBody.create(_JSON_TYPE, __r.body())).
 				build()).execute();
-		
-			System.err.printf("DEBUG -- %s%n", hr);
 			
-			throw new Error("TODO");
+			ResponseBody rb = hr.body();
+			return new RemoteResult(hr.code(),
+				(rb != null ? rb.string() : "{}"));
 		}
 		
 		catch (IOException e)
