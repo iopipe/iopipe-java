@@ -11,7 +11,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import javax.json.Json;
 import javax.json.JsonException;
@@ -81,6 +83,9 @@ public final class IOPipeMeasurement
 		IOPipeConfiguration config = context.config();
 		Context aws = context.context();
 		
+		// Snapshot system information
+		__SystemInfo__ sysinfo = new __SystemInfo__();
+		
 		StringWriter out = new StringWriter();
 		try (JsonGenerator gen = Json.createGenerator(out))
 		{
@@ -95,9 +100,7 @@ public final class IOPipeMeasurement
 			if (duration >= 0)
 				gen.write("duration", duration);
 			
-			if (true)
-				throw new Error("TODO");
-			/*gen.write("processId", "" + mypid.getProcessID());*/
+			gen.write("processId", sysinfo.pid());
 			gen.write("timestamp", IOPipeConstants.LOAD_TIME);
 			gen.write("timestampEnd", System.currentTimeMillis());
 			
@@ -150,13 +153,7 @@ public final class IOPipeMeasurement
 			// Unique operating system boot identifier
 			gen.writeStartObject("host");
 			
-			if (_IS_LINUX)
-			{
-				String bootid = IOPipeMeasurement.__readFirstLine(
-					Paths.get("/proc/sys/kernel/random/boot_id"));
-				if (bootid != null)
-					gen.write("boot_id", bootid);
-			}
+			gen.write("boot_id", sysinfo.bootId());
 			
 			gen.writeEnd();
 			
@@ -164,37 +161,31 @@ public final class IOPipeMeasurement
 			gen.writeStartObject("os");
 			
 			long totalmem, freemem;
-			if (true)
-				throw new Error("TODO");
-			/*
-			gen.write("hostname", network.getHostName());
-			gen.write("totalmem", (totalmem = memory.getTotal()));
-			gen.write("freemem", (freemem = memory.getAvailable()));
+			gen.write("hostname", sysinfo.hostName());
+			gen.write("totalmem", (totalmem = sysinfo.memoryTotalKiB()));
+			gen.write("freemem", (freemem = sysinfo.memoryFreeKiB()));
 			gen.write("usedmem", totalmem - freemem);
-			*/
 			
 			// Start CPUs
 			gen.writeStartArray("cpus");
 			
-			if (true)
-				throw new Error("TODO");
-			/*
-			long[][] loadticks = cpu.getProcessorCpuLoadTicks();
-			for (int i = 0, n = cpu.getLogicalProcessorCount(); i < n; i++)
+			__SystemInfo__.__Cpu__[] cpus = sysinfo.cpus();
+			for (int i = 0, n = cpus.length; i < n; i++)
 			{
+				__SystemInfo__.__Cpu__ cpu = cpus[i];
+				
 				gen.writeStartObject();
 				gen.writeStartObject("times");
 				
-				gen.write("idle", loadticks[i][TickType.IDLE.ordinal()]);
-				gen.write("irq", loadticks[i][TickType.IRQ.ordinal()]);
-				gen.write("sys", loadticks[i][TickType.SYSTEM.ordinal()]);
-				gen.write("user", loadticks[i][TickType.USER.ordinal()]);
-				gen.write("nice", loadticks[i][TickType.NICE.ordinal()]);
+				gen.write("idle", cpu.idle());
+				gen.write("irq", cpu.irq());
+				gen.write("sys", cpu.sys());
+				gen.write("user", cpu.user());
+				gen.write("nice", cpu.nice());
 				
 				gen.writeEnd();
 				gen.writeEnd();
 			}
-			*/
 			
 			// End CPUs
 			gen.writeEnd();
@@ -213,12 +204,10 @@ public final class IOPipeMeasurement
 				
 				gen.writeStartObject("stat");
 				
-				if (true)
-					throw new Error("TODO");
-				/*gen.write("utime", mypid.getUserTime());
-				gen.write("stime", mypid.getKernelTime());
-				gen.write("cutime", mypid.getUserTime());
-				gen.write("cstime", mypid.getKernelTime());*/
+				gen.write("utime", __capInt(sysinfo.utime()));
+				gen.write("stime", __capInt(sysinfo.stime()));
+				gen.write("cutime", __capInt(sysinfo.cutime()));
+				gen.write("cstime", __capInt(sysinfo.cstime()));
 				
 				gen.writeEnd();
 				
@@ -226,12 +215,9 @@ public final class IOPipeMeasurement
 				
 				gen.writeStartObject("status");
 				
-				if (true)
-					throw new Error("TODO");
-				/*gen.write("VmRSS", mypid.getResidentSetSize());
-				gen.write("Threads", mypid.getThreadCount());
-				gen.write("FDSize", os.getFileSystem().
-					getOpenFileDescriptors());*/
+				gen.write("VmRSS", sysinfo.vmRssKiB());
+				gen.write("Threads", sysinfo.threads());
+				gen.write("FDSize", sysinfo.fdSize());
 				
 				gen.writeEnd();
 				
@@ -333,6 +319,55 @@ public final class IOPipeMeasurement
 	public void setThrown(Throwable __t)
 	{
 		this._thrown = __t;
+	}
+	
+	/**
+	 * Caps the integer value.
+	 *
+	 * @param __v The value to cap.
+	 * @return The capped value.
+	 * @since 2017/12/19
+	 */
+	static int __capInt(long __v)
+	{
+		if (__v > Integer.MAX_VALUE)
+			return Integer.MAX_VALUE;
+		return (int)__v;
+	}
+	
+	/**
+	 * Reads field mappings for Linux /proc filesystem fields which are like
+	 * a map.
+	 *
+	 * @param __p The path to read.
+	 * @return The mapping of values or null if the file could not be read.
+	 * @since 2017/12/19
+	 */
+	private static Map<String, String> __readLinuxMap(Path __p)
+		throws NullPointerException
+	{
+		if (__p == null)
+			throw new NullPointerException();
+		
+		Map<String, String> rv = new LinkedHashMap<>();
+		
+		try
+		{
+			for (String l : Files.readAllLines(__p))
+			{
+				int fc = l.indexOf(':');
+				int fs = l.indexOf(' ');
+				
+				throw new Error("TODO");
+			}
+		}
+		
+		catch (IOException e)
+		{
+			return null;
+		}
+		
+		return rv;
 	}
 	
 	/**

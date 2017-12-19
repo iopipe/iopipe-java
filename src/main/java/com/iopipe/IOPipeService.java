@@ -60,18 +60,16 @@ public final class IOPipeService
 	 */
 	static
 	{
-		if (true)
-			throw new Error("TODO");
-		/*JsonObjectBuilder ss = Json.createObjectBuilder();
-		OperatingSystem os = new SystemInfo().getOperatingSystem();
-		OSProcess mypid = os.getProcess(os.getProcessId());
+		__SystemInfo__ sysinfo = new __SystemInfo__();
 		
-		ss.add("utime", mypid.getUserTime());
-		ss.add("stime", mypid.getKernelTime());
-		ss.add("cutime", mypid.getUserTime());
-		ss.add("cstime", mypid.getKernelTime());
+		JsonObjectBuilder ss = Json.createObjectBuilder();
 		
-		_STAT_START = ss.build();*/
+		ss.add("utime", IOPipeMeasurement.__capInt(sysinfo.utime()));
+		ss.add("stime", IOPipeMeasurement.__capInt(sysinfo.stime()));
+		ss.add("cutime", IOPipeMeasurement.__capInt(sysinfo.cutime()));
+		ss.add("cstime", IOPipeMeasurement.__capInt(sysinfo.cstime()));
+		
+		_STAT_START = ss.build();
 	}
 	
 	/**
