@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,6 +84,8 @@ final class __SystemInfo__
 			String val = kernelstat.get("cpu" + i);
 			if (val != null)
 				cpus.add(new __Cpu__(val));
+			else
+				break;
 		}
 		this._cpus = cpus.<__Cpu__>toArray(new __Cpu__[cpus.size()]);
 		
@@ -303,7 +306,7 @@ final class __SystemInfo__
 	 * Decodes a long value from the specified string.
 	 *
 	 * @param __s The string to decode a value from.
-	 * @return The decoded long value.
+	 * @return The decoded long value or {@code 0} if it is not valid.
 	 * @since 2017/12/19
 	 */
 	public static long __readLong(String __s)
@@ -311,7 +314,19 @@ final class __SystemInfo__
 		if (__s == null)
 			return 0;
 		
-		throw new Error("TODO");
+		// There may be extra data following a space
+		int sp = __s.indexOf(' ');
+		if (sp >= 0)
+			__s = __s.substring(0, sp);
+		
+		try
+		{
+			return Long.parseLong(__s);
+		}
+		catch (NumberFormatException e)
+		{
+			return 0L;
+		}
 	}
 	
 	/**
@@ -344,7 +359,31 @@ final class __SystemInfo__
 		if (__p == null)
 			throw new NullPointerException("NARG");
 		
-		throw new Error("TODO");
+		Map<String, String> rv = new LinkedHashMap<>();
+		
+		try
+		{
+			for (String l : Files.readAllLines(__p))
+			{
+				l = l.trim();
+				if (!l.isEmpty())
+					continue;
+				
+				// Determine splice point which is earliest of the colon
+				// or the space
+				int fc = l.indexOf(':'),
+					fs = l.indexOf(' ');
+				int splice = ((fc < 0) || (fs >= 0 && fs < fc) ? fs : fc);
+				
+				rv.put(l.substring(0, splice).trim(),
+					l.substring(splice + 1).trim());
+			}
+		}
+		catch (IOException e)
+		{
+		}
+		
+		return rv;
 	}
 	
 	/**
@@ -359,7 +398,7 @@ final class __SystemInfo__
 		if (__s == null)
 			throw new NullPointerException("NARG");
 		
-		throw new Error("TODO");
+		return Arrays.<String>asList(__s.split(" "));
 	}
 	
 	/**
