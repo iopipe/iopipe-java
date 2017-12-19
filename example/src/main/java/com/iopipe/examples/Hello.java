@@ -19,7 +19,6 @@ public class Hello
 	@Override
 	protected final String wrappedHandleRequest(String __input, Context __c)
 	{
-		__c.getLogger().log("Input: " + __input);
 		return "Hello " + __input + "!";
 	}
 }

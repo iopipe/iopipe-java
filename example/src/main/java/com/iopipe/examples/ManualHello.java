@@ -25,7 +25,6 @@ public class ManualHello
 			return sv.createContext(__context).<String>run(
 				() ->
 				{
-					__context.getLogger().log("Input: " + __input);
 					return "Hello " + __input + "!";
 				});
 		}
