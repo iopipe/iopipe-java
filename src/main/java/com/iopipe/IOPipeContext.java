@@ -87,10 +87,11 @@ public final class IOPipeContext
 	}
 	
 	/**
-	 * Returns the number of requests which returned with a result with
-	 * an error.
+	 * Returns the number of requests which would have been accepted by the
+	 * service if the configuration was correct and the service was enabled.
 	 *
-	 * @return The number of requests which return a failure code.
+	 * @return The number of requests which would have been accepted by the
+	 * server.
 	 * @since 2017/12/18
 	 */
 	public final int getBadResultCount()
@@ -115,8 +116,15 @@ public final class IOPipeContext
 		if (__func == null)
 			throw new NullPointerException();
 		
-		Thread thread = Thread.currentThread();
+		// If disabled, just run the function
 		IOPipeConfiguration config = this.config;
+		if (!config.isEnabled())
+		{
+			this._badresultcount++;
+			return __func.get();
+		}
+		
+		Thread thread = Thread.currentThread();
 		IOPipeTimeOutManager timeout = this.timeout;
 		boolean usewindow = (config.getTimeOutWindow() > 0);
 		

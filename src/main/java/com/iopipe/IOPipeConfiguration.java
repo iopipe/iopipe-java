@@ -1,5 +1,6 @@
 package com.iopipe;
 
+import com.iopipe.http.NullConnectionFactory;
 import com.iopipe.http.RemoteConnectionFactory;
 import com.iopipe.http.ServiceConnectionFactory;
 import java.io.PrintStream;
@@ -209,56 +210,69 @@ public final class IOPipeConfiguration
 		IOPipeConfigurationBuilder rv = new IOPipeConfigurationBuilder();
 		
 		// Enabled if not specified is "true" by default
-		rv.setEnabled(Boolean.valueOf(Objects.toString(
+		boolean enabled;
+		rv.setEnabled((enabled = Boolean.valueOf(Objects.toString(
 			System.getProperty("com.iopipe.enabled",
-			System.getenv("IOPIPE_ENABLED")), "true")));
-		
-		PrintStream debugstream = null;
-		if (Boolean.valueOf(System.getProperty("com.iopipe.debug",
-			System.getenv("IOPIPE_DEBUG"))))
-			rv.setDebugStream((debugstream = System.err));
-		
-		rv.setProjectToken(System.getProperty("com.iopipe.token",
-			Objects.toString(System.getenv("IOPIPE_TOKEN"),
-				System.getenv("IOPIPE_CLIENTID"))));
-		
-		rv.setInstallMethod(System.getProperty("com.iopipe.installmethod",
-			Objects.toString(System.getenv("IOPIPE_INSTALL_METHOD"),
-			"manual")));
-		
-		try
+			System.getenv("IOPIPE_ENABLED")), "true"))));
+		if (enabled)
 		{
-			rv.setTimeOutWindow(Integer.valueOf(Objects.toString(
-				System.getProperty("com.iopipe.timeoutwindow",
-				System.getenv("IOPIPE_TIMEOUT_WINDOW")), "150")));
+			PrintStream debugstream = null;
+			if (Boolean.valueOf(System.getProperty("com.iopipe.debug",
+				System.getenv("IOPIPE_DEBUG"))))
+				rv.setDebugStream((debugstream = System.err));
+		
+			rv.setProjectToken(System.getProperty("com.iopipe.token",
+				Objects.toString(System.getenv("IOPIPE_TOKEN"),
+					System.getenv("IOPIPE_CLIENTID"))));
+		
+			rv.setInstallMethod(System.getProperty("com.iopipe.installmethod",
+				Objects.toString(System.getenv("IOPIPE_INSTALL_METHOD"),
+				"manual")));
+		
+			try
+			{
+				rv.setTimeOutWindow(Integer.valueOf(Objects.toString(
+					System.getProperty("com.iopipe.timeoutwindow",
+					System.getenv("IOPIPE_TIMEOUT_WINDOW")), "150")));
+			}
+			catch (NumberFormatException e)
+			{
+				rv.setTimeOutWindow(150);
+			}
+		
+			// Determine the URI which is used to collect resources, use the
+			// same region as the AWS service if it is supported.
+			String awsregion = Objects.toString(System.getenv("AWS_REGION"),
+				IOPipeConstants.DEFAULT_REGION);
+			if (!IOPipeConstants.SUPPORTED_REGIONS.contains(awsregion))
+				awsregion = IOPipeConstants.DEFAULT_REGION;
+		
+			// Build hostname from region
+			String hostname = (awsregion.equals(
+				IOPipeConstants.DEFAULT_REGION) ?
+				"metrics-api.iopipe.com" :
+				String.format("metrics-api.%s.iopipe.com", awsregion));
+			HttpUrl url;
+			rv.setRemoteConnectionFactory(new ServiceConnectionFactory(
+				(url = new HttpUrl.Builder().
+					scheme("https").
+					host(hostname).
+					addPathSegment("v0").
+					addPathSegment("event").
+					build())));
+		
+			if (debugstream != null)
+				debugstream.printf("IOPipe: Remote URL `%s`%n", url);
 		}
-		catch (NumberFormatException e)
+		
+		else
 		{
-			rv.setTimeOutWindow(150);
+			rv.setProjectToken("Disabled");
+			rv.setInstallMethod("Disabled");
+			rv.setDebugStream(null);
+			rv.setRemoteConnectionFactory(new NullConnectionFactory());
+			rv.setTimeOutWindow(0);
 		}
-		
-		// Determine the URI which is used to collect resources, use the same
-		// region as the AWS service if it is supported.
-		String awsregion = Objects.toString(System.getenv("AWS_REGION"),
-			IOPipeConstants.DEFAULT_REGION);
-		if (!IOPipeConstants.SUPPORTED_REGIONS.contains(awsregion))
-			awsregion = IOPipeConstants.DEFAULT_REGION;
-		
-		// Build hostname from region
-		String hostname = (awsregion.equals(IOPipeConstants.DEFAULT_REGION) ?
-			"metrics-api.iopipe.com" :
-			String.format("metrics-api.%s.iopipe.com", awsregion));
-		HttpUrl url;
-		rv.setRemoteConnectionFactory(new ServiceConnectionFactory(
-			(url = new HttpUrl.Builder().
-				scheme("https").
-				host(hostname).
-				addPathSegment("v0").
-				addPathSegment("event").
-				build())));
-		
-		if (debugstream != null)
-			debugstream.printf("IOPipe: Remote URL `%s`%n", url);
 		
 		return rv.build();
 	}
