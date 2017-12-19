@@ -230,7 +230,7 @@ public final class IOPipeConfiguration
 		{
 			rv.setTimeOutWindow(Integer.valueOf(Objects.toString(
 				System.getProperty("com.iopipe.timeoutwindow",
-				System.getenv("IOPIPE_TIMEOUT_WINDOW")), "true")));
+				System.getenv("IOPIPE_TIMEOUT_WINDOW")), "150")));
 		}
 		catch (NumberFormatException e)
 		{
