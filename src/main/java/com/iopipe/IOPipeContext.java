@@ -124,6 +124,9 @@ public final class IOPipeContext
 			return __func.get();
 		}
 		
+		// Force the initial stat entry to be initialized
+		IOPipeService.__statStart();
+		
 		Thread thread = Thread.currentThread();
 		IOPipeTimeOutManager timeout = this.timeout;
 		boolean usewindow = (config.getTimeOutWindow() > 0);

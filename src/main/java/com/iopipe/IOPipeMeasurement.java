@@ -211,7 +211,7 @@ public final class IOPipeMeasurement
 				
 				gen.writeEnd();
 				
-				gen.write("stat_start", IOPipeService._STAT_START);
+				gen.write("stat_start", IOPipeService.__statStart());
 				
 				gen.writeStartObject("status");
 				

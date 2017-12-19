@@ -36,7 +36,7 @@ public final class IOPipeService
 		IOPipeConstants.LOAD_TIME;
 	
 	/** The process stat when the process started. */
-	static final JsonObject _STAT_START;
+	private static volatile JsonObject _STAT_START;
 	
 	/** The configuration used to connect to the service. */
 	protected final IOPipeConfiguration config;
@@ -52,25 +52,6 @@ public final class IOPipeService
 	
 	/** Has this been closed? */
 	private volatile boolean _closed;
-	
-	/**
-	 * Initializes the process start information.
-	 *
-	 * @since 2017/12/17
-	 */
-	static
-	{
-		__SystemInfo__ sysinfo = new __SystemInfo__();
-		
-		JsonObjectBuilder ss = Json.createObjectBuilder();
-		
-		ss.add("utime", IOPipeMeasurement.__capInt(sysinfo.utime()));
-		ss.add("stime", IOPipeMeasurement.__capInt(sysinfo.stime()));
-		ss.add("cutime", IOPipeMeasurement.__capInt(sysinfo.cutime()));
-		ss.add("cstime", IOPipeMeasurement.__capInt(sysinfo.cstime()));
-		
-		_STAT_START = ss.build();
-	}
 	
 	/**
 	 * Initializes the service using the default configuration.
@@ -177,6 +158,32 @@ public final class IOPipeService
 	public final boolean isEnabled()
 	{
 		return this.enabled;
+	}
+	
+	/**
+	 * Initializes the stat start information if it has not been set.
+	 *
+	 * @return The stat start information.
+	 * @since 2017/12/19
+	 */
+	static JsonObject __statStart()
+	{
+		JsonObject rv = _STAT_START;
+		if (rv == null)
+		{
+			__SystemInfo__ sysinfo = new __SystemInfo__();
+		
+			JsonObjectBuilder ss = Json.createObjectBuilder();
+		
+			ss.add("utime", IOPipeMeasurement.__capInt(sysinfo.utime()));
+			ss.add("stime", IOPipeMeasurement.__capInt(sysinfo.stime()));
+			ss.add("cutime", IOPipeMeasurement.__capInt(sysinfo.cutime()));
+			ss.add("cstime", IOPipeMeasurement.__capInt(sysinfo.cstime()));
+		
+			_STAT_START = ss.build();
+		}
+		
+		return rv;
 	}
 }
 
