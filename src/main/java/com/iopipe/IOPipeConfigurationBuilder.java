@@ -8,17 +8,12 @@ import okhttp3.HttpUrl;
 /**
  * This class is used to initialize instances of {@link IOPipeConfiguration}
  *
+ * This class is not thread safe.
+ *
  * @since 2017/12/13
  */
 public class IOPipeConfigurationBuilder
 {
-	/**
-	 * This lock is used to prevent situations such as mismatched values when
-	 * multiple threads are setting parameters or building configurations.
-	 */
-	protected final Object lock =
-		new Object();
-	
 	/** Is the service enabled? */
 	volatile boolean _enabled;
 	
@@ -80,10 +75,7 @@ public class IOPipeConfigurationBuilder
 	public final IOPipeConfiguration build()
 		throws IllegalArgumentException
 	{
-		synchronized (this.lock)
-		{
-			return new IOPipeConfiguration(this);
-		}
+		return new IOPipeConfiguration(this);
 	}
 	
 	/**
@@ -95,10 +87,7 @@ public class IOPipeConfigurationBuilder
 	 */
 	public final void setDebugStream(PrintStream __ps)
 	{
-		synchronized (this.lock)
-		{
-			this._debug = __ps;
-		}
+		this._debug = __ps;
 	}
 	
 	/**
@@ -110,10 +99,7 @@ public class IOPipeConfigurationBuilder
 	 */
 	public final void setEnabled(boolean __enabled)
 	{
-		synchronized (this.lock)
-		{
-			this._enabled = __enabled;
-		}
+		this._enabled = __enabled;
 	}
 	
 	/**
@@ -124,10 +110,7 @@ public class IOPipeConfigurationBuilder
 	 */
 	public final void setInstallMethod(String __im)
 	{
-		synchronized (this.lock)
-		{
-			this._installmethod = __im;
-		}
+		this._installmethod = __im;
 	}
 	
 	/**
@@ -139,10 +122,7 @@ public class IOPipeConfigurationBuilder
 	 */
 	public final void setProjectToken(String __token)
 	{
-		synchronized (this.lock)
-		{
-			this._token = __token;
-		}
+		this._token = __token;
 	}
 	
 	/**
@@ -154,10 +134,7 @@ public class IOPipeConfigurationBuilder
 	public final void setRemoteConnectionFactory(
 		RemoteConnectionFactory __cf)
 	{
-		synchronized (this.lock)
-		{
-			this._connectionfactory = __cf;
-		}
+		this._connectionfactory = __cf;
 	}
 	
 	/**
@@ -175,10 +152,7 @@ public class IOPipeConfigurationBuilder
 			throw new IllegalArgumentException("The timeout window " +
 				"cannot be negative.");
 		
-		synchronized (this.lock)
-		{
-			this._timeoutwindow = __ms;
-		}
+		this._timeoutwindow = __ms;
 	}
 }
 
