@@ -60,7 +60,7 @@ public final class IOPipeService
 	 */
 	public IOPipeService()
 	{
-		this(IOPipeConfiguration.byDefault());
+		this(IOPipeConfiguration.DEFAULT_CONFIG);
 	}
 	
 	/**

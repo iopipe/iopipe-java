@@ -213,6 +213,8 @@ public abstract class GenericTester
 		Supplier<IOPipeConfiguration> __getconf,
 		Consumer<IOPipeContext> __run)
 	{
+		long starttime = System.nanoTime();
+		
 		// Initialize the service and run the test
 		IOPipeConfiguration config = (__getconf != null ? __getconf.get() :
 			null);
@@ -230,6 +232,12 @@ public abstract class GenericTester
 			
 			// Return the used context, which might be useful
 			return context;
+		}
+		finally
+		{
+			long duration = System.nanoTime() - starttime;
+			System.err.printf("Test %s took %fms%n", __funcname,
+				duration / 1_000_000.0D);
 		}
 	}
 }

@@ -17,6 +17,12 @@ import okhttp3.HttpUrl;
  */
 public final class IOPipeConfiguration
 {
+	/** The disabled configuration. */
+	public static final IOPipeConfiguration DISABLED_CONFIG;
+	
+	/** Default configuration to use. */
+	public static final IOPipeConfiguration DEFAULT_CONFIG;
+	
 	/** Debug output stream, is optional. */
 	protected final PrintStream debug;
 	
@@ -34,6 +40,38 @@ public final class IOPipeConfiguration
 	
 	/** Install method. */
 	protected final String installmethod;
+	
+	/**
+	 * Initializes the default configuration.
+	 *
+	 * @since 2017/12/19
+	 */
+	static
+	{
+		// Initialize disabled configuration
+		IOPipeConfigurationBuilder cb = new IOPipeConfigurationBuilder();
+		
+		cb.setEnabled(false);
+		cb.setProjectToken("Disabled");
+		cb.setInstallMethod("Disabled");
+		cb.setDebugStream(null);
+		cb.setRemoteConnectionFactory(new NullConnectionFactory());
+		cb.setTimeOutWindow(0);
+		
+		DISABLED_CONFIG = cb.build();
+		
+		// Try to initialize a default configuration, if the configuration
+		// is not valid due to missing values then use the disabled one
+		IOPipeConfiguration use = DISABLED_CONFIG;
+		try
+		{
+			use = IOPipeConfiguration.byDefault();
+		}
+		catch (IllegalArgumentException e)
+		{
+		}
+		DEFAULT_CONFIG = use;
+	}
 	
 	/**
 	 * Initializes the configuration from the specified builder.
@@ -265,14 +303,9 @@ public final class IOPipeConfiguration
 				debugstream.printf("IOPipe: Remote URL `%s`%n", url);
 		}
 		
+		// Fallback to disabled configuration
 		else
-		{
-			rv.setProjectToken("Disabled");
-			rv.setInstallMethod("Disabled");
-			rv.setDebugStream(null);
-			rv.setRemoteConnectionFactory(new NullConnectionFactory());
-			rv.setTimeOutWindow(0);
-		}
+			return IOPipeConfiguration.DISABLED_CONFIG;
 		
 		return rv.build();
 	}
