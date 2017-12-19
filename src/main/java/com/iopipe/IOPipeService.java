@@ -11,9 +11,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import oshi.software.os.OperatingSystem;
-import oshi.software.os.OSProcess;
-import oshi.SystemInfo;
 
 /**
  * This class provides a single connection to the IOPipe service which may then
@@ -63,7 +60,9 @@ public final class IOPipeService
 	 */
 	static
 	{
-		JsonObjectBuilder ss = Json.createObjectBuilder();
+		if (true)
+			throw new Error("TODO");
+		/*JsonObjectBuilder ss = Json.createObjectBuilder();
 		OperatingSystem os = new SystemInfo().getOperatingSystem();
 		OSProcess mypid = os.getProcess(os.getProcessId());
 		
@@ -72,7 +71,7 @@ public final class IOPipeService
 		ss.add("cutime", mypid.getUserTime());
 		ss.add("cstime", mypid.getKernelTime());
 		
-		_STAT_START = ss.build();
+		_STAT_START = ss.build();*/
 	}
 	
 	/**

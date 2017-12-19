@@ -16,15 +16,6 @@ import java.util.Objects;
 import javax.json.Json;
 import javax.json.JsonException;
 import javax.json.stream.JsonGenerator;
-import oshi.hardware.CentralProcessor;
-import oshi.hardware.GlobalMemory;
-import oshi.hardware.HardwareAbstractionLayer;
-import oshi.software.os.NetworkParams;
-import oshi.software.os.OperatingSystem;
-import oshi.software.os.OSProcess;
-import oshi.SystemInfo;
-
-import static oshi.hardware.CentralProcessor.TickType;
 
 /**
  * This class is used to keep track of measurements during execution.
@@ -89,13 +80,6 @@ public final class IOPipeMeasurement
 		IOPipeContext context = this.context;
 		IOPipeConfiguration config = context.config();
 		Context aws = context.context();
-		SystemInfo systeminfo = new SystemInfo();
-		HardwareAbstractionLayer hardware = systeminfo.getHardware();
-		OperatingSystem os = systeminfo.getOperatingSystem();
-		OSProcess mypid = os.getProcess(os.getProcessId());
-		NetworkParams network = os.getNetworkParams();
-		GlobalMemory memory = hardware.getMemory();
-		CentralProcessor cpu = hardware.getProcessor();
 		
 		StringWriter out = new StringWriter();
 		try (JsonGenerator gen = Json.createGenerator(out))
@@ -111,7 +95,9 @@ public final class IOPipeMeasurement
 			if (duration >= 0)
 				gen.write("duration", duration);
 			
-			gen.write("processId", "" + mypid.getProcessID());
+			if (true)
+				throw new Error("TODO");
+			/*gen.write("processId", "" + mypid.getProcessID());*/
 			gen.write("timestamp", IOPipeConstants.LOAD_TIME);
 			gen.write("timestampEnd", System.currentTimeMillis());
 			
@@ -178,14 +164,21 @@ public final class IOPipeMeasurement
 			gen.writeStartObject("os");
 			
 			long totalmem, freemem;
+			if (true)
+				throw new Error("TODO");
+			/*
 			gen.write("hostname", network.getHostName());
 			gen.write("totalmem", (totalmem = memory.getTotal()));
 			gen.write("freemem", (freemem = memory.getAvailable()));
 			gen.write("usedmem", totalmem - freemem);
+			*/
 			
 			// Start CPUs
 			gen.writeStartArray("cpus");
 			
+			if (true)
+				throw new Error("TODO");
+			/*
 			long[][] loadticks = cpu.getProcessorCpuLoadTicks();
 			for (int i = 0, n = cpu.getLogicalProcessorCount(); i < n; i++)
 			{
@@ -201,6 +194,7 @@ public final class IOPipeMeasurement
 				gen.writeEnd();
 				gen.writeEnd();
 			}
+			*/
 			
 			// End CPUs
 			gen.writeEnd();
@@ -219,10 +213,12 @@ public final class IOPipeMeasurement
 				
 				gen.writeStartObject("stat");
 				
-				gen.write("utime", mypid.getUserTime());
+				if (true)
+					throw new Error("TODO");
+				/*gen.write("utime", mypid.getUserTime());
 				gen.write("stime", mypid.getKernelTime());
 				gen.write("cutime", mypid.getUserTime());
-				gen.write("cstime", mypid.getKernelTime());
+				gen.write("cstime", mypid.getKernelTime());*/
 				
 				gen.writeEnd();
 				
@@ -230,10 +226,12 @@ public final class IOPipeMeasurement
 				
 				gen.writeStartObject("status");
 				
-				gen.write("VmRSS", mypid.getResidentSetSize());
+				if (true)
+					throw new Error("TODO");
+				/*gen.write("VmRSS", mypid.getResidentSetSize());
 				gen.write("Threads", mypid.getThreadCount());
 				gen.write("FDSize", os.getFileSystem().
-					getOpenFileDescriptors());
+					getOpenFileDescriptors());*/
 				
 				gen.writeEnd();
 				
