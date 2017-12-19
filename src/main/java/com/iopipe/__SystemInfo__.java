@@ -366,7 +366,7 @@ final class __SystemInfo__
 			for (String l : Files.readAllLines(__p))
 			{
 				l = l.trim();
-				if (!l.isEmpty())
+				if (l.isEmpty())
 					continue;
 				
 				// Determine splice point which is earliest of the colon
