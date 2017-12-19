@@ -1,5 +1,14 @@
 package com.iopipe;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * This class reads and provides a snapshot of all the system information which
  * is needed to keep track of measurements.
@@ -8,6 +17,45 @@ package com.iopipe;
  */
 final class __SystemInfo__
 {
+	/** The boot ID. */
+	protected final String bootid;
+	
+	/** The hostname. */
+	protected final String hostname;
+	
+	/** The file descriptor count. */
+	protected final int fdsize;
+	
+	/** Kernel time with children. */
+	protected final long cstime;
+	
+	/** User time with children. */
+	protected final long cutime;
+	
+	/** Kernel time. */
+	protected final long stime;
+	
+	/** User time. */
+	protected final long utime;
+	
+	/** Total amount of memory in KiB. */
+	protected final long memorytotalkib;
+	
+	/** Free amount of memory in KiB. */
+	protected final long memoryfreekib;
+	
+	/** The current process ID. */
+	protected final int pid;
+	
+	/** The number of threads that exist. */
+	protected final int threads;
+	
+	/** The resident set size in KiB. */
+	protected final long vmrsskib;
+	
+	/** CPU information. */
+	private final __Cpu__[] _cpus;
+	
 	/**
 	 * Creates a snapshot of the system information.
 	 *
@@ -15,13 +63,44 @@ final class __SystemInfo__
 	 */
 	__SystemInfo__()
 	{
-		throw new Error("TODO");
-		/*
-		String bootid = IOPipeMeasurement.__readFirstLine(
-		Paths.get("/proc/sys/kernel/random/boot_id"));
-		if (bootid != null)
-			gen.write("boot_id", bootid);
-		*/
+		this.hostname = __readFirstLine(Paths.get("/etc/hostname"), "unknown");
+		this.bootid = __readFirstLine(
+			Paths.get("/proc/sys/kernel/random/boot_id"), "unknown");
+		
+		// Memory information
+		Map<String, String> meminfo = __readMap(Paths.get("/proc/meminfo"));
+		this.memorytotalkib = __readLong(
+			meminfo.getOrDefault("MemTotal", "0"));
+		this.memoryfreekib = __readLong(
+			meminfo.getOrDefault("MemFree", "0"));
+		
+		// Obtain CPU information
+		List<__Cpu__> cpus = new ArrayList<>(
+			Runtime.getRuntime().availableProcessors());
+		Map<String, String> kernelstat = __readMap(Paths.get("/proc/stat"));
+		for (int i = 0; i >= 0; i++)
+		{
+			String val = kernelstat.get("cpu" + i);
+			if (val != null)
+				cpus.add(new __Cpu__(val));
+		}
+		this._cpus = cpus.<__Cpu__>toArray(new __Cpu__[cpus.size()]);
+		
+		// Parse current process info
+		Map<String, String> pidstatus = __readMap(
+			Paths.get("/proc/self/status"));
+		this.pid = __readInt(pidstatus.getOrDefault("Pid", "0"));
+		this.vmrsskib = __readLong(pidstatus.getOrDefault("VmRSS", "0"));
+		this.threads = __readInt(pidstatus.getOrDefault("Threads", "0"));
+		this.fdsize = __readInt(pidstatus.getOrDefault("FDSize", "0"));
+		
+		// Process times
+		List<String> pidstat = __readValuesFromFile(
+			Paths.get("/proc/self/stat"));
+		this.cstime = __readLong(pidstat, 13);
+		this.cutime = __readLong(pidstat, 14);
+		this.stime = __readLong(pidstat, 15);
+		this.utime = __readLong(pidstat, 16);
 	}
 	
 	/**
@@ -32,7 +111,7 @@ final class __SystemInfo__
 	 */
 	public String bootId()
 	{
-		throw new Error("TODO");
+		return this.bootid;
 	}
 	
 	/**
@@ -43,7 +122,7 @@ final class __SystemInfo__
 	 */
 	public __Cpu__[] cpus()
 	{
-		throw new Error("TODO");
+		return this._cpus.clone();
 	}
 	
 	/**
@@ -55,7 +134,7 @@ final class __SystemInfo__
 	 */
 	public long cstime()
 	{
-		throw new Error("TODO");
+		return this.cstime;
 	}
 	
 	/**
@@ -67,7 +146,7 @@ final class __SystemInfo__
 	 */
 	public long cutime()
 	{
-		throw new Error("TODO");
+		return this.cutime;
 	}
 	
 	/**
@@ -78,7 +157,7 @@ final class __SystemInfo__
 	 */
 	public int fdSize()
 	{
-		throw new Error("TODO");
+		return this.fdsize;
 	}
 	
 	/**
@@ -87,9 +166,9 @@ final class __SystemInfo__
 	 * @return The system hostname.
 	 * @since 2017/12/19
 	 */
-	public long hostName()
+	public String hostName()
 	{
-		throw new Error("TODO");
+		return this.hostname;
 	}
 	
 	/**
@@ -100,7 +179,7 @@ final class __SystemInfo__
 	 */
 	public long memoryFreeKiB()
 	{
-		throw new Error("TODO");
+		return this.memoryfreekib;
 	}
 	
 	/**
@@ -111,7 +190,7 @@ final class __SystemInfo__
 	 */
 	public long memoryTotalKiB()
 	{
-		throw new Error("TODO");
+		return this.memorytotalkib;
 	}
 	
 	/**
@@ -122,7 +201,7 @@ final class __SystemInfo__
 	 */
 	public int pid()
 	{
-		throw new Error("TODO");
+		return this.pid;
 	}
 	
 	/**
@@ -133,7 +212,7 @@ final class __SystemInfo__
 	 */
 	public long stime()
 	{
-		throw new Error("TODO");
+		return this.stime;
 	}
 	
 	/**
@@ -144,7 +223,7 @@ final class __SystemInfo__
 	 */
 	public int threads()
 	{
-		throw new Error("TODO");
+		return this.threads;
 	}
 	
 	/**
@@ -155,7 +234,7 @@ final class __SystemInfo__
 	 */
 	public long utime()
 	{
-		throw new Error("TODO");
+		return this.utime;
 	}
 	
 	/**
@@ -166,7 +245,136 @@ final class __SystemInfo__
 	 */
 	public long vmRssKiB()
 	{
+		return this.vmrsskib;
+	}
+	
+	/**
+	 * Reads the first non-empty line for the given path.
+	 *
+	 * @param __p The path to read.
+	 * @param __def Default value if it could not be read.
+	 * @return The first non-empty line or {@code __def} if the file could not
+	 * be read or has only empty lines.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2017/12/17
+	 */
+	private static String __readFirstLine(Path __p, String __def)
+		throws NullPointerException
+	{
+		if (__p == null)
+			throw new NullPointerException();
+		
+		try
+		{
+			for (String l : Files.readAllLines(__p))
+			{
+				l = l.trim();
+				if (!l.isEmpty())
+					return l;
+			}
+			
+			return __def;
+		}
+		
+		catch (IOException e)
+		{
+			return __def;
+		}
+	}
+	
+	/**
+	 * Decodes an integer value from the specified string.
+	 *
+	 * @param __s The string to decode a value from.
+	 * @return The decoded integer value.
+	 * @since 2017/12/19
+	 */
+	public static int __readInt(String __s)
+	{
+		long rv = __readLong(__s);
+		if (rv < Integer.MIN_VALUE)
+			return Integer.MIN_VALUE;
+		else if (rv > Integer.MAX_VALUE)
+			return Integer.MAX_VALUE;
+		return (int)rv;
+	}
+	
+	/**
+	 * Decodes a long value from the specified string.
+	 *
+	 * @param __s The string to decode a value from.
+	 * @return The decoded long value.
+	 * @since 2017/12/19
+	 */
+	public static long __readLong(String __s)
+	{
+		if (__s == null)
+			return 0;
+		
 		throw new Error("TODO");
+	}
+	
+	/**
+	 * Reads a long value from the given list
+	 *
+	 * @param __l The list to read values from.
+	 * @param __dx The index of the element to read.
+	 * @return The decoded long value.
+	 * @since 2017/12/19
+	 */
+	public static long __readLong(List<String> __l, int __dx)
+	{
+		int n = __l.size();
+		if (__l == null || __dx < 0 || __dx >= n)
+			return 0L;
+		
+		return __readLong(__l.get(__dx));
+	}
+	
+	/**
+	 * Parses a map-like structure of keys and values from the given path.
+	 *
+	 * @param __p The path to decode.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2017/12/19
+	 */
+	private static Map<String, String> __readMap(Path __p)
+		throws NullPointerException
+	{
+		if (__p == null)
+			throw new NullPointerException("NARG");
+		
+		throw new Error("TODO");
+	}
+	
+	/**
+	 * Reads a number of space separated values from a file.
+	 *
+	 * @param __s The string to decode from.
+	 * @return The list of values which are separated by space.
+	 * @since 2017/12/19
+	 */
+	private static List<String> __readValues(String __s)
+	{
+		if (__s == null)
+			throw new NullPointerException("NARG");
+		
+		throw new Error("TODO");
+	}
+	
+	/**
+	 * Reads a number of space separated values from a file.
+	 *
+	 * @param __p The path to read from.
+	 * @return The list of values which are separated by space.
+	 * @since 2017/12/19
+	 */
+	private static List<String> __readValuesFromFile(Path __p)
+	{
+		if (__p == null)
+			throw new NullPointerException("NARG");
+		
+		return __readValues(__readFirstLine(__p, ""));
 	}
 	
 	/**
@@ -176,6 +384,42 @@ final class __SystemInfo__
 	 */
 	static final class __Cpu__
 	{
+		/** Idle time. */
+		protected final long idle;
+		
+		/** IRQ time. */
+		protected final long irq;
+		
+		/** Nice time. */
+		protected final long nice;
+		
+		/** System time. */
+		protected final long sys;
+		
+		/** User time. */
+		protected final long user;
+		
+		/**
+		 * Initializes the CPU information, decoded from the given string.
+		 *
+		 * @param __s The string to decode from.
+		 * @throws NullPointerException On null arguments.
+		 * @since 2017/12/19
+		 */
+		__Cpu__(String __s)
+			throws NullPointerException
+		{
+			if (__s == null)
+				throw new NullPointerException();
+			
+			List<String> fields = __readValues(__s);
+			this.user = __readLong(fields, 1);
+			this.nice = __readLong(fields, 2);
+			this.sys = __readLong(fields, 3);
+			this.idle = __readLong(fields, 4);
+			this.irq = __readLong(fields, 6);
+		}
+		
 		/**
 		 * Returns time spent doing nothing.
 		 *
@@ -184,7 +428,7 @@ final class __SystemInfo__
 		 */
 		public long idle()
 		{
-			throw new Error("TODO");
+			return this.idle;
 		}
 		
 		/**
@@ -195,7 +439,7 @@ final class __SystemInfo__
 		 */
 		public long irq()
 		{
-			throw new Error("TODO");
+			return this.irq;
 		}
 		
 		/**
@@ -206,7 +450,7 @@ final class __SystemInfo__
 		 */
 		public long nice()
 		{
-			throw new Error("TODO");
+			return this.nice;
 		}
 		
 		/**
@@ -217,7 +461,7 @@ final class __SystemInfo__
 		 */
 		public long sys()
 		{
-			throw new Error("TODO");
+			return this.sys;
 		}
 		
 		/**
@@ -228,7 +472,7 @@ final class __SystemInfo__
 		 */
 		public long user()
 		{
-			throw new Error("TODO");
+			return this.user;
 		}
 	}
 }
