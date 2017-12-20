@@ -96,5 +96,13 @@ In your `pom.xml` have the following
 </build>
 ```
 
+If you wish to strip all debugging information in the JAR file you can run
+the command:
+
+`pack200 -r -G file.jar`
+
+Note that stack traces will not be as meaningful and will not provide locations
+as to where exceptions were thrown.
+
 ***TO BE WRITTEN COMPLETELY***
 
