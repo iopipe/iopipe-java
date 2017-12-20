@@ -84,7 +84,7 @@ public final class IOPipeMeasurement
 		Context aws = context.context();
 		
 		// Snapshot system information
-		__SystemInfo__ sysinfo = new __SystemInfo__();
+		SystemMeasurement sysinfo = new SystemMeasurement();
 		
 		StringWriter out = new StringWriter();
 		try (JsonGenerator gen = Json.createGenerator(out))
@@ -100,7 +100,7 @@ public final class IOPipeMeasurement
 			if (duration >= 0)
 				gen.write("duration", duration);
 			
-			gen.write("processId", sysinfo.pid());
+			gen.write("processId", sysinfo.pid);
 			gen.write("timestamp", IOPipeConstants.LOAD_TIME);
 			gen.write("timestampEnd", System.currentTimeMillis());
 			
@@ -153,7 +153,7 @@ public final class IOPipeMeasurement
 			// Unique operating system boot identifier
 			gen.writeStartObject("host");
 			
-			gen.write("boot_id", sysinfo.bootId());
+			gen.write("boot_id", SystemMeasurement.BOOTID);
 			
 			gen.writeEnd();
 			
@@ -161,27 +161,27 @@ public final class IOPipeMeasurement
 			gen.writeStartObject("os");
 			
 			long totalmem, freemem;
-			gen.write("hostname", sysinfo.hostName());
-			gen.write("totalmem", (totalmem = sysinfo.memoryTotalKiB()));
-			gen.write("freemem", (freemem = sysinfo.memoryFreeKiB()));
+			gen.write("hostname", SystemMeasurement.HOSTNAME);
+			gen.write("totalmem", (totalmem = sysinfo.memorytotalkib));
+			gen.write("freemem", (freemem = sysinfo.memoryfreekib));
 			gen.write("usedmem", totalmem - freemem);
 			
 			// Start CPUs
 			gen.writeStartArray("cpus");
 			
-			__SystemInfo__.__Cpu__[] cpus = sysinfo.cpus();
-			for (int i = 0, n = cpus.length; i < n; i++)
+			List<SystemMeasurement.Cpu> cpus = sysinfo.cpus;
+			for (int i = 0, n = cpus.size(); i < n; i++)
 			{
-				__SystemInfo__.__Cpu__ cpu = cpus[i];
+				SystemMeasurement.Cpu cpu = cpus.get(i);
 				
 				gen.writeStartObject();
 				gen.writeStartObject("times");
 				
-				gen.write("idle", cpu.idle());
-				gen.write("irq", cpu.irq());
-				gen.write("sys", cpu.sys());
-				gen.write("user", cpu.user());
-				gen.write("nice", cpu.nice());
+				gen.write("idle", cpu.idle);
+				gen.write("irq", cpu.irq);
+				gen.write("sys", cpu.sys);
+				gen.write("user", cpu.user);
+				gen.write("nice", cpu.nice);
 				
 				gen.writeEnd();
 				gen.writeEnd();
@@ -204,10 +204,11 @@ public final class IOPipeMeasurement
 				
 				gen.writeStartObject("stat");
 				
-				gen.write("utime", __capInt(sysinfo.utime()));
-				gen.write("stime", __capInt(sysinfo.stime()));
-				gen.write("cutime", __capInt(sysinfo.cutime()));
-				gen.write("cstime", __capInt(sysinfo.cstime()));
+				SystemMeasurement.Times times = new SystemMeasurement.Times();
+				gen.write("utime", times.utime);
+				gen.write("stime", times.stime);
+				gen.write("cutime", times.cutime);
+				gen.write("cstime", times.cstime);
 				
 				gen.writeEnd();
 				
@@ -215,9 +216,9 @@ public final class IOPipeMeasurement
 				
 				gen.writeStartObject("status");
 				
-				gen.write("VmRSS", sysinfo.vmRssKiB());
-				gen.write("Threads", sysinfo.threads());
-				gen.write("FDSize", sysinfo.fdSize());
+				gen.write("VmRSS", sysinfo.vmrsskib);
+				gen.write("Threads", sysinfo.threads);
+				gen.write("FDSize", sysinfo.fdsize);
 				
 				gen.writeEnd();
 				
@@ -319,20 +320,6 @@ public final class IOPipeMeasurement
 	public void setThrown(Throwable __t)
 	{
 		this._thrown = __t;
-	}
-	
-	/**
-	 * Caps the integer value.
-	 *
-	 * @param __v The value to cap.
-	 * @return The capped value.
-	 * @since 2017/12/19
-	 */
-	static int __capInt(long __v)
-	{
-		if (__v > Integer.MAX_VALUE)
-			return Integer.MAX_VALUE;
-		return (int)__v;
 	}
 }
 

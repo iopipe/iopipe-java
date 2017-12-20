@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,46 +17,34 @@ import java.util.Map;
  *
  * @since 2017/12/19
  */
-final class __SystemInfo__
+public final class SystemMeasurement
 {
 	/** The boot ID. */
-	protected static final String _BOOTID;
+	public static final String BOOTID;
 	
 	/** The hostname. */
-	protected static final String _HOSTNAME;
+	public static final String HOSTNAME;
 	
 	/** The file descriptor count. */
-	protected final int fdsize;
-	
-	/** Kernel time with children. */
-	protected final long cstime;
-	
-	/** User time with children. */
-	protected final long cutime;
-	
-	/** Kernel time. */
-	protected final long stime;
-	
-	/** User time. */
-	protected final long utime;
+	public final int fdsize;
 	
 	/** Total amount of memory in KiB. */
-	protected final long memorytotalkib;
+	public final int memorytotalkib;
 	
 	/** Free amount of memory in KiB. */
-	protected final long memoryfreekib;
+	public final int memoryfreekib;
 	
 	/** The current process ID. */
-	protected final int pid;
+	public final int pid;
 	
 	/** The number of threads that exist. */
-	protected final int threads;
+	public final int threads;
 	
 	/** The resident set size in KiB. */
-	protected final long vmrsskib;
+	public final int vmrsskib;
 	
 	/** CPU information. */
-	private final __Cpu__[] _cpus;
+	public final List<Cpu> cpus;
 	
 	/**
 	 * This caches information which will always be the same regardless.
@@ -64,8 +53,8 @@ final class __SystemInfo__
 	 */
 	static
 	{
-		_HOSTNAME = __readFirstLine(Paths.get("/etc/hostname"), "unknown");
-		_BOOTID = __readFirstLine(
+		HOSTNAME = __readFirstLine(Paths.get("/etc/hostname"), "unknown");
+		BOOTID = __readFirstLine(
 			Paths.get("/proc/sys/kernel/random/boot_id"), "unknown");
 	}
 	
@@ -74,189 +63,36 @@ final class __SystemInfo__
 	 *
 	 * @since 2017/12/19
 	 */
-	__SystemInfo__()
+	public SystemMeasurement()
 	{
 		// Memory information
 		Map<String, String> meminfo = __readMap(Paths.get("/proc/meminfo"));
-		this.memorytotalkib = __readLong(
+		this.memorytotalkib = __readInt(
 			meminfo.getOrDefault("MemTotal", "0"));
-		this.memoryfreekib = __readLong(
+		this.memoryfreekib = __readInt(
 			meminfo.getOrDefault("MemFree", "0"));
 		
 		// Obtain CPU information
-		List<__Cpu__> cpus = new ArrayList<>(
+		List<Cpu> cpus = new ArrayList<>(
 			Runtime.getRuntime().availableProcessors());
 		Map<String, String> kernelstat = __readMap(Paths.get("/proc/stat"));
 		for (int i = 0; i >= 0; i++)
 		{
 			String val = kernelstat.get("cpu" + i);
 			if (val != null)
-				cpus.add(new __Cpu__(val));
+				cpus.add(new Cpu(val));
 			else
 				break;
 		}
-		this._cpus = cpus.<__Cpu__>toArray(new __Cpu__[cpus.size()]);
+		this.cpus = Collections.<Cpu>unmodifiableList(cpus);
 		
 		// Parse current process info
 		Map<String, String> pidstatus = __readMap(
 			Paths.get("/proc/self/status"));
 		this.pid = __readInt(pidstatus.getOrDefault("Pid", "0"));
-		this.vmrsskib = __readLong(pidstatus.getOrDefault("VmRSS", "0"));
+		this.vmrsskib = __readInt(pidstatus.getOrDefault("VmRSS", "0"));
 		this.threads = __readInt(pidstatus.getOrDefault("Threads", "0"));
 		this.fdsize = __readInt(pidstatus.getOrDefault("FDSize", "0"));
-		
-		// Process times
-		List<String> pidstat = __readValuesFromFile(
-			Paths.get("/proc/self/stat"));
-		this.cstime = __readLong(pidstat, 13);
-		this.cutime = __readLong(pidstat, 14);
-		this.stime = __readLong(pidstat, 15);
-		this.utime = __readLong(pidstat, 16);
-	}
-	
-	/**
-	 * Returns the unique boot identifier.
-	 *
-	 * @return The boot identifier.
-	 * @since 2017/12/19
-	 */
-	public String bootId()
-	{
-		return __SystemInfo__._BOOTID;
-	}
-	
-	/**
-	 * Returns CPU related information.
-	 *
-	 * @return CPU information.
-	 * @since 2017/12/19
-	 */
-	public __Cpu__[] cpus()
-	{
-		return this._cpus.clone();
-	}
-	
-	/**
-	 * Returns the amount of time spent in kernelspace including all of the
-	 * process children.
-	 *
-	 * @return The time spent in kernelspace including children.
-	 * @since 2017/12/19
-	 */
-	public long cstime()
-	{
-		return this.cstime;
-	}
-	
-	/**
-	 * Returns the amount of time spent in userspace including all of the
-	 * process children.
-	 *
-	 * @return The time spent in userspace including children.
-	 * @since 2017/12/19
-	 */
-	public long cutime()
-	{
-		return this.cutime;
-	}
-	
-	/**
-	 * Returns the upper size in file descriptors.
-	 *
-	 * @return The upper file descriptor size.
-	 * @since 2017/12/19
-	 */
-	public int fdSize()
-	{
-		return this.fdsize;
-	}
-	
-	/**
-	 * Returns the hostname of the system.
-	 *
-	 * @return The system hostname.
-	 * @since 2017/12/19
-	 */
-	public String hostName()
-	{
-		return __SystemInfo__._HOSTNAME;
-	}
-	
-	/**
-	 * Returns the amount of free memory in KiB.
-	 *
-	 * @return The free amount of available memory.
-	 * @since 2017/12/19
-	 */
-	public long memoryFreeKiB()
-	{
-		return this.memoryfreekib;
-	}
-	
-	/**
-	 * Returns the amount of total memory in KiB.
-	 *
-	 * @return The total amount of available memory.
-	 * @since 2017/12/19
-	 */
-	public long memoryTotalKiB()
-	{
-		return this.memorytotalkib;
-	}
-	
-	/**
-	 * Returns the current PID.
-	 *
-	 * @return The current PID.
-	 * @since 2017/12/19
-	 */
-	public int pid()
-	{
-		return this.pid;
-	}
-	
-	/**
-	 * Returns the amount of time spent in kernelspace.
-	 *
-	 * @return The time spent in kernelspace.
-	 * @since 2017/12/19
-	 */
-	public long stime()
-	{
-		return this.stime;
-	}
-	
-	/**
-	 * Returns the number of threads which exist.
-	 *
-	 * @return The number of threads which exist.
-	 * @since 2017/12/19
-	 */
-	public int threads()
-	{
-		return this.threads;
-	}
-	
-	/**
-	 * Returns the amount of time spent in userspace.
-	 *
-	 * @return The time spent in userspace.
-	 * @since 2017/12/19
-	 */
-	public long utime()
-	{
-		return this.utime;
-	}
-	
-	/**
-	 * Returns the resident set memory in KiB.
-	 *
-	 * @return The RSS memory.
-	 * @since 2017/12/19
-	 */
-	public long vmRssKiB()
-	{
-		return this.vmrsskib;
 	}
 	
 	/**
@@ -308,6 +144,23 @@ final class __SystemInfo__
 		else if (rv > Integer.MAX_VALUE)
 			return Integer.MAX_VALUE;
 		return (int)rv;
+	}
+	
+	/**
+	 * Reads an int value from the given list
+	 *
+	 * @param __l The list to read values from.
+	 * @param __dx The index of the element to read.
+	 * @return The decoded int value.
+	 * @since 2017/12/19
+	 */
+	public static int __readInt(List<String> __l, int __dx)
+	{
+		int n = __l.size();
+		if (__l == null || __dx < 0 || __dx >= n)
+			return 0;
+		
+		return __readInt(__l.get(__dx));
 	}
 	
 	/**
@@ -429,22 +282,22 @@ final class __SystemInfo__
 	 *
 	 * @since 2017/12/19
 	 */
-	static final class __Cpu__
+	public static final class Cpu
 	{
 		/** Idle time. */
-		protected final long idle;
+		public final int idle;
 		
 		/** IRQ time. */
-		protected final long irq;
+		public final int irq;
 		
 		/** Nice time. */
-		protected final long nice;
+		public final int nice;
 		
 		/** System time. */
-		protected final long sys;
+		public final int sys;
 		
 		/** User time. */
-		protected final long user;
+		public final int user;
 		
 		/**
 		 * Initializes the CPU information, decoded from the given string.
@@ -453,73 +306,53 @@ final class __SystemInfo__
 		 * @throws NullPointerException On null arguments.
 		 * @since 2017/12/19
 		 */
-		__Cpu__(String __s)
+		Cpu(String __s)
 			throws NullPointerException
 		{
 			if (__s == null)
 				throw new NullPointerException();
 			
 			List<String> fields = __readValues(__s);
-			this.user = __readLong(fields, 1);
-			this.nice = __readLong(fields, 2);
-			this.sys = __readLong(fields, 3);
-			this.idle = __readLong(fields, 4);
-			this.irq = __readLong(fields, 6);
+			this.user = __readInt(fields, 1);
+			this.nice = __readInt(fields, 2);
+			this.sys = __readInt(fields, 3);
+			this.idle = __readInt(fields, 4);
+			this.irq = __readInt(fields, 6);
 		}
+	}
+	
+	/**
+	 * This contains the process time information.
+	 *
+	 * @since 2017/12/19
+	 */
+	public static final class Times
+	{
+		/** Kernel time with children. */
+		public final int cstime;
+	
+		/** User time with children. */
+		public final int cutime;
+	
+		/** Kernel time. */
+		public final int stime;
+	
+		/** User time. */
+		public final int utime;
 		
 		/**
-		 * Returns time spent doing nothing.
+		 * Initializes the snapshot of the process times.
 		 *
-		 * @return Time spent doing nothing.
 		 * @since 2017/12/19
 		 */
-		public long idle()
+		public Times()
 		{
-			return this.idle;
-		}
-		
-		/**
-		 * Returns time spent handling IRQs.
-		 *
-		 * @return Time spent handling IRQs.
-		 * @since 2017/12/19
-		 */
-		public long irq()
-		{
-			return this.irq;
-		}
-		
-		/**
-		 * Returns time spent in nice process.
-		 *
-		 * @return Time spent in nice process.
-		 * @since 2017/12/19
-		 */
-		public long nice()
-		{
-			return this.nice;
-		}
-		
-		/**
-		 * Returns time spent in kernelspace.
-		 *
-		 * @return Time spent in kernelspace.
-		 * @since 2017/12/19
-		 */
-		public long sys()
-		{
-			return this.sys;
-		}
-		
-		/**
-		 * Returns time spent in userspace.
-		 *
-		 * @return Time spent in userpsace.
-		 * @since 2017/12/19
-		 */
-		public long user()
-		{
-			return this.user;
+			List<String> pidstat = __readValuesFromFile(
+				Paths.get("/proc/self/stat"));
+			this.cstime = __readInt(pidstat, 13);
+			this.cutime = __readInt(pidstat, 14);
+			this.stime = __readInt(pidstat, 15);
+			this.utime = __readInt(pidstat, 16);
 		}
 	}
 }

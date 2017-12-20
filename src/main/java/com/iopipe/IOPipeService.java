@@ -171,14 +171,14 @@ public final class IOPipeService
 		JsonObject rv = _STAT_START;
 		if (rv == null)
 		{
-			__SystemInfo__ sysinfo = new __SystemInfo__();
+			SystemMeasurement.Times times = new SystemMeasurement.Times();
 		
 			JsonObjectBuilder ss = Json.createObjectBuilder();
 		
-			ss.add("utime", IOPipeMeasurement.__capInt(sysinfo.utime()));
-			ss.add("stime", IOPipeMeasurement.__capInt(sysinfo.stime()));
-			ss.add("cutime", IOPipeMeasurement.__capInt(sysinfo.cutime()));
-			ss.add("cstime", IOPipeMeasurement.__capInt(sysinfo.cstime()));
+			ss.add("utime", times.utime);
+			ss.add("stime", times.stime);
+			ss.add("cutime", times.cutime);
+			ss.add("cstime", times.cstime);
 		
 			_STAT_START = ss.build();
 		}
