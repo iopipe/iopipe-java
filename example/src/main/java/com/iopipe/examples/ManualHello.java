@@ -20,14 +20,10 @@ public class ManualHello
 	@Override
 	public final String handleRequest(String __input, Context __context)
 	{
-		try (IOPipeService sv = new IOPipeService())
-		{
-			return sv.createContext(__context).<String>run(
-				() ->
-				{
-					return "Hello " + __input + "!";
-				});
-		}
+		return IOPipeService.instance().<String>run(__context,() ->
+			{
+				return "Hello " + __input + "!";
+			});
 	}
 }
 
