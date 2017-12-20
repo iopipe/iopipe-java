@@ -19,10 +19,10 @@ import java.util.Map;
 final class __SystemInfo__
 {
 	/** The boot ID. */
-	protected final String bootid;
+	protected static final String _BOOTID;
 	
 	/** The hostname. */
-	protected final String hostname;
+	protected static final String _HOSTNAME;
 	
 	/** The file descriptor count. */
 	protected final int fdsize;
@@ -58,16 +58,24 @@ final class __SystemInfo__
 	private final __Cpu__[] _cpus;
 	
 	/**
+	 * This caches information which will always be the same regardless.
+	 *
+	 * @since 2017/12/19
+	 */
+	static
+	{
+		_HOSTNAME = __readFirstLine(Paths.get("/etc/hostname"), "unknown");
+		_BOOTID = __readFirstLine(
+			Paths.get("/proc/sys/kernel/random/boot_id"), "unknown");
+	}
+	
+	/**
 	 * Creates a snapshot of the system information.
 	 *
 	 * @since 2017/12/19
 	 */
 	__SystemInfo__()
 	{
-		this.hostname = __readFirstLine(Paths.get("/etc/hostname"), "unknown");
-		this.bootid = __readFirstLine(
-			Paths.get("/proc/sys/kernel/random/boot_id"), "unknown");
-		
 		// Memory information
 		Map<String, String> meminfo = __readMap(Paths.get("/proc/meminfo"));
 		this.memorytotalkib = __readLong(
@@ -114,7 +122,7 @@ final class __SystemInfo__
 	 */
 	public String bootId()
 	{
-		return this.bootid;
+		return __SystemInfo__._BOOTID;
 	}
 	
 	/**
@@ -171,7 +179,7 @@ final class __SystemInfo__
 	 */
 	public String hostName()
 	{
-		return this.hostname;
+		return __SystemInfo__._HOSTNAME;
 	}
 	
 	/**
