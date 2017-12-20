@@ -103,6 +103,17 @@ public final class IOPipeService
 	}
 	
 	/**
+	 * Returns the configuration which is used.
+	 *
+	 * @return The used configuration.
+	 * @since 2017/12/20
+	 */
+	public final IOPipeConfiguration config()
+	{
+		return this.config;
+	}
+	
+	/**
 	 * Returns the number of requests which would have been accepted by the
 	 * service if the configuration was correct and the service was enabled.
 	 *
@@ -156,7 +167,8 @@ public final class IOPipeService
 		
 		PrintStream debug = config.getDebugStream();
 		if (debug != null)
-			debug.println("IOPipe: Invoking function");
+			debug.printf("IOPipe: Invoking function %08x%n",
+				System.identityHashCode(__context));
 		
 		// Is this coldstarted?
 		boolean coldstarted = !IOPipeService._THAWED.getAndSet(true);
