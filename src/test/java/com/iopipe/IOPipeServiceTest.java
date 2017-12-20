@@ -28,23 +28,7 @@ public class IOPipeServiceTest
 	@Test
 	public void testConstruction()
 	{
-		try (IOPipeService sv = new IOPipeService(testConfig(true, null)))
-		{
-		}
-	}
-	
-	/**
-	 * Tests the construction of a context.
-	 *
-	 * @since 2017/12/15
-	 */
-	@Test
-	public void testConstructionContext()
-	{
-		try (IOPipeService sv = new IOPipeService(testConfig(true, null)))
-		{
-			sv.createContext(new MockContext("testConstructionContext"));
-		}
+		IOPipeService sv = new IOPipeService(testConfig(true, null));
 	}
 	
 	/**

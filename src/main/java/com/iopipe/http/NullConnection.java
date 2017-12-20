@@ -1,7 +1,5 @@
 package com.iopipe.http;
 
-import javax.json.JsonValue;
-
 /**
  * This is a connection which has no effect and always returns the 503
  * Service Unavailable code.
@@ -11,16 +9,6 @@ import javax.json.JsonValue;
 public final class NullConnection
 	implements RemoteConnection
 {
-	/**
-	 * {@inheritDoc}
-	 * @since 2017/12/15
-	 */
-	@Override
-	public void close()
-		throws RemoteException
-	{
-	}
-	
 	/**
 	 * {@inheritDoc}
 	 * @since 2017/12/15

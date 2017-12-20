@@ -50,16 +50,6 @@ public final class ServiceConnection
 	 * @since 2017/12/17
 	 */
 	@Override
-	public void close()
-		throws RemoteException
-	{
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * @since 2017/12/17
-	 */
-	@Override
 	public RemoteResult send(RemoteRequest __r)
 		throws NullPointerException, RemoteException
 	{

@@ -39,9 +39,9 @@ public abstract class SimpleRequestStreamHandlerWrapper
 		Context __context)
 		throws IOException
 	{
-		try (IOPipeService sv = new IOPipeService())
+		try
 		{
-			sv.createContext(__context).<Object>run(
+			IOPipeService.instance().<Object>run(__context,
 				() ->
 				{
 					try

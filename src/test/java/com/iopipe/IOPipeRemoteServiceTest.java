@@ -37,9 +37,7 @@ public class IOPipeRemoteServiceTest
 	{
 		assumeTrue(ENABLE_TESTS);
 		
-		try (IOPipeService sv = new IOPipeService())
-		{
-		}
+		IOPipeService sv = new IOPipeService();
 	}
 	
 	/**

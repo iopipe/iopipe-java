@@ -1,7 +1,5 @@
 package com.iopipe.http;
 
-import java.io.Closeable;
-
 /**
  * This interface is used to represent a single connection to the IOPipe
  * service. The server is sent {@link IOPipeHTTPRequest}s and the result of
@@ -14,16 +12,7 @@ import java.io.Closeable;
  * @since 2017/12/13
  */
 public interface RemoteConnection
-	extends Closeable
 {
-	/**
-	 * {@inheritDoc}
-	 * @throws RemoteException If the connection could not be closed.
-	 * @since 2017/12/17
-	 */
-	public abstract void close()
-		throws RemoteException;
-	
 	/**
 	 * Sends the specified request to the remote server.
 	 *

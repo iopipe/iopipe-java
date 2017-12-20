@@ -6,6 +6,7 @@ import com.iopipe.mock.MockContext;
 import com.iopipe.mock.MockException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -26,14 +27,15 @@ public abstract class GenericTester
 	 * Tests the empty function which does absolutely nothing to make sure that
 	 * it operates correctly.
 	 *
+	 * @param __sv The running service.
 	 * @param __c The execution context.
 	 * @since 2017/12/18
 	 */
-	public final void baseEmptyFunction(IOPipeContext __c)
+	public final void baseEmptyFunction(IOPipeService __sv, Context __c)
 	{
 		AtomicBoolean ranfunc = new AtomicBoolean();
 		
-		__c.run(() ->
+		__sv.<Object>run(__c, () ->
 			{
 				ranfunc.set(true);
 				return null;
@@ -46,14 +48,16 @@ public abstract class GenericTester
 	 * This tests the empty method when the service is disabled, it should
 	 * not call the IOPipe service at all.
 	 *
+	 * @param __sv The running service.
 	 * @param __c The execution context.
 	 * @since 2017/12/17
 	 */
-	public final void baseEmptyFunctionWhenDisabled(IOPipeContext __c)
+	public final void baseEmptyFunctionWhenDisabled(IOPipeService __sv,
+		Context __c)
 	{
 		AtomicBoolean ranfunc = new AtomicBoolean();
 		
-		__c.run(() ->
+		__sv.<Object>run(__c, () ->
 			{
 				ranfunc.set(true);
 				return null;
@@ -65,17 +69,18 @@ public abstract class GenericTester
 	/**
 	 * Tests throwing of an exception.
 	 *
+	 * @param __sv The running service.
 	 * @param __c The execution context.
 	 * @since 2017/12/17
 	 */
-	public final void baseThrow(IOPipeContext __c)
+	public final void baseThrow(IOPipeService __sv, Context __c)
 	{
 		AtomicBoolean ranfunc = new AtomicBoolean(),
 			exceptioncaught = new AtomicBoolean();
 		
 		try
 		{
-			__c.run(() ->
+			__sv.<Object>run(__c, () ->
 				{
 					ranfunc.set(true);
 					throw new MockException("Something went wrong!");
@@ -93,17 +98,18 @@ public abstract class GenericTester
 	/**
 	 * Tests throwing of an exception with a cause.
 	 *
+	 * @param __sv The running service.
 	 * @param __c The execution context.
 	 * @since 2017/12/17
 	 */
-	public void baseThrowWithCause(IOPipeContext __c)
+	public void baseThrowWithCause(IOPipeService __sv, Context __c)
 	{
 		AtomicBoolean ranfunc = new AtomicBoolean(),
 			exceptioncaught = new AtomicBoolean();
 		
 		try
 		{
-			__c.run(() ->
+			__sv.<Object>run(__c, () ->
 				{
 					ranfunc.set(true);
 					throw new MockException("Not our fault!",
@@ -122,28 +128,27 @@ public abstract class GenericTester
 	/**
 	 * Tests timing out of the service.
 	 *
+	 * @param __sv The running service.
 	 * @param __c The execution context.
 	 * @since 2017/12/17
 	 */
-	public void baseTimeOut(IOPipeContext __c)
+	public void baseTimeOut(IOPipeService __sv, Context __c)
 	{
 		AtomicBoolean ranfunc = new AtomicBoolean();
 		
-		__c.run(() ->
+		__sv.<Object>run(__c, () ->
 			{
 				ranfunc.set(true);
 				
 				int extratime = MockContext.CONTEXT_DURATION_MS +
 					(MockContext.CONTEXT_DURATION_MS >>> 4);
 				
-				Context context = __c.context();
-				
 				// Sleep for the duration time
 				System.err.println("Timeout test is waiting...");
 				for (;;)
 				{
 					// Determine how long to sleep for
-					int sleepdur = context.getRemainingTimeInMillis();
+					int sleepdur = __c.getRemainingTimeInMillis();
 					
 					// Finished sleeping
 					if (sleepdur <= 0)
@@ -209,29 +214,29 @@ public abstract class GenericTester
 	 * @return The context which was generated.
 	 * @since 2017/12/17
 	 */
-	public final IOPipeContext runTest(String __funcname, boolean __wantbad,
+	public final IOPipeService runTest(String __funcname, boolean __wantbad,
 		Supplier<IOPipeConfiguration> __getconf,
-		Consumer<IOPipeContext> __run)
+		BiConsumer<IOPipeService, Context> __run)
 	{
 		long starttime = System.nanoTime();
 		
 		// Initialize the service and run the test
 		IOPipeConfiguration config = (__getconf != null ? __getconf.get() :
 			null);
-		try (IOPipeService sv = (config != null ? new IOPipeService(config) :
-			new IOPipeService()))
+		try
 		{
-			// Setup new context which is mocked
-			IOPipeContext context = sv.createContext(
-				new MockContext(__funcname));
-			__run.accept(context);
+			IOPipeService sv = (config != null ? new IOPipeService(config) :
+				new IOPipeService());
+			
+			// Execute the function
+			__run.accept(sv, new MockContext(__funcname));
 			
 			// Expecting a bad response on purpose?
 			assertTrue("badresponse",
-				__wantbad == (context.getBadResultCount() != 0));
+				__wantbad == (sv.getBadResultCount() != 0));
 			
-			// Return the used context, which might be useful
-			return context;
+			// Return the used service for potential extra testing
+			return sv;
 		}
 		finally
 		{

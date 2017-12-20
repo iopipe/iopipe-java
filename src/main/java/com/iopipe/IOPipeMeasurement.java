@@ -43,8 +43,11 @@ public final class IOPipeMeasurement
 			"java.compiler", "os.name", "os.arch", "os.version",
 			"file.separator", "path.separator"));
 	
+	/** The configuration. */
+	protected final IOPipeConfiguration config;
+	
 	/** The context this is taking the measurement for. */
-	protected final IOPipeContext context;
+	protected final Context context;
 	
 	/** The exception which may have been thrown. */
 	private volatile Throwable _thrown;
@@ -53,20 +56,25 @@ public final class IOPipeMeasurement
 	private volatile long _duration =
 		Long.MIN_VALUE;
 	
+	/** Is this execution one which is a cold start? */
+	private volatile boolean _coldstart;
+	
 	/**
 	 * Initializes the measurement holder.
 	 *
-	 * @param __c The context this holds measurements for.
+	 * @param __config The configuration for the context.
+	 * @param __context The context this holds measurements for.
 	 * @throws NullPointerException On null arguments.
 	 * @since 2017/12/17
 	 */
-	public IOPipeMeasurement(IOPipeContext __c)
+	public IOPipeMeasurement(IOPipeConfiguration __config, Context __context)
 		throws NullPointerException
 	{
-		if (__c == null)
+		if (__config == null || __context == null)
 			throw new NullPointerException();
 		
-		this.context = __c;
+		this.config = __config;
+		this.context = __context;
 	}
 	
 	/**
@@ -79,9 +87,8 @@ public final class IOPipeMeasurement
 	public RemoteRequest buildRequest()
 		throws RemoteException
 	{
-		IOPipeContext context = this.context;
-		IOPipeConfiguration config = context.config();
-		Context aws = context.context();
+		Context aws = this.context;
+		IOPipeConfiguration config = this.config;
 		
 		// Snapshot system information
 		SystemMeasurement sysinfo = new SystemMeasurement();
@@ -270,7 +277,7 @@ public final class IOPipeMeasurement
 				gen.writeEnd();
 			}
 			
-			gen.write("coldstart", context._coldstarted);
+			gen.write("coldstart", this._coldstart);
 			
 			// Finished
 			gen.writeEnd();
@@ -306,6 +313,19 @@ public final class IOPipeMeasurement
 	public Throwable getThrown()
 	{
 		return this._thrown;
+	}
+	
+	/**
+	 * Sets whether or not the execution was a cold start. A cold start
+	 * indicates that the JVM was started fresh and a previous instance is not
+	 * being reused.
+	 *
+	 * @param __cold If {@code true} then the execution follows a cold start.
+	 * @since 2017/12/20
+	 */
+	public void setColdStart(boolean __cold)
+	{
+		this._coldstart = __cold;
 	}
 	
 	/**

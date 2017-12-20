@@ -37,16 +37,6 @@ public final class MockConnection
 	 * @since 2017/12/13
 	 */
 	@Override
-	public void close()
-		throws RemoteException
-	{
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * @since 2017/12/13
-	 */
-	@Override
 	public RemoteResult send(RemoteRequest __r)
 		throws NullPointerException, RemoteException
 	{
