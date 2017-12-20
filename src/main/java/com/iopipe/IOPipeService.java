@@ -8,9 +8,6 @@ import com.iopipe.http.RemoteException;
 import java.io.Closeable;
 import java.io.PrintStream;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
 
 /**
  * This class provides a single connection to the IOPipe service which may then
@@ -36,7 +33,8 @@ public final class IOPipeService
 		IOPipeConstants.LOAD_TIME;
 	
 	/** The process stat when the process started. */
-	private static volatile JsonObject _STAT_START;
+	static final SystemMeasurement.Times _STAT_START =
+		new SystemMeasurement.Times();
 	
 	/** The configuration used to connect to the service. */
 	protected final IOPipeConfiguration config;
@@ -158,32 +156,6 @@ public final class IOPipeService
 	public final boolean isEnabled()
 	{
 		return this.enabled;
-	}
-	
-	/**
-	 * Initializes the stat start information if it has not been set.
-	 *
-	 * @return The stat start information.
-	 * @since 2017/12/19
-	 */
-	static JsonObject __statStart()
-	{
-		JsonObject rv = _STAT_START;
-		if (rv == null)
-		{
-			SystemMeasurement.Times times = new SystemMeasurement.Times();
-		
-			JsonObjectBuilder ss = Json.createObjectBuilder();
-		
-			ss.add("utime", times.utime);
-			ss.add("stime", times.stime);
-			ss.add("cutime", times.cutime);
-			ss.add("cstime", times.cstime);
-		
-			_STAT_START = ss.build();
-		}
-		
-		return rv;
 	}
 }
 

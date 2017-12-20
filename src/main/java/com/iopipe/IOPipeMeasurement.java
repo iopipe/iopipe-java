@@ -212,7 +212,15 @@ public final class IOPipeMeasurement
 				
 				gen.writeEnd();
 				
-				gen.write("stat_start", IOPipeService.__statStart());
+				gen.writeStartObject("stat_start");
+				
+				times = IOPipeService._STAT_START;
+				gen.write("utime", times.utime);
+				gen.write("stime", times.stime);
+				gen.write("cutime", times.cutime);
+				gen.write("cstime", times.cstime);
+				
+				gen.writeEnd();
 				
 				gen.writeStartObject("status");
 				
