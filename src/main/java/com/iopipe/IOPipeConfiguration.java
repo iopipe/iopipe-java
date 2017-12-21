@@ -5,7 +5,6 @@ import com.iopipe.http.RemoteConnectionFactory;
 import com.iopipe.http.ServiceConnectionFactory;
 import java.io.PrintStream;
 import java.util.Objects;
-import okhttp3.HttpUrl;
 
 /**
  * This class contains the configuration for IOPipe and specifies the settings
@@ -290,14 +289,8 @@ public final class IOPipeConfiguration
 				IOPipeConstants.DEFAULT_REGION) ?
 				"metrics-api.iopipe.com" :
 				String.format("metrics-api.%s.iopipe.com", awsregion));
-			HttpUrl url;
-			rv.setRemoteConnectionFactory(new ServiceConnectionFactory(
-				(url = new HttpUrl.Builder().
-					scheme("https").
-					host(hostname).
-					addPathSegment("v0").
-					addPathSegment("event").
-					build())));
+			String url = String.format("https://%s/v0/event", hostname);
+			rv.setRemoteConnectionFactory(new ServiceConnectionFactory(url));
 		
 			if (debugstream != null)
 				debugstream.printf("IOPipe: Remote URL `%s`%n", url);

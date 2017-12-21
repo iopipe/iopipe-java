@@ -2,8 +2,6 @@ package com.iopipe;
 
 import com.iopipe.http.RemoteConnectionFactory;
 import java.io.PrintStream;
-import java.net.URI;
-import okhttp3.HttpUrl;
 
 /**
  * This class is used to initialize instances of {@link IOPipeConfiguration}

@@ -1,8 +1,5 @@
 package com.iopipe.http;
 
-import okhttp3.HttpUrl;
-import okhttp3.OkHttpClient;
-
 /**
  * This is a factory which can create connections to the remote IOPipe service
  * to send reports.
@@ -12,12 +9,8 @@ import okhttp3.OkHttpClient;
 public final class ServiceConnectionFactory
 	implements RemoteConnectionFactory
 {
-	/** The OkHttp client manager. */
-	protected final OkHttpClient client =
-		new OkHttpClient.Builder().build();
-	
 	/** The URL to connect to. */
-	protected final HttpUrl url;
+	protected final String url;
 	
 	/**
 	 * Initializes the connection factory.
@@ -26,7 +19,7 @@ public final class ServiceConnectionFactory
 	 * @throws NullPointerException On null arguments.
 	 * @since 2017/12/17
 	 */
-	public ServiceConnectionFactory(HttpUrl __url)
+	public ServiceConnectionFactory(String __url)
 		throws NullPointerException
 	{
 		if (__url == null)
@@ -43,7 +36,7 @@ public final class ServiceConnectionFactory
 	public RemoteConnection connect()
 		throws RemoteException
 	{
-		return new ServiceConnection(this.client, this.url);
+		return new ServiceConnection(this.url);
 	}
 }
 
