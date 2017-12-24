@@ -3,6 +3,8 @@ package com.iopipe;
 import com.iopipe.http.NullConnectionFactory;
 import com.iopipe.http.RemoteConnectionFactory;
 import com.iopipe.http.ServiceConnectionFactory;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.io.PrintStream;
 import java.util.Objects;
 import okhttp3.HttpUrl;
@@ -40,6 +42,9 @@ public final class IOPipeConfiguration
 	
 	/** Install method. */
 	protected final String installmethod;
+	
+	/** String representation. */
+	private volatile Reference<String> _string;
 	
 	/**
 	 * Initializes the default configuration.
@@ -129,7 +134,13 @@ public final class IOPipeConfiguration
 		if (!(__o instanceof IOPipeConfiguration))
 			return false;
 		
-		throw new Error("TODO");
+		IOPipeConfiguration o = (IOPipeConfiguration)__o;
+		return Objects.equals(this.debug, o.debug) &&
+			this.enabled == o.enabled &&
+			Objects.equals(this.token, o.token) &&
+			Objects.equals(this.connectionfactory, o.connectionfactory) &&
+			this.timeoutwindow == o.timeoutwindow &&
+			Objects.equals(this.installmethod, o.installmethod);
 	}
 	
 	/**
@@ -210,7 +221,12 @@ public final class IOPipeConfiguration
 	@Override
 	public final int hashCode()
 	{
-		throw new Error("TODO");
+		return Objects.hashCode(this.debug) ^
+			Boolean.hashCode(this.enabled) ^
+			Objects.hashCode(this.token) ^
+			Objects.hashCode(this.connectionfactory) ^
+			this.timeoutwindow ^
+			Objects.hashCode(this.installmethod);
 	}
 	
 	/**
@@ -232,7 +248,18 @@ public final class IOPipeConfiguration
 	@Override
 	public final String toString()
 	{
-		throw new Error("TODO");
+		Reference<String> ref = this._string;
+		String rv;
+		
+		if (ref == null || null == (rv = ref.get()))
+			this._string = new WeakReference<>((rv =
+				String.format("{debug=%s, enabled=%s, token=%s, " +
+					"connectionfactory=%s, timeoutwindow=%d, " +
+					"installmethod=%s}", this.debug, this.enabled,
+					this.token, this.connectionfactory, this.timeoutwindow,
+					this.installmethod)));
+		
+		return rv;
 	}
 	
 	/**
