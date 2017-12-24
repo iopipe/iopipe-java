@@ -1,5 +1,5 @@
 /**
- * This package contains the examples for using the IOPipe service.
+ * This package contains the examples for using the IOpipe service.
  *
  * @since 2017/12/13
  */

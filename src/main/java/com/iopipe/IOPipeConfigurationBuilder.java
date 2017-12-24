@@ -91,9 +91,9 @@ public class IOPipeConfigurationBuilder
 	}
 	
 	/**
-	 * Sets whether the IOPipe service to to be enabled.
+	 * Sets whether the IOpipe service to to be enabled.
 	 *
-	 * @param __enabled If {@code true} then the IOPipe service is to be used,
+	 * @param __enabled If {@code true} then the IOpipe service is to be used,
 	 * otherwise any requests will NOT use the service.
 	 * @since 2017/12/13
 	 */

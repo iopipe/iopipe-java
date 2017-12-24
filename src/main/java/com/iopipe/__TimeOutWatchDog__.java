@@ -134,7 +134,7 @@ final class __TimeOutWatchDog__
 				
 				PrintStream debug = config.getDebugStream();
 				if (debug != null)
-					debug.printf("IOPipe: Time out by %08x%n",
+					debug.printf("IOpipe: Time out by %08x%n",
 						System.identityHashCode(context));
 				
 				// Generate a timeout exception, but for the ease of use in

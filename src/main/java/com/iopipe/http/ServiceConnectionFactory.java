@@ -4,7 +4,7 @@ import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 
 /**
- * This is a factory which can create connections to the remote IOPipe service
+ * This is a factory which can create connections to the remote IOpipe service
  * to send reports.
  *
  * @since 2017/12/17

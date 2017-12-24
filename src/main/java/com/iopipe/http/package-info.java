@@ -1,6 +1,6 @@
 /**
- * This package contains the IOPipe specific classes and interfaces for
- * communicating with the remote IOPipe service.
+ * This package contains the IOpipe specific classes and interfaces for
+ * communicating with the remote IOpipe service.
  *
  * @since 2017/12/17
  */

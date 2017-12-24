@@ -46,7 +46,7 @@ public abstract class GenericTester
 	
 	/**
 	 * This tests the empty method when the service is disabled, it should
-	 * not call the IOPipe service at all.
+	 * not call the IOpipe service at all.
 	 *
 	 * @param __sv The running service.
 	 * @param __c The execution context.

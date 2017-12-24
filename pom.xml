@@ -8,7 +8,7 @@
   <name>iopipe</name>
   <url>https://github.com/iopipe/iopipe-java-core</url>
   <description>
-    This contains the support library for the IOPipe service and additionally
+    This contains the support library for the IOpipe service and additionally
     provides support for wrapping AWS services.
   </description>
   <build>

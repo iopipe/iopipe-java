@@ -8,7 +8,7 @@ import java.util.Objects;
 import okhttp3.HttpUrl;
 
 /**
- * This class contains the configuration for IOPipe and specifies the settings
+ * This class contains the configuration for IOpipe and specifies the settings
  * which are to be used when the server is contacted.
  *
  * This class is mutable.
@@ -133,9 +133,9 @@ public final class IOPipeConfiguration
 	}
 	
 	/**
-	 * Returns the factory which is used to connect to the IOPipe service.
+	 * Returns the factory which is used to connect to the IOpipe service.
 	 *
-	 * @return The factory used to connect to the IOPipe service.
+	 * @return The factory used to connect to the IOpipe service.
 	 * @since 2017/12/13
 	 */
 	public final RemoteConnectionFactory getRemoteConnectionFactory()
@@ -300,7 +300,7 @@ public final class IOPipeConfiguration
 					build())));
 		
 			if (debugstream != null)
-				debugstream.printf("IOPipe: Remote URL `%s`%n", url);
+				debugstream.printf("IOpipe: Remote URL `%s`%n", url);
 		}
 		
 		// Fallback to disabled configuration

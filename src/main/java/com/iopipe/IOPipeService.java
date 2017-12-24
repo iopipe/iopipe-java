@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 /**
- * This class provides a single connection to the IOPipe service which may then
+ * This class provides a single connection to the IOpipe service which may then
  * be used to send multiple requests to as methods are ran. It is permittable
  * for this class to be used a singleton (and recommended for optimization
  * purposes) in which case you can call {@link IOPipeService#instance()} to
@@ -76,7 +76,7 @@ public final class IOPipeService
 		if (__config == null)
 			throw new NullPointerException();
 		
-		// Try to open a connection to the IOPipe service, if that fails
+		// Try to open a connection to the IOpipe service, if that fails
 		// then fall back to a disabled connection
 		RemoteConnection connection = null;
 		boolean enabled = false;
@@ -87,7 +87,7 @@ public final class IOPipeService
 				enabled = true;
 			}
 			
-			// Cannot report error to IOPipe so print to the console
+			// Cannot report error to IOpipe so print to the console
 			catch (RemoteException e)
 			{
 				e.printStackTrace(__config.getFatalErrorStream());
@@ -167,7 +167,7 @@ public final class IOPipeService
 		
 		PrintStream debug = config.getDebugStream();
 		if (debug != null)
-			debug.printf("IOPipe: Invoking function %08x%n",
+			debug.printf("IOpipe: Invoking function %08x%n",
 				System.identityHashCode(__context));
 		
 		// Is this coldstarted?
@@ -253,13 +253,13 @@ public final class IOPipeService
 			// Report what is to be sent
 			PrintStream debug = config.getDebugStream();
 			if (debug != null)
-				debug.printf("IOPipe: Send: %s%n", __r);
+				debug.printf("IOpipe: Send: %s%n", __r);
 			
 			RemoteResult result = this.connection.send(__r);
 			
 			// Report what was received
 			if (debug != null)
-				debug.printf("IOPipe: Result %d: %s%n", result.code(),
+				debug.printf("IOpipe: Result %d: %s%n", result.code(),
 					result.body());
 			
 			// Only the 200 range is valid for okay responses

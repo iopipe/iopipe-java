@@ -6,9 +6,6 @@
 This project provides the capability of using the IOPipe service for AWS
 lambda services.
 
-This project uses OSHI <https://github.com/oshi/oshi> (which is under the
-EPL 1.0 license) to obtain information about the native system.
-
 # Project
 
 ## Requirements
@@ -28,9 +25,9 @@ Building requires Maven and a Java 7 Virtual Machine.
 
 # System Properties And Environment Variables.
 
-These are used to configure IOPipe from the outside environment.
+These are used to configure IOpipe from the outside environment.
 
-For compatibility with other IOPipe clients the environment variables are
+For compatibility with other IOpipe clients the environment variables are
 supported. System properties take precedence.
 
  * `com.iopipe.debug` or `IOPIPE_DEBUG`

@@ -1,7 +1,7 @@
 package com.iopipe.http;
 
 /**
- * This interface is used to create connections to the IOPipe server for the
+ * This interface is used to create connections to the IOpipe server for the
  * purpose of sending and receiving requests.
  *
  * @since 2017/12/13

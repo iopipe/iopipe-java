@@ -4,7 +4,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 
 /**
- * This is a plain Hello response which does not use the IOPipe service and
+ * This is a plain Hello response which does not use the IOpipe service and
  * is called directly by AWS.
  *
  * @since 2017/12/19

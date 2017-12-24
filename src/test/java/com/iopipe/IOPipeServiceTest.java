@@ -47,7 +47,7 @@ public class IOPipeServiceTest
 	
 	/**
 	 * This tests the empty method when the service is disabled, it should
-	 * not call the IOPipe service at all.
+	 * not call the IOpipe service at all.
 	 *
 	 * @since 2017/12/13
 	 */

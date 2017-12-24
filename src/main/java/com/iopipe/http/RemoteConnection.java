@@ -1,7 +1,7 @@
 package com.iopipe.http;
 
 /**
- * This interface is used to represent a single connection to the IOPipe
+ * This interface is used to represent a single connection to the IOpipe
  * service. The server is sent {@link IOPipeHTTPRequest}s and the result of
  * those requests are returned within a {@link IOPipeHTTPResult}.
  *
