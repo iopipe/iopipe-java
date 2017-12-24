@@ -115,6 +115,22 @@ actual classes.
 
 ## Using The Classes
 
+There are three ways to use the service:
+
+ * Implement `com.iopipe.SimpleRequestHandlerWrapper`.
+ * Implement `com.iopipe.SimpleRequestStreamHandlerWrapper`.
+ * Using the service directly.
+
+### Implement `com.iopipe.SimpleRequestHandlerWrapper`.
+
+***TO BE WRITTEN***
+
+### Implement `com.iopipe.SimpleRequestStreamHandlerWrapper`.
+
+***TO BE WRITTEN***
+
+### Using the service directly.
+
 ***TO BE WRITTEN***
 
 ## Building And Deploying
