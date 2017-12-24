@@ -3,18 +3,16 @@
  * <http://www.iopipe.com/>
  * Licensed under the Apache 2.0 License.
 
-This project provides the capability of using the IOPipe service for AWS
-lambda services.
+This project provides analytics and distributed tracing for event-driven
+applications running on AWS Lambda using the IOpipe service.
 
 # Project
 
-## Requirements
-
-This project requires Maven and at least Java 7.
+This project requires at least Java 8.
 
 ## Building
 
-Building requires Maven and a Java 7 Virtual Machine.
+Building requires Maven and a Java 8 compiler.
 
  * `mvn compile`         -- Compile the project.
  * `mvn package`         -- Compile JAR package.
