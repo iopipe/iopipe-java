@@ -123,15 +123,45 @@ There are three ways to use the service:
 
 ### Implement `com.iopipe.SimpleRequestHandlerWrapper`.
 
-***TO BE WRITTEN***
+This class provides an implementation of `RequestHandler<I, O>`.
+
+ * Add the following import statements:
+   * `import com.amazonaws.services.lambda.runtime.Context;`
+   * `import com.iopipe.SimpleRequestHandlerWrapper;`
+ * Add a class which extends:
+   * `SimpleRequestHandlerWrapper<I, O>`
+ * Implement the following method:
+   * `protected O wrappedHandleRequest(I __input, Context __context)`
 
 ### Implement `com.iopipe.SimpleRequestStreamHandlerWrapper`.
 
-***TO BE WRITTEN***
+This class provides an implementation of `RequestStreamHandler`.
+
+ * Add the following import statements:
+   * `import com.amazonaws.services.lambda.runtime.Context;`
+   * `import com.iopipe.SimpleRequestStreamHandlerWrapper;`
+   * `import java.io.InputStream;`
+   * `import java.io.IOException;`
+   * `import java.io.OutputStream;`
+ * Add a class which extends:
+   * `SimpleRequestStreamHandlerWrapper`
+ * Implement the following method:
+   * `protected void wrappedHandleRequest(InputStream __in, `
+     `OutputStream __out, Context __context)`
 
 ### Using the service directly.
 
-***TO BE WRITTEN***
+This may be used with any request handler such as `RequestHandler` or
+`RequestStreamHandler`, although it is not limited to those interfaces.
+
+ * Add the following import statements:
+   * `import com.amazonaws.services.lambda.runtime.Context;`
+   * `import com.iopipe.IOPipeService;`
+ * Obtain an instance of `IOPipeService`:
+   * `IOPipeService service = IOPipeService.instance();`
+ * Run by passing a lambda or a class which implements the functional
+   interface `Supplier<R>`:
+   * `service.<String>run(() -> "Hello World!");`
 
 ## Building And Deploying
 

@@ -7,6 +7,8 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
  * This class is used as a base to create simple instances of wrapped lambdas
  * which will provide measurements to the IOpipe service.
  *
+ * This class may be used as a base to wrap requests.
+ *
  * @param <I> The input object type.
  * @param <O> The output object type.
  * @since 2017/12/13

@@ -10,6 +10,8 @@ import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
  * This class is used as a base to create simple instances of wrapped lambdas
  * which will provide measurements to the IOpipe service.
  *
+ * This class may be used as a base to wrap requests.
+ *
  * @since 2017/12/13
  */
 public abstract class SimpleRequestStreamHandlerWrapper

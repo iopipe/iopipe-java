@@ -19,6 +19,10 @@ import java.util.function.Supplier;
  * purposes) in which case you can call {@link IOPipeService#instance()} to
  * return a single instance of this class.
  *
+ * It is recommended that code use the instance provided by
+ * {@link IOPipeService#instance()}, then once an instance is obtained the
+ * method {@link IOPipeService#run(Context, Supplier<R>)} may be called.
+ *
  * @since 2017/12/13
  */
 public final class IOPipeService
