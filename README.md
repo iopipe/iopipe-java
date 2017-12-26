@@ -52,13 +52,16 @@ supported and take precedence.
    * If you need help looking for your token you can visit:
      [Find your project token](https://dashboard.iopipe.com/install).
 
-# Integration Into Your Maven Project With Amazon AWS Lambdas
+# Integration With Your Project
 
 Using the IOpipe service with your pre-existing and newly created classes is
-quite simple. If you are using Maven is requires modification of your `pom.xml`
+quite simple. If you are using Maven it requires modification of your `pom.xml`
 file, otherwise you may include the JAR file of the library to your project.
 
-## Setting Up A Maven Project
+More information on using Java Lambdas on Amazon AWS can be obtained at:
+<https://docs.aws.amazon.com/lambda/latest/dg/java-programming-model.html>.
+
+## Integration Into Your Maven Project With Amazon AWS Lambdas
 
 Note that the instructions here are slightly derived from
 <https://docs.aws.amazon.com/lambda/latest/dg/java-create-jar-pkg-maven-no-ide.html>,
@@ -166,7 +169,7 @@ This may be used with any request handler such as `RequestHandler` or
 ## Building And Deploying
 
 To create a package which is ready for deployment you may type the following
-command:
+command (if you use maven):
 
  * `mvn package`
 
@@ -176,5 +179,5 @@ following command:
 
 `pack200 -r -G file.jar`
 
-Deployment is the same for other Java programs.
+Deployment is the same as other Java programs on the Amazon Lambda platform.
 
