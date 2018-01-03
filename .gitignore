@@ -19,6 +19,9 @@ buildNumber.properties
 # BlueJ files
 *.ctxt
 
+# IntelliJ
+.idea
+
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
