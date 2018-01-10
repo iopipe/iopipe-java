@@ -24,7 +24,6 @@ public abstract class SimpleRequestStreamHandlerWrapper
 	 * @param __in The input stream.
 	 * @param __out The output stream.
 	 * @param __context The lambda context.
-	 * @return The return value.
 	 * @throws IOException On read/write errors.
 	 * @since 2017/12/18
 	 */

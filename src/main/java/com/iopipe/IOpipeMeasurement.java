@@ -331,7 +331,7 @@ public final class IOpipeMeasurement
 	/**
 	 * Sets the duration of execution.
 	 *
-	 * @param __d The execution duration in nanoseconds.
+	 * @param __ns The execution duration in nanoseconds.
 	 * @since 2017/12/15
 	 */
 	public void setDuration(long __ns)

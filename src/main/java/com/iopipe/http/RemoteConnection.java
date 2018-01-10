@@ -2,8 +2,8 @@ package com.iopipe.http;
 
 /**
  * This interface is used to represent a single connection to the IOpipe
- * service. The server is sent {@link IOpipeHTTPRequest}s and the result of
- * those requests are returned within a {@link IOpipeHTTPResult}.
+ * service. The server is sent {@link RemoteRequest}s and the result of
+ * those requests are returned within a {@link RemoteResult}.
  *
  * It is unspecified if this reuses a single connection to a server which is
  * streamlined with other requests or if it opens a new connection each time
