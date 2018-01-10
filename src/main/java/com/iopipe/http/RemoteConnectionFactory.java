@@ -9,9 +9,9 @@ package com.iopipe.http;
 public interface RemoteConnectionFactory
 {
 	/**
-	 * Initializes the connection to the IOPipe service.
+	 * Initializes the connection to the IOpipe service.
 	 *
-	 * @return A HTTP connection to the IOPipe service.
+	 * @return A HTTP connection to the IOpipe service.
 	 * @throws RemoteException If the connection could not be made.
 	 * @since 2017/12/13
 	 */

@@ -2,7 +2,7 @@ package com.iopipe.examples;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-import com.iopipe.IOPipeService;
+import com.iopipe.IOpipeService;
 
 /**
  * This class wraps the simple request handler and just prefixes "Hello" to
@@ -20,7 +20,7 @@ public class ManualHello
 	@Override
 	public final String handleRequest(String __input, Context __context)
 	{
-		return IOPipeService.instance().<String>run(__context,() ->
+		return IOpipeService.instance().<String>run(__context,() ->
 			{
 				return "Hello " + __input + "!";
 			});

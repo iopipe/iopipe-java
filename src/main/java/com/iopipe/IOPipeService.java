@@ -16,16 +16,16 @@ import java.util.function.Supplier;
  * This class provides a single connection to the IOpipe service which may then
  * be used to send multiple requests to as methods are ran. It is permittable
  * for this class to be used a singleton (and recommended for optimization
- * purposes) in which case you can call {@link IOPipeService#instance()} to
+ * purposes) in which case you can call {@link IOpipeService#instance()} to
  * return a single instance of this class.
  *
  * It is recommended that code use the instance provided by
- * {@link IOPipeService#instance()}, then once an instance is obtained the
- * method {@link IOPipeService#run(Context, Supplier<R>)} may be called.
+ * {@link IOpipeService#instance()}, then once an instance is obtained the
+ * method {@link IOpipeService#run(Context, Supplier<R>)} may be called.
  *
  * @since 2017/12/13
  */
-public final class IOPipeService
+public final class IOpipeService
 {
 	/** This is used to detect cold starts. */
 	static final AtomicBoolean _THAWED =
@@ -33,17 +33,17 @@ public final class IOPipeService
 	
 	/** The time this class was loaded. */
 	static final long _LOAD_TIME =
-		IOPipeConstants.LOAD_TIME;
+		IOpipeConstants.LOAD_TIME;
 	
 	/** The process stat when the process started. */
 	static final SystemMeasurement.Times _STAT_START =
 		new SystemMeasurement.Times();
 	
 	/** If an instance was created then this will be that one instance. */
-	private static volatile IOPipeService _INSTANCE;
+	private static volatile IOpipeService _INSTANCE;
 	
 	/** The configuration used to connect to the service. */
-	protected final IOPipeConfiguration config;
+	protected final IOpipeConfiguration config;
 	
 	/** The connection to the server. */
 	protected final RemoteConnection connection;
@@ -62,9 +62,9 @@ public final class IOPipeService
 	 *
 	 * @since 2017/12/14
 	 */
-	public IOPipeService()
+	public IOpipeService()
 	{
-		this(IOPipeConfiguration.DEFAULT_CONFIG);
+		this(IOpipeConfiguration.DEFAULT_CONFIG);
 	}
 	
 	/**
@@ -74,7 +74,7 @@ public final class IOPipeService
 	 * @throws NullPointerException On null arguments.
 	 * @since 2017/12/24
 	 */
-	public IOPipeService(IOPipeConfiguration __config)
+	public IOpipeService(IOpipeConfiguration __config)
 		throws NullPointerException
 	{
 		if (__config == null)
@@ -112,7 +112,7 @@ public final class IOPipeService
 	 * @return The used configuration.
 	 * @since 2017/12/20
 	 */
-	public final IOPipeConfiguration config()
+	public final IOpipeConfiguration config()
 	{
 		return this.config;
 	}
@@ -162,7 +162,7 @@ public final class IOPipeService
 		int execcount = ++this._execcount;
 		
 		// If disabled, just run the function
-		IOPipeConfiguration config = this.config;
+		IOpipeConfiguration config = this.config;
 		if (!config.isEnabled())
 		{
 			this._badresultcount++;
@@ -175,7 +175,7 @@ public final class IOPipeService
 				System.identityHashCode(__context));
 		
 		// Is this coldstarted?
-		boolean coldstarted = !IOPipeService._THAWED.getAndSet(true);
+		boolean coldstarted = !IOpipeService._THAWED.getAndSet(true);
 		
 		// Register timeout with this execution number so if execution takes
 		// longer than expected a timeout is generated
@@ -195,7 +195,7 @@ public final class IOPipeService
 		// Keep track of how long execution takes
 		long ticker = System.nanoTime();
 		boolean timedout = false;
-		IOPipeMeasurement measurement = new IOPipeMeasurement(config,
+		IOpipeMeasurement measurement = new IOpipeMeasurement(config,
 			__context);
 		try
 		{
@@ -284,16 +284,16 @@ public final class IOPipeService
 	}
 	
 	/**
-	 * Returns a single instance of the IOPipe service.
+	 * Returns a single instance of the IOpipe service.
 	 *
 	 * @return The single instance of the service.
 	 * @since 2017/12/20
 	 */
-	public static final IOPipeService instance()
+	public static final IOpipeService instance()
 	{
-		IOPipeService rv = _INSTANCE;
+		IOpipeService rv = _INSTANCE;
 		if (rv == null)
-			_INSTANCE = (rv = new IOPipeService());
+			_INSTANCE = (rv = new IOpipeService());
 		return rv;
 	}
 }

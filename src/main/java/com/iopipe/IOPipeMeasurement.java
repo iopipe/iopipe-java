@@ -24,7 +24,7 @@ import javax.json.stream.JsonGenerator;
  *
  * @since 2017/12/15
  */
-public final class IOPipeMeasurement
+public final class IOpipeMeasurement
 {	
 	/** Is this a Linux system? */
 	private static final boolean _IS_LINUX =
@@ -44,7 +44,7 @@ public final class IOPipeMeasurement
 			"file.separator", "path.separator"));
 	
 	/** The configuration. */
-	protected final IOPipeConfiguration config;
+	protected final IOpipeConfiguration config;
 	
 	/** The context this is taking the measurement for. */
 	protected final Context context;
@@ -67,7 +67,7 @@ public final class IOPipeMeasurement
 	 * @throws NullPointerException On null arguments.
 	 * @since 2017/12/17
 	 */
-	public IOPipeMeasurement(IOPipeConfiguration __config, Context __context)
+	public IOpipeMeasurement(IOpipeConfiguration __config, Context __context)
 		throws NullPointerException
 	{
 		if (__config == null || __context == null)
@@ -88,7 +88,7 @@ public final class IOPipeMeasurement
 		throws RemoteException
 	{
 		Context aws = this.context;
-		IOPipeConfiguration config = this.config;
+		IOpipeConfiguration config = this.config;
 		
 		// Snapshot system information
 		SystemMeasurement sysinfo = new SystemMeasurement();
@@ -108,7 +108,7 @@ public final class IOPipeMeasurement
 				gen.write("duration", duration);
 			
 			gen.write("processId", sysinfo.pid);
-			gen.write("timestamp", IOPipeConstants.LOAD_TIME);
+			gen.write("timestamp", IOpipeConstants.LOAD_TIME);
 			gen.write("timestampEnd", System.currentTimeMillis());
 			
 			// AWS Context information
@@ -144,15 +144,15 @@ public final class IOPipeMeasurement
 			gen.writeStartObject("agent");
 			
 			gen.write("runtime", "java");
-			gen.write("version", IOPipeConstants.AGENT_VERSION);
-			gen.write("load_time", IOPipeConstants.LOAD_TIME);
+			gen.write("version", IOpipeConstants.AGENT_VERSION);
+			gen.write("load_time", IOpipeConstants.LOAD_TIME);
 			
 			gen.writeEnd();
 			
 			// Java information
 			gen.writeStartObject("java");
 			
-			for (String prop : IOPipeMeasurement._COPY_PROPERTIES)
+			for (String prop : IOpipeMeasurement._COPY_PROPERTIES)
 				gen.write(prop, System.getProperty(prop, ""));
 			
 			gen.writeEnd();
@@ -221,7 +221,7 @@ public final class IOPipeMeasurement
 				
 				gen.writeStartObject("stat_start");
 				
-				times = IOPipeService._STAT_START;
+				times = IOpipeService._STAT_START;
 				gen.write("utime", times.utime);
 				gen.write("stime", times.stime);
 				gen.write("cutime", times.cutime);

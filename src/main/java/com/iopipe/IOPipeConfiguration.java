@@ -17,13 +17,13 @@ import okhttp3.HttpUrl;
  *
  * @since 2017/12/12
  */
-public final class IOPipeConfiguration
+public final class IOpipeConfiguration
 {
 	/** The disabled configuration. */
-	public static final IOPipeConfiguration DISABLED_CONFIG;
+	public static final IOpipeConfiguration DISABLED_CONFIG;
 	
 	/** Default configuration to use. */
-	public static final IOPipeConfiguration DEFAULT_CONFIG;
+	public static final IOpipeConfiguration DEFAULT_CONFIG;
 	
 	/** Debug output stream, is optional. */
 	protected final PrintStream debug;
@@ -54,7 +54,7 @@ public final class IOPipeConfiguration
 	static
 	{
 		// Initialize disabled configuration
-		IOPipeConfigurationBuilder cb = new IOPipeConfigurationBuilder();
+		IOpipeConfigurationBuilder cb = new IOpipeConfigurationBuilder();
 		
 		cb.setEnabled(false);
 		cb.setProjectToken("Disabled");
@@ -67,10 +67,10 @@ public final class IOPipeConfiguration
 		
 		// Try to initialize a default configuration, if the configuration
 		// is not valid due to missing values then use the disabled one
-		IOPipeConfiguration use = DISABLED_CONFIG;
+		IOpipeConfiguration use = DISABLED_CONFIG;
 		try
 		{
-			use = IOPipeConfiguration.byDefault();
+			use = IOpipeConfiguration.byDefault();
 		}
 		catch (IllegalArgumentException e)
 		{
@@ -87,7 +87,7 @@ public final class IOPipeConfiguration
 	 * @throws NullPointerException On null arguments.
 	 * @since 2017/12/13
 	 */
-	IOPipeConfiguration(IOPipeConfigurationBuilder __builder)
+	IOpipeConfiguration(IOpipeConfigurationBuilder __builder)
 		throws IllegalArgumentException, NullPointerException
 	{
 		if (__builder == null)
@@ -131,10 +131,10 @@ public final class IOPipeConfiguration
 		if (this == __o)
 			return true;
 		
-		if (!(__o instanceof IOPipeConfiguration))
+		if (!(__o instanceof IOpipeConfiguration))
 			return false;
 		
-		IOPipeConfiguration o = (IOPipeConfiguration)__o;
+		IOpipeConfiguration o = (IOpipeConfiguration)__o;
 		return Objects.equals(this.debug, o.debug) &&
 			this.enabled == o.enabled &&
 			Objects.equals(this.token, o.token) &&
@@ -230,7 +230,7 @@ public final class IOPipeConfiguration
 	}
 	
 	/**
-	 * Returns {@code true} if IOPipe logging is to be enabled, this allows
+	 * Returns {@code true} if IOpipe logging is to be enabled, this allows
 	 * the service to be disabled for testing.
 	 *
 	 * @return {@code true} if logging is enabled.
@@ -270,9 +270,9 @@ public final class IOPipeConfiguration
 	 * @return The default configuration to use.
 	 * @since 2017/12/13
 	 */
-	public static final IOPipeConfiguration byDefault()
+	public static final IOpipeConfiguration byDefault()
 	{
-		IOPipeConfigurationBuilder rv = new IOPipeConfigurationBuilder();
+		IOpipeConfigurationBuilder rv = new IOpipeConfigurationBuilder();
 		
 		// Enabled if not specified is "true" by default
 		boolean enabled;
@@ -308,13 +308,13 @@ public final class IOPipeConfiguration
 			// Determine the URI which is used to collect resources, use the
 			// same region as the AWS service if it is supported.
 			String awsregion = Objects.toString(System.getenv("AWS_REGION"),
-				IOPipeConstants.DEFAULT_REGION);
-			if (!IOPipeConstants.SUPPORTED_REGIONS.contains(awsregion))
-				awsregion = IOPipeConstants.DEFAULT_REGION;
+				IOpipeConstants.DEFAULT_REGION);
+			if (!IOpipeConstants.SUPPORTED_REGIONS.contains(awsregion))
+				awsregion = IOpipeConstants.DEFAULT_REGION;
 		
 			// Build hostname from region
 			String hostname = (awsregion.equals(
-				IOPipeConstants.DEFAULT_REGION) ?
+				IOpipeConstants.DEFAULT_REGION) ?
 				"metrics-api.iopipe.com" :
 				String.format("metrics-api.%s.iopipe.com", awsregion));
 			HttpUrl url;
@@ -332,7 +332,7 @@ public final class IOPipeConfiguration
 		
 		// Fallback to disabled configuration
 		else
-			return IOPipeConfiguration.DISABLED_CONFIG;
+			return IOpipeConfiguration.DISABLED_CONFIG;
 		
 		return rv.build();
 	}

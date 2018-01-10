@@ -23,10 +23,10 @@ final class __TimeOutWatchDog__
 		10;
 	
 	/** The service to use when sending reports. */
-	protected final IOPipeService service;
+	protected final IOpipeService service;
 	
 	/** The configuration used. */
-	protected final IOPipeConfiguration config;
+	protected final IOpipeConfiguration config;
 	
 	/** The context being executed. */
 	protected final Context context;
@@ -63,7 +63,7 @@ final class __TimeOutWatchDog__
 	 * @throws NullPointerException On null arguments.
 	 * @since 2017/12/20
 	 */
-	__TimeOutWatchDog__(IOPipeService __sv, Context __context, Thread __src,
+	__TimeOutWatchDog__(IOpipeService __sv, Context __context, Thread __src,
 		int __wt, boolean __cs)
 		throws NullPointerException
 	{
@@ -78,7 +78,7 @@ final class __TimeOutWatchDog__
 		this.coldstart = __cs;
 		
 		Thread timeoutthread = new Thread(this,
-			"IOPipe-WatchDog-" + System.identityHashCode(__context));
+			"IOpipe-WatchDog-" + System.identityHashCode(__context));
 		timeoutthread.setDaemon(true);
 		this.timeoutthread = timeoutthread;
 		timeoutthread.start();
@@ -130,7 +130,7 @@ final class __TimeOutWatchDog__
 				if (this._generated.getAndSet(true))
 					return;
 				
-				IOPipeConfiguration config = this.config;
+				IOpipeConfiguration config = this.config;
 				
 				PrintStream debug = config.getDebugStream();
 				if (debug != null)
@@ -139,12 +139,12 @@ final class __TimeOutWatchDog__
 				
 				// Generate a timeout exception, but for the ease of use in
 				// debugging use the stack trace of the thread which timed out
-				IOPipeTimeOutException reported = new IOPipeTimeOutException(
+				IOpipeTimeOutException reported = new IOpipeTimeOutException(
 					"Execution timed out.");
 				reported.setStackTrace(this.sourcethread.getStackTrace());
 				
 				// Send report to the service
-				IOPipeMeasurement measurement = new IOPipeMeasurement(config,
+				IOpipeMeasurement measurement = new IOpipeMeasurement(config,
 					context);
 				measurement.setThrown(reported);
 				this.service.__sendRequest(measurement.buildRequest());
