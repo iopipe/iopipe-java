@@ -1,6 +1,6 @@
 # IOpipe Telemetry Agent for Java
 
- * <http://www.iopipe.com/>
+ * <https://www.iopipe.com/>
  * Licensed under the Apache 2.0 License.
 
 This project provides analytics and distributed tracing for event-driven
