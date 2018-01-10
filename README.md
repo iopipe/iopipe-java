@@ -41,10 +41,10 @@ supported and take precedence.
  * `com.iopipe.installmethod` or `IOPIPE_INSTALL_METHOD`
  * `com.iopipe.timeoutwindow` or `IOPIPE_TIMEOUT_WINDOW`
    * This time is subtracted from the duration that a lambda may operate on
-     the service, if
+     the service.
    * If this is zero then the window is disabled.
    * If this is not set then it defaults to `150`.
- * `com.iopipe.token`, `IOPIPE_TOKEN`, or `IOPIPE_CLIENTID`
+ * `com.iopipe.token`, `IOPIPE_TOKEN`
    * This represents the token of the IOPipe collector which is to obtain
      statistics.
    * This is the default token which will be used if no token was specified in
