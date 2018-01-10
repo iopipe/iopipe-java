@@ -45,7 +45,7 @@ supported and take precedence.
    * If this is zero then the window is disabled.
    * If this is not set then it defaults to `150`.
  * `com.iopipe.token`, `IOPIPE_TOKEN`
-   * This represents the token of the IOPipe collector which is to obtain
+   * This represents the token of the IOpipe collector which is to obtain
      statistics.
    * This is the default token which will be used if no token was specified in
      the client.
@@ -113,9 +113,9 @@ This may be used with any request handler such as `RequestHandler` or
 
  * Add the following import statements:
    * `import com.amazonaws.services.lambda.runtime.Context;`
-   * `import com.iopipe.IOPipeService;`
- * Obtain an instance of `IOPipeService`:
-   * `IOPipeService service = IOPipeService.instance();`
+   * `import com.iopipe.IOpipeService;`
+ * Obtain an instance of `IOpipeService`:
+   * `IOpipeService service = IOpipeService.instance();`
  * Run by passing a lambda or a class which implements the functional
    interface `Supplier<R>`:
    * `service.<String>run(() -> "Hello World!");`

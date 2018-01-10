@@ -31,7 +31,7 @@ public abstract class GenericTester
 	 * @param __c The execution context.
 	 * @since 2017/12/18
 	 */
-	public final void baseEmptyFunction(IOPipeService __sv, Context __c)
+	public final void baseEmptyFunction(IOpipeService __sv, Context __c)
 	{
 		AtomicBoolean ranfunc = new AtomicBoolean();
 		
@@ -52,7 +52,7 @@ public abstract class GenericTester
 	 * @param __c The execution context.
 	 * @since 2017/12/17
 	 */
-	public final void baseEmptyFunctionWhenDisabled(IOPipeService __sv,
+	public final void baseEmptyFunctionWhenDisabled(IOpipeService __sv,
 		Context __c)
 	{
 		AtomicBoolean ranfunc = new AtomicBoolean();
@@ -73,7 +73,7 @@ public abstract class GenericTester
 	 * @param __c The execution context.
 	 * @since 2017/12/17
 	 */
-	public final void baseThrow(IOPipeService __sv, Context __c)
+	public final void baseThrow(IOpipeService __sv, Context __c)
 	{
 		AtomicBoolean ranfunc = new AtomicBoolean(),
 			exceptioncaught = new AtomicBoolean();
@@ -102,7 +102,7 @@ public abstract class GenericTester
 	 * @param __c The execution context.
 	 * @since 2017/12/17
 	 */
-	public void baseThrowWithCause(IOPipeService __sv, Context __c)
+	public void baseThrowWithCause(IOpipeService __sv, Context __c)
 	{
 		AtomicBoolean ranfunc = new AtomicBoolean(),
 			exceptioncaught = new AtomicBoolean();
@@ -132,7 +132,7 @@ public abstract class GenericTester
 	 * @param __c The execution context.
 	 * @since 2017/12/17
 	 */
-	public void baseTimeOut(IOPipeService __sv, Context __c)
+	public void baseTimeOut(IOpipeService __sv, Context __c)
 	{
 		AtomicBoolean ranfunc = new AtomicBoolean();
 		
@@ -190,13 +190,13 @@ public abstract class GenericTester
 	 * @throws NullPointerException On null arguments.
 	 * @since 2017/12/18
 	 */
-	public final IOPipeConfiguration invalidateToken(IOPipeConfiguration __c)
+	public final IOpipeConfiguration invalidateToken(IOpipeConfiguration __c)
 		throws NullPointerException
 	{
 		if (__c == null)
 			throw new NullPointerException();
 		
-		IOPipeConfigurationBuilder rv = new IOPipeConfigurationBuilder(__c);
+		IOpipeConfigurationBuilder rv = new IOpipeConfigurationBuilder(__c);
 		
 		rv.setProjectToken(MockConfiguration.INVALID_TOKEN);
 		
@@ -214,19 +214,19 @@ public abstract class GenericTester
 	 * @return The context which was generated.
 	 * @since 2017/12/17
 	 */
-	public final IOPipeService runTest(String __funcname, boolean __wantbad,
-		Supplier<IOPipeConfiguration> __getconf,
-		BiConsumer<IOPipeService, Context> __run)
+	public final IOpipeService runTest(String __funcname, boolean __wantbad,
+		Supplier<IOpipeConfiguration> __getconf,
+		BiConsumer<IOpipeService, Context> __run)
 	{
 		long starttime = System.nanoTime();
 		
 		// Initialize the service and run the test
-		IOPipeConfiguration config = (__getconf != null ? __getconf.get() :
+		IOpipeConfiguration config = (__getconf != null ? __getconf.get() :
 			null);
 		try
 		{
-			IOPipeService sv = (config != null ? new IOPipeService(config) :
-				new IOPipeService());
+			IOpipeService sv = (config != null ? new IOpipeService(config) :
+				new IOpipeService());
 			
 			// Execute the function
 			__run.accept(sv, new MockContext(__funcname));

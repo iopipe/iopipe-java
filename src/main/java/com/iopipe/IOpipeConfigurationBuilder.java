@@ -6,13 +6,13 @@ import java.net.URI;
 import okhttp3.HttpUrl;
 
 /**
- * This class is used to initialize instances of {@link IOPipeConfiguration}
+ * This class is used to initialize instances of {@link IOpipeConfiguration}
  *
  * This class is not thread safe.
  *
  * @since 2017/12/13
  */
-public class IOPipeConfigurationBuilder
+public class IOpipeConfigurationBuilder
 {
 	/** Is the service enabled? */
 	volatile boolean _enabled;
@@ -37,7 +37,7 @@ public class IOPipeConfigurationBuilder
 	 *
 	 * @since 2017/12/18
 	 */
-	public IOPipeConfigurationBuilder()
+	public IOpipeConfigurationBuilder()
 	{
 	}
 	
@@ -49,7 +49,7 @@ public class IOPipeConfigurationBuilder
 	 * @throws NullPointerException On null arguments.
 	 * @since 2017/12/18
 	 */
-	public IOPipeConfigurationBuilder(IOPipeConfiguration __c)
+	public IOpipeConfigurationBuilder(IOpipeConfiguration __c)
 		throws NullPointerException
 	{
 		if (__c == null)
@@ -72,10 +72,10 @@ public class IOPipeConfigurationBuilder
 	 * is not valid.
 	 * @since 2017/12/13
 	 */
-	public final IOPipeConfiguration build()
+	public final IOpipeConfiguration build()
 		throws IllegalArgumentException
 	{
-		return new IOPipeConfiguration(this);
+		return new IOpipeConfiguration(this);
 	}
 	
 	/**

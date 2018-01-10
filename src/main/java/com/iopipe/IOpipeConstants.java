@@ -10,7 +10,7 @@ import java.util.Set;
  *
  * @since 2017/12/17
  */
-public interface IOPipeConstants
+public interface IOpipeConstants
 {
 	/** The version for this agent. */
 	public static final String AGENT_VERSION =

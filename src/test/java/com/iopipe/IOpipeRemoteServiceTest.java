@@ -19,7 +19,7 @@ import static org.junit.Assert.*;
  *
  * @since 2017/12/17
  */
-public class IOPipeRemoteServiceTest
+public class IOpipeRemoteServiceTest
 	extends GenericTester
 {
 	/** If this is set then the tests here are ran. */
@@ -37,7 +37,7 @@ public class IOPipeRemoteServiceTest
 	{
 		assumeTrue(ENABLE_TESTS);
 		
-		IOPipeService sv = new IOPipeService();
+		IOpipeService sv = new IOpipeService();
 	}
 	
 	/**
@@ -70,8 +70,8 @@ public class IOPipeRemoteServiceTest
 		// Requests cannot be tested locally
 		super.runTest("testEmptyFunctionWhenDisabled", true, () ->
 			{
-				IOPipeConfigurationBuilder rv = new IOPipeConfigurationBuilder(
-					IOPipeConfiguration.byDefault());
+				IOpipeConfigurationBuilder rv = new IOpipeConfigurationBuilder(
+					IOpipeConfiguration.byDefault());
 				rv.setEnabled(false);
 				return rv.build();
 			},
@@ -89,7 +89,7 @@ public class IOPipeRemoteServiceTest
 		assumeTrue(ENABLE_TESTS);
 		
 		super.runTest("testInvalidToken", true,
-			() -> super.invalidateToken(IOPipeConfiguration.byDefault()),
+			() -> super.invalidateToken(IOpipeConfiguration.byDefault()),
 			super::baseEmptyFunction);
 	}
 	
