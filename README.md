@@ -41,10 +41,10 @@ supported and take precedence.
  * `com.iopipe.installmethod` or `IOPIPE_INSTALL_METHOD`
  * `com.iopipe.timeoutwindow` or `IOPIPE_TIMEOUT_WINDOW`
    * This time is subtracted from the duration that a lambda may operate on
-     the service, if 
+     the service.
    * If this is zero then the window is disabled.
    * If this is not set then it defaults to `150`.
- * `com.iopipe.token`, `IOPIPE_TOKEN`, or `IOPIPE_CLIENTID`
+ * `com.iopipe.token`, `IOPIPE_TOKEN`
    * This represents the token of the IOPipe collector which is to obtain
      statistics.
    * This is the default token which will be used if no token was specified in
@@ -61,23 +61,9 @@ file, otherwise you may include the JAR file of the library to your project.
 More information on using Java Lambdas on Amazon AWS can be obtained at:
 <https://docs.aws.amazon.com/lambda/latest/dg/java-programming-model.html>.
 
-## Integration Into Your Maven Project With Amazon AWS Lambdas
+## Installation & usage
 
-Note that the instructions here are slightly derived from
-<https://docs.aws.amazon.com/lambda/latest/dg/java-create-jar-pkg-maven-no-ide.html>,
-however they have been slightly modified.
-
-If you do not have a Maven project and you wish to start one, the recommended
-way of doing so is to modify and execute the following:
-
-```
-mvn archetype:generate -DgroupId=com.mycompany.app \
- -DartifactId=my-app -DarchetypeArtifactId=maven-archetype-quickstart \
- -DinteractiveMode=false
-```
-
-In the `pom.xml`, add the following which will bring in the service library
-and its dependencies:
+In the `pom.xml`, add the following block to your `<dependencies>`:
 
 ```
 <dependency>
@@ -87,49 +73,17 @@ and its dependencies:
 </dependency>
 ```
 
-And the following which will allow you to distribute a single JAR which may
-then be uploaded to Amazon's services:
-
-```
-<build>
-  <plugins>
-    <plugin>
-      <groupId>org.apache.maven.plugins</groupId>
-      <artifactId>maven-shade-plugin</artifactId>
-      <version>2.3</version>
-      <configuration>
-        <createDependencyReducedPom>false</createDependencyReducedPom>
-      </configuration>
-      <executions>
-        <execution>
-          <phase>package</phase>
-          <goals>
-            <goal>shade</goal>
-          </goals>
-        </execution>
-      </executions>
-    </plugin>
-  </plugins>
-</build>
-```
-
-Once you have these two in your `pom.xml` you are ready to start using the
-actual classes.
-
-## Using The Classes
-
 There are three ways to use the service:
 
- * Implement `com.iopipe.SimpleRequestHandlerWrapper`.
- * Implement `com.iopipe.SimpleRequestStreamHandlerWrapper`.
- * Using the service directly.
+ * If you are currently implementing `RequestHandler`, implement `com.iopipe.SimpleRequestHandlerWrapper`
+ * If you are currently implementing `RequestStreamHandler`, implement `com.iopipe.SimpleRequestStreamHandlerWrapper`
+ * You may also interact with IOpipe directly
 
 ### Implement `com.iopipe.SimpleRequestHandlerWrapper`.
 
 This class provides an implementation of `RequestHandler<I, O>`.
 
- * Add the following import statements:
-   * `import com.amazonaws.services.lambda.runtime.Context;`
+ * Add the following import statement:
    * `import com.iopipe.SimpleRequestHandlerWrapper;`
  * Add a class which extends:
    * `SimpleRequestHandlerWrapper<I, O>`
@@ -180,4 +134,3 @@ following command:
 `pack200 -r -G file.jar`
 
 Deployment is the same as other Java programs on the Amazon Lambda platform.
-
