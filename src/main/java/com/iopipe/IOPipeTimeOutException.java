@@ -5,7 +5,7 @@ package com.iopipe;
  *
  * @since 2017/12/16
  */
-public class IOPipeTimeOutException
+public class IOpipeTimeOutException
 	extends RuntimeException
 {
 	/**
@@ -14,7 +14,7 @@ public class IOPipeTimeOutException
 	 * @param __m The message to use.
 	 * @since 2017/12/16
 	 */
-	public IOPipeTimeOutException(String __m)
+	public IOpipeTimeOutException(String __m)
 	{
 		super(__m);
 	}

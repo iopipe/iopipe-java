@@ -43,7 +43,7 @@ public abstract class SimpleRequestStreamHandlerWrapper
 	{
 		try
 		{
-			IOPipeService.instance().<Object>run(__context,
+			IOpipeService.instance().run(__context,
 				() ->
 				{
 					try

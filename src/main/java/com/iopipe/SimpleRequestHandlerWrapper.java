@@ -34,7 +34,7 @@ public abstract class SimpleRequestHandlerWrapper<I, O>
 	@Override
 	public final O handleRequest(I __input, Context __context)
 	{
-		return IOPipeService.instance().<O>run(__context,
+		return IOpipeService.instance().<O>run(__context,
 			() -> this.wrappedHandleRequest(__input, __context));
 	}
 }

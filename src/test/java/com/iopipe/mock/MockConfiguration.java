@@ -1,8 +1,8 @@
 package com.iopipe.mock;
 
 import com.iopipe.http.RemoteRequest;
-import com.iopipe.IOPipeConfiguration;
-import com.iopipe.IOPipeConfigurationBuilder;
+import com.iopipe.IOpipeConfiguration;
+import com.iopipe.IOpipeConfigurationBuilder;
 import java.util.function.Consumer;
 import junit.framework.TestCase;
 
@@ -16,7 +16,7 @@ public final class MockConfiguration
 {
 	/** This is the token which is considered to be valid for the service. */
 	public static final String VALID_TOKEN =
-		"ThisIsNotARealIOPipeTokenAndIsUsedForTesting";
+		"ThisIsNotARealIOpipeTokenAndIsUsedForTesting";
 	
 	/** This is an invalid project token. */
 	public static final String INVALID_TOKEN =
@@ -39,10 +39,10 @@ public final class MockConfiguration
 	 * @return A new test configuration.
 	 * @since 2017/12/13
 	 */
-	public static final IOPipeConfiguration testConfig(boolean __enabled,
+	public static final IOpipeConfiguration testConfig(boolean __enabled,
 		Consumer<RemoteRequest> __rrh)
 	{
-		IOPipeConfigurationBuilder rv = new IOPipeConfigurationBuilder();
+		IOpipeConfigurationBuilder rv = new IOpipeConfigurationBuilder();
 		
 		rv.setEnabled(__enabled);
 		rv.setDebugStream(System.err);

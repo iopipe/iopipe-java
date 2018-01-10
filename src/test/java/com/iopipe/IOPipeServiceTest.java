@@ -12,11 +12,11 @@ import static com.iopipe.mock.MockConfiguration.testConfig;
 import static org.junit.Assert.*;
 
 /**
- * This tests the {@link IOPipeServiceTest} class.
+ * This tests the {@link IOpipeServiceTest} class.
  *
  * @since 2017/12/13
  */
-public class IOPipeServiceTest
+public class IOpipeServiceTest
 	extends GenericTester
 {
 	/**
@@ -28,7 +28,7 @@ public class IOPipeServiceTest
 	@Test
 	public void testConstruction()
 	{
-		IOPipeService sv = new IOPipeService(testConfig(true, null));
+		IOpipeService sv = new IOpipeService(testConfig(true, null));
 	}
 	
 	/**
