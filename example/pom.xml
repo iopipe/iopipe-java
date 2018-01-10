@@ -6,7 +6,10 @@
   <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
   <name>iopipe-hello-world</name>
-  <url>https://github.com/iopipe/iopipe-java-core</url>
+  <url>https://www.iopipe.com/</url>
+  <scm>
+    <url>https://github.com/iopipe/iopipe-java-core</url>
+  </scm>
   <licenses>
     <license>
       <name>Apache License, Version 2.0</name>
