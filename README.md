@@ -53,6 +53,7 @@ Log4j2 is used for debugging output and it can be configured via enviroment
 variable. Information on its configuration is at:
 
  * <https://logging.apache.org/log4j/2.x/manual/configuration.html>
+ * <https://docs.aws.amazon.com/lambda/latest/dg/java-logging.html>
 
 The associated package is `com.iopipe`.
 
@@ -64,6 +65,9 @@ file, otherwise you may include the JAR file of the library to your project.
 
 More information on using Java Lambdas on Amazon AWS can be obtained at:
 <https://docs.aws.amazon.com/lambda/latest/dg/java-programming-model.html>.
+
+Logging can be enabled by following the instructions at:
+<https://docs.aws.amazon.com/lambda/latest/dg/java-logging.html>.
 
 ## Installation & usage
 
