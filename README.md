@@ -30,9 +30,6 @@ quoted names in UPPER_CASE_WITH_UNDERSCORE) are
 supported, however system properties (which start with `com.iopipe`) are also
 supported and take precedence.
 
- * `com.iopipe.debug` or `IOPIPE_DEBUG`
-   * If this is set to `true` then
-   * If this is not set then it defaults to `false`.
  * `com.iopipe.enabled` or `IOPIPE_ENABLED`
    * If this is set and if the value is `true` (ignoring case) then the library
      will be enabled.
@@ -51,6 +48,13 @@ supported and take precedence.
      the client.
    * If you need help looking for your token you can visit:
      [Find your project token](https://dashboard.iopipe.com/install).
+
+Log4j2 is used for debugging output and it can be configured via enviroment
+variable. Information on its configuration is at:
+
+ * <https://logging.apache.org/log4j/2.x/manual/configuration.html>
+
+The associated package is `com.iopipe`.
 
 # Integration With Your Project
 
@@ -73,10 +77,22 @@ In the `pom.xml`, add the following block to your `<dependencies>`:
 </dependency>
 ```
 
+For debugging on Amazon AWS, the additional dependency is required:
+
+```
+<dependency>
+  <groupId>com.amazonaws</groupId>
+  <artifactId>aws-lambda-java-log4j2</artifactId>
+  <version>1.0.0</version>
+</dependency>
+```
+
 There are three ways to use the service:
 
- * If you are currently implementing `RequestHandler`, implement `com.iopipe.SimpleRequestHandlerWrapper`
- * If you are currently implementing `RequestStreamHandler`, implement `com.iopipe.SimpleRequestStreamHandlerWrapper`
+ * If you are currently implementing `RequestHandler`,
+   implement `com.iopipe.SimpleRequestHandlerWrapper`
+ * If you are currently implementing `RequestStreamHandler`,
+   implement `com.iopipe.SimpleRequestStreamHandlerWrapper`
  * You may also interact with IOpipe directly
 
 ### Implement `com.iopipe.SimpleRequestHandlerWrapper`.

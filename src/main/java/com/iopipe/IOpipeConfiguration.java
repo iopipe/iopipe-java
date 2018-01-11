@@ -5,9 +5,11 @@ import com.iopipe.http.RemoteConnectionFactory;
 import com.iopipe.http.ServiceConnectionFactory;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
-import java.io.PrintStream;
 import java.util.Objects;
 import okhttp3.HttpUrl;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * This class contains the configuration for IOpipe and specifies the settings
@@ -19,14 +21,15 @@ import okhttp3.HttpUrl;
  */
 public final class IOpipeConfiguration
 {
+	/** Used for logging. */
+	private static final Logger _LOGGER =
+		LogManager.getLogger(IOpipeConfiguration.class);
+	
 	/** The disabled configuration. */
 	public static final IOpipeConfiguration DISABLED_CONFIG;
 	
 	/** Default configuration to use. */
 	public static final IOpipeConfiguration DEFAULT_CONFIG;
-	
-	/** Debug output stream, is optional. */
-	protected final PrintStream debug;
 	
 	/** Should the service be enabled? */
 	protected final boolean enabled;
@@ -59,7 +62,6 @@ public final class IOpipeConfiguration
 		cb.setEnabled(false);
 		cb.setProjectToken("Disabled");
 		cb.setInstallMethod("Disabled");
-		cb.setDebugStream(null);
 		cb.setRemoteConnectionFactory(new NullConnectionFactory());
 		cb.setTimeOutWindow(0);
 		
@@ -70,10 +72,12 @@ public final class IOpipeConfiguration
 		IOpipeConfiguration use = DISABLED_CONFIG;
 		try
 		{
+			_LOGGER.debug("Initializing default configuration");
 			use = IOpipeConfiguration.byDefault();
 		}
 		catch (IllegalArgumentException e)
 		{
+			_LOGGER.error("Failed to initialize default configuration.", e);
 		}
 		DEFAULT_CONFIG = use;
 	}
@@ -93,7 +97,6 @@ public final class IOpipeConfiguration
 		if (__builder == null)
 			throw new NullPointerException();
 		
-		PrintStream debug = __builder._debug;
 		boolean enabled = __builder._enabled;
 		String token = __builder._token;
 		RemoteConnectionFactory connectionfactory =
@@ -113,7 +116,6 @@ public final class IOpipeConfiguration
 			throw new IllegalArgumentException("The timeout window cannot " +
 				"be negative.");
 		
-		this.debug = debug;
 		this.enabled = enabled;
 		this.token = token;
 		this.connectionfactory = connectionfactory;
@@ -135,8 +137,7 @@ public final class IOpipeConfiguration
 			return false;
 		
 		IOpipeConfiguration o = (IOpipeConfiguration)__o;
-		return Objects.equals(this.debug, o.debug) &&
-			this.enabled == o.enabled &&
+		return this.enabled == o.enabled &&
 			Objects.equals(this.token, o.token) &&
 			Objects.equals(this.connectionfactory, o.connectionfactory) &&
 			this.timeoutwindow == o.timeoutwindow &&
@@ -152,32 +153,6 @@ public final class IOpipeConfiguration
 	public final RemoteConnectionFactory getRemoteConnectionFactory()
 	{
 		return this.connectionfactory;
-	}
-	
-	/**
-	 * Returns the debug stream where debugging information is printed to.
-	 *
-	 * @return The stream used for debugging.
-	 * @since 2017/12/13
-	 */
-	public final PrintStream getDebugStream()
-	{
-		return this.debug;
-	}
-	
-	/**
-	 * Returns a stream which can be used to report fatal errors, if a debug
-	 * stream was not specified then standard error is used.
-	 *
-	 * @return The debug stream or standard error.
-	 * @since 2017/12/15
-	 */
-	public final PrintStream getFatalErrorStream()
-	{
-		PrintStream rv = this.debug;
-		if (rv != null)
-			return rv;
-		return System.err;
 	}
 	
 	/**
@@ -221,8 +196,7 @@ public final class IOpipeConfiguration
 	@Override
 	public final int hashCode()
 	{
-		return Objects.hashCode(this.debug) ^
-			Boolean.hashCode(this.enabled) ^
+		return Boolean.hashCode(this.enabled) ^
 			Objects.hashCode(this.token) ^
 			Objects.hashCode(this.connectionfactory) ^
 			this.timeoutwindow ^
@@ -253,9 +227,9 @@ public final class IOpipeConfiguration
 		
 		if (ref == null || null == (rv = ref.get()))
 			this._string = new WeakReference<>((rv =
-				String.format("{debug=%s, enabled=%s, token=%s, " +
+				String.format("{enabled=%s, token=%s, " +
 					"connectionfactory=%s, timeoutwindow=%d, " +
-					"installmethod=%s}", this.debug, this.enabled,
+					"installmethod=%s}", this.enabled,
 					this.token, this.connectionfactory, this.timeoutwindow,
 					this.installmethod)));
 		
@@ -281,11 +255,6 @@ public final class IOpipeConfiguration
 			System.getenv("IOPIPE_ENABLED")), "true"))));
 		if (enabled)
 		{
-			PrintStream debugstream = null;
-			if (Boolean.valueOf(System.getProperty("com.iopipe.debug",
-				System.getenv("IOPIPE_DEBUG"))))
-				rv.setDebugStream((debugstream = System.err));
-		
 			rv.setProjectToken(System.getProperty("com.iopipe.token",
 				Objects.toString(System.getenv("IOPIPE_TOKEN"),
 					System.getenv("IOPIPE_CLIENTID"))));
@@ -325,9 +294,8 @@ public final class IOpipeConfiguration
 					addPathSegment("v0").
 					addPathSegment("event").
 					build())));
-		
-			if (debugstream != null)
-				debugstream.printf("IOpipe: Remote URL `%s`%n", url);
+			
+			_LOGGER.debug(() -> "Remote URL: " + url);
 		}
 		
 		// Fallback to disabled configuration

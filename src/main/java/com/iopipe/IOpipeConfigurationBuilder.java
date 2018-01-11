@@ -1,7 +1,6 @@
 package com.iopipe;
 
 import com.iopipe.http.RemoteConnectionFactory;
-import java.io.PrintStream;
 import java.net.URI;
 import okhttp3.HttpUrl;
 
@@ -19,9 +18,6 @@ public class IOpipeConfigurationBuilder
 	
 	/** The project token. */
 	volatile String _token;
-	
-	/** Debug stream, this is optional. */
-	volatile PrintStream _debug;
 	
 	/** The factory to use for connections. */
 	volatile RemoteConnectionFactory _connectionfactory;
@@ -57,7 +53,6 @@ public class IOpipeConfigurationBuilder
 		
 		this._enabled = __c.isEnabled();
 		this._token = __c.getProjectToken();
-		this._debug = __c.getDebugStream();
 		this._connectionfactory = __c.getRemoteConnectionFactory();
 		this._timeoutwindow = __c.getTimeOutWindow();
 		this._installmethod = __c.getInstallMethod();
@@ -76,18 +71,6 @@ public class IOpipeConfigurationBuilder
 		throws IllegalArgumentException
 	{
 		return new IOpipeConfiguration(this);
-	}
-	
-	/**
-	 * Specifies that debugging should be enabled and that all debugging output
-	 * is to be written to the given stream.
-	 *
-	 * @param __ps The stream to print debugging messages to.
-	 * @since 2017/12/13
-	 */
-	public final void setDebugStream(PrintStream __ps)
-	{
-		this._debug = __ps;
 	}
 	
 	/**

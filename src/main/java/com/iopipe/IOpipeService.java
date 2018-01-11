@@ -11,6 +11,8 @@ import java.io.Closeable;
 import java.io.PrintStream;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * This class provides a single connection to the IOpipe service which may then
@@ -27,6 +29,10 @@ import java.util.function.Supplier;
  */
 public final class IOpipeService
 {
+	/** Logging. */
+	private static final Logger _LOGGER =
+		LogManager.getLogger(IOpipeService.class);
+	
 	/** This is used to detect cold starts. */
 	static final AtomicBoolean _THAWED =
 		new AtomicBoolean();
@@ -94,7 +100,7 @@ public final class IOpipeService
 			// Cannot report error to IOpipe so print to the console
 			catch (RemoteException e)
 			{
-				e.printStackTrace(__config.getFatalErrorStream());
+				_LOGGER.error("Could not connect to the remote server.", e);
 			}
 		
 		// If the connection failed, use one which does nothing
@@ -169,10 +175,8 @@ public final class IOpipeService
 			return __func.get();
 		}
 		
-		PrintStream debug = config.getDebugStream();
-		if (debug != null)
-			debug.printf("IOpipe: Invoking function %08x%n",
-				System.identityHashCode(__context));
+		_LOGGER.debug(() -> String.format("Invoking context %08x",
+			System.identityHashCode(__context)));
 		
 		// Is this coldstarted?
 		boolean coldstarted = !IOpipeService._THAWED.getAndSet(true);
@@ -255,16 +259,13 @@ public final class IOpipeService
 		try
 		{
 			// Report what is to be sent
-			PrintStream debug = config.getDebugStream();
-			if (debug != null)
-				debug.printf("IOpipe: Send: %s%n", __r);
+			_LOGGER.debug(() -> "Send: " + __r);
 			
 			RemoteResult result = this.connection.send(__r);
 			
 			// Report what was received
-			if (debug != null)
-				debug.printf("IOpipe: Result %d: %s%n", result.code(),
-					result.body());
+			_LOGGER.debug(() -> "Recv (" + result.code() + "): " +
+				result.body());
 			
 			// Only the 200 range is valid for okay responses
 			if ((result.code() / 100) != 2)
@@ -276,7 +277,7 @@ public final class IOpipeService
 		// Failed to write to the server
 		catch (RemoteException e)
 		{
-			e.printStackTrace(this.config.getFatalErrorStream());
+			_LOGGER.error("Could not sent request to server.", e);
 			
 			this._badresultcount++;
 			return new RemoteResult(503, "");
@@ -293,7 +294,11 @@ public final class IOpipeService
 	{
 		IOpipeService rv = _INSTANCE;
 		if (rv == null)
+		{
+			_LOGGER.debug("Initializing new service instance.");
+			
 			_INSTANCE = (rv = new IOpipeService());
+		}
 		return rv;
 	}
 }

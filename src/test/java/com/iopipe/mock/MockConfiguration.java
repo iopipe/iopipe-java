@@ -45,7 +45,6 @@ public final class MockConfiguration
 		IOpipeConfigurationBuilder rv = new IOpipeConfigurationBuilder();
 		
 		rv.setEnabled(__enabled);
-		rv.setDebugStream(System.err);
 		rv.setProjectToken(MockConfiguration.VALID_TOKEN);
 		rv.setRemoteConnectionFactory(new MockConnectionFactory(__rrh));
 		rv.setTimeOutWindow(150);
