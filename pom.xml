@@ -8,7 +8,9 @@
   <name>IOpipe Java Wrapper</name>
   <url>https://www.iopipe.com/</url>
   <scm>
+    <connection>scm:git:https://github.com/iopipe/iopipe-java-core.git</connection>
     <url>https://github.com/iopipe/iopipe-java-core</url>
+    <tag>HEAD</tag>
   </scm>
   <licenses>
     <license>
@@ -26,8 +28,20 @@
     This project provides analytics and distributed tracing for event-driven
     applications running on AWS Lambda using the IOpipe service.
   </description>
+  <distributionManagement>
+    <repository>
+      <id>bintray</id>
+      <name>bintray</name>
+      <url>https://api.bintray.com/maven/${env.BINTRAY_REPO_OWNER}/${env.BINTRAY_REPO}/${project.artifactId}/;publish=1
+      </url>
+    </repository>
+  </distributionManagement>
   <build>
     <plugins>
+      <plugin>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>2.5.3</version>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -80,4 +94,3 @@
   <!-- Note that there are no build steps for deployment because this is a
        supporting library and NOT a deployment library. -->
 </project>
-
