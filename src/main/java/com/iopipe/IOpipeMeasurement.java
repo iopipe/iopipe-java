@@ -9,6 +9,7 @@ import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -49,6 +50,13 @@ public final class IOpipeMeasurement
 	/** The context this is taking the measurement for. */
 	protected final Context context;
 	
+	/**
+	 * Performance entries which have been added to the measurement, this
+	 * field is locked since multiple threads may be adding entries.
+	 */
+	private final List<TracePerformanceEntry> _perfentries =
+		new ArrayList<>();
+	
 	/** The exception which may have been thrown. */
 	private volatile Throwable _thrown;
 	
@@ -75,6 +83,27 @@ public final class IOpipeMeasurement
 		
 		this.config = __config;
 		this.context = __context;
+	}
+	
+	/**
+	 * Adds a single performance entry to the report.
+	 *
+	 * @param __e The entry to add to the report.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/01/19
+	 */
+	public void addPerformanceEntry(TracePerformanceEntry __e)
+		throws NullPointerException
+	{
+		if (__e == null)
+			throw new NullPointerException();
+		
+		// Multiple threads could be adding entries
+		List<TracePerformanceEntry> perfentries = this._perfentries;
+		synchronized (perfentries)
+		{
+			throw new Error("TODO");
+		}
 	}
 	
 	/**
@@ -279,6 +308,18 @@ public final class IOpipeMeasurement
 			
 			gen.write("coldstart", this._coldstart);
 			
+			// Multiple threads may have stored performance entries, so it
+			// is possible that the list may be in a state where it is
+			// inconsistent due to cache differences
+			List<TracePerformanceEntry> perfentries = this._perfentries;
+			synchronized (perfentries)
+			{
+				if (!perfentries.isEmpty())
+				{
+					throw new Error("TODO");
+				}
+			}
+			
 			// Finished
 			gen.writeEnd();
 			gen.flush();
@@ -313,6 +354,64 @@ public final class IOpipeMeasurement
 	public Throwable getThrown()
 	{
 		return this._thrown;
+	}
+	
+	/**
+	 * Creates a new mark which represents a single point in time and adds it
+	 * to the report.
+	 *
+	 * @param __name The name of the mark to create.
+	 * @return The created mark.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/01/19
+	 */
+	public TraceMark mark(String __name)
+		throws NullPointerException
+	{
+		if (__name == null)
+			throw new NullPointerException();
+		
+		throw new Error("TODO");
+	}
+	
+	/**
+	 * Creates a new instance of a class which is used to measure how long
+	 * a block of code has executed for. The returned object is
+	 * {@link AutoCloseable} and it is highly recommended to use
+	 * try-with-resources when utilizing it. When the method
+	 * {@link AutoCloseable#close()} is called the measurement will be
+	 * recorded.
+	 *
+	 * @param __name The name of the measurement.
+	 * @return NullPointerException On null arguments.
+	 * @since 2018/01/19
+	 */
+	public TraceMeasurement measure(String __name)
+		throws NullPointerException
+	{
+		if (__name == null)
+			throw new NullPointerException();
+		
+		throw new Error("TODO");
+	}
+	
+	/**
+	 * Creates a measurement between the two marks.
+	 *
+	 * @param __a The first mark.
+	 * @param __b The second mark.
+	 * @return A performance entry which defines a measurement between
+	 * the two marks.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/01/19
+	 */
+	public TracePerformanceEntry measure(TraceMark __a, TraceMark __b)
+		throws NullPointerException
+	{
+		if (__a == null || __b == null)
+			throw new NullPointerException();
+		
+		throw new Error("TODO");
 	}
 	
 	/**
