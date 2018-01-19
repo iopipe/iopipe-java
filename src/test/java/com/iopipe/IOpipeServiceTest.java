@@ -131,7 +131,36 @@ public class IOpipeServiceTest
 	@Test
 	public void testMeasurement()
 	{
-		throw new Error("TODO");
+		AtomicBoolean requestmade = new AtomicBoolean(),
+			hasperformanceentries = new AtomicBoolean(),
+			hasfirstmeasurement = new AtomicBoolean();
+		
+		super.runTest("testMeasurement", false, () -> testConfig(true, (__r) ->
+			{
+				requestmade.set(true);
+				
+				JsonObject o = (JsonObject)__r.bodyValue();
+				JsonValue pev;
+				if (null != (pev = o.get("performanceEntries")))
+				{
+					hasperformanceentries.set(true);
+					
+					JsonArray pea = (JsonArray)pev;
+					if (pea.size() >= 1)
+					{
+						JsonObject q = (JsonObject)pea.get(0);
+						
+						if ("measurement".equals(Objects.toString(
+							q.get("entryType"))))
+							hasfirstmeasurement.set(true);
+					}
+				}
+			}),
+			super::baseMeasurement);
+		
+		assertFalse("requestmade", requestmade.get());
+		assertFalse("hasperformanceentries", hasperformanceentries.get());
+		assertFalse("hasfirstmeasurement", hasfirstmeasurement.get());
 	}
 	
 	/**
