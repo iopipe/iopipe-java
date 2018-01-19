@@ -1,9 +1,12 @@
 package com.iopipe;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import com.iopipe.IOpipeMeasurement;
 import com.iopipe.mock.MockConfiguration;
 import com.iopipe.mock.MockContext;
 import com.iopipe.mock.MockException;
+import com.iopipe.TraceMark;
+import com.iopipe.TraceMeasurement;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
@@ -64,6 +67,30 @@ public abstract class GenericTester
 			});
 		
 		assertTrue("ranfunc", ranfunc.get());
+	}
+	
+	/**
+	 * Test marking.
+	 *
+	 * @param __sv The running service.
+	 * @param __c The context.
+	 * @since 2018/01/19
+	 */
+	public final void baseMark(IOpipeService __sv, Context __c)
+	{
+		throw new Error("TODO");
+	}
+	
+	/**
+	 * Test measurements.
+	 *
+	 * @param __sv The running service.
+	 * @param __c The context.
+	 * @since 2018/01/19
+	 */
+	public final void baseMeasurement(IOpipeService __sv, Context __c)
+	{
+		throw new Error("TODO");
 	}
 	
 	/**

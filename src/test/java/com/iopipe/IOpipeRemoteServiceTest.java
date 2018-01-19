@@ -94,6 +94,32 @@ public class IOpipeRemoteServiceTest
 	}
 	
 	/**
+	 * Tests marking.
+	 *
+	 * @since 2018/01/19
+	 */
+	@Test
+	public void testMark()
+	{
+		assumeTrue(ENABLE_TESTS);
+		
+		throw new Error("TODO");
+	}
+	
+	/**
+	 * Tests measurements.
+	 *
+	 * @since 2018/01/19
+	 */
+	@Test
+	public void testMeasurement()
+	{
+		assumeTrue(ENABLE_TESTS);
+		
+		throw new Error("TODO");
+	}
+	
+	/**
 	 * Tests throwing of an exception.
 	 *
 	 * @since 2017/12/17

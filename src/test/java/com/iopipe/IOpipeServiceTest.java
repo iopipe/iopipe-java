@@ -80,6 +80,28 @@ public class IOpipeServiceTest
 	}
 	
 	/**
+	 * Tests marking.
+	 *
+	 * @since 2018/01/19
+	 */
+	@Test
+	public void testMark()
+	{
+		throw new Error("TODO");
+	}
+	
+	/**
+	 * Tests measurements.
+	 *
+	 * @since 2018/01/19
+	 */
+	@Test
+	public void testMeasurement()
+	{
+		throw new Error("TODO");
+	}
+	
+	/**
 	 * Tests throwing of an exception.
 	 *
 	 * @since 2017/12/15
