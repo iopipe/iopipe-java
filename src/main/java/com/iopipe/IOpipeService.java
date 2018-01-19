@@ -212,7 +212,7 @@ public final class IOpipeService
 		{
 			rt = e;
 			
-			measurement.setThrown(e);
+			measurement.__setThrown(e);
 		}
 		
 		// Indicate that execution has finished to the timeout manager
@@ -224,8 +224,8 @@ public final class IOpipeService
 				watchdog.__finished();
 		}
 		
-		measurement.setDuration(ticker);
-		measurement.setColdStart(coldstarted);
+		measurement.__setDuration(ticker);
+		measurement.__setColdStart(coldstarted);
 		
 		// Generate and send result to server
 		if (watchdog == null || !watchdog._generated.getAndSet(true))

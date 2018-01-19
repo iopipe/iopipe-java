@@ -323,7 +323,7 @@ public final class IOpipeMeasurement
 	 * @param __cold If {@code true} then the execution follows a cold start.
 	 * @since 2017/12/20
 	 */
-	public void setColdStart(boolean __cold)
+	void __setColdStart(boolean __cold)
 	{
 		this._coldstart = __cold;
 	}
@@ -334,7 +334,7 @@ public final class IOpipeMeasurement
 	 * @param __ns The execution duration in nanoseconds.
 	 * @since 2017/12/15
 	 */
-	public void setDuration(long __ns)
+	void __setDuration(long __ns)
 	{
 		this._duration = __ns;
 	}
@@ -345,7 +345,7 @@ public final class IOpipeMeasurement
 	 * @param __t The generated throwable.
 	 * @since 2017/12/15
 	 */
-	public void setThrown(Throwable __t)
+	void __setThrown(Throwable __t)
 	{
 		this._thrown = __t;
 	}

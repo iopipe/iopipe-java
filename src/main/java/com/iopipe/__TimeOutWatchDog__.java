@@ -151,7 +151,7 @@ final class __TimeOutWatchDog__
 				// Send report to the service
 				IOpipeMeasurement measurement = new IOpipeMeasurement(config,
 					context);
-				measurement.setThrown(reported);
+				measurement.__setThrown(reported);
 				this.service.__sendRequest(measurement.buildRequest());
 				
 				// Do not need to execute anymore
