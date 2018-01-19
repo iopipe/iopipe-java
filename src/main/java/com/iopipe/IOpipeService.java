@@ -10,6 +10,7 @@ import com.iopipe.http.RemoteResult;
 import java.io.Closeable;
 import java.io.PrintStream;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -152,14 +153,16 @@ public final class IOpipeService
 	 *
 	 * @param <R> The value to return.
 	 * @param __context The context provided by the AWS service.
-	 * @param __func The function to call which will get a generated report.
+	 * @param __func The lambda function to execute, measure, and generate a
+	 * report for.
 	 * @return The returned value.
 	 * @throws Error If the called function threw an error.
 	 * @throws NullPointerException If no function was specified.
 	 * @throws RuntimeException If the called function threw an exception.
 	 * @since 2017/12/14
 	 */
-	public final <R> R run(Context __context, Supplier<R> __func)
+	public final <R> R run(Context __context,
+		Function<IOpipeExecution, R> __func)
 		throws Error, NullPointerException, RuntimeException
 	{
 		if (__context == null || __func == null)
@@ -167,12 +170,20 @@ public final class IOpipeService
 		
 		int execcount = ++this._execcount;
 		
+		// Setup execution information
+		IOpipeMeasurement measurement = new IOpipeMeasurement(config,
+			__context);
+		IOpipeExecution exec = new IOpipeExecution(this, config, __context,
+			measurement);
+		
 		// If disabled, just run the function
 		IOpipeConfiguration config = this.config;
 		if (!config.isEnabled())
 		{
+			// Disabled lambdas could still rely on measurements, despite them
+			// not doing anything useful at all
 			this._badresultcount++;
-			return __func.get();
+			return __func.apply(exec);
 		}
 		
 		_LOGGER.debug(() -> String.format("Invoking context %08x",
@@ -198,12 +209,9 @@ public final class IOpipeService
 		
 		// Keep track of how long execution takes
 		long ticker = System.nanoTime();
-		boolean timedout = false;
-		IOpipeMeasurement measurement = new IOpipeMeasurement(config,
-			__context);
 		try
 		{
-			rv = __func.get();
+			rv = __func.apply(exec);
 		}
 		
 		// An exception or error was thrown, so that will be reported

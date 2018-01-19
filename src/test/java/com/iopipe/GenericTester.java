@@ -1,6 +1,7 @@
 package com.iopipe;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import com.iopipe.IOpipeExecution;
 import com.iopipe.IOpipeMeasurement;
 import com.iopipe.mock.MockConfiguration;
 import com.iopipe.mock.MockContext;
@@ -38,7 +39,7 @@ public abstract class GenericTester
 	{
 		AtomicBoolean ranfunc = new AtomicBoolean();
 		
-		__sv.<Object>run(__c, () ->
+		__sv.<Object>run(__c, (__exec) ->
 			{
 				ranfunc.set(true);
 				return null;
@@ -60,7 +61,7 @@ public abstract class GenericTester
 	{
 		AtomicBoolean ranfunc = new AtomicBoolean();
 		
-		__sv.<Object>run(__c, () ->
+		__sv.<Object>run(__c, (__exec) ->
 			{
 				ranfunc.set(true);
 				return null;
@@ -107,7 +108,7 @@ public abstract class GenericTester
 		
 		try
 		{
-			__sv.<Object>run(__c, () ->
+			__sv.<Object>run(__c, (__exec) ->
 				{
 					ranfunc.set(true);
 					throw new MockException("Something went wrong!");
@@ -136,7 +137,7 @@ public abstract class GenericTester
 		
 		try
 		{
-			__sv.<Object>run(__c, () ->
+			__sv.<Object>run(__c, (__exec) ->
 				{
 					ranfunc.set(true);
 					throw new MockException("Not our fault!",
@@ -163,7 +164,7 @@ public abstract class GenericTester
 	{
 		AtomicBoolean ranfunc = new AtomicBoolean();
 		
-		__sv.<Object>run(__c, () ->
+		__sv.<Object>run(__c, (__exec) ->
 			{
 				ranfunc.set(true);
 				
