@@ -5,7 +5,11 @@ import com.iopipe.mock.MockContext;
 import com.iopipe.mock.MockException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Objects;
+import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.json.JsonStructure;
+import javax.json.JsonValue;
 import org.junit.Test;
 
 import static com.iopipe.mock.MockConfiguration.testConfig;
@@ -87,7 +91,36 @@ public class IOpipeServiceTest
 	@Test
 	public void testMark()
 	{
-		throw new Error("TODO");
+		AtomicBoolean requestmade = new AtomicBoolean(),
+			hasperformanceentries = new AtomicBoolean(),
+			hasfirstmark = new AtomicBoolean();
+		
+		super.runTest("testMark", false, () -> testConfig(true, (__r) ->
+			{
+				requestmade.set(true);
+				
+				JsonObject o = (JsonObject)__r.bodyValue();
+				JsonValue pev;
+				if (null != (pev = o.get("performanceEntries")))
+				{
+					hasperformanceentries.set(true);
+					
+					JsonArray pea = (JsonArray)pev;
+					if (pea.size() >= 1)
+					{
+						JsonObject q = (JsonObject)pea.get(0);
+						
+						if ("mark".equals(Objects.toString(
+							q.get("entryType"))))
+							hasfirstmark.set(true);
+					}
+				}
+			}),
+			super::baseMark);
+		
+		assertFalse("requestmade", requestmade.get());
+		assertFalse("hasperformanceentries", hasperformanceentries.get());
+		assertFalse("hasfirstmark", hasfirstmark.get());
 	}
 	
 	/**

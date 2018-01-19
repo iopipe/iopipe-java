@@ -103,7 +103,8 @@ public class IOpipeRemoteServiceTest
 	{
 		assumeTrue(ENABLE_TESTS);
 		
-		throw new Error("TODO");
+		super.runTest("testMark", false, null,
+			super::baseMark);
 	}
 	
 	/**
@@ -116,7 +117,8 @@ public class IOpipeRemoteServiceTest
 	{
 		assumeTrue(ENABLE_TESTS);
 		
-		throw new Error("TODO");
+		super.runTest("testMeasurement", false, null,
+			super::baseMeasurement);
 	}
 	
 	/**
