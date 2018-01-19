@@ -1,6 +1,7 @@
 package com.iopipe.examples;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import com.iopipe.IOpipeExecution;
 import com.iopipe.SimpleRequestHandlerWrapper;
 
 /**
@@ -17,7 +18,8 @@ public class Hello
 	 * @since 2017/12/13
 	 */
 	@Override
-	protected final String wrappedHandleRequest(String __input, Context __c)
+	protected final String wrappedHandleRequest(IOpipeExecution __exec,
+		String __input)
 	{
 		return "Hello " + __input + "!";
 	}
