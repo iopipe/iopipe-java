@@ -263,13 +263,20 @@ public final class IOpipeService
 			
 			RemoteResult result = this.connection.send(__r);
 			
-			// Report what was received
-			_LOGGER.debug(() -> "Recv (" + result.code() + "): " +
-				result.body());
-			
 			// Only the 200 range is valid for okay responses
 			if ((result.code() / 100) != 2)
+			{
 				this._badresultcount++;
+				
+				// Emit errors for failed requests
+				_LOGGER.error(() -> "Recv (" + result.code() + "): " +
+					result.body());
+			}
+			
+			// Debug log successful requests
+			else
+				_LOGGER.debug(() -> "Recv (" + result.code() + "): " +
+					result.body());
 			
 			return result;
 		}
