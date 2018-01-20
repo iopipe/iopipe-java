@@ -7,11 +7,21 @@ import com.iopipe.http.RemoteConnectionFactory;
 import com.iopipe.http.RemoteException;
 import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RemoteResult;
+import com.iopipe.plugin.IOpipePlugin;
+import com.iopipe.plugin.IOpipePluginExecution;
+import com.iopipe.plugin.IOpipePluginPostExecutable;
+import com.iopipe.plugin.IOpipePluginPreExecutable;
 import java.io.Closeable;
 import java.io.PrintStream;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.ServiceLoader;
+import java.util.Set;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -57,6 +67,19 @@ public final class IOpipeService
 	
 	/** Is the service enabled and working? */
 	protected final boolean enabled;
+	
+	/** All plugins which are known to exist and are actually enabled. */
+	private final Map<Class<? extends IOpipePluginExecution>,
+		IOpipePlugin> _plugins =
+		new HashMap<>();
+	
+	/** Plugins which are pre-exection. */
+	private final Set<IOpipePluginPreExecutable> _pluginspre =
+		new LinkedHashSet<>();
+	
+	/** Plugins which are post-exection. */
+	private final Set<IOpipePluginPostExecutable> _pluginspost =
+		new LinkedHashSet<>();
 	
 	/** The number of times this context has been executed. */
 	private volatile int _execcount;
@@ -111,6 +134,33 @@ public final class IOpipeService
 		this.enabled = enabled;
 		this.connection = connection;
 		this.config = __config;
+		
+		// Load in plugins and initialize ones which are pre execution and
+		// post execution
+		Map<Class<? extends IOpipePluginExecution>, IOpipePlugin> plugins =
+			this._plugins;
+		Set<IOpipePluginPreExecutable> pluginspre = this._pluginspre;
+		Set<IOpipePluginPostExecutable> pluginspost = this._pluginspost;
+		for (IOpipePlugin p : ServiceLoader.<IOpipePlugin>load(
+			IOpipePlugin.class))
+		{
+			try
+			{
+				plugins.put(Objects.<Class<? extends IOpipePluginExecution>>
+					requireNonNull(p.executionClass()), p);
+			}
+			catch (NullPointerException e)
+			{
+				_LOGGER.error("Plugin did not return an execution class.", e);
+				continue;
+			}
+			
+			if (p instanceof IOpipePluginPreExecutable)
+				pluginspre.add((IOpipePluginPreExecutable)p);
+				
+			if (p instanceof IOpipePluginPostExecutable)
+				pluginspost.add((IOpipePluginPostExecutable)p);
+		}
 	}
 	
 	/**
@@ -207,6 +257,18 @@ public final class IOpipeService
 		R rv = null;
 		Throwable rt = null;
 		
+		// Run pre-execution plugins
+		for (IOpipePluginPreExecutable p : this._pluginspre)
+			try
+			{
+				p.preExecute(exec.<IOpipePluginExecution>plugin(
+					IOpipePluginExecution.class));
+			}
+			catch (RuntimeException e)
+			{
+				_LOGGER.error("Could not run pre-executable plugin.", e);
+			}
+		
 		// Keep track of how long execution takes
 		long ticker = System.nanoTime();
 		try
@@ -234,6 +296,18 @@ public final class IOpipeService
 		
 		measurement.__setDuration(ticker);
 		measurement.__setColdStart(coldstarted);
+		
+		// Run post-execution plugins
+		for (IOpipePluginPostExecutable p : this._pluginspost)
+			try
+			{
+				p.postExecute(exec.<IOpipePluginExecution>plugin(
+					IOpipePluginExecution.class));
+			}
+			catch (RuntimeException e)
+			{
+				_LOGGER.error("Could not run post-executable plugin.", e);
+			}
 		
 		// Generate and send result to server
 		if (watchdog == null || !watchdog._generated.getAndSet(true))

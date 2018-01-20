@@ -2,6 +2,8 @@ package com.iopipe;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.iopipe.plugin.IOpipePluginExecution;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class provides access to information and functionality which is
@@ -24,6 +26,11 @@ public final class IOpipeExecution
 	
 	/** The measurement. */
 	protected final IOpipeMeasurement measurement;
+	
+	/** Plugins which currently have an active exection state. */
+	private final Map<Class<? extends IOpipePluginExecution>,
+		IOpipePluginExecution> _active =
+		new HashMap<>();
 	
 	/**
 	 * Initializes the execution information.
