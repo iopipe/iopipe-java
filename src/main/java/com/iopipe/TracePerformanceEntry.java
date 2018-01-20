@@ -1,5 +1,7 @@
 package com.iopipe;
 
+import java.util.Objects;
+
 /**
  * This interface is used as a base for performance entries and is used to
  * allow access to the common attributes for each entry.
@@ -67,7 +69,10 @@ public interface TracePerformanceEntry
 			return (int)Math.max(diff, Integer.MIN_VALUE);
 		else if (diff > 0)
 			return (int)Math.min(diff, Integer.MAX_VALUE);
-		return 0;
+		
+		// Compare by name so that two entries do not occur at the same point
+		return Objects.toString(this.name(), "").compareTo(
+			Objects.toString(__o.name(), ""));
 	}
 	
 	/**

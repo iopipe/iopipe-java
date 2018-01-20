@@ -18,8 +18,27 @@ public final class TraceMeasurement
 	/** The name of this trace. */
 	protected final String name;
 	
+	/** The nano time this measurement was started. */
+	protected final long startnanotime =
+		System.nanoTime();
+	
+	/** The system time this measurement was started. */
+	protected final long starttimemillis =
+		System.currentTimeMillis();
+	
+	/** Has this been closed? */
+	private volatile boolean _closed;
+	
+	/** The ending nano time when this was closed. */
+	private volatile long _endnanotime =
+		System.nanoTime();
+	
+	/** The ending system time when this was closed. */
+	private volatile long _endtimemillis =
+		System.currentTimeMillis();
+	
 	/**
-	 * Initializes the trace
+	 * Initializes the trace measurement.
 	 *
 	 * @param __m Where the measurement will be placed.
 	 * @param __name The name of this trace.
@@ -43,7 +62,15 @@ public final class TraceMeasurement
 	@Override
 	public void close()
 	{
-		throw new Error("TODO");
+		if (!this._closed)
+		{
+			this._closed = true;
+			
+			this._endnanotime = System.nanoTime();
+			this._endtimemillis = System.currentTimeMillis();
+			
+			this.measurement.addPerformanceEntry(this);
+		}
 	}
 	
 	/**
@@ -53,7 +80,7 @@ public final class TraceMeasurement
 	@Override
 	public long endNanoTime()
 	{
-		throw new Error("TODO");
+		return this._endnanotime;
 	}
 	
 	/**
@@ -63,7 +90,42 @@ public final class TraceMeasurement
 	@Override
 	public long endTimeMillis()
 	{
-		throw new Error("TODO");
+		return this._endtimemillis;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @since 2018/01/20
+	 */
+	@Override
+	public boolean equals(Object __o)
+	{
+		if (__o == this)
+			return true;
+		
+		if (!(__o instanceof TraceMeasurement))
+			return false;
+		
+		TraceMeasurement o = (TraceMeasurement)__o;
+		return this.name.equals(o.name) &&
+			this.startnanotime == o.startnanotime &&
+			this.starttimemillis == o.starttimemillis &&
+			this._endnanotime == o._endnanotime &&
+			this._endtimemillis == o._endtimemillis;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @since 2018/01/20
+	 */
+	@Override
+	public int hashCode()
+	{
+		return this.name.hashCode() ^
+			Long.hashCode(this.startnanotime) ^
+			Long.hashCode(this.starttimemillis) ^
+			Long.hashCode(this._endnanotime) ^
+			Long.hashCode(this._endtimemillis);
 	}
 	
 	/**
@@ -73,7 +135,7 @@ public final class TraceMeasurement
 	@Override
 	public String name()
 	{
-		throw new Error("TODO");
+		return this.name;
 	}
 	
 	/**
@@ -83,7 +145,7 @@ public final class TraceMeasurement
 	@Override
 	public long startNanoTime()
 	{
-		throw new Error("TODO");
+		return this.startnanotime;
 	}
 	
 	/**
@@ -93,7 +155,7 @@ public final class TraceMeasurement
 	@Override
 	public long startTimeMillis()
 	{
-		throw new Error("TODO");
+		return this.starttimemillis;
 	}
 	
 	/**
@@ -103,7 +165,7 @@ public final class TraceMeasurement
 	@Override
 	public String type()
 	{
-		throw new Error("TODO");
+		return "measurement";
 	}
 }
 

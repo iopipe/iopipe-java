@@ -13,9 +13,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
 import javax.json.Json;
 import javax.json.JsonException;
 import javax.json.stream.JsonGenerator;
@@ -54,8 +57,8 @@ public final class IOpipeMeasurement
 	 * Performance entries which have been added to the measurement, this
 	 * field is locked since multiple threads may be adding entries.
 	 */
-	private final List<TracePerformanceEntry> _perfentries =
-		new ArrayList<>();
+	private final Set<TracePerformanceEntry> _perfentries =
+		new TreeSet<>();
 	
 	/** The exception which may have been thrown. */
 	private volatile Throwable _thrown;
@@ -99,10 +102,10 @@ public final class IOpipeMeasurement
 			throw new NullPointerException();
 		
 		// Multiple threads could be adding entries
-		List<TracePerformanceEntry> perfentries = this._perfentries;
+		Set<TracePerformanceEntry> perfentries = this._perfentries;
 		synchronized (perfentries)
 		{
-			throw new Error("TODO");
+			perfentries.add(__e);
 		}
 	}
 	
@@ -122,6 +125,9 @@ public final class IOpipeMeasurement
 		// Snapshot system information
 		SystemMeasurement sysinfo = new SystemMeasurement();
 		
+		// The current timestamp
+		long nowtimestamp = System.currentTimeMillis();
+		
 		StringWriter out = new StringWriter();
 		try (JsonGenerator gen = Json.createGenerator(out))
 		{
@@ -138,7 +144,7 @@ public final class IOpipeMeasurement
 			
 			gen.write("processId", sysinfo.pid);
 			gen.write("timestamp", IOpipeConstants.LOAD_TIME);
-			gen.write("timestampEnd", System.currentTimeMillis());
+			gen.write("timestampEnd", nowtimestamp);
 			
 			// AWS Context information
 			gen.writeStartObject("aws");
@@ -311,12 +317,33 @@ public final class IOpipeMeasurement
 			// Multiple threads may have stored performance entries, so it
 			// is possible that the list may be in a state where it is
 			// inconsistent due to cache differences
-			List<TracePerformanceEntry> perfentries = this._perfentries;
+			Set<TracePerformanceEntry> perfentries = this._perfentries;
 			synchronized (perfentries)
 			{
 				if (!perfentries.isEmpty())
 				{
-					throw new Error("TODO");
+					// Entries are stored in an array
+					gen.writeStartArray("performanceEntries");
+					
+					// Write each entry
+					for (TracePerformanceEntry e : perfentries)
+					{
+						gen.writeStartObject();
+						
+						gen.write("name",
+							Objects.toString(e.name(), "unknown"));
+						gen.write("startTime", e.startTimeMillis());
+						gen.write("duration",
+							e.durationNanoTime() / 1_000_000L);
+						gen.write("entryType",
+							Objects.toString(e.type(), "unknown"));
+						gen.write("timestamp", nowtimestamp);
+						
+						gen.writeEnd();
+					}
+					
+					// End of array
+					gen.writeEnd();
 				}
 			}
 			
@@ -371,7 +398,9 @@ public final class IOpipeMeasurement
 		if (__name == null)
 			throw new NullPointerException();
 		
-		throw new Error("TODO");
+		TraceMark rv = new TraceMark(__name);
+		this.addPerformanceEntry(rv);
+		return rv;
 	}
 	
 	/**
@@ -392,7 +421,7 @@ public final class IOpipeMeasurement
 		if (__name == null)
 			throw new NullPointerException();
 		
-		throw new Error("TODO");
+		return new TraceMeasurement(this, __name);
 	}
 	
 	/**

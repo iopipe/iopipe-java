@@ -12,6 +12,14 @@ public final class TraceMark
 	/** The name of this trace. */
 	protected final String name;
 	
+	/** The nano time this mark was created. */
+	protected final long nanotime =
+		System.nanoTime();
+	
+	/** The system time this mark was created. */
+	protected final long timemillis =
+		System.currentTimeMillis();
+	
 	/**
 	 * Initializes the trace mark.
 	 *
@@ -30,12 +38,43 @@ public final class TraceMark
 	
 	/**
 	 * {@inheritDoc}
+	 * @since 2018/01/20
+	 */
+	@Override
+	public boolean equals(Object __o)
+	{
+		if (__o == this)
+			return true;
+		
+		if (!(__o instanceof TraceMark))
+			return false;
+		
+		TraceMark o = (TraceMark)__o;
+		return this.name.equals(o.name) &&
+			this.nanotime == o.nanotime &&
+			this.timemillis == o.timemillis;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @since 2018/01/20
+	 */
+	@Override
+	public int hashCode()
+	{
+		return this.name.hashCode() ^
+			Long.hashCode(this.nanotime) ^
+			Long.hashCode(this.timemillis);
+	}
+	
+	/**
+	 * {@inheritDoc}
 	 * @since 2018/01/19
 	 */
 	@Override
 	public String name()
 	{
-		throw new Error("TODO");
+		return this.name;
 	}
 	
 	/**
@@ -45,7 +84,7 @@ public final class TraceMark
 	@Override
 	public long startNanoTime()
 	{
-		throw new Error("TODO");
+		return this.nanotime;
 	}
 	
 	/**
@@ -55,7 +94,7 @@ public final class TraceMark
 	@Override
 	public long startTimeMillis()
 	{
-		throw new Error("TODO");
+		return this.timemillis;
 	}
 	
 	/**
@@ -65,7 +104,7 @@ public final class TraceMark
 	@Override
 	public String type()
 	{
-		throw new Error("TODO");
+		return "mark";
 	}
 }
 

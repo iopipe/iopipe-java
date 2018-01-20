@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.Objects;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.json.JsonString;
 import javax.json.JsonStructure;
 import javax.json.JsonValue;
 import org.junit.Test;
@@ -110,17 +111,17 @@ public class IOpipeServiceTest
 					{
 						JsonObject q = (JsonObject)pea.get(0);
 						
-						if ("mark".equals(Objects.toString(
-							q.get("entryType"))))
+						if ("mark".equals(((JsonString)(q.get("entryType"))).
+							getString()))
 							hasfirstmark.set(true);
 					}
 				}
 			}),
 			super::baseMark);
 		
-		assertFalse("requestmade", requestmade.get());
-		assertFalse("hasperformanceentries", hasperformanceentries.get());
-		assertFalse("hasfirstmark", hasfirstmark.get());
+		assertTrue("requestmade", requestmade.get());
+		assertTrue("hasperformanceentries", hasperformanceentries.get());
+		assertTrue("hasfirstmark", hasfirstmark.get());
 	}
 	
 	/**
@@ -150,17 +151,17 @@ public class IOpipeServiceTest
 					{
 						JsonObject q = (JsonObject)pea.get(0);
 						
-						if ("measurement".equals(Objects.toString(
-							q.get("entryType"))))
+						if ("measurement".equals(
+							((JsonString)(q.get("entryType"))).getString()))
 							hasfirstmeasurement.set(true);
 					}
 				}
 			}),
 			super::baseMeasurement);
 		
-		assertFalse("requestmade", requestmade.get());
-		assertFalse("hasperformanceentries", hasperformanceentries.get());
-		assertFalse("hasfirstmeasurement", hasfirstmeasurement.get());
+		assertTrue("requestmade", requestmade.get());
+		assertTrue("hasperformanceentries", hasperformanceentries.get());
+		assertTrue("hasfirstmeasurement", hasfirstmeasurement.get());
 	}
 	
 	/**
