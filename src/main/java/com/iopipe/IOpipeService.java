@@ -13,6 +13,7 @@ import com.iopipe.plugin.IOpipePluginPostExecutable;
 import com.iopipe.plugin.IOpipePluginPreExecutable;
 import java.io.Closeable;
 import java.io.PrintStream;
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -222,7 +223,7 @@ public final class IOpipeService
 		
 		// Setup execution information
 		IOpipeMeasurement measurement = new IOpipeMeasurement(config,
-			__context);
+			__context, this);
 		IOpipeExecution exec = new IOpipeExecution(this, config, __context,
 			measurement);
 		
@@ -321,6 +322,36 @@ public final class IOpipeService
 			else
 				throw (RuntimeException)rt;
 		return rv;
+	}
+	
+	/**
+	 * Obtains the plugin.
+	 *
+	 * @param __cl The execution class.
+	 * @return The plugin instance or {@code null} if it is not enabled or
+	 * does not exist.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/01/20
+	 */
+	final IOpipePlugin __plugin(Class<? extends IOpipePluginExecution> __cl)
+		throws NullPointerException
+	{
+		if (__cl == null)
+			throw new NullPointerException();
+		
+		return this._plugins.get(__cl);
+	}
+	
+	/**
+	 * Returns all of the available plugins.
+	 *
+	 * @return All of the plugins.
+	 * @since 2018/01/20
+	 */
+	final IOpipePlugin[] __plugins()
+	{
+		Collection<IOpipePlugin> plugins = this._plugins.values();
+		return plugins.<IOpipePlugin>toArray(new IOpipePlugin[plugins.size()]);
 	}
 	
 	/**

@@ -27,10 +27,13 @@ public interface IOpipePlugin
 	 *
 	 * @param __e The reference to the owning execution for this plugin.
 	 * @return The execution instance for this plugin.
+	 * @throws NullPointerException This may be thrown if the execution is
+	 * required.
 	 * @since 2018/01/20
 	 */
 	public abstract IOpipePluginExecution execute(
-		Reference<IOpipeExecution> __e);
+		Reference<IOpipeExecution> __e)
+		throws NullPointerException;
 	
 	/**
 	 * This returns the class type of the plugin execution object, this is

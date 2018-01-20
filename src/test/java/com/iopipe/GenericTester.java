@@ -6,6 +6,7 @@ import com.iopipe.IOpipeMeasurement;
 import com.iopipe.mock.MockConfiguration;
 import com.iopipe.mock.MockContext;
 import com.iopipe.mock.MockException;
+import com.iopipe.plugin.trace.TraceExecution;
 import com.iopipe.TraceMark;
 import com.iopipe.TraceMeasurement;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -83,7 +84,9 @@ public abstract class GenericTester
 		
 		__sv.<Object>run(__c, (__exec) ->
 			{
-				__exec.measurement().mark("test-mark");
+				// Indirect call, but it tests the plugin
+				__exec.<TraceExecution>plugin(TraceExecution.class).
+					measurement().mark("test-mark");
 				
 				ranfunc.set(true);
 				return null;
@@ -105,7 +108,9 @@ public abstract class GenericTester
 		
 		__sv.<Object>run(__c, (__exec) ->
 			{
-				try (TraceMeasurement tm = __exec.measurement().
+				// Indirect call, but it tests the plugin
+				try (TraceMeasurement tm = __exec.<TraceExecution>plugin(
+					TraceExecution.class).measurement().
 					measure("test-measurement"))
 				{
 					ranfunc.set(true);

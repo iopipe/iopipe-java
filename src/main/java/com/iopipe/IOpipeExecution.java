@@ -1,7 +1,10 @@
 package com.iopipe;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import com.iopipe.plugin.IOpipePlugin;
 import com.iopipe.plugin.IOpipePluginExecution;
+import com.iopipe.plugin.NoSuchPluginException;
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -97,16 +100,49 @@ public final class IOpipeExecution
 	 * @param __cl The class object of the execution state.
 	 * @return The instance of the plugin's execution state.
 	 * @throws ClassCastException If the class type is not valid.
+	 * @throws NoSuchPluginException If the plugin does not exist.
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/01/20
 	 */
 	public final <C extends IOpipePluginExecution> C plugin(Class<C> __cl)
-		throws ClassCastException, NullPointerException
+		throws ClassCastException, NoSuchPluginException, NullPointerException
 	{
 		if (__cl == null)
 			throw new NullPointerException();
 		
-		throw new Error("TODO");
+		// Lock due to multiple threads
+		Map<Class<? extends IOpipePluginExecution>, IOpipePluginExecution>
+			active = this._active;
+		synchronized (active)
+		{
+			// Need to create the plugin if it does not exist
+			IOpipePluginExecution rv = active.get(__cl);
+			if (rv == null)
+			{
+				// Was pre-cached to not exist
+				if (active.containsKey(__cl))
+					throw new NoSuchPluginException(String.format(
+						"No plugin exists for %s.", __cl));
+				
+				// Cache no plugin
+				IOpipePlugin plugin = this.service.__plugin(__cl);
+				if (plugin == null)
+				{
+					active.put(__cl, null);
+					throw new NoSuchPluginException(String.format(
+						"No plugin exists for %s.", __cl));
+				}
+				
+				// Initialize it
+				rv = plugin.execute(new WeakReference<>(this));
+				if (rv == null)
+					throw new NoSuchPluginException(String.format(
+						"Could create execution instance for plugin.", __cl));
+				active.put(__cl, rv);
+			}
+			
+			return  __cl.cast(rv);
+		}
 	}
 	
 	/**

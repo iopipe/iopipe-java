@@ -3,6 +3,7 @@ package com.iopipe;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.iopipe.http.RemoteException;
 import com.iopipe.http.RemoteRequest;
+import com.iopipe.plugin.IOpipePlugin;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -53,6 +54,9 @@ public final class IOpipeMeasurement
 	/** The context this is taking the measurement for. */
 	protected final Context context;
 	
+	/** The service which initialized this class. */
+	protected final IOpipeService service;
+	
 	/**
 	 * Performance entries which have been added to the measurement, this
 	 * field is locked since multiple threads may be adding entries.
@@ -78,14 +82,16 @@ public final class IOpipeMeasurement
 	 * @throws NullPointerException On null arguments.
 	 * @since 2017/12/17
 	 */
-	public IOpipeMeasurement(IOpipeConfiguration __config, Context __context)
+	IOpipeMeasurement(IOpipeConfiguration __config, Context __context,
+		IOpipeService __sv)
 		throws NullPointerException
 	{
-		if (__config == null || __context == null)
+		if (__config == null || __context == null || __sv == null)
 			throw new NullPointerException();
 		
 		this.config = __config;
 		this.context = __context;
+		this.service = __sv;
 	}
 	
 	/**
@@ -345,6 +351,27 @@ public final class IOpipeMeasurement
 					// End of array
 					gen.writeEnd();
 				}
+			}
+			
+			// Record plugins which are being used
+			IOpipePlugin[] plugins = this.service.__plugins();
+			if (plugins.length > 0)
+			{
+				gen.writeStartArray("plugins");
+				
+				for (IOpipePlugin p : plugins)
+				{
+					gen.writeStartObject();
+					
+					gen.write("name", Objects.toString(p.name(), ""));
+					gen.write("version", Objects.toString(p.version(), ""));
+					gen.write("homepage", Objects.toString(p.homepage(), ""));
+					gen.write("enabled", true);
+					
+					gen.writeEnd();
+				}
+				
+				gen.writeEnd();
 			}
 			
 			// Finished
