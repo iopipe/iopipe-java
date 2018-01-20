@@ -454,6 +454,7 @@ public final class IOpipeMeasurement
 	/**
 	 * Creates a measurement between the two marks.
 	 *
+	 * @param __name The name of the measurement.
 	 * @param __a The first mark.
 	 * @param __b The second mark.
 	 * @return A performance entry which defines a measurement between
@@ -461,13 +462,16 @@ public final class IOpipeMeasurement
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/01/19
 	 */
-	public TracePerformanceEntry measure(TraceMark __a, TraceMark __b)
+	public TraceMeasurementMark measure(String __name, TraceMark __a,
+		TraceMark __b)
 		throws NullPointerException
 	{
 		if (__a == null || __b == null)
 			throw new NullPointerException();
 		
-		throw new Error("TODO");
+		TraceMeasurementMark rv = new TraceMeasurementMark(__name, __a, __b);
+		this.addPerformanceEntry(rv);
+		return rv;
 	}
 	
 	/**
