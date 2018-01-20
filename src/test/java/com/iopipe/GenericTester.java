@@ -79,7 +79,17 @@ public abstract class GenericTester
 	 */
 	public final void baseMark(IOpipeService __sv, Context __c)
 	{
-		throw new Error("TODO");
+		AtomicBoolean ranfunc = new AtomicBoolean();
+		
+		__sv.<Object>run(__c, (__exec) ->
+			{
+				__exec.measurement().mark("test-mark");
+				
+				ranfunc.set(true);
+				return null;
+			});
+		
+		assertTrue("ranfunc", ranfunc.get());
 	}
 	
 	/**
@@ -91,7 +101,28 @@ public abstract class GenericTester
 	 */
 	public final void baseMeasurement(IOpipeService __sv, Context __c)
 	{
-		throw new Error("TODO");
+		AtomicBoolean ranfunc = new AtomicBoolean();
+		
+		__sv.<Object>run(__c, (__exec) ->
+			{
+				try (TraceMeasurement tm = __exec.measurement().
+					measure("test-measurement"))
+				{
+					ranfunc.set(true);
+					
+					try
+					{
+						Thread.sleep(1000);
+					}
+					catch (InterruptedException e)
+					{
+					}
+				}
+				
+				return null;
+			});
+		
+		assertTrue("ranfunc", ranfunc.get());
 	}
 	
 	/**
