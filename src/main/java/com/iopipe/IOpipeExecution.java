@@ -1,6 +1,7 @@
 package com.iopipe;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import com.iopipe.plugin.IOpipePluginExecution;
 
 /**
  * This class provides access to information and functionality which is
@@ -79,6 +80,26 @@ public final class IOpipeExecution
 	public final IOpipeMeasurement measurement()
 	{
 		return this.measurement;
+	}
+	
+	/**
+	 * This returns an instance of a plugin based on the class type of its
+	 * interface.
+	 *
+	 * @param <C> The class type of the execution state.
+	 * @param __cl The class object of the execution state.
+	 * @return The instance of the plugin's execution state.
+	 * @throws ClassCastException If the class type is not valid.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/01/20
+	 */
+	public final <C extends IOpipePluginExecution> C plugin(Class<C> __cl)
+		throws ClassCastException, NullPointerException
+	{
+		if (__cl == null)
+			throw new NullPointerException();
+		
+		throw new Error("TODO");
 	}
 	
 	/**
