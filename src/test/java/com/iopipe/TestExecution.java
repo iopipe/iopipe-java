@@ -29,5 +29,16 @@ public class TestExecution
 		
 		this.execution = __e;
 	}
+	
+	/**
+	 * Returns the execution.
+	 *
+	 * @return The execution.
+	 * @since 2018/01/20
+	 */
+	public final IOpipeExecution execution()
+	{
+		return this.execution;
+	}
 }
 

@@ -65,8 +65,13 @@ public class TestPlugin
 	 */
 	@Override
 	public final void preExecute(IOpipePluginExecution __e)
+		throws NullPointerException
 	{
-		throw new Error("TODO");
+		if (__e == null)
+			throw new NullPointerException();
+			
+		((TestExecution)__e).execution().measurement().
+			customMetric("pre-execute", "test");
 	}
 	
 	/**
@@ -75,8 +80,13 @@ public class TestPlugin
 	 */
 	@Override
 	public final void postExecute(IOpipePluginExecution __e)
+		throws NullPointerException
 	{
-		throw new Error("TODO");
+		if (__e == null)
+			throw new NullPointerException();
+			
+		((TestExecution)__e).execution().measurement().
+			customMetric("post-execute", 2.0D);
 	}
 	
 	/**

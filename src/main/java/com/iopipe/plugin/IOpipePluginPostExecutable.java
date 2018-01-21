@@ -14,8 +14,10 @@ public interface IOpipePluginPostExecutable
 	 * Performs a post-execution of the given plugin using the specified state.
 	 *
 	 * @param __e The plugin execution state.
+	 * @throws NullPointerException On null arguments.
 	 * @since 2018/01/20
 	 */
-	public abstract void postExecute(IOpipePluginExecution __e);
+	public abstract void postExecute(IOpipePluginExecution __e)
+		throws NullPointerException;
 }
 

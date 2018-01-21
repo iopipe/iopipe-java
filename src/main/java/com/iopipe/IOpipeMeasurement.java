@@ -64,6 +64,10 @@ public final class IOpipeMeasurement
 	private final Set<TracePerformanceEntry> _perfentries =
 		new TreeSet<>();
 	
+	/** Custom metrics that have been added, locked for thread safety. */
+	private final Set<CustomMetric> _custmetrics =
+		new TreeSet<>();
+	
 	/** The exception which may have been thrown. */
 	private volatile Throwable _thrown;
 	
@@ -95,6 +99,27 @@ public final class IOpipeMeasurement
 	}
 	
 	/**
+	 * Adds a single custom metric to the report.
+	 *
+	 * @param __cm The custom metric to add.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/01/20
+	 */
+	public void addCustomMetric(CustomMetric __cm)
+		throws NullPointerException
+	{
+		if (__cm == null)
+			throw new NullPointerException();
+		
+		// Multiple threads can add metrics at one time
+		Set<CustomMetric> custmetrics = this._custmetrics;
+		synchronized (custmetrics)
+		{
+			custmetrics.add(__cm);
+		}
+	}
+	
+	/**
 	 * Adds a single performance entry to the report.
 	 *
 	 * @param __e The entry to add to the report.
@@ -113,6 +138,58 @@ public final class IOpipeMeasurement
 		{
 			perfentries.add(__e);
 		}
+	}
+	
+	/**
+	 * Adds the specified custom metric with a string value.
+	 *
+	 * @param __name The matric name.
+	 * @param __sv The string value.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/01/20
+	 */
+	public final void customMetric(String __name, String __sv)
+		throws NullPointerException
+	{
+		if (__name == null || __sv == null)
+			throw new NullPointerException();
+		
+		this.addCustomMetric(new CustomMetric(__name, __sv));
+	}
+	
+	/**
+	 * Adds the specified custom metric with a double value.
+	 *
+	 * @param __name The matric name.
+	 * @param __dv The double value.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/01/20
+	 */
+	public final void customMetric(String __name, double __dv)
+		throws NullPointerException
+	{
+		if (__name == null)
+			throw new NullPointerException();
+		
+		this.addCustomMetric(new CustomMetric(__name, __dv));
+	}
+	
+	/**
+	 * Adds the specified custom metric with a string and double value.
+	 *
+	 * @param __name The matric name.
+	 * @param __sv The string value.
+	 * @param __dv The double value.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/01/20
+	 */
+	public final void customMetric(String __name, String __sv, double __dv)
+		throws NullPointerException
+	{
+		if (__name == null || __sv == null)
+			throw new NullPointerException();
+		
+		this.addCustomMetric(new CustomMetric(__name, __sv, __dv));
 	}
 	
 	/**
@@ -319,6 +396,33 @@ public final class IOpipeMeasurement
 			}
 			
 			gen.write("coldstart", this._coldstart);
+			
+			// Add custom metrics, which multiple threads could be adding at
+			// once
+			Set<CustomMetric> custmetrics = this._custmetrics;
+			synchronized (custmetrics)
+			{
+				if (!custmetrics.isEmpty())
+				{
+					gen.writeStartArray("custom_metrics");
+					
+					for (CustomMetric cm : custmetrics)
+					{
+						gen.writeStartObject();
+						
+						gen.write("name", cm.name());
+						
+						if (cm.hasString())
+							gen.write("s", cm.stringValue());
+						if (cm.hasDouble())
+							gen.write("n", cm.doubleValue());
+						
+						gen.writeEnd();
+					}
+					
+					gen.writeEnd();
+				}
+			}
 			
 			// Multiple threads may have stored performance entries, so it
 			// is possible that the list may be in a state where it is

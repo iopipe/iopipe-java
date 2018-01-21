@@ -13,8 +13,10 @@ public interface IOpipePluginPreExecutable
 	 * Performs a pre-execution of the given plugin using the specified state.
 	 *
 	 * @param __e The plugin execution state.
+	 * @throws NullPointerException On null arguments.
 	 * @since 2018/01/20
 	 */
-	public abstract void preExecute(IOpipePluginExecution __e);
+	public abstract void preExecute(IOpipePluginExecution __e)
+		throws NullPointerException;
 }
 
