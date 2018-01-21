@@ -159,6 +159,8 @@ public final class IOpipeService
 				
 				if (p instanceof IOpipePluginPostExecutable)
 					pluginspost.add(cl);
+				
+				_LOGGER.info("Added plugin for {}.", cl);
 			}
 			catch (NullPointerException e)
 			{
