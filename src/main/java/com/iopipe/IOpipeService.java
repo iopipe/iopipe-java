@@ -75,11 +75,11 @@ public final class IOpipeService
 		new HashMap<>();
 	
 	/** Plugins which are pre-exection. */
-	private final Set<IOpipePluginPreExecutable> _pluginspre =
+	private final Set<Class<? extends IOpipePluginExecution>> _pluginspre =
 		new LinkedHashSet<>();
 	
 	/** Plugins which are post-exection. */
-	private final Set<IOpipePluginPostExecutable> _pluginspost =
+	private final Set<Class<? extends IOpipePluginExecution>> _pluginspost =
 		new LinkedHashSet<>();
 	
 	/** The number of times this context has been executed. */
@@ -140,27 +140,31 @@ public final class IOpipeService
 		// post execution
 		Map<Class<? extends IOpipePluginExecution>, IOpipePlugin> plugins =
 			this._plugins;
-		Set<IOpipePluginPreExecutable> pluginspre = this._pluginspre;
-		Set<IOpipePluginPostExecutable> pluginspost = this._pluginspost;
+		Set<Class<? extends IOpipePluginExecution>> pluginspre =
+			this._pluginspre;
+		Set<Class<? extends IOpipePluginExecution>> pluginspost =
+			this._pluginspost;
 		for (IOpipePlugin p : ServiceLoader.<IOpipePlugin>load(
 			IOpipePlugin.class))
 		{
 			try
 			{
-				plugins.put(Objects.<Class<? extends IOpipePluginExecution>>
-					requireNonNull(p.executionClass()), p);
+				Class<? extends IOpipePluginExecution> cl;
+				plugins.put((cl = Objects.
+					<Class<? extends IOpipePluginExecution>>
+					requireNonNull(p.executionClass())), p);
+				
+				if (p instanceof IOpipePluginPreExecutable)
+					pluginspre.add(cl);
+				
+				if (p instanceof IOpipePluginPostExecutable)
+					pluginspost.add(cl);
 			}
 			catch (NullPointerException e)
 			{
 				_LOGGER.error("Plugin did not return an execution class.", e);
 				continue;
 			}
-			
-			if (p instanceof IOpipePluginPreExecutable)
-				pluginspre.add((IOpipePluginPreExecutable)p);
-				
-			if (p instanceof IOpipePluginPostExecutable)
-				pluginspost.add((IOpipePluginPostExecutable)p);
 		}
 	}
 	
@@ -258,12 +262,12 @@ public final class IOpipeService
 		R rv = null;
 		Throwable rt = null;
 		
-		// Run pre-execution plugins
-		for (IOpipePluginPreExecutable p : this._pluginspre)
+		// Run pre-execution plugins IOpipePluginPreExecutable
+		for (Class<? extends IOpipePluginExecution> p : this._pluginspre)
 			try
 			{
-				p.preExecute(exec.<IOpipePluginExecution>plugin(
-					IOpipePluginExecution.class));
+				((IOpipePluginPostExecutable)this.__plugin(p)).
+					postExecute(exec.plugin(p));
 			}
 			catch (RuntimeException e)
 			{
@@ -299,11 +303,11 @@ public final class IOpipeService
 		measurement.__setColdStart(coldstarted);
 		
 		// Run post-execution plugins
-		for (IOpipePluginPostExecutable p : this._pluginspost)
+		for (Class<? extends IOpipePluginExecution> p : this._pluginspost)
 			try
 			{
-				p.postExecute(exec.<IOpipePluginExecution>plugin(
-					IOpipePluginExecution.class));
+				((IOpipePluginPostExecutable)this.__plugin(p)).postExecute(
+					exec.plugin(p));
 			}
 			catch (RuntimeException e)
 			{
