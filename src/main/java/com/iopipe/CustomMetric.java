@@ -5,7 +5,7 @@ import java.lang.ref.WeakReference;
 import java.util.Objects;
 
 /**
- * This represents a custom metric which may have a string and/or double value.
+ * This represents a custom metric which may have a string or double value.
  *
  * @since 2018/01/20
  */
@@ -76,7 +76,7 @@ public final class CustomMetric
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/01/20
 	 */
-	public CustomMetric(String __name, String __sv, double __dv)
+	private CustomMetric(String __name, String __sv, double __dv)
 		throws NullPointerException
 	{
 		if (__name == null || __sv == null)

@@ -175,24 +175,6 @@ public final class IOpipeMeasurement
 	}
 	
 	/**
-	 * Adds the specified custom metric with a string and double value.
-	 *
-	 * @param __name The matric name.
-	 * @param __sv The string value.
-	 * @param __dv The double value.
-	 * @throws NullPointerException On null arguments.
-	 * @since 2018/01/20
-	 */
-	public final void customMetric(String __name, String __sv, double __dv)
-		throws NullPointerException
-	{
-		if (__name == null || __sv == null)
-			throw new NullPointerException();
-		
-		this.addCustomMetric(new CustomMetric(__name, __sv, __dv));
-	}
-	
-	/**
 	 * Builds the request which is sent to the remote service.
 	 *
 	 * @return The remote request to send to the service.
