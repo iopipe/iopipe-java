@@ -5,13 +5,21 @@
   <artifactId>iopipe</artifactId>
   <version>0.3-SNAPSHOT</version>
   <packaging>jar</packaging>
-  <name>IOpipe Java Wrapper</name>
+  <name>${project.groupId}:${project.artifactId}</name>
   <url>https://www.iopipe.com/</url>
   <scm>
     <connection>scm:git:https://github.com/iopipe/iopipe-java-core.git</connection>
     <url>https://github.com/iopipe/iopipe-java-core</url>
     <tag>HEAD</tag>
   </scm>
+  <developers>
+   <developer>
+     <name>IOpipe</name>
+     <email>dev@iopipe.com</email>
+     <organization>IOpipe</organization>
+     <organizationUrl>https://www.iopipe.com</organizationUrl>
+   </developer>
+ </developers>
   <licenses>
     <license>
       <name>Apache License, Version 2.0</name>
