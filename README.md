@@ -99,6 +99,26 @@ There are three ways to use the service:
    implement `com.iopipe.SimpleRequestStreamHandlerWrapper`
  * You may also interact with IOpipe directly
 
+It is recommended that the shade plugin is used to create packages, configuring
+the shade plugin is located in this document.
+
+ * https://docs.aws.amazon.com/lambda/latest/dg/java-create-jar-pkg-maven-no-ide.html
+
+It is highly recommened to configure the shade plugin so that is merges
+together service resources, this will be _especially_ important if you plan to
+use a number of plugins which may exist across different packages. By default
+the shade plugin will not merge resources for you and as a result plugins will
+appear to disappear. As such, add the following transformer:
+
+
+```
+<configuration>
+  <transformers>
+    <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+  </transformers>
+</configuration>
+```
+
 ### Implement `com.iopipe.SimpleRequestHandlerWrapper`.
 
 This class provides an implementation of `RequestHandler<I, O>`.

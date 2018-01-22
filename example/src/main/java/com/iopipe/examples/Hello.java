@@ -21,6 +21,13 @@ public class Hello
 	protected final String wrappedHandleRequest(IOpipeExecution __exec,
 		String __input)
 	{
+		// Send a message to the example plugin
+		ExampleExecution example = __exec.<ExampleExecution>plugin(
+			ExampleExecution.class);
+		example.message("I shall say hello!");
+		example.message(__input);
+		
+		// Say hello to them!
 		return "Hello " + __input + "!";
 	}
 }
