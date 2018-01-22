@@ -258,7 +258,7 @@ public final class IOpipeService
 		if ((windowtime = config.getTimeOutWindow()) > 0 &&
 			__context.getRemainingTimeInMillis() > 0)
 			watchdog = new __TimeOutWatchDog__(this, __context,
-				Thread.currentThread(), windowtime, coldstarted);
+				Thread.currentThread(), windowtime, coldstarted, exec);
 		
 		// This method either returns a value or throwsn
 		R rv = null;
