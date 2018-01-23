@@ -22,10 +22,10 @@ public class Hello
 		String __input)
 	{
 		// Send a message to the example plugin
-		__exec.<ExampleExecution>plugin(ExampleExecution.class, (__state) ->
+		__exec.<ExampleExecution>plugin(ExampleExecution.class, (__s) ->
 			{
-				example.message("I shall say hello!");
-				example.message(__input);
+				__s.message("I shall say hello!");
+				__s.message(__input);
 			});
 		
 		// Say hello to them!
