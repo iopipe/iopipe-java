@@ -48,8 +48,22 @@ If a plugin is optional and you wish `null` to be returned then a call to
 Plugins utilize the `ServiceLoader` class and therefor means that it is very
 similar to writing other services. All plugins operate under the
 `com.iopipe.plugin.IOpipePlugin` service and as such implementations of the
-plugins must be described in the services file
+plugins must be referenced in the services file
 `META-INF/services/com.iopipe.plugin.IOpipePlugin`.
 
-***TO BE WRITTEN***
+All that is required that the interfaces be implemented and you will have a
+functional plugin that may be used.
+
+There are two additional interfaces which may be extended which make it so the
+plugin with its execution state is called before and/or after a method has
+executed, if it is required.
+
+ * `com.iopipe.plugin.IOpipePluginPreExecutable`
+   * The plugin is executed before the method begins.
+ * `com.iopipe.plugin.IOpipePluginPostExecutable`
+   * The plugin is executed after the method finishes.
+
+Each plugin has its own execution state for each invocation which can be used
+to store state along with providing functionality for the plugin if it can be
+called within.
 
