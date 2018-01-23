@@ -108,7 +108,8 @@ It is highly recommened to configure the shade plugin so that is merges
 together service resources, this will be _especially_ important if you plan to
 use a number of plugins which may exist across different packages. By default
 the shade plugin will not merge resources for you and as a result plugins will
-appear to disappear. As such, add the following transformer:
+appear to disappear. As such, add the following transformer to the shade
+plugin:
 
 
 ```
@@ -118,6 +119,19 @@ appear to disappear. As such, add the following transformer:
   </transformers>
 </configuration>
 ```
+
+Additionally if you wish to debug IOpipe, you should additionally place the
+following transformer into the shade plugin:
+
+```
+<configuration>
+  <transformers>
+    <transformer implementation="com.github.edwgiz.mavenShadePlugin.log4j2CacheTransformer.PluginsCacheFileTransformer" />
+  </transformers>
+</configuration>
+```
+
+You may then set the desired debugging level for `com.iopipe`.
 
 ### Implement `com.iopipe.SimpleRequestHandlerWrapper`.
 
@@ -174,3 +188,10 @@ following command:
 `pack200 -r -G file.jar`
 
 Deployment is the same as other Java programs on the Amazon Lambda platform.
+
+# Plugins
+
+The usage and implementation of plugins is provided in this document:
+
+ * <PLUGINS.md>
+

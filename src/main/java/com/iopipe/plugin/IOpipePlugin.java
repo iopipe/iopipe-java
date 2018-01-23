@@ -23,7 +23,10 @@ public interface IOpipePlugin
 {
 	/**
 	 * This creates a new execution for the given plugin which allows it to
-	 * store state for a single execution of a method.
+	 * store state for a single execution of a method. This is only initialized
+	 * when it is needed and as such if it is required that it be initialized
+	 * before the execution of a method then {@link IOpipePluginPreExecutable}
+	 * should be implemented.
 	 *
 	 * @param __e The reference to the owning execution for this plugin.
 	 * @return The execution instance for this plugin.

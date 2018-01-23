@@ -146,6 +146,34 @@ public final class IOpipeExecution
 	}
 	
 	/**
+	 * This returns an instance of a plugin based on the class type of its
+	 * interface, if the plugin does not exist then {@code null} is returned.
+	 *
+	 * @param <C> The class type of the execution state.
+	 * @param __cl The class object of the execution state.
+	 * @return The instance of the plugin's execution state or {@code null}
+	 * if no such plugin exists.
+	 * @throws ClassCastException If the class type is not valid.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/01/23
+	 */
+	public final <C extends IOpipePluginExecution> C optionalPlugin(
+		Class<C> __cl)
+		throws ClassCastException, NullPointerException
+	{
+		try
+		{
+			return this.plugin(__cl);
+		}
+		
+		// Does not exist
+		catch (NoSuchPluginException e)
+		{
+			return null;
+		}
+	}
+	
+	/**
 	 * Returns the service which ran this execution.
 	 *
 	 * @return The service which ran this execution.
