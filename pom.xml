@@ -39,6 +39,22 @@
   <build>
     <plugins>
       <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.19.1</version>
+        <dependencies>
+          <dependency>
+              <groupId>org.junit.platform</groupId>
+              <artifactId>junit-platform-surefire-provider</artifactId>
+              <version>1.0.3</version>
+          </dependency>
+          <dependency>
+              <groupId>org.junit.jupiter</groupId>
+              <artifactId>junit-jupiter-engine</artifactId>
+              <version>5.0.3</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+      <plugin>
         <artifactId>maven-release-plugin</artifactId>
         <version>2.5.3</version>
       </plugin>
@@ -60,10 +76,16 @@
   </build>
   <dependencies>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.12</version>
-      <scope>test</scope>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter-api</artifactId>
+        <version>5.0.3</version>
+        <scope>test</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.junit.vintage</groupId>
+        <artifactId>junit-vintage-engine</artifactId>
+        <version>4.12.3</version>
+        <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.glassfish</groupId>
