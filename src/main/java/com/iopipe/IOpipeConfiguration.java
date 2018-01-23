@@ -5,7 +5,12 @@ import com.iopipe.http.RemoteConnectionFactory;
 import com.iopipe.http.ServiceConnectionFactory;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Properties;
+import java.util.regex.Pattern;
+import java.util.TreeMap;
 import okhttp3.HttpUrl;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
@@ -24,6 +29,18 @@ public final class IOpipeConfiguration
 	/** Used for logging. */
 	private static final Logger _LOGGER =
 		LogManager.getLogger(IOpipeConfiguration.class);
+	
+	/** The prefix for plugin enabled in system properties. */
+	private static final String _PROPERTY_PLUGIN_PREFIX =
+		"com.iopipe.plugin.";
+	
+	/** Environment variable prefix for plugin state. */
+	private static final String _ENVIRONMENT_PLUGIN_PREFIX =
+		"IOPIPE_";
+	
+	/** Environment variable suffix for plugin state. */
+	private static final String _ENVIRONMENT_PLUGIN_SUFFIX =
+		"_ENABLE";
 	
 	/** The disabled configuration. */
 	public static final IOpipeConfiguration DISABLED_CONFIG;
@@ -45,6 +62,10 @@ public final class IOpipeConfiguration
 	
 	/** Install method. */
 	protected final String installmethod;
+	
+	/** The state of plugins. */
+	private final Map<String, Boolean> _pluginstate =
+		new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 	
 	/** String representation. */
 	private volatile Reference<String> _string;
@@ -72,14 +93,19 @@ public final class IOpipeConfiguration
 		IOpipeConfiguration use = DISABLED_CONFIG;
 		try
 		{
-			_LOGGER.debug("Initializing default configuration");
+			_LOGGER.debug("Initializing default configuration.");
 			use = IOpipeConfiguration.byDefault();
 		}
 		catch (IllegalArgumentException e)
 		{
-			_LOGGER.error("Failed to initialize default configuration.", e);
+			_LOGGER.error("Failed to initialize default configuration, " +
+				"your method will still run however it will not report " +
+				"anything to IOpipe.", e);
 		}
 		DEFAULT_CONFIG = use;
+		
+		// Debug the default config
+		_LOGGER.debug("Default config: {}", use);
 	}
 	
 	/**
@@ -121,6 +147,8 @@ public final class IOpipeConfiguration
 		this.connectionfactory = connectionfactory;
 		this.timeoutwindow = timeoutwindow;
 		this.installmethod = installmethod;
+		
+		this._pluginstate.putAll(__builder._pluginstate);
 	}
 	
 	/**
@@ -141,7 +169,8 @@ public final class IOpipeConfiguration
 			Objects.equals(this.token, o.token) &&
 			Objects.equals(this.connectionfactory, o.connectionfactory) &&
 			this.timeoutwindow == o.timeoutwindow &&
-			Objects.equals(this.installmethod, o.installmethod);
+			Objects.equals(this.installmethod, o.installmethod) &&
+			this._pluginstate.equals(o._pluginstate);
 	}
 	
 	/**
@@ -200,7 +229,8 @@ public final class IOpipeConfiguration
 			Objects.hashCode(this.token) ^
 			Objects.hashCode(this.connectionfactory) ^
 			this.timeoutwindow ^
-			Objects.hashCode(this.installmethod);
+			Objects.hashCode(this.installmethod) ^
+			this._pluginstate.hashCode();
 	}
 	
 	/**
@@ -213,6 +243,29 @@ public final class IOpipeConfiguration
 	public final boolean isEnabled()
 	{
 		return this.enabled;
+	}
+	
+	/**
+	 * Returns whether the specified plugin is enabled or not. If it is
+	 * unspecified in the configuration then the specified default value is
+	 * used instead.
+	 *
+	 * @param __n The plugin to get the state for.
+	 * @param __def If the initial state of the plugin was not specified then
+	 * @return {@code true} if the plugin is enabled.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/01/23
+	 */
+	public final boolean isPluginEnabled(String __n, boolean __def)
+		throws NullPointerException
+	{
+		if (__n == null)
+			throw new NullPointerException();
+		
+		Boolean rv = this._pluginstate.get(__n);
+		if (rv == null)
+			return __def;
+		return rv;
 	}
 	
 	/**
@@ -229,9 +282,11 @@ public final class IOpipeConfiguration
 			this._string = new WeakReference<>((rv =
 				String.format("{enabled=%s, token=%s, " +
 					"connectionfactory=%s, timeoutwindow=%d, " +
-					"installmethod=%s}", this.enabled,
+					"installmethod=%s, " +
+					"pluginstate=%s}", this.enabled,
 					this.token, this.connectionfactory, this.timeoutwindow,
-					this.installmethod)));
+					this.installmethod,
+					this._pluginstate)));
 		
 		return rv;
 	}
@@ -255,14 +310,17 @@ public final class IOpipeConfiguration
 			System.getenv("IOPIPE_ENABLED")), "true"))));
 		if (enabled)
 		{
+			// Token
 			rv.setProjectToken(System.getProperty("com.iopipe.token",
 				Objects.toString(System.getenv("IOPIPE_TOKEN"),
 					System.getenv("IOPIPE_CLIENTID"))));
-		
+			
+			// Installation method
 			rv.setInstallMethod(System.getProperty("com.iopipe.installmethod",
 				Objects.toString(System.getenv("IOPIPE_INSTALL_METHOD"),
 				"manual")));
-		
+			
+			// Timeout window
 			try
 			{
 				rv.setTimeOutWindow(Integer.valueOf(Objects.toString(
@@ -273,7 +331,36 @@ public final class IOpipeConfiguration
 			{
 				rv.setTimeOutWindow(150);
 			}
-		
+			
+			// Go through system properties to get the enabled state of
+			// plugins
+			for (Map.Entry<Object, Object> e : System.getProperties().
+				entrySet())
+			{
+				String k = Objects.toString(e.getKey(), ""),
+					v = Objects.toString(e.getValue(), "");
+				
+				if (k.startsWith(_PROPERTY_PLUGIN_PREFIX))
+					rv.setPluginEnabled(
+						k.substring(_PROPERTY_PLUGIN_PREFIX.length()),
+						Boolean.valueOf(v));
+			}
+			
+			// Go through environment variables to find plugins which are
+			// enabled
+			for (Map.Entry<String, String> e : System.getenv().entrySet())
+			{
+				String k = Objects.toString(e.getKey(), ""),
+					v = Objects.toString(e.getValue(), "");
+				
+				if (k.startsWith(_ENVIRONMENT_PLUGIN_PREFIX) &&
+					k.endsWith(_ENVIRONMENT_PLUGIN_SUFFIX))
+					rv.setPluginEnabled(k.substring(
+						_ENVIRONMENT_PLUGIN_PREFIX.length(),
+						k.length() - _ENVIRONMENT_PLUGIN_SUFFIX.length()),
+						Boolean.valueOf(v));
+			}
+			
 			// Determine the URI which is used to collect resources, use the
 			// same region as the AWS service if it is supported.
 			String awsregion = Objects.toString(System.getenv("AWS_REGION"),

@@ -33,7 +33,7 @@ supported and take precedence.
  * `com.iopipe.enabled` or `IOPIPE_ENABLED`
    * If this is set and if the value is `true` (ignoring case) then the library
      will be enabled.
-   * If this is set to `false`.
+   * If this is set to `false` then the service will be disabled.
    * If this is not set then internally it is treated as being `true`.
  * `com.iopipe.installmethod` or `IOPIPE_INSTALL_METHOD`
  * `com.iopipe.timeoutwindow` or `IOPIPE_TIMEOUT_WINDOW`
@@ -41,13 +41,18 @@ supported and take precedence.
      the service.
    * If this is zero then the window is disabled.
    * If this is not set then it defaults to `150`.
- * `com.iopipe.token`, `IOPIPE_TOKEN`
+ * `com.iopipe.token` or `IOPIPE_TOKEN`
    * This represents the token of the IOpipe collector which is to obtain
      statistics.
    * This is the default token which will be used if no token was specified in
      the client.
    * If you need help looking for your token you can visit:
      [Find your project token](https://dashboard.iopipe.com/install).
+ * `com.iopipe.plugin.<name>` or `IOPIPE_<NAME>_ENABLE`
+   * If set to `true` then the specified plugin will be enabled.
+   * If set to `false` then the plugin will be disabled.
+   * If this is not set for a plugin then it will use the setting from the
+     plugin if it should be enabled by default or not.
 
 Log4j2 is used for debugging output and it can be configured via enviroment
 variable. Information on its configuration is at:

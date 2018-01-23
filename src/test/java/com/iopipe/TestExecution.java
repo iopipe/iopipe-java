@@ -14,25 +14,20 @@ public class TestExecution
 	/** The execution to refer to. */
 	protected final IOpipeExecution execution;
 	
-	/** Is this plugin enabled? */
-	final boolean _enabled;
-	
 	/**
 	 * Initializes the test execution.
 	 *
 	 * @param __e The execution to modify.
-	 * @param __enabled Is this plugin enabled?
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/01/20
 	 */
-	public TestExecution(IOpipeExecution __e, boolean __enabled)
+	public TestExecution(IOpipeExecution __e)
 		throws NullPointerException
 	{
 		if (__e == null)
 			throw new NullPointerException();
 		
 		this.execution = __e;
-		this._enabled = __enabled;
 	}
 	
 	/**

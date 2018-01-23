@@ -136,8 +136,7 @@ public final class IOpipeExecution
 				}
 				
 				// Initialize it
-				rv = plugin.execute(new WeakReference<>(this),
-					service.__pluginIsEnabled(__cl));
+				rv = plugin.execute(new WeakReference<>(this));
 				if (rv == null)
 					throw new NoSuchPluginException(String.format(
 						"Could create execution instance for plugin.", __cl));

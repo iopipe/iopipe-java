@@ -29,15 +29,13 @@ public interface IOpipePlugin
 	 * should be implemented.
 	 *
 	 * @param __e The reference to the owning execution for this plugin.
-	 * @param __enabled This specifies whether the plugin is enabled. If a
-	 * plugin is disabled, it should not perform any operations.
 	 * @return The execution instance for this plugin.
 	 * @throws NullPointerException This may be thrown if the execution is
 	 * required.
 	 * @since 2018/01/20
 	 */
 	public abstract IOpipePluginExecution execute(
-		Reference<IOpipeExecution> __e, boolean __enabled)
+		Reference<IOpipeExecution> __e)
 		throws NullPointerException;
 	
 	/**
@@ -65,6 +63,19 @@ public interface IOpipePlugin
 	 * @since 2018/01/20
 	 */
 	public abstract String version();
+	
+	/**
+	 * Should this plugin be enabled by default?
+	 *
+	 * The default implementation is that plugins are disabled by default.
+	 *
+	 * @return {@code true} if it is enabled by default.
+	 * @since 2018/01/20
+	 */
+	public default boolean enabledByDefault()
+	{
+		return false;
+	}
 	
 	/**
 	 * Return the homepage where this plugin is located, this is optional.

@@ -22,11 +22,10 @@ public class ExampleExecution
 	 * Initializes the execution.
 	 *
 	 * @param __e The execution to utilize.
-	 * @param __enabled Has this plugin been enabled?
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/01/22
 	 */
-	public ExampleExecution(IOpipeExecution __e, boolean __enabled)
+	public ExampleExecution(IOpipeExecution __e)
 		throws NullPointerException
 	{
 		if (__e == null)

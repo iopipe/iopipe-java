@@ -2,6 +2,8 @@ package com.iopipe;
 
 import com.iopipe.http.RemoteConnectionFactory;
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 import okhttp3.HttpUrl;
 
 /**
@@ -13,6 +15,10 @@ import okhttp3.HttpUrl;
  */
 public class IOpipeConfigurationBuilder
 {
+	/** Specific plugin states. */
+	final Map<String, Boolean> _pluginstate =
+		new HashMap<>();
+	
 	/** Is the service enabled? */
 	volatile boolean _enabled;
 	
@@ -94,6 +100,23 @@ public class IOpipeConfigurationBuilder
 	public final void setInstallMethod(String __im)
 	{
 		this._installmethod = __im;
+	}
+	
+	/**
+	 * This sets the specific state of a plugin.
+	 *
+	 * @param __p The plugin to modify.
+	 * @param __e Whether the plugin is to be enabled or disabled.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/01/23
+	 */
+	public final void setPluginEnabled(String __p, boolean __e)
+		throws NullPointerException
+	{
+		if (__p == null)
+			throw new NullPointerException();
+		
+		this._pluginstate.put(__p, __e);
 	}
 	
 	/**

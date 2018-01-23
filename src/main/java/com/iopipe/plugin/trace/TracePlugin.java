@@ -20,13 +20,22 @@ public class TracePlugin
 	 * @since 2018/01/20
 	 */
 	@Override
-	public IOpipePluginExecution execute(Reference<IOpipeExecution> __e,
-		boolean __enabled)
+	public boolean enabledByDefault()
+	{
+		return true;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @since 2018/01/20
+	 */
+	@Override
+	public IOpipePluginExecution execute(Reference<IOpipeExecution> __e)
 	{
 		if (__e == null)
 			throw new NullPointerException();
 		
-		return new TraceExecution(__e.get().measurement(), __enabled);
+		return new TraceExecution(__e.get().measurement());
 	}
 	
 	/**

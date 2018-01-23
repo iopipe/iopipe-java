@@ -156,26 +156,30 @@ public final class IOpipeService
 		{
 			try
 			{
-				Class<? extends IOpipePluginExecution> cl;
-				plugins.put((cl = Objects.
+				Class<? extends IOpipePluginExecution> cl = Objects.
 					<Class<? extends IOpipePluginExecution>>
-					requireNonNull(p.executionClass())), p);
+					requireNonNull(p.executionClass());
 				
-				// Plugins may be disabled as needed
-				boolean pluginenabled = enabled && true;
+				// Plugins can be configured to be enabled or disabled
+				// However, some plugins may be enabled by default
+				boolean pluginenabled = enabled && __config.isPluginEnabled(
+					p.name(), p.enabledByDefault());
 				enabledplugins.put(cl, pluginenabled);
 				
 				// Only register if it is enabled
 				if (pluginenabled)
 				{
+					plugins.put(cl, p);
+					
 					if (p instanceof IOpipePluginPreExecutable)
 						pluginspre.add(cl);
 				
 					if (p instanceof IOpipePluginPostExecutable)
 						pluginspost.add(cl);
+						
+					_LOGGER.info("Added plugin for {} called '{}'", cl,
+						p.name());
 				}
-				
-				_LOGGER.info("Added plugin for {}.", cl);
 			}
 			catch (NullPointerException e)
 			{

@@ -19,25 +19,20 @@ public class TraceExecution
 	/** The measurement to record to. */
 	protected final IOpipeMeasurement measurement;
 	
-	/** Is this enabled? */
-	protected final boolean enabled;
-	
 	/**
 	 * Initializes the trace execution instance.
 	 *
 	 * @param __m The measurement to record to.
-	 * @param __enabled Is this plugin enabled?
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/01/20
 	 */
-	public TraceExecution(IOpipeMeasurement __m, boolean __enabled)
+	public TraceExecution(IOpipeMeasurement __m)
 		throws NullPointerException
 	{
 		if (__m == null)
 			throw new NullPointerException();
 		
 		this.measurement = __m;
-		this.enabled = __enabled;
 	}
 	
 	/**
@@ -56,8 +51,7 @@ public class TraceExecution
 			throw new NullPointerException();
 		
 		TraceMark rv = new TraceMark(__name);
-		if (this.enabled)
-			this.measurement.addPerformanceEntry(rv);
+		this.measurement.addPerformanceEntry(rv);
 		return rv;
 	}
 	
@@ -80,8 +74,7 @@ public class TraceExecution
 			throw new NullPointerException();
 		
 		TraceMeasurement rv = new TraceMeasurement(__name);
-		if (this.enabled)
-			this.measurement.addPerformanceEntry(rv);
+		this.measurement.addPerformanceEntry(rv);
 		return rv;
 	}
 	
@@ -104,8 +97,7 @@ public class TraceExecution
 			throw new NullPointerException();
 		
 		TraceMeasurementMark rv = new TraceMeasurementMark(__name, __a, __b);
-		if (this.enabled)
-			this.measurement.addPerformanceEntry(rv);
+		this.measurement.addPerformanceEntry(rv);
 		return rv;
 	}
 }
