@@ -124,8 +124,10 @@ public final class IOpipeExecution
 					throw new NoSuchPluginException(String.format(
 						"No plugin exists for %s.", __cl));
 				
+				IOpipeService service = this.service;
+				
 				// Cache no plugin
-				IOpipePlugin plugin = this.service.__plugin(__cl);
+				IOpipePlugin plugin = service.__plugin(__cl);
 				if (plugin == null)
 				{
 					active.put(__cl, null);
@@ -134,7 +136,8 @@ public final class IOpipeExecution
 				}
 				
 				// Initialize it
-				rv = plugin.execute(new WeakReference<>(this));
+				rv = plugin.execute(new WeakReference<>(this),
+					service.__pluginIsEnabled(__cl));
 				if (rv == null)
 					throw new NoSuchPluginException(String.format(
 						"Could create execution instance for plugin.", __cl));

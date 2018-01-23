@@ -74,6 +74,11 @@ public final class IOpipeService
 		IOpipePlugin> _plugins =
 		new HashMap<>();
 	
+	/** Plugins which are in the enabled state. */
+	private final Map<Class<? extends IOpipePluginExecution>, Boolean>
+		_enabledplugins =
+		new HashMap<>();
+	
 	/** Plugins which are pre-exection. */
 	private final Set<Class<? extends IOpipePluginExecution>> _pluginspre =
 		new LinkedHashSet<>();
@@ -129,7 +134,7 @@ public final class IOpipeService
 			}
 		
 		// If the connection failed, use one which does nothing
-		if (connection == null)
+		if (!enabled || connection == null)
 			connection = new NullConnection();
 		
 		this.enabled = enabled;
@@ -140,6 +145,8 @@ public final class IOpipeService
 		// post execution
 		Map<Class<? extends IOpipePluginExecution>, IOpipePlugin> plugins =
 			this._plugins;
+		Map<Class<? extends IOpipePluginExecution>, Boolean> enabledplugins =
+			this._enabledplugins;
 		Set<Class<? extends IOpipePluginExecution>> pluginspre =
 			this._pluginspre;
 		Set<Class<? extends IOpipePluginExecution>> pluginspost =
@@ -154,11 +161,19 @@ public final class IOpipeService
 					<Class<? extends IOpipePluginExecution>>
 					requireNonNull(p.executionClass())), p);
 				
-				if (p instanceof IOpipePluginPreExecutable)
-					pluginspre.add(cl);
+				// Plugins may be disabled as needed
+				boolean pluginenabled = enabled && true;
+				enabledplugins.put(cl, pluginenabled);
 				
-				if (p instanceof IOpipePluginPostExecutable)
-					pluginspost.add(cl);
+				// Only register if it is enabled
+				if (pluginenabled)
+				{
+					if (p instanceof IOpipePluginPreExecutable)
+						pluginspre.add(cl);
+				
+					if (p instanceof IOpipePluginPostExecutable)
+						pluginspost.add(cl);
+				}
 				
 				_LOGGER.info("Added plugin for {}.", cl);
 			}
@@ -346,6 +361,23 @@ public final class IOpipeService
 			throw new NullPointerException();
 		
 		return this._plugins.get(__cl);
+	}
+	
+	/**
+	 * Checks if the specified plugin is currently enabled.
+	 *
+	 * @param __cl The execution class.
+	 * @return {@code true} if the plugin is enabled.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/01/23
+	 */
+	final boolean __pluginIsEnabled(Class<? extends IOpipePluginExecution> __c)
+		throws NullPointerException
+	{
+		Boolean rv = this._enabledplugins.get(__c);
+		if (rv == null)
+			return false;
+		return rv;
 	}
 	
 	/**

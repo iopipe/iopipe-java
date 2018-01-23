@@ -12,9 +12,6 @@ package com.iopipe;
 public final class TraceMeasurement
 	implements AutoCloseable, TracePerformanceEntry
 {
-	/** The measurement where the measurement will be recorded into. */
-	protected final IOpipeMeasurement measurement;
-	
 	/** The name of this trace. */
 	protected final String name;
 	
@@ -45,13 +42,12 @@ public final class TraceMeasurement
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/01/19
 	 */
-	public TraceMeasurement(IOpipeMeasurement __m, String __name)
+	public TraceMeasurement(String __name)
 		throws NullPointerException
 	{
-		if (__m == null || __name == null)
+		if (__name == null)
 			throw new NullPointerException();
 		
-		this.measurement = __m;
 		this.name = __name;
 	}
 	
@@ -68,8 +64,6 @@ public final class TraceMeasurement
 			
 			this._endnanotime = System.nanoTime();
 			this._endtimemillis = System.currentTimeMillis();
-			
-			this.measurement.addPerformanceEntry(this);
 		}
 	}
 	

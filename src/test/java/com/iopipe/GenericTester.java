@@ -86,7 +86,7 @@ public abstract class GenericTester
 			{
 				// Indirect call, but it tests the plugin
 				__exec.<TraceExecution>plugin(TraceExecution.class).
-					measurement().mark("test-mark");
+					mark("test-mark");
 				
 				ranfunc.set(true);
 				return null;
@@ -110,8 +110,7 @@ public abstract class GenericTester
 			{
 				// Indirect call, but it tests the plugin
 				try (TraceMeasurement tm = __exec.<TraceExecution>plugin(
-					TraceExecution.class).measurement().
-					measure("test-measurement"))
+					TraceExecution.class).measure("test-measurement"))
 				{
 					ranfunc.set(true);
 					

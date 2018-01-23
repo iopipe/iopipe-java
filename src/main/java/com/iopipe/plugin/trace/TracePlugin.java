@@ -20,12 +20,13 @@ public class TracePlugin
 	 * @since 2018/01/20
 	 */
 	@Override
-	public IOpipePluginExecution execute(Reference<IOpipeExecution> __e)
+	public IOpipePluginExecution execute(Reference<IOpipeExecution> __e,
+		boolean __enabled)
 	{
 		if (__e == null)
 			throw new NullPointerException();
 		
-		return new TraceExecution(__e.get().measurement());
+		return new TraceExecution(__e.get().measurement(), __enabled);
 	}
 	
 	/**

@@ -29,13 +29,15 @@ public interface IOpipePlugin
 	 * should be implemented.
 	 *
 	 * @param __e The reference to the owning execution for this plugin.
+	 * @param __enabled This specifies whether the plugin is enabled. If a
+	 * plugin is disabled, it should not perform any operations.
 	 * @return The execution instance for this plugin.
 	 * @throws NullPointerException This may be thrown if the execution is
 	 * required.
 	 * @since 2018/01/20
 	 */
 	public abstract IOpipePluginExecution execute(
-		Reference<IOpipeExecution> __e)
+		Reference<IOpipeExecution> __e, boolean __enabled)
 		throws NullPointerException;
 	
 	/**

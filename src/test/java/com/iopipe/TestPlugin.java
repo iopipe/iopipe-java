@@ -20,13 +20,14 @@ public class TestPlugin
 	 * @since 2018/01/20
 	 */
 	@Override
-	public final IOpipePluginExecution execute(Reference<IOpipeExecution> __e)
+	public final IOpipePluginExecution execute(Reference<IOpipeExecution> __e,
+		boolean __enabled)
 		throws NullPointerException
 	{
 		if (__e == null)
 			throw new NullPointerException();
 		
-		return new TestExecution(__e.get());
+		return new TestExecution(__e.get(), __enabled);
 	}
 	
 	/**
@@ -69,9 +70,11 @@ public class TestPlugin
 	{
 		if (__e == null)
 			throw new NullPointerException();
-			
-		((TestExecution)__e).execution().measurement().
-			customMetric("pre-execute", "test");
+		
+		TestExecution e = (TestExecution)__e;
+		if (e._enabled)
+			e.execution().measurement().
+				customMetric("pre-execute", "test");
 	}
 	
 	/**
@@ -84,9 +87,11 @@ public class TestPlugin
 	{
 		if (__e == null)
 			throw new NullPointerException();
-			
-		((TestExecution)__e).execution().measurement().
-			customMetric("post-execute", 2.0D);
+		
+		TestExecution e = (TestExecution)__e;
+		if (e._enabled)
+			e.execution().measurement().
+				customMetric("post-execute", 2.0D);
 	}
 	
 	/**
