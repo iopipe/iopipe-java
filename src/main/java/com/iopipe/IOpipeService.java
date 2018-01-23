@@ -264,7 +264,8 @@ public final class IOpipeService
 			RemoteResult result = this.connection.send(__r);
 			
 			// Only the 200 range is valid for okay responses
-			if ((result.code() / 100) != 2)
+			int code = result.code();
+			if (!(code >= 200 && code < 300))
 			{
 				this._badresultcount++;
 				
