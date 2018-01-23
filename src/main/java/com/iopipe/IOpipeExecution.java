@@ -5,6 +5,9 @@ import com.iopipe.plugin.IOpipePlugin;
 import com.iopipe.plugin.IOpipePluginExecution;
 import com.iopipe.plugin.NoSuchPluginException;
 import java.lang.ref.WeakReference;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -148,6 +151,102 @@ public final class IOpipeExecution
 	}
 	
 	/**
+	 * This executes the specified method if the plugin exists, if it does
+	 * not exist then it will not be executed.
+	 *
+	 * @param <C> The class type of the execution state.
+	 * @param __cl The class object of the execution state.
+	 * @param __func The function to excute if the plugin exists and is valid.
+	 * @throws ClassCastException If the class type is not valid.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/01/23
+	 */
+	public final <C extends IOpipePluginExecution> void plugin(Class<C> __cl,
+		Consumer<C> __func)
+		throws ClassCastException, NullPointerException
+	{
+		if (__cl == null || __func == null)
+			throw new NullPointerException();
+		
+		try
+		{
+			__func.accept(this.plugin(__cl));
+		}
+		catch (NoSuchPluginException e)
+		{
+		}
+	}
+	
+	/**
+	 * This searches for the specified plugin if the plugin exists it will
+	 * return an instance of {@link AutoCloseable} which may be used with
+	 * try-with-resources.
+	 *
+	 * @param <C> The class type of the execution state.
+	 * @param <R> The type of object to return.
+	 * @param __cl The class object of the execution state.
+	 * @param __func The function to obtain the {@link AutoCloseable} for use
+	 * with try-with-resources for.
+	 * @return The {@code A} object or {@code null} if the plugin is not valid
+	 * or no value was returned.
+	 * @throws ClassCastException If the class type is not valid.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/01/23
+	 */
+	public final <C extends IOpipePluginExecution, R extends AutoCloseable>
+		R plugin(Class<C> __cl, Function<C, R> __func)
+		throws ClassCastException, NullPointerException
+	{
+		if (__cl == null || __func == null)
+			throw new NullPointerException();
+		
+		try
+		{
+			return __func.apply(this.plugin(__cl));
+		}
+		catch (NoSuchPluginException e)
+		{
+			return null;
+		}
+	}
+	
+	/**
+	 * This searches for the specified plugin if the plugin exists it will
+	 * return an instance of {@link AutoCloseable} which may be used with
+	 * try-with-resources. An optional secondary argument may be passed to
+	 * simplify some operations that take an extra parameter.
+	 *
+	 * @param <C> The class type of the execution state.
+	 * @param <R> The type of object to return.
+	 * @param <V> The type of extra value to pass to the function.
+	 * @param __cl The class object of the execution state.
+	 * @param __func The function to obtain the {@link AutoCloseable} for use
+	 * with try-with-resources for.
+	 * @param __v The extra value to be passed to the function.
+	 * @return The {@code A} object or {@code null} if the plugin is not valid
+	 * or no value was returned.
+	 * @throws ClassCastException If the class type is not valid.
+	 * @throws NullPointerException On null arguments except for {@code __v}.
+	 * @since 2018/01/23
+	 */
+	public final <C extends IOpipePluginExecution, R extends AutoCloseable,
+		V> R plugin(Class<C> __cl, BiFunction<C, V, R> __func, V __v)
+		throws ClassCastException, NullPointerException
+	{
+		if (__cl == null || __func == null)
+			throw new NullPointerException();
+		
+		try
+		{
+			return __func.apply(this.plugin(__cl), __v);
+		}
+		catch (NoSuchPluginException e)
+		{
+			return null;
+		}
+	}
+	
+	/**
 	 * This returns an instance of a plugin based on the class type of its
 	 * interface, if the plugin does not exist then {@code null} is returned.
 	 *
@@ -167,8 +266,6 @@ public final class IOpipeExecution
 		{
 			return this.plugin(__cl);
 		}
-		
-		// Does not exist
 		catch (NoSuchPluginException e)
 		{
 			return null;

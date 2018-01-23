@@ -84,9 +84,10 @@ public abstract class GenericTester
 		
 		__sv.<Object>run(__c, (__exec) ->
 			{
-				// Indirect call, but it tests the plugin
-				__exec.<TraceExecution>plugin(TraceExecution.class).
-					mark("test-mark");
+				__exec.<TraceExecution>plugin(TraceExecution.class, (__q) ->
+					{
+						__q.mark("test-mark");
+					});
 				
 				ranfunc.set(true);
 				return null;
@@ -109,8 +110,9 @@ public abstract class GenericTester
 		__sv.<Object>run(__c, (__exec) ->
 			{
 				// Indirect call, but it tests the plugin
-				try (TraceMeasurement tm = __exec.<TraceExecution>plugin(
-					TraceExecution.class).measure("test-measurement"))
+				try (TraceMeasurement tm = __exec.<TraceExecution,
+					TraceMeasurement, String>plugin(TraceExecution.class,
+					TraceExecution::measure, "test-measurement"))
 				{
 					ranfunc.set(true);
 					

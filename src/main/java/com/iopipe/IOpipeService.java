@@ -287,8 +287,9 @@ public final class IOpipeService
 		for (Class<? extends IOpipePluginExecution> p : this._pluginspre)
 			try
 			{
-				((IOpipePluginPreExecutable)this.__plugin(p)).
-					preExecute(exec.plugin(p));
+				IOpipePluginPreExecutable l =
+					(IOpipePluginPreExecutable)this.__plugin(p);
+				exec.plugin(p, l::preExecute);
 			}
 			catch (RuntimeException e)
 			{
@@ -327,8 +328,9 @@ public final class IOpipeService
 		for (Class<? extends IOpipePluginExecution> p : this._pluginspost)
 			try
 			{
-				((IOpipePluginPostExecutable)this.__plugin(p)).postExecute(
-					exec.plugin(p));
+				IOpipePluginPostExecutable l =
+					(IOpipePluginPostExecutable)this.__plugin(p);
+				exec.plugin(p, l::postExecute);
 			}
 			catch (RuntimeException e)
 			{

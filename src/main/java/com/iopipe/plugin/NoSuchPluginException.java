@@ -7,7 +7,7 @@ package com.iopipe.plugin;
  * @since 2018/01/20
  */
 public class NoSuchPluginException
-	extends RuntimeException
+	extends Exception
 {
 	/**
 	 * Initializes the exception with the given message.
