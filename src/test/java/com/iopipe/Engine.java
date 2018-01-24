@@ -1,5 +1,6 @@
 package com.iopipe;
 
+import com.iopipe.plugin.IOpipePlugin;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -7,6 +8,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.List;
+import java.util.ServiceLoader;
 import org.junit.jupiter.api.DynamicTest;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -95,6 +97,12 @@ public abstract class Engine
 		
 		// Obtain configuration to use
 		IOpipeConfigurationBuilder confbld = this.generateConfig(__s);
+		
+		// There may be plugins configured in the environment or the test
+		// system, so disable all of them by default
+		for (IOpipePlugin p : ServiceLoader.<IOpipePlugin>load(
+			IOpipePlugin.class))
+			confbld.setPluginEnabled(p.name(), false);
 		
 		// Wrap the connection factory with one where we can tunnel returned
 		// results from the remote service to our single handler
