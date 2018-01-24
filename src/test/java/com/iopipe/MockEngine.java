@@ -1,6 +1,8 @@
 package com.iopipe;
 
 import com.iopipe.http.RemoteRequest;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import javax.json.JsonObject;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -29,6 +31,16 @@ public class MockEngine
 	 * @since 2018/01/23
 	 */
 	@Override
+	protected Consumer<Single> endTestFunction()
+	{
+		return Single::endMocked;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @since 2018/01/23
+	 */
+	@Override
 	protected IOpipeConfigurationBuilder generateConfig(Single __s)
 		throws NullPointerException
 	{
@@ -44,6 +56,10 @@ public class MockEngine
 		// Use the request handler from the single test
 		rv.setRemoteConnectionFactory(new MockConnectionFactory((__rr) ->
 			{
+				// Force the body to be generated to check if it is valid JSON
+				__rr.bodyValue();
+				
+				// Mock it
 				__s.mockedRequest(__rr);
 			}));
 		

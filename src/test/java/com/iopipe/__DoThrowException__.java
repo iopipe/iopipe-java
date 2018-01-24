@@ -1,6 +1,8 @@
 package com.iopipe;
 
 import com.iopipe.http.RemoteRequest;
+import com.iopipe.http.RemoteResult;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.json.JsonObject;
 
 /**
@@ -26,7 +28,43 @@ class __DoThrowException__
 	 * @since 2018/01/23
 	 */
 	@Override
+	public void endCommon()
+	{
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @since 2018/01/23
+	 */
+	@Override
+	public void endMocked()
+	{
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @since 2018/01/23
+	 */
+	@Override
+	public void endRemote()
+	{
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @since 2018/01/23
+	 */
+	@Override
 	public void mockedRequest(RemoteRequest __r)
+	{
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @since 2018/01/23
+	 */
+	@Override
+	public void remoteResult(RemoteResult __r)
 	{
 	}
 	

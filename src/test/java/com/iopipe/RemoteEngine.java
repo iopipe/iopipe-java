@@ -1,5 +1,8 @@
 package com.iopipe;
 
+import java.util.function.Consumer;
+import java.util.function.Function;
+
 /**
  * This runs all of the tests but interacts directly 
  *
@@ -16,6 +19,16 @@ public class RemoteEngine
 	public RemoteEngine()
 	{
 		super("remote");
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @since 2018/01/23
+	 */
+	@Override
+	protected Consumer<Single> endTestFunction()
+	{
+		return Single::endRemote;
 	}
 	
 	/**

@@ -80,6 +80,18 @@ public class IOpipeConfigurationBuilder
 	}
 	
 	/**
+	 * Returns the factory which is used to connect to the IOpipe service.
+	 *
+	 * @return The factory used to connect to the IOpipe service or
+	 * {@code null} if it has not been set.
+	 * @since 2018/01/23
+	 */
+	public final RemoteConnectionFactory getRemoteConnectionFactory()
+	{
+		return this._connectionfactory;
+	}
+	
+	/**
 	 * Sets whether the IOpipe service to to be enabled.
 	 *
 	 * @param __enabled If {@code true} then the IOpipe service is to be used,

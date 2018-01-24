@@ -3,6 +3,8 @@ package com.iopipe;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.List;
 import org.junit.jupiter.api.DynamicTest;
@@ -57,6 +59,14 @@ public abstract class Engine
 		throws NullPointerException;
 	
 	/**
+	 * Returns the function to use for end tests.
+	 *
+	 * @return The end test function.
+	 * @since 2018/01/23
+	 */
+	protected abstract Consumer<Single> endTestFunction();
+	
+	/**
 	 * Returns the base name of this engine.
 	 *
 	 * @return The engine base name
@@ -85,6 +95,11 @@ public abstract class Engine
 		
 		// Obtain configuration to use
 		IOpipeConfigurationBuilder confbld = this.generateConfig(__s);
+		
+		// Wrap the connection factory with one where we can tunnel returned
+		// results from the remote service to our single handler
+		confbld.setRemoteConnectionFactory(new __WrappedConnectionFactory__(
+			__s, confbld.getRemoteConnectionFactory()));
 		
 		// Setup service
 		sv = new IOpipeService(confbld.build());
@@ -126,6 +141,12 @@ public abstract class Engine
 			
 		// The body must have always been entered
 		assertTrue(enteredbody.get(), "enteredbody");
+		
+		// Common end of service
+		__s.endCommon();
+		
+		// And specific tests according to the service
+		endTestFunction().accept(__s);
 	}
 	
 	/**
