@@ -38,6 +38,20 @@ For debugging on Amazon AWS, the additional dependency is required:
 </dependency>
 ```
 
+To create a package which is ready for deployment you may run:
+
+ * `mvn package`
+
+If you wish to strip all debugging information in the JAR file __including__
+__potentially meaningful source lines to stack traces__ you can run the
+following command:
+
+`pack200 -r -G file.jar`
+
+Deployment is the same as other Java programs on the Amazon Lambda platform.
+
+## Configuration
+
 There are three ways to use the service:
 
  * If you are currently implementing `RequestHandler`,
@@ -132,18 +146,3 @@ to build.
 * `mvn install`         -- Install the project into your own Maven repository.
 * `mvn site`            -- Generate Maven informational pages.
 * `mvn javadoc:javadoc` -- Generate JavaDoc.
-
-## Building and Deploying
-
-To create a package which is ready for deployment you may type the following
-command (if you use maven):
-
- * `mvn package`
-
-If you wish to strip all debugging information in the JAR file __including__
-__potentially meaningful source lines to stack traces__ you can run the
-following command:
-
-`pack200 -r -G file.jar`
-
-Deployment is the same as other Java programs on the Amazon Lambda platform.
