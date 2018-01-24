@@ -1,4 +1,4 @@
-package com.iopipe.mock;
+package com.iopipe;
 
 import com.iopipe.http.RemoteConnection;
 import com.iopipe.http.RemoteConnectionFactory;

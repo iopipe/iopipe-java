@@ -1,4 +1,4 @@
-package com.iopipe.mock;
+package com.iopipe;
 
 import com.amazonaws.services.lambda.runtime.CognitoIdentity;
 import com.amazonaws.services.lambda.runtime.ClientContext;

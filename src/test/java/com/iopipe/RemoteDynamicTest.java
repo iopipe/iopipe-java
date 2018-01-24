@@ -1,7 +1,7 @@
 package com.iopipe;
 
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.Collections;
+import java.util.Objects;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
@@ -13,7 +13,7 @@ import org.junit.runner.RunWith;
  *
  * @since 2018/01/23
  */
-@RunWith(JUnitPlatform.class)
+//@RunWith(JUnitPlatform.class)
 public class RemoteDynamicTest
 {
 	/**
@@ -23,9 +23,14 @@ public class RemoteDynamicTest
 	 * @since 2018/01/23
 	 */
 	@TestFactory
-	public Collection<DynamicTest> doThings()
+	public Iterable<DynamicTest> doThings()
 	{
-		throw new Error("TODO");
+		// Instead of skipping tests, just do nothing if they are not enabled
+		if (!Boolean.valueOf(Objects.toString(
+			System.getenv("IOPIPE_ENABLE_REMOTE_TESTS"), "false")))
+			return Collections.<DynamicTest>emptySet();
+		
+		return Engine.generateTests(RemoteEngine::new);
 	}
 }
 

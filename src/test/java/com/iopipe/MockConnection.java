@@ -1,4 +1,4 @@
-package com.iopipe.mock;
+package com.iopipe;
 
 import com.iopipe.http.RemoteConnection;
 import com.iopipe.http.RemoteException;
@@ -17,6 +17,14 @@ import javax.json.JsonString;
 public final class MockConnection
 	implements RemoteConnection
 {
+	/** This is the token which is considered to be valid for the service. */
+	public static final String VALID_TOKEN =
+		"ThisIsNotARealIOpipeTokenAndIsUsedForTesting";
+	
+	/** This is an invalid project token. */
+	public static final String INVALID_TOKEN =
+		"ThisIsAnInvalidTokenAndIsNotCorrect";
+	
 	/** When a request is made this function will be called. */
 	protected final Consumer<RemoteRequest> function;
 	
@@ -50,7 +58,7 @@ public final class MockConnection
 			function.accept(__r);
 		
 		// Check the authorization token
-		if (MockConfiguration.VALID_TOKEN.equals(((JsonString)
+		if (MockConnection.VALID_TOKEN.equals(((JsonString)
 			((JsonObject)__r.bodyValue()).get("client_id")).getString()))
 			return new RemoteResult(202, "Accepted");
 		return new RemoteResult(401,

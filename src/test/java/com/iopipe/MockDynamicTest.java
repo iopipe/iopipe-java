@@ -1,7 +1,5 @@
 package com.iopipe;
 
-import java.util.Arrays;
-import java.util.Collection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
@@ -13,7 +11,7 @@ import org.junit.runner.RunWith;
  *
  * @since 2018/01/23
  */
-@RunWith(JUnitPlatform.class)
+//@RunWith(JUnitPlatform.class)
 public class MockDynamicTest
 {
 	/**
@@ -23,9 +21,9 @@ public class MockDynamicTest
 	 * @since 2018/01/23
 	 */
 	@TestFactory
-	public Iterable<DynamicTest> tests()
+	public Iterable<DynamicTest> doThings()
 	{
-		throw new Error("TODO");
+		return Engine.generateTests(MockEngine::new);
 	}
 }
 

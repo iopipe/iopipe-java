@@ -1,4 +1,4 @@
-package com.iopipe.mock;
+package com.iopipe;
 
 /**
  * This is a mock exception which is not really an error but is used for
