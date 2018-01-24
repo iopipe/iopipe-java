@@ -3,14 +3,14 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.iopipe</groupId>
   <artifactId>iopipe</artifactId>
-  <version>0.4-SNAPSHOT</version>
+  <version>v0.4</version>
   <packaging>jar</packaging>
   <name>${project.groupId}:${project.artifactId}</name>
   <url>https://www.iopipe.com/</url>
   <scm>
     <connection>scm:git:https://github.com/iopipe/iopipe-java-core.git</connection>
     <url>https://github.com/iopipe/iopipe-java-core</url>
-    <tag>HEAD</tag>
+    <tag>0.4</tag>
   </scm>
   <developers>
    <developer>
