@@ -93,18 +93,18 @@ class __DoTracePlugin__
 	@Override
 	public void remoteRequest(RemoteRequest __r)
 	{
-		Map<String, JsonValue> expand = __RequestUtils__.expandObject(__r);
+		Map<String, JsonValue> expand = __Utils__.expandObject(__r);
 		
 		// It is invalid if there is an error
-		if (null == __RequestUtils__.hasError(expand))
+		if (null == __Utils__.hasError(expand))
 			this.noerror.set(true);
 		
 		// See if the trace plugin was specified
-		if (__RequestUtils__.isEqual(expand.get(".plugins[0].name"), "trace"))
+		if (__Utils__.isEqual(expand.get(".plugins[0].name"), "trace"))
 			this.tracepluginspecified.set(true);
 		
 		// Was a mark made?
-		if (__RequestUtils__.isEqual(expand.get(
+		if (__Utils__.isEqual(expand.get(
 			".performanceEntries[0].entryType"), "mark"))
 			this.mademark.set(true);
 	}
@@ -116,7 +116,7 @@ class __DoTracePlugin__
 	@Override
 	public void remoteResult(RemoteResult __r)
 	{
-		if (__ResultUtils__.isOkay(__r))
+		if (__Utils__.isResultOkay(__r))
 			this.remoterecvokay.set(true);
 	}
 	

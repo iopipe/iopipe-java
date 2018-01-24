@@ -1,6 +1,7 @@
 package com.iopipe;
 
 import com.iopipe.http.RemoteRequest;
+import com.iopipe.http.RemoteResult;
 import java.util.Map;
 import java.util.TreeMap;
 import javax.json.JsonArray;
@@ -10,18 +11,18 @@ import javax.json.JsonStructure;
 import javax.json.JsonValue;
 
 /**
- * Basic class to work with requests.
+ * Basic class to work with requests and results.
  *
  * @since 2018/01/23
  */
-final class __RequestUtils__
+final class __Utils__
 {
 	/**
 	 * Not used.
 	 *
 	 * @since 2018/01/23
 	 */
-	private __RequestUtils__()
+	private __Utils__()
 	{
 	}
 	
@@ -64,7 +65,7 @@ final class __RequestUtils__
 				// Recurive into structure?
 				if (v instanceof JsonStructure)
 					for (Map.Entry<String, JsonValue> f :
-						__RequestUtils__.expandObject((JsonStructure)v).
+						__Utils__.expandObject((JsonStructure)v).
 						entrySet())
 						rv.put(k + f.getKey(), f.getValue());
 			}
@@ -87,7 +88,7 @@ final class __RequestUtils__
 				// Recursive into structure?
 				if (v instanceof JsonStructure)
 					for (Map.Entry<String, JsonValue> f :
-						__RequestUtils__.expandObject((JsonStructure)v).
+						__Utils__.expandObject((JsonStructure)v).
 						entrySet())
 						rv.put(k + f.getKey(), f.getValue());
 			}
@@ -97,7 +98,7 @@ final class __RequestUtils__
 	}
 	
 	/**
-	 * Same as {@link __RequestUtils__#expandObject(JsonStructure)}.
+	 * Same as {@link __Utils__#expandObject(JsonStructure)}.
 	 *
 	 * @param __o The object to expand.
 	 * @return The map of expanded values.
@@ -110,7 +111,7 @@ final class __RequestUtils__
 		if (__o == null)
 			throw new NullPointerException();
 		
-		return __RequestUtils__.expandObject(__o.bodyValue());
+		return __Utils__.expandObject(__o.bodyValue());
 	}
 	
 	/**
@@ -129,7 +130,7 @@ final class __RequestUtils__
 		if (__r == null)
 			throw new NullPointerException();
 		
-		return __RequestUtils__.hasError(__RequestUtils__.
+		return __Utils__.hasError(__Utils__.
 			expandObject(__r.bodyValue()));
 	}
 	
@@ -172,6 +173,24 @@ final class __RequestUtils__
 		
 		// Compare string
 		return __s.equals(((JsonString)__v).getString());
+	}
+	
+	/**
+	 * Checks if the result status code is okay.
+	 *
+	 * @param __r The request to check.
+	 * @return If the status code is okay.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/01/23
+	 */
+	public static boolean isResultOkay(RemoteResult __r)
+		throws NullPointerException
+	{
+		if (__r == null)
+			throw new NullPointerException();
+		
+		int code = __r.code();
+		return code >= 200 && code < 300;
 	}
 }
 

@@ -48,7 +48,7 @@ class __DoThrowException__
 	@Override
 	public void remoteRequest(RemoteRequest __r)
 	{
-		if (null != __RequestUtils__.hasError(__r))
+		if (null != __Utils__.hasError(__r))
 			this.errorwassent.set(true);
 	}
 	
@@ -59,7 +59,7 @@ class __DoThrowException__
 	@Override
 	public void remoteResult(RemoteResult __r)
 	{
-		if (__ResultUtils__.isOkay(__r))
+		if (__Utils__.isResultOkay(__r))
 			this.remoterecvokay.set(true);
 	}
 	
