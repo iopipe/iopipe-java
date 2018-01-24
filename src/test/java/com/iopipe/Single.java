@@ -3,6 +3,7 @@ package com.iopipe;
 import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RemoteResult;
 import javax.json.JsonObject;
+import org.junit.jupiter.api.Assertions;
 
 /**
  * This represents a single test which is to be extended and .
@@ -83,6 +84,30 @@ public abstract class Single
 		throws Throwable;
 	
 	/**
+	 * Asserts that the given condition is false.
+	 *
+	 * @param __f The passed condition.
+	 * @param __n The name of the condition.
+	 * @since 2018/01/23
+	 */
+	public final void assertFalse(boolean __f, String __name)
+	{
+		Assertions.assertFalse(__f, __testName(__name));
+	}
+	
+	/**
+	 * Asserts that the given condition is true.
+	 *
+	 * @param __f The passed condition.
+	 * @param __n The name of the condition.
+	 * @since 2018/01/23
+	 */
+	public final void assertTrue(boolean __f, String __name)
+	{
+		Assertions.assertTrue(__f, __testName(__name));
+	}
+	
+	/**
 	 * Returns the full name of the test.
 	 *
 	 * @return The test full name.
@@ -102,6 +127,18 @@ public abstract class Single
 	public boolean mockedTokenValidity()
 	{
 		return true;
+	}
+	
+	/**
+	 * Returns the constructed test name so it is easier to find tests.
+	 *
+	 * @param __name The input name.
+	 * @return The full name of the actual test.
+	 * @since 2018/01/23
+	 */
+	private final String __testName(String __name)
+	{
+		return this.fullName() + "-" + __name;
 	}
 }
 

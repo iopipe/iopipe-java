@@ -13,6 +13,18 @@ import javax.json.JsonObject;
 class __DoEmptyMethod__
 	extends Single
 {
+	/** Was the function executed? */
+	protected final AtomicBoolean executedit =
+		new AtomicBoolean();
+		
+	/** Got mocked request? */
+	protected final AtomicBoolean mocksentokay =
+		new AtomicBoolean();
+		
+	/** Got a result from the server okay? */
+	protected final AtomicBoolean remoterecvokay =
+		new AtomicBoolean();
+	
 	/**
 	 * Constructs the test.
 	 *
@@ -30,6 +42,8 @@ class __DoEmptyMethod__
 	@Override
 	public void endCommon()
 	{
+		super.assertTrue(this.executedit.get(), "executedit");
+		super.assertTrue(this.remoterecvokay.get(), "remoterecvokay");
 	}
 	
 	/**
@@ -39,6 +53,7 @@ class __DoEmptyMethod__
 	@Override
 	public void endMocked()
 	{
+		super.assertTrue(this.mocksentokay.get(), "mocksentokay");
 	}
 	
 	/**
@@ -57,6 +72,8 @@ class __DoEmptyMethod__
 	@Override
 	public void mockedRequest(RemoteRequest __r)
 	{
+		if (null == __RequestUtils__.hasError(__r))
+			this.mocksentokay.set(true);
 	}
 	
 	/**
@@ -66,6 +83,8 @@ class __DoEmptyMethod__
 	@Override
 	public void remoteResult(RemoteResult __r)
 	{
+		if (__ResultUtils__.isOkay(__r))
+			this.remoterecvokay.set(true);
 	}
 	
 	/**
@@ -76,6 +95,7 @@ class __DoEmptyMethod__
 	public void run(IOpipeExecution __e)
 		throws Throwable
 	{
+		this.executedit.set(true);
 	}
 }
 

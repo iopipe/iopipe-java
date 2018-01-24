@@ -13,6 +13,14 @@ import javax.json.JsonObject;
 class __DoThrowException__
 	extends Single
 {
+	/** Got mocked request? */
+	protected final AtomicBoolean mocksentokay =
+		new AtomicBoolean();
+		
+	/** Got a result from the server okay? */
+	protected final AtomicBoolean remoterecvokay =
+		new AtomicBoolean();
+	
 	/**
 	 * Constructs the test.
 	 *
@@ -20,7 +28,7 @@ class __DoThrowException__
 	 */
 	__DoThrowException__(Engine __e)
 	{
-		super(__e, "emptymethod");
+		super(__e, "thrownexception");
 	}
 	
 	/**
@@ -30,6 +38,7 @@ class __DoThrowException__
 	@Override
 	public void endCommon()
 	{
+		super.assertTrue(this.remoterecvokay.get(), "remoterecvokay");
 	}
 	
 	/**
@@ -39,6 +48,7 @@ class __DoThrowException__
 	@Override
 	public void endMocked()
 	{
+		super.assertTrue(this.mocksentokay.get(), "mocksentokay");
 	}
 	
 	/**
@@ -57,6 +67,8 @@ class __DoThrowException__
 	@Override
 	public void mockedRequest(RemoteRequest __r)
 	{
+		if (null != __RequestUtils__.hasError(__r))
+			this.mocksentokay.set(true);
 	}
 	
 	/**
@@ -66,6 +78,8 @@ class __DoThrowException__
 	@Override
 	public void remoteResult(RemoteResult __r)
 	{
+		if (__ResultUtils__.isOkay(__r))
+			this.remoterecvokay.set(true);
 	}
 	
 	/**

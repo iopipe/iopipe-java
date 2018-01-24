@@ -108,39 +108,52 @@ public abstract class Engine
 		AtomicBoolean enteredbody = new AtomicBoolean();
 		
 		// Execute service
-		sv.<Object>run(new MockContext(__s.fullName()), (__exec) ->
-			{
-				// Body entered, which should always happen no matter
-				// what
-				enteredbody.set(true);
-				
-				// Exceptions could be thrown
-				try
+		try
+		{
+			sv.<Object>run(new MockContext(__s.fullName()), (__exec) ->
 				{
-					// Run it
-					__s.run(__exec);
+					// Body entered, which should always happen no matter
+					// what
+					enteredbody.set(true);
+				
+					// Exceptions could be thrown
+					try
+					{
+						// Run it
+						__s.run(__exec);
 					
-					// No exception expected
-					assertFalse(false, "mockexception");
-				}
+						// No exception expected
+						__s.assertFalse(false, "mockexception");
+					}
 	
-				// Threw an exception, which might not be in error
-				catch (Throwable t)
-				{
-					// Mock exception was thrown, treat that as valid
-					if (t instanceof MockException)
-						assertTrue(true, "mockexception");
+					// Threw an exception, which might not be in error
+					catch (Throwable t)
+					{
+						// Mock exception was thrown, treat that as valid
+						if (t instanceof MockException)
+						{
+							__s.assertTrue(true, "mockexception");
+						
+							// Throw it again so an error is actually generated
+							throw (MockException)t;
+						}
 		
-					// Otherwise, this is not good
-					else
-						throw new RuntimeException(t);
-				}
+						// Otherwise, this is not good
+						else
+							throw new RuntimeException(t);
+					}
 				
-				return null;
-			});
+					return null;
+				});
+		}
+		
+		// Ignore the mock exception
+		catch (MockException e)
+		{
+		}
 			
 		// The body must have always been entered
-		assertTrue(enteredbody.get(), "enteredbody");
+		__s.assertTrue(enteredbody.get(), "enteredbody");
 		
 		// Common end of service
 		__s.endCommon();

@@ -5,8 +5,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import javax.json.JsonObject;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 /**
  * This runs all of the tests using the mock service rather than the real
  * service.
