@@ -1,4 +1,4 @@
-package com.iopipe.test;
+package com.iopipe;
 
 /**
  * This is a test engine which performs the bulk of the logic for executing
@@ -6,7 +6,7 @@ package com.iopipe.test;
  *
  * @since 2018/01/23
  */
-public abstract class TestEngine
+public abstract class Engine
 {
 }
 

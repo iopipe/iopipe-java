@@ -4,7 +4,6 @@ import com.iopipe.http.RemoteRequest;
 import com.iopipe.IOpipeConfiguration;
 import com.iopipe.IOpipeConfigurationBuilder;
 import java.util.function.Consumer;
-import junit.framework.TestCase;
 
 /**
  * This class is used to setup configurations which are solely used for testing
