@@ -18,7 +18,7 @@ class __DoEmptyMethod__
 		new AtomicBoolean();
 		
 	/** Got mocked request? */
-	protected final AtomicBoolean mocksentokay =
+	protected final AtomicBoolean errorwasnotsent =
 		new AtomicBoolean();
 		
 	/** Got a result from the server okay? */
@@ -53,7 +53,7 @@ class __DoEmptyMethod__
 	@Override
 	public void endMocked()
 	{
-		super.assertTrue(this.mocksentokay.get(), "mocksentokay");
+		super.assertTrue(this.errorwasnotsent.get(), "errorwasnotsent");
 	}
 	
 	/**
@@ -70,10 +70,10 @@ class __DoEmptyMethod__
 	 * @since 2018/01/23
 	 */
 	@Override
-	public void mockedRequest(RemoteRequest __r)
+	public void remoteRequest(RemoteRequest __r)
 	{
 		if (null == __RequestUtils__.hasError(__r))
-			this.mocksentokay.set(true);
+			this.errorwasnotsent.set(true);
 	}
 	
 	/**

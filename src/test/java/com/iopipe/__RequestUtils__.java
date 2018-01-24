@@ -116,7 +116,7 @@ final class __RequestUtils__
 	 * Checks if the returned object has an error in it, if it does then it
 	 * will be returned.
 	 * 
-	 * @param __e Check if the structure has an error.
+	 * @param __r Check if the structure has an error.
 	 * @return The object represented the error or {@code null} if there
 	 * is none.
 	 * @throws NullPointerException On null arguments.
@@ -128,14 +128,27 @@ final class __RequestUtils__
 		if (__r == null)
 			throw new NullPointerException();
 		
-		// It is easier to handle this way
-		Map<String, JsonValue> expanded = __RequestUtils__.
-			expandObject(__r.bodyValue());
+		return __RequestUtils__.hasError(__RequestUtils__.
+			expandObject(__r.bodyValue()));
+	}
+	
+	/**
+	 * Checks if the returned object has an error in it, if it does then it
+	 * will be returned.
+	 * 
+	 * @param __e The expanded JSON data
+	 * @return The object represented the error or {@code null} if there
+	 * is none.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/01/23
+	 */
+	public static JsonObject hasError(Map<String, JsonValue> __e)
+		throws NullPointerException
+	{
+		if (__e == null)
+			throw new NullPointerException();
 		
-		for (Map.Entry<String, JsonValue> e : expanded.entrySet())
-			System.err.printf("DEBUG -- %s=%s%n", e.getKey(), e.getValue());
-		
-		return (JsonObject)expanded.get(".errors");
+		return (JsonObject)__e.get(".errors");
 	}
 }
 

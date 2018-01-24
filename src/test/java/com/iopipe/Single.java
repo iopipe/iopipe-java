@@ -58,12 +58,12 @@ public abstract class Single
 	public abstract void endRemote();
 	
 	/**
-	 * This is called when a mocked request was made.
+	 * This is called when a request was made.
 	 *
 	 * @param __r The request which was made.
 	 * @since 2018/01/23
 	 */
-	public abstract void mockedRequest(RemoteRequest __r);
+	public abstract void remoteRequest(RemoteRequest __r);
 	
 	/**
 	 * This is called when the remote end returns a result.

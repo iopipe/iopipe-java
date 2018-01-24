@@ -52,14 +52,7 @@ public class MockEngine
 		rv.setTimeOutWindow(150);
 		
 		// Use the request handler from the single test
-		rv.setRemoteConnectionFactory(new MockConnectionFactory((__rr) ->
-			{
-				// Force the body to be generated to check if it is valid JSON
-				__rr.bodyValue();
-				
-				// Mock it
-				__s.mockedRequest(__rr);
-			}));
+		rv.setRemoteConnectionFactory(new MockConnectionFactory());
 		
 		return rv;
 	}

@@ -89,11 +89,17 @@ final class __WrappedConnectionFactory__
 		public RemoteResult send(RemoteRequest __r)
 			throws NullPointerException, RemoteException
 		{
+			// Snoop the request being sent to the server to make sure it is
+			// being formed correctly
+			Single single = this.single;
+			single.remoteRequest(__r);
+			
+			// Send result to remote server, which generates some things
 			RemoteResult rv = this.connection.send(__r);
 			
 			// Snoop and have the test see the result before the service
 			// sees it
-			this.single.remoteResult(rv);
+			single.remoteResult(rv);
 			
 			return rv;
 		}

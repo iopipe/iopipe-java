@@ -14,7 +14,7 @@ class __DoThrowException__
 	extends Single
 {
 	/** Got mocked request? */
-	protected final AtomicBoolean mocksentokay =
+	protected final AtomicBoolean errorwassent =
 		new AtomicBoolean();
 		
 	/** Got a result from the server okay? */
@@ -48,7 +48,7 @@ class __DoThrowException__
 	@Override
 	public void endMocked()
 	{
-		super.assertTrue(this.mocksentokay.get(), "mocksentokay");
+		super.assertTrue(this.errorwassent.get(), "errorwassent");
 	}
 	
 	/**
@@ -65,10 +65,10 @@ class __DoThrowException__
 	 * @since 2018/01/23
 	 */
 	@Override
-	public void mockedRequest(RemoteRequest __r)
+	public void remoteRequest(RemoteRequest __r)
 	{
 		if (null != __RequestUtils__.hasError(__r))
-			this.mocksentokay.set(true);
+			this.errorwassent.set(true);
 	}
 	
 	/**
