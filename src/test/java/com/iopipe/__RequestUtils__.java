@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.json.JsonString;
 import javax.json.JsonStructure;
 import javax.json.JsonValue;
 
@@ -149,6 +150,28 @@ final class __RequestUtils__
 			throw new NullPointerException();
 		
 		return (JsonObject)__e.get(".errors");
+	}
+	
+	/**
+	 * Checks if the given value is equal to the given string.
+	 *
+	 * @param __v The value to check.
+	 * @param __s The string to compare against.
+	 * @return {@code true} if they are equal.
+	 * @since 2018/01/24
+	 */
+	public static boolean isEqual(JsonValue __v, String __s)
+	{
+		// Compare null
+		if (__s == null || __v == null)
+			return (__v == null) == (__s == null);
+		
+		// Not a string?
+		else if (!(__v instanceof JsonString))
+			return false;
+		
+		// Compare string
+		return __s.equals(((JsonString)__v).getString());
 	}
 }
 

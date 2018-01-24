@@ -35,6 +35,10 @@ class __DoTracePlugin__
 	/** Was the trace plugin specified? */
 	protected final BooleanValue tracepluginspecified =
 		new BooleanValue("tracepluginspecified");
+		
+	/** Was the trace plugin specified? */
+	protected final BooleanValue mademark =
+		new BooleanValue("mademark");
 	
 	/**
 	 * Constructs the test.
@@ -65,6 +69,7 @@ class __DoTracePlugin__
 		
 		super.assertEquals(enabled, this.tracepluginspecified);
 		super.assertEquals(enabled, this.tracepluginexecuted);
+		super.assertEquals(enabled, this.mademark);
 	}
 	
 	/**
@@ -95,10 +100,13 @@ class __DoTracePlugin__
 			this.noerror.set(true);
 		
 		// See if the trace plugin was specified
-		JsonValue v = expand.get(".plugins[0].name");
-		if (v instanceof JsonString &&
-			"trace".equals(((JsonString)v).getString()))
+		if (__RequestUtils__.isEqual(expand.get(".plugins[0].name"), "trace"))
 			this.tracepluginspecified.set(true);
+		
+		// Was a mark made?
+		if (__RequestUtils__.isEqual(expand.get(
+			".performanceEntries[0].entryType"), "mark"))
+			this.mademark.set(true);
 	}
 	
 	/**
@@ -123,6 +131,9 @@ class __DoTracePlugin__
 		__e.<TraceExecution>plugin(TraceExecution.class, (__p) ->
 			{
 				this.tracepluginexecuted.set(true);
+				
+				// Make a mark
+				__p.mark("mark");
 			});
 	}
 }
