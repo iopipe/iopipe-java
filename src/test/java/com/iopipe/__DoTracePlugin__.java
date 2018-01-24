@@ -4,6 +4,7 @@ import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RemoteResult;
 import com.iopipe.plugin.trace.TraceExecution;
 import com.iopipe.plugin.trace.TracePlugin;
+import com.iopipe.TraceMeasurement;
 import java.util.Map;
 import javax.json.JsonObject;
 import javax.json.JsonString;
@@ -36,9 +37,13 @@ class __DoTracePlugin__
 	protected final BooleanValue tracepluginspecified =
 		new BooleanValue("tracepluginspecified");
 		
-	/** Was the trace plugin specified? */
+	/** Was a mark made? */
 	protected final BooleanValue mademark =
 		new BooleanValue("mademark");
+	
+	/** Was a measurement made? */
+	protected final BooleanValue mademeasurement =
+		new BooleanValue("mademeasurement");
 	
 	/**
 	 * Constructs the test.
@@ -70,6 +75,7 @@ class __DoTracePlugin__
 		super.assertEquals(enabled, this.tracepluginspecified);
 		super.assertEquals(enabled, this.tracepluginexecuted);
 		super.assertEquals(enabled, this.mademark);
+		super.assertEquals(enabled, this.mademeasurement);
 	}
 	
 	/**
@@ -103,9 +109,14 @@ class __DoTracePlugin__
 		if (__Utils__.isEqual(expand.get(".plugins[0].name"), "trace"))
 			this.tracepluginspecified.set(true);
 		
+		// Was a measurement made?
+		if (__Utils__.isEqual(expand.get(
+			".performanceEntries[0].entryType"), "measurement"))
+			this.mademeasurement.set(true);
+			
 		// Was a mark made?
 		if (__Utils__.isEqual(expand.get(
-			".performanceEntries[0].entryType"), "mark"))
+			".performanceEntries[1].entryType"), "mark"))
 			this.mademark.set(true);
 	}
 	
@@ -132,8 +143,12 @@ class __DoTracePlugin__
 			{
 				this.tracepluginexecuted.set(true);
 				
-				// Make a mark
-				__p.mark("mark");
+				// Make a measurement
+				try (TraceMeasurement c = __p.measure("measurement"))
+				{
+					// Make a mark
+					__p.mark("mark");
+				}
 			});
 	}
 }
