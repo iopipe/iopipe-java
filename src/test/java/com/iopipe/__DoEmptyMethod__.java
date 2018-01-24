@@ -2,7 +2,6 @@ package com.iopipe;
 
 import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RemoteResult;
-import java.util.concurrent.atomic.AtomicBoolean;
 import javax.json.JsonObject;
 
 /**
@@ -14,16 +13,16 @@ class __DoEmptyMethod__
 	extends Single
 {
 	/** Was the function executed? */
-	protected final AtomicBoolean executedit =
-		new AtomicBoolean();
+	protected final BooleanValue executedit =
+		new BooleanValue("executedit");
 		
 	/** Got mocked request? */
-	protected final AtomicBoolean errorwasnotsent =
-		new AtomicBoolean();
+	protected final BooleanValue errorwasnotsent =
+		new BooleanValue("errorwasnotsent");
 		
 	/** Got a result from the server okay? */
-	protected final AtomicBoolean remoterecvokay =
-		new AtomicBoolean();
+	protected final BooleanValue remoterecvokay =
+		new BooleanValue("remoterecvokay");
 	
 	/**
 	 * Constructs the test.
@@ -40,29 +39,11 @@ class __DoEmptyMethod__
 	 * @since 2018/01/23
 	 */
 	@Override
-	public void endCommon()
+	public void end()
 	{
-		super.assertTrue(this.executedit.get(), "executedit");
-		super.assertTrue(this.remoterecvokay.get(), "remoterecvokay");
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * @since 2018/01/23
-	 */
-	@Override
-	public void endMocked()
-	{
-		super.assertTrue(this.errorwasnotsent.get(), "errorwasnotsent");
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * @since 2018/01/23
-	 */
-	@Override
-	public void endRemote()
-	{
+		super.assertTrue(this.executedit);
+		super.assertTrue(this.remoterecvokay);
+		super.assertTrue(this.errorwasnotsent);
 	}
 	
 	/**

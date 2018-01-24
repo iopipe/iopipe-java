@@ -29,16 +29,6 @@ public class MockEngine
 	 * @since 2018/01/23
 	 */
 	@Override
-	protected Consumer<Single> endTestFunction()
-	{
-		return Single::endMocked;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * @since 2018/01/23
-	 */
-	@Override
 	protected IOpipeConfigurationBuilder generateConfig(Single __s)
 		throws NullPointerException
 	{

@@ -2,11 +2,10 @@ package com.iopipe;
 
 import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RemoteResult;
-import java.util.concurrent.atomic.AtomicBoolean;
 import javax.json.JsonObject;
 
 /**
- * Tests an empty method which does nothing.
+ * Tests throwing of an exception.
  *
  * @since 2018/01/23
  */
@@ -14,12 +13,12 @@ class __DoThrowException__
 	extends Single
 {
 	/** Got mocked request? */
-	protected final AtomicBoolean errorwassent =
-		new AtomicBoolean();
+	protected final BooleanValue errorwassent =
+		new BooleanValue("errorwassent");
 		
 	/** Got a result from the server okay? */
-	protected final AtomicBoolean remoterecvokay =
-		new AtomicBoolean();
+	protected final BooleanValue remoterecvokay =
+		new BooleanValue("remoterecvokay");
 	
 	/**
 	 * Constructs the test.
@@ -36,28 +35,10 @@ class __DoThrowException__
 	 * @since 2018/01/23
 	 */
 	@Override
-	public void endCommon()
+	public void end()
 	{
-		super.assertTrue(this.remoterecvokay.get(), "remoterecvokay");
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * @since 2018/01/23
-	 */
-	@Override
-	public void endMocked()
-	{
-		super.assertTrue(this.errorwassent.get(), "errorwassent");
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * @since 2018/01/23
-	 */
-	@Override
-	public void endRemote()
-	{
+		super.assertTrue(this.remoterecvokay);
+		super.assertTrue(this.errorwassent);
 	}
 	
 	/**

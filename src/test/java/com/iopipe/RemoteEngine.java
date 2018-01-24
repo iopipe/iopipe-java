@@ -26,16 +26,6 @@ public class RemoteEngine
 	 * @since 2018/01/23
 	 */
 	@Override
-	protected Consumer<Single> endTestFunction()
-	{
-		return Single::endRemote;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * @since 2018/01/23
-	 */
-	@Override
 	protected IOpipeConfigurationBuilder generateConfig(Single __s)
 	{
 		if (__s == null)

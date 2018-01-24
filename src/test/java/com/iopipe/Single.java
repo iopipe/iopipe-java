@@ -41,21 +41,7 @@ public abstract class Single
 	 *
 	 * @since 2018/01/23
 	 */
-	public abstract void endCommon();
-	
-	/**
-	 * Code to run at the end of a mocked test.
-	 *
-	 * @since 2018/01/23
-	 */
-	public abstract void endMocked();
-	
-	/**
-	 * Code to run at the end of a service test.
-	 *
-	 * @since 2018/01/23
-	 */
-	public abstract void endRemote();
+	public abstract void end();
 	
 	/**
 	 * This is called when a request was made.
@@ -86,25 +72,50 @@ public abstract class Single
 	/**
 	 * Asserts that the given condition is false.
 	 *
-	 * @param __f The passed condition.
-	 * @param __n The name of the condition.
+	 * @param __v The value.
+	 * @throws NullPointerException On null arguments.
 	 * @since 2018/01/23
 	 */
-	public final void assertFalse(boolean __f, String __name)
+	public final void assertFalse(BooleanValue __v)
+		throws NullPointerException
 	{
-		Assertions.assertFalse(__f, __testName(__name));
+		if (__v == null)
+			throw new NullPointerException();
+		
+		Assertions.assertFalse(__v.get(), __testName(__v.name()));
 	}
 	
 	/**
 	 * Asserts that the given condition is true.
 	 *
-	 * @param __f The passed condition.
-	 * @param __n The name of the condition.
+	 * @param __v The value.
+	 * @throws NullPointerException On null arguments.
 	 * @since 2018/01/23
 	 */
-	public final void assertTrue(boolean __f, String __name)
+	public final void assertTrue(BooleanValue __v)
+		throws NullPointerException
 	{
-		Assertions.assertTrue(__f, __testName(__name));
+		if (__v == null)
+			throw new NullPointerException();
+		
+		Assertions.assertTrue(__v.get(), __testName(__v.name()));
+	}
+	
+	/**
+	 * Asserts that the given condition is equal.
+	 *
+	 * @param __exp The expected value.
+	 * @param __v The actual value.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/01/24
+	 */
+	public final void assertEquals(boolean __exp, BooleanValue __v)
+		throws NullPointerException
+	{
+		if (__v == null)
+			throw new NullPointerException();
+		
+		Assertions.assertEquals(__exp, __v.get(), __testName(__v.name()));
 	}
 	
 	/**

@@ -27,6 +27,8 @@ public abstract class Engine
 		{
 			__DoEmptyMethod__::new,
 			__DoThrowException__::new,
+			(__e) -> new __DoTracePlugin__(__e, true),
+			(__e) -> new __DoTracePlugin__(__e, false),
 		};
 	
 	/** The base name for this engine. */
@@ -59,14 +61,6 @@ public abstract class Engine
 	 */
 	protected abstract IOpipeConfigurationBuilder generateConfig(Single __s)
 		throws NullPointerException;
-	
-	/**
-	 * Returns the function to use for end tests.
-	 *
-	 * @return The end test function.
-	 * @since 2018/01/23
-	 */
-	protected abstract Consumer<Single> endTestFunction();
 	
 	/**
 	 * Returns the base name of this engine.
@@ -116,7 +110,8 @@ public abstract class Engine
 		sv = new IOpipeService(confbld.build());
 		
 		// Has the function body been entered?
-		AtomicBoolean enteredbody = new AtomicBoolean();
+		BooleanValue enteredbody = new BooleanValue("enteredbody");
+		BooleanValue mockedexception = new BooleanValue("mockedexception");
 		
 		// Execute service
 		try
@@ -134,7 +129,7 @@ public abstract class Engine
 						__s.run(__exec);
 					
 						// No exception expected
-						__s.assertFalse(false, "mockexception");
+						__s.assertFalse(mockedexception);
 					}
 	
 					// Threw an exception, which might not be in error
@@ -143,7 +138,8 @@ public abstract class Engine
 						// Mock exception was thrown, treat that as valid
 						if (t instanceof MockException)
 						{
-							__s.assertTrue(true, "mockexception");
+							mockedexception.set(true);
+							__s.assertTrue(mockedexception);
 						
 							// Throw it again so an error is actually generated
 							throw (MockException)t;
@@ -164,13 +160,10 @@ public abstract class Engine
 		}
 			
 		// The body must have always been entered
-		__s.assertTrue(enteredbody.get(), "enteredbody");
+		__s.assertTrue(enteredbody);
 		
 		// Common end of service
-		__s.endCommon();
-		
-		// And specific tests according to the service
-		endTestFunction().accept(__s);
+		__s.end();
 	}
 	
 	/**
