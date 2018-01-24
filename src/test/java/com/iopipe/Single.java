@@ -119,14 +119,17 @@ public abstract class Single
 	}
 	
 	/**
-	 * Returns if the mocked test requires a valid token or an invalid one.
+	 * Modifies the config for the test to handle test specific settings.
 	 *
-	 * @return Is a valid token required?
-	 * @since 2018/01/12
+	 * @param __cb The configuration to modify.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/01/24
 	 */
-	public boolean mockedTokenValidity()
+	public void modifyConfig(IOpipeConfigurationBuilder __cb)
+		throws NullPointerException
 	{
-		return true;
+		if (__cb == null)
+			throw new NullPointerException();
 	}
 	
 	/**

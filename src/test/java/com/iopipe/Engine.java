@@ -104,6 +104,9 @@ public abstract class Engine
 			IOpipePlugin.class))
 			confbld.setPluginEnabled(p.name(), false);
 		
+		// Modify the configuration as needed by some tests
+		__s.modifyConfig(confbld);
+		
 		// Wrap the connection factory with one where we can tunnel returned
 		// results from the remote service to our single handler
 		confbld.setRemoteConnectionFactory(new __WrappedConnectionFactory__(
