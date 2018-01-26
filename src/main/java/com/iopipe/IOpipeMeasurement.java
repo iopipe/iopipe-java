@@ -31,18 +31,6 @@ public final class IOpipeMeasurement
 		"linux".compareToIgnoreCase(
 			System.getProperty("os.name", "unknown")) == 0;
 
-	/** The system properties to copy in the environment report. */
-	private static final List<String> _COPY_PROPERTIES =
-		Collections.<String>unmodifiableList(Arrays.<String>asList(
-			"java.version", "java.vendor", "java.vendor.url",
-			"java.vm.specification.version",
-			"java.vm.specification.vendor", "java.vm.specification.name",
-			"java.vm.version", "java.vm.vendor", "java.vm.name",
-			"java.specification.version", "java.specification.vendor",
-			"java.specification.name", "java.class.version",
-			"java.compiler", "os.name", "os.arch", "os.version",
-			"file.separator", "path.separator"));
-
 	/** The configuration. */
 	protected final IOpipeConfiguration config;
 
@@ -142,11 +130,9 @@ public final class IOpipeMeasurement
 
 			// Agent
 			gen.writeStartObject("agent");
-
 			gen.write("runtime", "java");
 			gen.write("version", IOpipeConstants.AGENT_VERSION);
 			gen.write("load_time", IOpipeConstants.LOAD_TIME);
-
 			gen.writeEnd();
 
 			// Runtime information
@@ -154,10 +140,6 @@ public final class IOpipeMeasurement
 			gen.write("name", "java");
 			gen.write("version", System.getProperty("java.version", ""));
 			gen.writeEnd();
-			//
-			// for (String prop : IOpipeMeasurement._COPY_PROPERTIES)
-			// 	gen.write(prop, System.getProperty(prop, ""));
-			//
 
 			// Unique operating system boot identifier
 			gen.writeStartObject("host");
