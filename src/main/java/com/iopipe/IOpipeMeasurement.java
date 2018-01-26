@@ -139,6 +139,9 @@ public final class IOpipeMeasurement
 			gen.writeStartObject("runtime");
 			gen.write("name", "java");
 			gen.write("version", System.getProperty("java.version", ""));
+			gen.write("vendor", System.getProperty("java.vendor", ""));
+			gen.write("vmVendor", System.getProperty("java.vm.vendor", ""));
+			gen.write("vmVersion", System.getProperty("java.vm.version", ""));
 			gen.writeEnd();
 
 			// Unique operating system boot identifier
