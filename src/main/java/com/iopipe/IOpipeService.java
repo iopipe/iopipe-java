@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 import java.util.Set;
 import org.apache.logging.log4j.Logger;
@@ -151,41 +152,55 @@ public final class IOpipeService
 			this._pluginspre;
 		Set<Class<? extends IOpipePluginExecution>> pluginspost =
 			this._pluginspost;
-		for (IOpipePlugin p : ServiceLoader.<IOpipePlugin>load(
-			IOpipePlugin.class))
+		try
 		{
-			try
+			for (IOpipePlugin p : ServiceLoader.<IOpipePlugin>load(
+				IOpipePlugin.class))
 			{
-				Class<? extends IOpipePluginExecution> cl = Objects.
-					<Class<? extends IOpipePluginExecution>>
-					requireNonNull(p.executionClass());
-				
-				// Plugins can be configured to be enabled or disabled
-				// However, some plugins may be enabled by default
-				boolean pluginenabled = enabled && __config.isPluginEnabled(
-					p.name(), p.enabledByDefault());
-				enabledplugins.put(cl, pluginenabled);
-				
-				// Only register if it is enabled
-				if (pluginenabled)
+				try
 				{
-					plugins.put(cl, p);
-					
-					if (p instanceof IOpipePluginPreExecutable)
-						pluginspre.add(cl);
+					Class<? extends IOpipePluginExecution> cl = Objects.
+						<Class<? extends IOpipePluginExecution>>
+						requireNonNull(p.executionClass());
 				
-					if (p instanceof IOpipePluginPostExecutable)
-						pluginspost.add(cl);
+					// Plugins can be configured to be enabled or disabled
+					// However, some plugins may be enabled by default
+					boolean pluginenabled = enabled &&
+						__config.isPluginEnabled(p.name(),
+						p.enabledByDefault());
+					enabledplugins.put(cl, pluginenabled);
+				
+					// Only register if it is enabled
+					if (pluginenabled)
+					{
+						plugins.put(cl, p);
+					
+						if (p instanceof IOpipePluginPreExecutable)
+							pluginspre.add(cl);
+				
+						if (p instanceof IOpipePluginPostExecutable)
+							pluginspost.add(cl);
 						
-					_LOGGER.info("Added plugin for {} called '{}'", cl,
-						p.name());
+						_LOGGER.info("Added plugin for {} called '{}'", cl,
+							p.name());
+					}
+				}
+				catch (NullPointerException e)
+				{
+					_LOGGER.error("Plugin did not return an execution class.",
+						e);
+					continue;
 				}
 			}
-			catch (NullPointerException e)
-			{
-				_LOGGER.error("Plugin did not return an execution class.", e);
-				continue;
-			}
+		}
+		
+		// There is a bad service configuration
+		catch (ServiceConfigurationError e)
+		{
+			_LOGGER.error("There is a service configuration error, this " +
+				"means that most and usually all plugins will be disabled." +
+				"The usual cause of this is META-INF/services which is" +
+				"missing a class or that class fails to load.", e);
 		}
 	}
 	
