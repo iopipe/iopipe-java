@@ -5,7 +5,7 @@ import java.lang.ref.WeakReference;
 import java.util.Objects;
 
 /**
- * This represents a custom metric which may have a string or double value.
+ * This represents a custom metric which may have a string or long value.
  *
  * @since 2018/01/20
  */
@@ -18,11 +18,11 @@ public final class CustomMetric
 	/** The string value of the metric. */
 	protected final String stringvalue;
 	
-	/** The double value of the metric. */
-	protected final double doublevalue;
+	/** The long value of the metric. */
+	protected final long longvalue;
 	
-	/** Has a double value? */
-	protected final boolean hasdouble;
+	/** Has a long value? */
+	protected final boolean haslong;
 	
 	/** String representation. */
 	private volatile Reference<String> _string;
@@ -43,19 +43,19 @@ public final class CustomMetric
 		
 		this.name = __name;
 		this.stringvalue = __sv;
-		this.doublevalue = Double.NaN;
-		this.hasdouble = false;
+		this.longvalue = 0L;
+		this.haslong = false;
 	}
 	
 	/**
-	 * Initializes the custom metric with a double value.
+	 * Initializes the custom metric with a long value.
 	 *
 	 * @param __name The matric name.
-	 * @param __dv The double value.
+	 * @param __lv The long value.
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/01/20
 	 */
-	public CustomMetric(String __name, double __dv)
+	public CustomMetric(String __name, long __lv)
 		throws NullPointerException
 	{
 		if (__name == null)
@@ -63,20 +63,20 @@ public final class CustomMetric
 		
 		this.name = __name;
 		this.stringvalue = null;
-		this.doublevalue = __dv;
-		this.hasdouble = true;
+		this.longvalue = __lv;
+		this.haslong = true;
 	}
 	
 	/**
-	 * Initializes the custom metric with a string and double value.
+	 * Initializes the custom metric with a string and long value.
 	 *
 	 * @param __name The matric name.
 	 * @param __sv The string value.
-	 * @param __dv The double value.
+	 * @param __lv The long value.
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/01/20
 	 */
-	private CustomMetric(String __name, String __sv, double __dv)
+	private CustomMetric(String __name, String __sv, long __lv)
 		throws NullPointerException
 	{
 		if (__name == null || __sv == null)
@@ -84,8 +84,8 @@ public final class CustomMetric
 		
 		this.name = __name;
 		this.stringvalue = __sv;
-		this.doublevalue = __dv;
-		this.hasdouble = true;
+		this.longvalue = __lv;
+		this.haslong = true;
 	}
 	
 	/**
@@ -112,20 +112,7 @@ public final class CustomMetric
 		if (rv != 0)
 			return rv;
 		
-		return Double.compare(this.doublevalue, __o.doublevalue);
-	}
-	
-	/**
-	 * Returns the double value.
-	 *
-	 * @return The double value or {@link Double#NaN} if there is no value.
-	 * @since 2018/01/20
-	 */
-	public double doubleValue()
-	{
-		if (this.hasdouble)
-			return this.doublevalue;
-		return Double.NaN;
+		return Long.compare(this.longvalue, __o.longvalue);
 	}
 	
 	/**
@@ -144,8 +131,8 @@ public final class CustomMetric
 		CustomMetric o = (CustomMetric)__o;
 		return this.name.equals(o.name) &&
 			Objects.equals(this.stringvalue, o.stringvalue) &&
-			this.hasdouble == o.hasdouble &&
-			this.doublevalue == o.doublevalue;
+			this.haslong == o.haslong &&
+			this.longvalue == o.longvalue;
 	}
 	
 	/**
@@ -154,9 +141,9 @@ public final class CustomMetric
 	 * @return If this has a double value.
 	 * @since 2018/01/20
 	 */
-	public boolean hasDouble()
+	public boolean hasLong()
 	{
-		return this.hasdouble;
+		return this.haslong;
 	}
 	
 	/**
@@ -168,7 +155,7 @@ public final class CustomMetric
 	{
 		return (this.name.hashCode() ^
 			Objects.hashCode(this.stringvalue) ^
-			Double.hashCode(this.doublevalue)) ^ (this.hasdouble ? ~0 : 0);
+			Long.hashCode(this.longvalue)) ^ (this.haslong ? ~0 : 0);
 	}
 	
 	/**
@@ -180,6 +167,19 @@ public final class CustomMetric
 	public boolean hasString()
 	{
 		return this.stringvalue != null;
+	}
+	
+	/**
+	 * Returns the long value.
+	 *
+	 * @return The long value or {@code 0} if there is no value.
+	 * @since 2018/01/20
+	 */
+	public long longValue()
+	{
+		if (this.haslong)
+			return this.longvalue;
+		return 0L;
 	}
 	
 	/**
@@ -218,16 +218,16 @@ public final class CustomMetric
 		{
 			String name = this.name,
 				stringvalue = this.stringvalue;
-			double doublevalue = this.doublevalue;
+			double longvalue = this.longvalue;
 			
 			if (stringvalue != null)
-				if (this.hasdouble)
-					rv = String.format("%s={%s, %f}", name, stringvalue,
-						doublevalue);
+				if (this.haslong)
+					rv = String.format("%s={%s, %d}", name, stringvalue,
+						longvalue);
 				else
 					rv = String.format("%s=%s", name, stringvalue);
 			else
-				rv = String.format("%s=%f", name, doublevalue);
+				rv = String.format("%s=%d", name, longvalue);
 			
 			// Cache it
 			this._string = new WeakReference<>(rv);

@@ -31,6 +31,7 @@ public abstract class Engine
 			(__e) -> new __DoTracePlugin__(__e, false),
 			__DoTimeOut__::new,
 			__DoInvalidToken__::new,
+			__DoCustomMetric__::new,
 		};
 	
 	/** The base name for this engine. */

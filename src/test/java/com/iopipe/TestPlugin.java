@@ -71,7 +71,7 @@ public class TestPlugin
 			throw new NullPointerException();
 			
 		((TestExecution)__e).execution().measurement().
-			customMetric("pre-execute", "test");
+			customMetric("pre", "pre");
 	}
 	
 	/**
@@ -86,7 +86,7 @@ public class TestPlugin
 			throw new NullPointerException();
 			
 		((TestExecution)__e).execution().measurement().
-			customMetric("post-execute", 2.0D);
+			customMetric("post", "post");
 	}
 	
 	/**

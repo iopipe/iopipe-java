@@ -158,20 +158,20 @@ public final class IOpipeMeasurement
 	}
 	
 	/**
-	 * Adds the specified custom metric with a double value.
+	 * Adds the specified custom metric with a long value.
 	 *
 	 * @param __name The matric name.
-	 * @param __dv The double value.
+	 * @param __lv The long value.
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/01/20
 	 */
-	public final void customMetric(String __name, double __dv)
+	public final void customMetric(String __name, long __lv)
 		throws NullPointerException
 	{
 		if (__name == null)
 			throw new NullPointerException();
 		
-		this.addCustomMetric(new CustomMetric(__name, __dv));
+		this.addCustomMetric(new CustomMetric(__name, __lv));
 	}
 	
 	/**
@@ -396,8 +396,8 @@ public final class IOpipeMeasurement
 						
 						if (cm.hasString())
 							gen.write("s", cm.stringValue());
-						if (cm.hasDouble())
-							gen.write("n", cm.doubleValue());
+						if (cm.hasLong())
+							gen.write("n", cm.longValue());
 						
 						gen.writeEnd();
 					}
