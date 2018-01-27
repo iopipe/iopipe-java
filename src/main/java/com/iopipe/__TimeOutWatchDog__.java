@@ -146,7 +146,7 @@ final class __TimeOutWatchDog__
 				IOpipeConfiguration config = this.config;
 				Thread sourcethread = this.sourcethread;
 				
-				_LOGGER.debug("Thread {} timed out.", sourcethread);
+				_LOGGER.error("Thread {} timed out.", sourcethread);
 				
 				// Generate a timeout exception, but for the ease of use in
 				// debugging use the stack trace of the thread which timed out
