@@ -56,7 +56,7 @@ public class TestPlugin
 	@Override
 	public final String name()
 	{
-		return "testplugin";
+		return "test";
 	}
 	
 	/**
