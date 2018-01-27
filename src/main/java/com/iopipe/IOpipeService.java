@@ -36,7 +36,7 @@ import org.apache.logging.log4j.LogManager;
  *
  * It is recommended that code use the instance provided by
  * {@link IOpipeService#instance()}, then once an instance is obtained the
- * method {@link IOpipeService#run(Context, Supplier)} may be called.
+ * method {@link IOpipeService#run(Context, Function)} may be called.
  *
  * @since 2017/12/13
  */
