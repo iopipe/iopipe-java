@@ -37,7 +37,6 @@ public final class TraceMeasurement
 	/**
 	 * Initializes the trace measurement.
 	 *
-	 * @param __m Where the measurement will be placed.
 	 * @param __name The name of this trace.
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/01/19
