@@ -119,6 +119,23 @@ public abstract class Single
 	}
 	
 	/**
+	 * Asserts that the given condition is equal.
+	 *
+	 * @param __exp The expected value.
+	 * @param __v The actual value.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/01/26
+	 */
+	public final void assertEquals(int __exp, IntegerValue __v)
+		throws NullPointerException
+	{
+		if (__v == null)
+			throw new NullPointerException();
+		
+		Assertions.assertEquals(__exp, __v.get(), __testName(__v.name()));
+	}
+	
+	/**
 	 * Returns the full name of the test.
 	 *
 	 * @return The test full name.
