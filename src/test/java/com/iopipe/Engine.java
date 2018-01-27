@@ -29,7 +29,8 @@ public abstract class Engine
 			__DoThrowException__::new,
 			(__e) -> new __DoTracePlugin__(__e, true),
 			(__e) -> new __DoTracePlugin__(__e, false),
-			__DoTimeOut__::new
+			__DoTimeOut__::new,
+			__DoInvalidToken__::new,
 		};
 	
 	/** The base name for this engine. */
