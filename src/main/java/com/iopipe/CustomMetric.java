@@ -5,7 +5,8 @@ import java.lang.ref.WeakReference;
 import java.util.Objects;
 
 /**
- * This represents a custom metric which may have a string or long value.
+ * This represents a custom metric which may have a string or long value,
+ * these may be used to add extra data points that are normally not present.
  *
  * @since 2018/01/20
  */
@@ -30,7 +31,7 @@ public final class CustomMetric
 	/**
 	 * Initializes the custom metric with a string value.
 	 *
-	 * @param __name The matric name.
+	 * @param __name The metric name.
 	 * @param __sv The string value.
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/01/20
@@ -50,7 +51,7 @@ public final class CustomMetric
 	/**
 	 * Initializes the custom metric with a long value.
 	 *
-	 * @param __name The matric name.
+	 * @param __name The metric name.
 	 * @param __lv The long value.
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/01/20
@@ -63,27 +64,6 @@ public final class CustomMetric
 		
 		this.name = __name;
 		this.stringvalue = null;
-		this.longvalue = __lv;
-		this.haslong = true;
-	}
-	
-	/**
-	 * Initializes the custom metric with a string and long value.
-	 *
-	 * @param __name The matric name.
-	 * @param __sv The string value.
-	 * @param __lv The long value.
-	 * @throws NullPointerException On null arguments.
-	 * @since 2018/01/20
-	 */
-	private CustomMetric(String __name, String __sv, long __lv)
-		throws NullPointerException
-	{
-		if (__name == null || __sv == null)
-			throw new NullPointerException();
-		
-		this.name = __name;
-		this.stringvalue = __sv;
 		this.longvalue = __lv;
 		this.haslong = true;
 	}
@@ -136,9 +116,9 @@ public final class CustomMetric
 	}
 	
 	/**
-	 * Does this have a double value?
+	 * Does this have a long value?
 	 *
-	 * @return If this has a double value.
+	 * @return If this has a long value.
 	 * @since 2018/01/20
 	 */
 	public boolean hasLong()
@@ -218,16 +198,11 @@ public final class CustomMetric
 		{
 			String name = this.name,
 				stringvalue = this.stringvalue;
-			double longvalue = this.longvalue;
 			
 			if (stringvalue != null)
-				if (this.haslong)
-					rv = String.format("%s={%s, %d}", name, stringvalue,
-						longvalue);
-				else
-					rv = String.format("%s=%s", name, stringvalue);
+				rv = String.format("%s=%s", name, stringvalue);
 			else
-				rv = String.format("%s=%d", name, longvalue);
+				rv = String.format("%s=%d", name, this.longvalue);
 			
 			// Cache it
 			this._string = new WeakReference<>(rv);

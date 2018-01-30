@@ -131,7 +131,7 @@ public final class IOpipeMeasurement
 	/**
 	 * Adds the specified custom metric with a string value.
 	 *
-	 * @param __name The matric name.
+	 * @param __name The metric name.
 	 * @param __sv The string value.
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/01/20
@@ -148,7 +148,7 @@ public final class IOpipeMeasurement
 	/**
 	 * Adds the specified custom metric with a long value.
 	 *
-	 * @param __name The matric name.
+	 * @param __name The metric name.
 	 * @param __lv The long value.
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/01/20
