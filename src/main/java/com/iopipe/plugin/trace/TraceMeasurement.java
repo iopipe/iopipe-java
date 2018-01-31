@@ -1,5 +1,6 @@
 package com.iopipe.plugin.trace;
 
+import com.iopipe.IOpipeConstants;
 import com.iopipe.PerformanceEntry;
 
 /**
@@ -19,7 +20,7 @@ public final class TraceMeasurement
 	
 	/** The nano time this measurement was started. */
 	protected final long startnanotime =
-		System.nanoTime();
+		System.nanoTime() - IOpipeConstants.LOAD_TIME_NANOS;
 	
 	/** The system time this measurement was started. */
 	protected final long starttimemillis =
@@ -30,11 +31,11 @@ public final class TraceMeasurement
 	
 	/** The ending nano time when this was closed. */
 	private volatile long _endnanotime =
-		System.nanoTime();
+		this.startnanotime;
 	
 	/** The ending system time when this was closed. */
 	private volatile long _endtimemillis =
-		System.currentTimeMillis();
+		this.starttimemillis;
 	
 	/**
 	 * Initializes the trace measurement.
@@ -63,7 +64,8 @@ public final class TraceMeasurement
 		{
 			this._closed = true;
 			
-			this._endnanotime = System.nanoTime();
+			this._endnanotime = System.nanoTime() -
+				IOpipeConstants.LOAD_TIME_NANOS;
 			this._endtimemillis = System.currentTimeMillis();
 		}
 	}

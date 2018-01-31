@@ -20,6 +20,10 @@ public interface IOpipeConstants
 	public static final long LOAD_TIME =
 		System.currentTimeMillis();
 	
+	/** The monotic time in milliseconds when the service was loaded. */
+	public static final long LOAD_TIME_NANOS =
+		System.nanoTime();
+	
 	/** The default region to connect to. */
 	public static final String DEFAULT_REGION =
 		"us-east-1";

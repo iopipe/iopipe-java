@@ -411,7 +411,8 @@ public final class IOpipeMeasurement
 						
 						gen.write("name",
 							Objects.toString(e.name(), "unknown"));
-						gen.write("startTime", e.startTimeMillis());
+						gen.write("startTime",
+							(double)e.startNanoTime() / 1_000_000.0D);
 						gen.write("duration",
 							(double)e.durationNanoTime() / 1_000_000.0D);
 						gen.write("entryType",

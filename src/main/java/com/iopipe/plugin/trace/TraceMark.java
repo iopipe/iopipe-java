@@ -1,5 +1,6 @@
 package com.iopipe.plugin.trace;
 
+import com.iopipe.IOpipeConstants;
 import com.iopipe.PerformanceEntry;
 
 /**
@@ -14,9 +15,9 @@ public final class TraceMark
 	/** The name of this trace. */
 	protected final String name;
 	
-	/** The nano time this mark was created. */
+	/** The nano time this mark was created, offset by the load time. */
 	protected final long nanotime =
-		System.nanoTime();
+		System.nanoTime() - IOpipeConstants.LOAD_TIME_NANOS;
 	
 	/** The system time this mark was created. */
 	protected final long timemillis =
