@@ -62,6 +62,7 @@ plugin:
     <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
   </transformers>
 </configuration>
+```
 
 To create a package which is ready for deployment you may run:
 
