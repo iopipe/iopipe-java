@@ -86,6 +86,40 @@ public final class IOpipeExecution
 	}
 	
 	/**
+	 * Adds the specified custom metric with a string value.
+	 *
+	 * @param __name The metric name.
+	 * @param __sv The string value.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/01/30
+	 */
+	public final void customMetric(String __name, String __sv)
+		throws NullPointerException
+	{
+		if (__name == null || __sv == null)
+			throw new NullPointerException();
+		
+		this.measurement.customMetric(__name, __sv);
+	}
+	
+	/**
+	 * Adds the specified custom metric with a long value.
+	 *
+	 * @param __name The metric name.
+	 * @param __lv The long value.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/01/30
+	 */
+	public final void customMetric(String __name, long __lv)
+		throws NullPointerException
+	{
+		if (__name == null)
+			throw new NullPointerException();
+		
+		this.measurement.customMetric(__name, __lv);
+	}
+	
+	/**
 	 * Returns the measurement recorder.
 	 *
 	 * @return The measurement recorder.

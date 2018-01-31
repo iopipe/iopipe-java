@@ -164,6 +164,17 @@ variable. Information on its configuration is at:
 
 The associated package is `com.iopipe`.
 
+## Custom Metrics
+
+To use custom metrics, you can simply call the following two methods in the
+`IOpipeExecution` instance:
+
+ * `customMetric(String name, String value)`
+ * `customMetric(String name, long value)`
+
+Calling either of these will add a custom metric with the specified name and
+the given value.
+
 # Building and Installing the Project Locally
 
 This project requires at least Java 8 to run and additionally required Maven

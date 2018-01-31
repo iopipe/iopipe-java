@@ -49,8 +49,7 @@ public class ExampleExecution
 		if (__s == null)
 			throw new NullPointerException();
 		
-		this.execution.measurement().customMetric(
-			"message-" + this._next++, __s);
+		this.execution.customMetric("message-" + this._next++, __s);
 	}
 }
 

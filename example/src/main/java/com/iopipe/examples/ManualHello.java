@@ -30,6 +30,10 @@ public class ManualHello
 						__s.message(__input);
 					});
 				
+				// Custom metrics which could convey important information
+				__exec.customMetric("hello", "world");
+				__exec.customMetric("numbers", 12346789);
+				
 				// Say hello to them!
 				return "Hello " + __input + "!";
 			});
