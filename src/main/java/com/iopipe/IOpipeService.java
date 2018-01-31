@@ -70,23 +70,8 @@ public final class IOpipeService
 	/** Is the service enabled and working? */
 	protected final boolean enabled;
 	
-	/** All plugins which are known to exist and are actually enabled. */
-	private final Map<Class<? extends IOpipePluginExecution>,
-		IOpipePlugin> _plugins =
-		new HashMap<>();
-	
-	/** Plugins which are in the enabled state. */
-	private final Map<Class<? extends IOpipePluginExecution>, Boolean>
-		_enabledplugins =
-		new HashMap<>();
-	
-	/** Plugins which are pre-exection. */
-	private final Set<Class<? extends IOpipePluginExecution>> _pluginspre =
-		new LinkedHashSet<>();
-	
-	/** Plugins which are post-exection. */
-	private final Set<Class<? extends IOpipePluginExecution>> _pluginspost =
-		new LinkedHashSet<>();
+	/** Plugin state. */
+	final __Plugins__ _plugins;
 	
 	/** The number of times this context has been executed. */
 	private volatile int _execcount;
@@ -142,66 +127,8 @@ public final class IOpipeService
 		this.connection = connection;
 		this.config = __config;
 		
-		// Load in plugins and initialize ones which are pre execution and
-		// post execution
-		Map<Class<? extends IOpipePluginExecution>, IOpipePlugin> plugins =
-			this._plugins;
-		Map<Class<? extends IOpipePluginExecution>, Boolean> enabledplugins =
-			this._enabledplugins;
-		Set<Class<? extends IOpipePluginExecution>> pluginspre =
-			this._pluginspre;
-		Set<Class<? extends IOpipePluginExecution>> pluginspost =
-			this._pluginspost;
-		try
-		{
-			for (IOpipePlugin p : ServiceLoader.<IOpipePlugin>load(
-				IOpipePlugin.class))
-			{
-				try
-				{
-					Class<? extends IOpipePluginExecution> cl = Objects.
-						<Class<? extends IOpipePluginExecution>>
-						requireNonNull(p.executionClass());
-				
-					// Plugins can be configured to be enabled or disabled
-					// However, some plugins may be enabled by default
-					boolean pluginenabled = enabled &&
-						__config.isPluginEnabled(p.name(),
-						p.enabledByDefault());
-					enabledplugins.put(cl, pluginenabled);
-				
-					// Only register if it is enabled
-					if (pluginenabled)
-					{
-						plugins.put(cl, p);
-					
-						if (p instanceof IOpipePluginPreExecutable)
-							pluginspre.add(cl);
-				
-						if (p instanceof IOpipePluginPostExecutable)
-							pluginspost.add(cl);
-						
-						_LOGGER.info("Added plugin for {} called '{}'", cl,
-							p.name());
-					}
-				}
-				catch (NullPointerException e)
-				{
-					_LOGGER.error("Plugin did not return an execution class.",
-						e);
-					continue;
-				}
-			}
-		}
-		
-		// There is a bad service configuration
-		catch (ServiceConfigurationError e)
-		{
-			_LOGGER.error("There is a service configuration error, this " +
-				"means that most and usually all plugins will be disabled." +
-				"The usual cause of this is META-INF/services which is" +
-				"missing a class or that class fails to load.", e);
-		}
+		// Detect all available plugins
+		this._plugins = new __Plugins__(enabled, __config);
 	}
 	
 	/**
@@ -298,18 +225,21 @@ public final class IOpipeService
 		R rv = null;
 		Throwable rt = null;
 		
-		// Run pre-execution plugins IOpipePluginPreExecutable
-		for (Class<? extends IOpipePluginExecution> p : this._pluginspre)
-			try
-			{
-				IOpipePluginPreExecutable l =
-					(IOpipePluginPreExecutable)this.__plugin(p);
-				exec.plugin(p, l::preExecute);
-			}
-			catch (RuntimeException e)
-			{
-				_LOGGER.error("Could not run pre-executable plugin.", e);
-			}
+		// Run pre-execution plugins
+		__Plugins__.__Info__[] plugins = this._plugins.__info();
+		for (__Plugins__.__Info__ i : plugins)
+		{
+			IOpipePluginPreExecutable l = i.getPreExecutable();
+			if (l != null)
+				try
+				{
+					exec.plugin(i.executionClass(), l::preExecute);
+				}
+				catch (RuntimeException e)
+				{
+					_LOGGER.error("Could not run pre-executable plugin.", e);
+				}
+		}
 		
 		// Keep track of how long execution takes
 		long ticker = System.nanoTime();
@@ -340,17 +270,19 @@ public final class IOpipeService
 		measurement.__setColdStart(coldstarted);
 		
 		// Run post-execution plugins
-		for (Class<? extends IOpipePluginExecution> p : this._pluginspost)
-			try
-			{
-				IOpipePluginPostExecutable l =
-					(IOpipePluginPostExecutable)this.__plugin(p);
-				exec.plugin(p, l::postExecute);
-			}
-			catch (RuntimeException e)
-			{
-				_LOGGER.error("Could not run post-executable plugin.", e);
-			}
+		for (__Plugins__.__Info__ i : plugins)
+		{
+			IOpipePluginPostExecutable l = i.getPostExecutable();
+			if (l != null)
+				try
+				{
+					exec.plugin(i.executionClass(), l::postExecute);
+				}
+				catch (RuntimeException e)
+				{
+					_LOGGER.error("Could not run post-executable plugin.", e);
+				}
+		}
 		
 		// Generate and send result to server
 		if (watchdog == null || !watchdog._generated.getAndSet(true))
@@ -364,53 +296,6 @@ public final class IOpipeService
 			else
 				throw (RuntimeException)rt;
 		return rv;
-	}
-	
-	/**
-	 * Obtains the plugin.
-	 *
-	 * @param __cl The execution class.
-	 * @return The plugin instance or {@code null} if it is not enabled or
-	 * does not exist.
-	 * @throws NullPointerException On null arguments.
-	 * @since 2018/01/20
-	 */
-	final IOpipePlugin __plugin(Class<? extends IOpipePluginExecution> __cl)
-		throws NullPointerException
-	{
-		if (__cl == null)
-			throw new NullPointerException();
-		
-		return this._plugins.get(__cl);
-	}
-	
-	/**
-	 * Checks if the specified plugin is currently enabled.
-	 *
-	 * @param __cl The execution class.
-	 * @return {@code true} if the plugin is enabled.
-	 * @throws NullPointerException On null arguments.
-	 * @since 2018/01/23
-	 */
-	final boolean __pluginIsEnabled(Class<? extends IOpipePluginExecution> __c)
-		throws NullPointerException
-	{
-		Boolean rv = this._enabledplugins.get(__c);
-		if (rv == null)
-			return false;
-		return rv;
-	}
-	
-	/**
-	 * Returns all of the available plugins.
-	 *
-	 * @return All of the plugins.
-	 * @since 2018/01/20
-	 */
-	final IOpipePlugin[] __plugins()
-	{
-		Collection<IOpipePlugin> plugins = this._plugins.values();
-		return plugins.<IOpipePlugin>toArray(new IOpipePlugin[plugins.size()]);
 	}
 	
 	/**

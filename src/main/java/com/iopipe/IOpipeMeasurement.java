@@ -427,19 +427,26 @@ public final class IOpipeMeasurement
 			}
 			
 			// Record plugins which are being used
-			IOpipePlugin[] plugins = this.service.__plugins();
+			__Plugins__.__Info__ plugins[] = this.service._plugins.__info();
 			if (plugins.length > 0)
 			{
 				gen.writeStartArray("plugins");
 				
-				for (IOpipePlugin p : plugins)
+				for (__Plugins__.__Info__ i : plugins)
 				{
 					gen.writeStartObject();
 					
-					gen.write("name", Objects.toString(p.name(), ""));
-					gen.write("version", Objects.toString(p.version(), ""));
-					gen.write("homepage", Objects.toString(p.homepage(), ""));
-					gen.write("enabled", true);
+					gen.write("name", i.name());
+					
+					String ve = i.version();
+					if (ve != null)
+						gen.write("version", ve);
+					
+					String hp = i.homepage();
+					if (hp != null)
+						gen.write("homepage", hp);
+					
+					gen.write("enabled", i.isEnabled());
 					
 					gen.writeEnd();
 				}

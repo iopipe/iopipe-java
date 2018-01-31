@@ -28,14 +28,13 @@ public interface IOpipePlugin
 	 * before the execution of a method then {@link IOpipePluginPreExecutable}
 	 * should be implemented.
 	 *
-	 * @param __e The reference to the owning execution for this plugin.
+	 * @param __e The execution state which the plugin will be executing under.
 	 * @return The execution instance for this plugin.
 	 * @throws NullPointerException This may be thrown if the execution is
 	 * required.
 	 * @since 2018/01/20
 	 */
-	public abstract IOpipePluginExecution execute(
-		Reference<IOpipeExecution> __e)
+	public abstract IOpipePluginExecution execute(IOpipeExecution __e)
 		throws NullPointerException;
 	
 	/**

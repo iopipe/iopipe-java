@@ -3,7 +3,6 @@ package com.iopipe.examples;
 import com.iopipe.IOpipeExecution;
 import com.iopipe.plugin.IOpipePlugin;
 import com.iopipe.plugin.IOpipePluginExecution;
-import java.lang.ref.Reference;
 
 /**
  * This is an example plugin, which is simple for example purposes.
@@ -18,13 +17,13 @@ public class ExamplePlugin
 	 * @since 2018/01/22
 	 */
 	@Override
-	public final IOpipePluginExecution execute(Reference<IOpipeExecution> __e)
+	public final IOpipePluginExecution execute(IOpipeExecution __e)
 		throws NullPointerException
 	{
 		if (__e == null)
 			throw new NullPointerException();
 		
-		return new ExampleExecution(__e.get());
+		return new ExampleExecution(__e);
 	}
 	
 	/**

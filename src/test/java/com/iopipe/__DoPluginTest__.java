@@ -64,11 +64,11 @@ class __DoPluginTest__
 	{
 		super.assertTrue(this.remoterecvokay);
 		super.assertTrue(this.noerror);
+		super.assertTrue(this.pluginspecified);
 		
 		// Depends on the enabled state of the plugin
 		boolean enabled = this.enabled;
 		
-		super.assertEquals(enabled, this.pluginspecified);
 		super.assertEquals(enabled, this.madepre);
 		super.assertEquals(enabled, this.madepost);
 	}
@@ -100,9 +100,16 @@ class __DoPluginTest__
 		if (null == __Utils__.hasError(expand))
 			this.noerror.set(true);
 		
-		// See if the plugin was specified
-		if (__Utils__.isEqual(expand.get(".plugins[0].name"), "test"))
-			this.pluginspecified.set(true);
+		// See if the test plugin was specified
+		for (int i = 0; i >= 0; i++)
+		{
+			JsonValue v = expand.get(".plugins[" + i + "].name");
+			if (v == null)
+				break;
+			
+			if (__Utils__.isEqual(v, "test"))
+				this.pluginspecified.set(true);
+		}
 		
 		for (int i = 0; i < 2; i++)
 		{

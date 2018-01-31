@@ -8,13 +8,29 @@ execution state is initialized when the plugin is first referenced. When the
 method finishes execution, the state is removed and nothing more is done with
 it. This mechanism can be used to keep track of which custom metrics should
 be written to the report for example. The execution state is an implementation
-of the class `com.iopipe.plugin.IOpipePluginExecution`.
+of the class `com.iopipe.plugin.IOpipePluginExecution`. All operations within
+a plugin are performed on the `IOpipePluginExecution` instance.
 
 # Using Plugins
 
+To quickly use a plugin:
+
+ 1. `import` the plugin execution state, this class will be used to refer to
+    the plugin.
+    * `import com.iopipe.examples.ExampleExecution;`
+ 2. Refer to the plugin via the `plugin` method and then use a lambda (or
+    method reference) to the code you wish to execute. If a plugin is not
+    enabled then the lambda will not be executed.
+    * `__exec.<ExampleExecution>plugin(ExampleExecution.class, (__s) ->`
+    * `    {`
+    * `        __s.message("I shall say hello!");`
+    * `        __s.message(__input);`
+    * `    });`
+
+## Detailed Instructions
+
 All plugins are referred to by their execution state, which is an
 implementation of the class `com.iopipe.plugin.IOpipePluginExecution`.
-To obtain the execution state of a plugin
 
 Each execution of a method is given a unique object which represents the
 current execution. Plugins are accessed through that. Take for example a
@@ -40,12 +56,24 @@ If the plugin does not exist, then `NoSuchPluginException` will be thrown so
 if your code needs to run regardless of whether the plugin works or not then
 this should be caught and handled accordingly.
 
+For convenience a lambda or method reference can be executed if the plugin is
+enabled and is the recommended way to utilize plugins.
+
+```
+// Send a message to the example plugin
+__exec.<ExampleExecution>plugin(ExampleExecution.class, (__s) ->
+	{
+		__s.message("I shall say hello!");
+		__s.message(__input);
+	});
+```
+
 If a plugin is optional and you wish `null` to be returned then a call to
 `optionalPlugin` should be made instead.
 
 # Writing Plugins
 
-Plugins utilize the `ServiceLoader` class and therefor means that it is very
+Plugins utilize the `ServiceLoader` class and therefore means that it is very
 similar to writing other services. All plugins operate under the
 `com.iopipe.plugin.IOpipePlugin` service and as such implementations of the
 plugins must be referenced in the services file
@@ -65,5 +93,7 @@ executed, if it is required.
 
 Each plugin has its own execution state for each invocation which can be used
 to store state along with providing functionality for the plugin if it can be
-called within.
+called within. The execution state implements
+`com.iopipe.plugin.IOpipePluginExecution` and stores any of the state needed
+for that single execution of a plugin.
 

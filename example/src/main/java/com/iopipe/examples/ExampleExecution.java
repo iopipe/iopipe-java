@@ -4,7 +4,9 @@ import com.iopipe.IOpipeExecution;
 import com.iopipe.plugin.IOpipePluginExecution;
 
 /**
- * This is an execution for the plugin.
+ * This stores the state for this plugin within a single execution of the
+ * example plugin. Internally the only state this stores is the message
+ * number. This is created by the example plugin.
  *
  * @since 2018/01/22
  */

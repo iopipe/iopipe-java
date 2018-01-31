@@ -1,6 +1,5 @@
 package com.iopipe.plugin.trace;
 
-import java.lang.ref.Reference;
 import com.iopipe.IOpipeExecution;
 import com.iopipe.IOpipeMeasurement;
 import com.iopipe.plugin.IOpipePlugin;
@@ -30,12 +29,12 @@ public class TracePlugin
 	 * @since 2018/01/20
 	 */
 	@Override
-	public IOpipePluginExecution execute(Reference<IOpipeExecution> __e)
+	public IOpipePluginExecution execute(IOpipeExecution __e)
 	{
 		if (__e == null)
 			throw new NullPointerException();
 		
-		return new TraceExecution(__e.get().measurement());
+		return new TraceExecution(__e.measurement());
 	}
 	
 	/**

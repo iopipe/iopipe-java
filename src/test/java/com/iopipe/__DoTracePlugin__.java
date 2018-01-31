@@ -68,11 +68,11 @@ class __DoTracePlugin__
 	{
 		super.assertTrue(this.remoterecvokay);
 		super.assertTrue(this.noerror);
+		super.assertTrue(this.tracepluginspecified);
 		
 		// Depends on the enabled state of the plugin
 		boolean enabled = this.enabled;
 		
-		super.assertEquals(enabled, this.tracepluginspecified);
 		super.assertEquals(enabled, this.tracepluginexecuted);
 		super.assertEquals(enabled, this.mademark);
 		super.assertEquals(enabled, this.mademeasurement);
@@ -106,8 +106,15 @@ class __DoTracePlugin__
 			this.noerror.set(true);
 		
 		// See if the trace plugin was specified
-		if (__Utils__.isEqual(expand.get(".plugins[0].name"), "trace"))
-			this.tracepluginspecified.set(true);
+		for (int i = 0; i >= 0; i++)
+		{
+			JsonValue v = expand.get(".plugins[" + i + "].name");
+			if (v == null)
+				break;
+			
+			if (__Utils__.isEqual(v, "trace"))
+				this.tracepluginspecified.set(true);
+		}
 		
 		// Was a measurement made?
 		if (__Utils__.isEqual(expand.get(

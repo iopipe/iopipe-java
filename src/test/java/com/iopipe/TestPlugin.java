@@ -4,7 +4,6 @@ import com.iopipe.plugin.IOpipePlugin;
 import com.iopipe.plugin.IOpipePluginExecution;
 import com.iopipe.plugin.IOpipePluginPreExecutable;
 import com.iopipe.plugin.IOpipePluginPostExecutable;
-import java.lang.ref.Reference;
 
 /**
  * This is a test plugin which exists within the test system.
@@ -20,13 +19,13 @@ public class TestPlugin
 	 * @since 2018/01/20
 	 */
 	@Override
-	public final IOpipePluginExecution execute(Reference<IOpipeExecution> __e)
+	public final IOpipePluginExecution execute(IOpipeExecution __e)
 		throws NullPointerException
 	{
 		if (__e == null)
 			throw new NullPointerException();
 		
-		return new TestExecution(__e.get());
+		return new TestExecution(__e);
 	}
 	
 	/**

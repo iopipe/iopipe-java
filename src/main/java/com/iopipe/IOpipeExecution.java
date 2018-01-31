@@ -15,7 +15,8 @@ import java.util.Map;
  * This class provides access to information and functionality which is
  * specific to a single execution of a method.
  *
- * Each execution will have a unique instance of this object.
+ * Each execution will have a unique instance of this object and as such will
+ * be initialized when it is first used.
  *
  * @since 2018/01/19
  */
@@ -125,24 +126,26 @@ public final class IOpipeExecution
 				// Was pre-cached to not exist
 				if (active.containsKey(__cl))
 					throw new NoSuchPluginException(String.format(
-						"No plugin exists for %s.", __cl));
+						"No plugin exists for %s or it is disabled.", __cl));
 				
-				IOpipeService service = this.service;
-				
-				// Cache no plugin
-				IOpipePlugin plugin = service.__plugin(__cl);
-				if (plugin == null)
+				// It is possible that the plugin does not exist or is
+				// disabled, it could be requested multiple times so cache it
+				__Plugins__.__Info__ info =  this.service._plugins.__get(__cl);
+				if (info == null || !info.isEnabled())
 				{
 					active.put(__cl, null);
 					throw new NoSuchPluginException(String.format(
-						"No plugin exists for %s.", __cl));
+						"No plugin exists for %s or it is disabled.", __cl));
 				}
 				
-				// Initialize it
-				rv = plugin.execute(new WeakReference<>(this));
+				// Initialize the plugin's execution state
+				rv = info.plugin().execute(this);
 				if (rv == null)
+				{
+					active.put(__cl, null);
 					throw new NoSuchPluginException(String.format(
 						"Could create execution instance for plugin.", __cl));
+				}
 				active.put(__cl, rv);
 			}
 			
