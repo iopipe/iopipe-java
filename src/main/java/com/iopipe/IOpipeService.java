@@ -7,10 +7,23 @@ import com.iopipe.http.RemoteConnectionFactory;
 import com.iopipe.http.RemoteException;
 import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RemoteResult;
+import com.iopipe.plugin.IOpipePlugin;
+import com.iopipe.plugin.IOpipePluginExecution;
+import com.iopipe.plugin.IOpipePluginPostExecutable;
+import com.iopipe.plugin.IOpipePluginPreExecutable;
 import java.io.Closeable;
 import java.io.PrintStream;
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.ServiceConfigurationError;
+import java.util.ServiceLoader;
+import java.util.Set;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -23,7 +36,7 @@ import org.apache.logging.log4j.LogManager;
  *
  * It is recommended that code use the instance provided by
  * {@link IOpipeService#instance()}, then once an instance is obtained the
- * method {@link IOpipeService#run(Context, Supplier)} may be called.
+ * method {@link IOpipeService#run(Context, Function)} may be called.
  *
  * @since 2017/12/13
  */
@@ -56,6 +69,9 @@ public final class IOpipeService
 	
 	/** Is the service enabled and working? */
 	protected final boolean enabled;
+	
+	/** Plugin state. */
+	final __Plugins__ _plugins;
 	
 	/** The number of times this context has been executed. */
 	private volatile int _execcount;
@@ -104,12 +120,15 @@ public final class IOpipeService
 			}
 		
 		// If the connection failed, use one which does nothing
-		if (connection == null)
+		if (!enabled || connection == null)
 			connection = new NullConnection();
 		
 		this.enabled = enabled;
 		this.connection = connection;
 		this.config = __config;
+		
+		// Detect all available plugins
+		this._plugins = new __Plugins__(enabled, __config);
 	}
 	
 	/**
@@ -152,14 +171,16 @@ public final class IOpipeService
 	 *
 	 * @param <R> The value to return.
 	 * @param __context The context provided by the AWS service.
-	 * @param __func The function to call which will get a generated report.
+	 * @param __func The lambda function to execute, measure, and generate a
+	 * report for.
 	 * @return The returned value.
 	 * @throws Error If the called function threw an error.
 	 * @throws NullPointerException If no function was specified.
 	 * @throws RuntimeException If the called function threw an exception.
 	 * @since 2017/12/14
 	 */
-	public final <R> R run(Context __context, Supplier<R> __func)
+	public final <R> R run(Context __context,
+		Function<IOpipeExecution, R> __func)
 		throws Error, NullPointerException, RuntimeException
 	{
 		if (__context == null || __func == null)
@@ -167,12 +188,20 @@ public final class IOpipeService
 		
 		int execcount = ++this._execcount;
 		
+		// Setup execution information
+		IOpipeMeasurement measurement = new IOpipeMeasurement(config,
+			__context, this);
+		IOpipeExecution exec = new IOpipeExecution(this, config, __context,
+			measurement);
+		
 		// If disabled, just run the function
 		IOpipeConfiguration config = this.config;
 		if (!config.isEnabled())
 		{
+			// Disabled lambdas could still rely on measurements, despite them
+			// not doing anything useful at all
 			this._badresultcount++;
-			return __func.get();
+			return __func.apply(exec);
 		}
 		
 		_LOGGER.debug(() -> String.format("Invoking context %08x",
@@ -190,20 +219,33 @@ public final class IOpipeService
 		if ((windowtime = config.getTimeOutWindow()) > 0 &&
 			__context.getRemainingTimeInMillis() > 0)
 			watchdog = new __TimeOutWatchDog__(this, __context,
-				Thread.currentThread(), windowtime, coldstarted);
+				Thread.currentThread(), windowtime, coldstarted, exec);
 		
 		// This method either returns a value or throwsn
 		R rv = null;
 		Throwable rt = null;
 		
+		// Run pre-execution plugins
+		__Plugins__.__Info__[] plugins = this._plugins.__info();
+		for (__Plugins__.__Info__ i : plugins)
+		{
+			IOpipePluginPreExecutable l = i.getPreExecutable();
+			if (l != null)
+				try
+				{
+					exec.plugin(i.executionClass(), l::preExecute);
+				}
+				catch (RuntimeException e)
+				{
+					_LOGGER.error("Could not run pre-executable plugin.", e);
+				}
+		}
+		
 		// Keep track of how long execution takes
 		long ticker = System.nanoTime();
-		boolean timedout = false;
-		IOpipeMeasurement measurement = new IOpipeMeasurement(config,
-			__context);
 		try
 		{
-			rv = __func.get();
+			rv = __func.apply(exec);
 		}
 		
 		// An exception or error was thrown, so that will be reported
@@ -212,7 +254,7 @@ public final class IOpipeService
 		{
 			rt = e;
 			
-			measurement.setThrown(e);
+			measurement.__setThrown(e);
 		}
 		
 		// Indicate that execution has finished to the timeout manager
@@ -224,8 +266,23 @@ public final class IOpipeService
 				watchdog.__finished();
 		}
 		
-		measurement.setDuration(ticker);
-		measurement.setColdStart(coldstarted);
+		measurement.__setDuration(ticker);
+		measurement.__setColdStart(coldstarted);
+		
+		// Run post-execution plugins
+		for (__Plugins__.__Info__ i : plugins)
+		{
+			IOpipePluginPostExecutable l = i.getPostExecutable();
+			if (l != null)
+				try
+				{
+					exec.plugin(i.executionClass(), l::postExecute);
+				}
+				catch (RuntimeException e)
+				{
+					_LOGGER.error("Could not run post-executable plugin.", e);
+				}
+		}
 		
 		// Generate and send result to server
 		if (watchdog == null || !watchdog._generated.getAndSet(true))

@@ -21,14 +21,14 @@ public abstract class SimpleRequestStreamHandlerWrapper
 	 * This method is implemented by sub-classes and is used as the actual
 	 * entry point for lambdas.
 	 *
+	 * @param __exec Execution information.
 	 * @param __in The input stream.
 	 * @param __out The output stream.
-	 * @param __context The lambda context.
 	 * @throws IOException On read/write errors.
 	 * @since 2017/12/18
 	 */
-	protected abstract void wrappedHandleRequest(InputStream __in,
-		OutputStream __out, Context __context)
+	protected abstract void wrappedHandleRequest(IOpipeExecution __exec,
+		InputStream __in, OutputStream __out)
 		throws IOException;
 	
 	/**
@@ -43,11 +43,11 @@ public abstract class SimpleRequestStreamHandlerWrapper
 		try
 		{
 			IOpipeService.instance().run(__context,
-				() ->
+				(__exec) ->
 				{
 					try
 					{
-						this.wrappedHandleRequest(__in, __out, __context);
+						this.wrappedHandleRequest(__exec, __in, __out);
 						return null;
 					}
 					catch (IOException e)

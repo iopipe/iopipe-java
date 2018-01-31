@@ -48,6 +48,9 @@ final class __TimeOutWatchDog__
 	/** Has this execution been coldstarted? */
 	protected final boolean coldstart;
 	
+	/** The execution which is being watched. */
+	protected final IOpipeExecution execution;
+	
 	/** Has execution finished? */
 	private final AtomicBoolean _finished =
 		new AtomicBoolean();
@@ -65,14 +68,16 @@ final class __TimeOutWatchDog__
 	 * @param __wt The duration of the timeout window.
 	 * @param __cs Is this a cold start and thus the first execution ever
 	 * to run on the JVM?
+	 * @param  __exec The execution which the watch dog waits under.
 	 * @throws NullPointerException On null arguments.
 	 * @since 2017/12/20
 	 */
 	__TimeOutWatchDog__(IOpipeService __sv, Context __context, Thread __src,
-		int __wt, boolean __cs)
+		int __wt, boolean __cs, IOpipeExecution __exec)
 		throws NullPointerException
 	{
-		if (__sv == null || __context == null || __src == null)
+		if (__sv == null || __context == null || __src == null ||
+			__exec == null)
 			throw new NullPointerException();
 		
 		this.service = __sv;
@@ -81,6 +86,7 @@ final class __TimeOutWatchDog__
 		this.sourcethread = __src;
 		this.windowtime = __wt;
 		this.coldstart = __cs;
+		this.execution = __exec;
 		
 		Thread timeoutthread = new Thread(this,
 			"IOpipe-WatchDog-" + System.identityHashCode(__context));
@@ -149,9 +155,8 @@ final class __TimeOutWatchDog__
 				reported.setStackTrace(sourcethread.getStackTrace());
 				
 				// Send report to the service
-				IOpipeMeasurement measurement = new IOpipeMeasurement(config,
-					context);
-				measurement.setThrown(reported);
+				IOpipeMeasurement measurement = this.execution.measurement();
+				measurement.__setThrown(reported);
 				this.service.__sendRequest(measurement.buildRequest());
 				
 				// Do not need to execute anymore

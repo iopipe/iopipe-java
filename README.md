@@ -38,6 +38,32 @@ For debugging on Amazon AWS, the additional dependency is required:
 </dependency>
 ```
 
+The shade plugin must also have the following transformer:
+
+```
+<configuration>
+  <transformers>
+    <transformer implementation="com.github.edwgiz.mavenShadePlugin.log4j2CacheTransformer.PluginsCacheFileTransformer" />
+  </transformers>
+</configuration>
+```
+
+It is highly recommened to configure the shade plugin so that is merges
+together service resources, this will be _especially_ important if you plan to
+use a number of plugins which may exist across different packages. By default
+the shade plugin will not merge resources for you and as a result plugins will
+appear to disappear. As such, add the following transformer to the shade
+plugin:
+
+
+```
+<configuration>
+  <transformers>
+    <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+  </transformers>
+</configuration>
+```
+
 To create a package which is ready for deployment you may run:
 
  * `mvn package`
@@ -125,6 +151,11 @@ take precedence when available.
     the client.
   * If you need help looking for your token you can visit:
     [Find your project token](https://dashboard.iopipe.com/install).
+ * `com.iopipe.plugin.<name>` or `IOPIPE_<NAME>_ENABLE`
+   * If set to `true` then the specified plugin will be enabled.
+   * If set to `false` then the plugin will be disabled.
+   * If this is not set for a plugin then it will use the setting from the
+     plugin if it should be enabled by default or not.
 
 Log4j2 is used for debugging output and it can be configured via environment
 variable. Information on its configuration is at:
@@ -133,6 +164,56 @@ variable. Information on its configuration is at:
 * <https://docs.aws.amazon.com/lambda/latest/dg/java-logging.html>
 
 The associated package is `com.iopipe`.
+
+## Custom Metrics
+
+To use custom metrics, you can simply call the following two methods in the
+`IOpipeExecution` instance:
+
+ * `customMetric(String name, String value)`
+ * `customMetric(String name, long value)`
+
+Calling either of these will add a custom metric with the specified name and
+the given value.
+
+## Tracing
+
+The tracing plugin is enabled by default and allows one to measure the
+performance of operations within a single execution of a method. Since the
+trace plugin will often be used, there are utility methods to make using it
+very simple.
+
+Import the following classes:
+
+```
+import com.iopipe.plugin.trace.TraceMark;
+import com.iopipe.plugin.trace.TraceMeasurement;
+import com.iopipe.plugin.trace.TraceUtils;
+```
+
+Marks and measurements can be made by calling:
+
+ * `TraceUtils.mark(IOpipeExecution execution, String __name)`
+ * `TraceUtils.measurement(IOpipeExecution execution, String __name)`
+ * `TraceUtils.measurement(IOpipeExecution execution, String __name,`
+   `TraceMark a, TraceMark b)`
+
+`TraceMeasurement` can be used with try-with-resources like the following:
+
+```
+try (TraceMeasurement m = TraceUtils.measurement(execution, "watchthis"))
+{
+    // Perform a lengthy operation
+}
+```
+
+If the plugin is not enabled then these methods will return `null` and the
+trace will not be performed.
+
+Disabling the plugin can be done as followed:
+
+ * Setting the system property `com.iopipe.plugin.trace` to `false`.
+ * Setting the environment variable `IOPIPE_TRACE_ENABLE` to `false`.
 
 # Building and Installing the Project Locally
 
@@ -146,3 +227,4 @@ to build.
 * `mvn install`         -- Install the project into your own Maven repository.
 * `mvn site`            -- Generate Maven informational pages.
 * `mvn javadoc:javadoc` -- Generate JavaDoc.
+

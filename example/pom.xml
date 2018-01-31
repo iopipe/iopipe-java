@@ -4,7 +4,7 @@
   <groupId>com.iopipe.example</groupId>
   <artifactId>iopipe-examples</artifactId>
   <packaging>jar</packaging>
-  <version>0.4</version>
+  <version>0.5-SNAPSHOT</version>
   <name>IOpipe Java Examples</name>
   <url>https://www.iopipe.com/</url>
   <scm>
@@ -36,7 +36,7 @@
     <dependency>
       <groupId>com.iopipe</groupId>
       <artifactId>iopipe</artifactId>
-      <version>0.4</version>
+      <version>0.5-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.amazonaws</groupId>
@@ -70,8 +70,8 @@
             </goals>
             <configuration>
               <transformers>
-                <transformer implementation="com.github.edwgiz.mavenShadePlugin.log4j2CacheTransformer.PluginsCacheFileTransformer">
-                </transformer>
+                <transformer implementation="com.github.edwgiz.mavenShadePlugin.log4j2CacheTransformer.PluginsCacheFileTransformer" />
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
               </transformers>
             </configuration>
           </execution>

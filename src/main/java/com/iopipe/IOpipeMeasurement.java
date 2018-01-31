@@ -3,18 +3,23 @@ package com.iopipe;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.iopipe.http.RemoteException;
 import com.iopipe.http.RemoteRequest;
+import com.iopipe.plugin.IOpipePlugin;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
 import javax.json.Json;
 import javax.json.JsonException;
 import javax.json.stream.JsonGenerator;
@@ -36,7 +41,21 @@ public final class IOpipeMeasurement
 
 	/** The context this is taking the measurement for. */
 	protected final Context context;
-
+	
+	/** The service which initialized this class. */
+	protected final IOpipeService service;
+	
+	/**
+	 * Performance entries which have been added to the measurement, this
+	 * field is locked since multiple threads may be adding entries.
+	 */
+	private final Set<PerformanceEntry> _perfentries =
+		new TreeSet<>();
+	
+	/** Custom metrics that have been added, locked for thread safety. */
+	private final Set<CustomMetric> _custmetrics =
+		new TreeSet<>();
+	
 	/** The exception which may have been thrown. */
 	private volatile Throwable _thrown;
 
@@ -55,14 +74,92 @@ public final class IOpipeMeasurement
 	 * @throws NullPointerException On null arguments.
 	 * @since 2017/12/17
 	 */
-	public IOpipeMeasurement(IOpipeConfiguration __config, Context __context)
+	IOpipeMeasurement(IOpipeConfiguration __config, Context __context,
+		IOpipeService __sv)
 		throws NullPointerException
 	{
-		if (__config == null || __context == null)
+		if (__config == null || __context == null || __sv == null)
 			throw new NullPointerException();
 
 		this.config = __config;
 		this.context = __context;
+		this.service = __sv;
+	}
+	
+	/**
+	 * Adds a single custom metric to the report.
+	 *
+	 * @param __cm The custom metric to add.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/01/20
+	 */
+	public void addCustomMetric(CustomMetric __cm)
+		throws NullPointerException
+	{
+		if (__cm == null)
+			throw new NullPointerException();
+		
+		// Multiple threads can add metrics at one time
+		Set<CustomMetric> custmetrics = this._custmetrics;
+		synchronized (custmetrics)
+		{
+			custmetrics.add(__cm);
+		}
+	}
+	
+	/**
+	 * Adds a single performance entry to the report.
+	 *
+	 * @param __e The entry to add to the report.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/01/19
+	 */
+	public void addPerformanceEntry(PerformanceEntry __e)
+		throws NullPointerException
+	{
+		if (__e == null)
+			throw new NullPointerException();
+		
+		// Multiple threads could be adding entries
+		Set<PerformanceEntry> perfentries = this._perfentries;
+		synchronized (perfentries)
+		{
+			perfentries.add(__e);
+		}
+	}
+	
+	/**
+	 * Adds the specified custom metric with a string value.
+	 *
+	 * @param __name The metric name.
+	 * @param __sv The string value.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/01/20
+	 */
+	public final void customMetric(String __name, String __sv)
+		throws NullPointerException
+	{
+		if (__name == null || __sv == null)
+			throw new NullPointerException();
+		
+		this.addCustomMetric(new CustomMetric(__name, __sv));
+	}
+	
+	/**
+	 * Adds the specified custom metric with a long value.
+	 *
+	 * @param __name The metric name.
+	 * @param __lv The long value.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/01/20
+	 */
+	public final void customMetric(String __name, long __lv)
+		throws NullPointerException
+	{
+		if (__name == null)
+			throw new NullPointerException();
+		
+		this.addCustomMetric(new CustomMetric(__name, __lv));
 	}
 
 	/**
@@ -80,7 +177,10 @@ public final class IOpipeMeasurement
 
 		// Snapshot system information
 		SystemMeasurement sysinfo = new SystemMeasurement();
-
+		
+		// The current timestamp
+		long nowtimestamp = System.currentTimeMillis();
+		
 		StringWriter out = new StringWriter();
 		try (JsonGenerator gen = Json.createGenerator(out))
 		{
@@ -97,8 +197,8 @@ public final class IOpipeMeasurement
 
 			gen.write("processId", sysinfo.pid);
 			gen.write("timestamp", IOpipeConstants.LOAD_TIME);
-			gen.write("timestampEnd", System.currentTimeMillis());
-
+			gen.write("timestampEnd", nowtimestamp);
+			
 			// AWS Context information
 			gen.writeStartObject("aws");
 
@@ -265,7 +365,96 @@ public final class IOpipeMeasurement
 			}
 
 			gen.write("coldstart", this._coldstart);
-
+			
+			// Add custom metrics, which multiple threads could be adding at
+			// once
+			Set<CustomMetric> custmetrics = this._custmetrics;
+			synchronized (custmetrics)
+			{
+				if (!custmetrics.isEmpty())
+				{
+					gen.writeStartArray("custom_metrics");
+					
+					for (CustomMetric cm : custmetrics)
+					{
+						gen.writeStartObject();
+						
+						gen.write("name", cm.name());
+						
+						if (cm.hasString())
+							gen.write("s", cm.stringValue());
+						if (cm.hasLong())
+							gen.write("n", cm.longValue());
+						
+						gen.writeEnd();
+					}
+					
+					gen.writeEnd();
+				}
+			}
+			
+			// Multiple threads may have stored performance entries, so it
+			// is possible that the list may be in a state where it is
+			// inconsistent due to cache differences
+			Set<PerformanceEntry> perfentries = this._perfentries;
+			synchronized (perfentries)
+			{
+				if (!perfentries.isEmpty())
+				{
+					// Entries are stored in an array
+					gen.writeStartArray("performanceEntries");
+					
+					// Write each entry
+					for (PerformanceEntry e : perfentries)
+					{
+						gen.writeStartObject();
+						
+						gen.write("name",
+							Objects.toString(e.name(), "unknown"));
+						gen.write("startTime",
+							(double)e.startNanoTime() / 1_000_000.0D);
+						gen.write("duration",
+							(double)e.durationNanoTime() / 1_000_000.0D);
+						gen.write("entryType",
+							Objects.toString(e.type(), "unknown"));
+						gen.write("timestamp", nowtimestamp);
+						
+						gen.writeEnd();
+					}
+					
+					// End of array
+					gen.writeEnd();
+				}
+			}
+			
+			// Record plugins which are being used
+			__Plugins__.__Info__ plugins[] = this.service._plugins.__info();
+			if (plugins.length > 0)
+			{
+				gen.writeStartArray("plugins");
+				
+				for (__Plugins__.__Info__ i : plugins)
+				{
+					gen.writeStartObject();
+					
+					gen.write("name", i.name());
+					
+					String ve = i.version();
+					if (ve != null)
+						gen.write("version", ve);
+					
+					String hp = i.homepage();
+					if (hp != null)
+						gen.write("homepage", hp);
+					
+					gen.write("enabled", i.isEnabled());
+					
+					gen.writeEnd();
+				}
+				
+				gen.writeEnd();
+			}
+			
 			// Finished
 			gen.writeEnd();
 			gen.flush();
@@ -310,7 +499,7 @@ public final class IOpipeMeasurement
 	 * @param __cold If {@code true} then the execution follows a cold start.
 	 * @since 2017/12/20
 	 */
-	public void setColdStart(boolean __cold)
+	void __setColdStart(boolean __cold)
 	{
 		this._coldstart = __cold;
 	}
@@ -321,7 +510,7 @@ public final class IOpipeMeasurement
 	 * @param __ns The execution duration in nanoseconds.
 	 * @since 2017/12/15
 	 */
-	public void setDuration(long __ns)
+	void __setDuration(long __ns)
 	{
 		this._duration = __ns;
 	}
@@ -332,7 +521,7 @@ public final class IOpipeMeasurement
 	 * @param __t The generated throwable.
 	 * @since 2017/12/15
 	 */
-	public void setThrown(Throwable __t)
+	void __setThrown(Throwable __t)
 	{
 		this._thrown = __t;
 	}

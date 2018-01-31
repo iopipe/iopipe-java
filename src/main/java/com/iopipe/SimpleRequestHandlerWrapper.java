@@ -20,12 +20,13 @@ public abstract class SimpleRequestHandlerWrapper<I, O>
 	 * This method is implemented by sub-classes and is used as the actual
 	 * entry point for lambdas.
 	 *
+	 * @param __exec The execution information.
 	 * @param __input The input value.
-	 * @param __context The lambda context.
 	 * @return The return value.
 	 * @since 2017/12/18
 	 */
-	protected abstract O wrappedHandleRequest(I __input, Context __context);
+	protected abstract O wrappedHandleRequest(IOpipeExecution __exec,
+		I __input);
 	
 	/**
 	 * {@inheritDoc}
@@ -35,7 +36,7 @@ public abstract class SimpleRequestHandlerWrapper<I, O>
 	public final O handleRequest(I __input, Context __context)
 	{
 		return IOpipeService.instance().<O>run(__context,
-			() -> this.wrappedHandleRequest(__input, __context));
+			(__exec) -> this.wrappedHandleRequest(__exec, __input));
 	}
 }
 
