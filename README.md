@@ -175,6 +175,45 @@ To use custom metrics, you can simply call the following two methods in the
 Calling either of these will add a custom metric with the specified name and
 the given value.
 
+## Tracing
+
+The tracing plugin is enabled by default and allows one to measure the
+performance of operations within a single execution of a method. Since the
+trace plugin will often be used, there are utility methods to make using it
+very simple.
+
+Import the following classes:
+
+```
+import com.iopipe.plugin.trace.TraceMark;
+import com.iopipe.plugin.trace.TraceMeasurement;
+import com.iopipe.plugin.trace.TraceUtils;
+```
+
+Marks and measurements can be made by calling:
+
+ * `TraceUtils.mark(IOpipeExecution execution, String __name)`
+ * `TraceUtils.measurement(IOpipeExecution execution, String __name)`
+ * `TraceUtils.measurement(IOpipeExecution execution, String __name,`
+   `TraceMark a, TraceMark b)`
+
+`TraceMeasurement` can be used with try-with-resources like the following:
+
+```
+try (TraceMeasurement m = TraceUtils.measurement(execution, "watchthis"))
+{
+    // Perform a lengthy operation
+}
+```
+
+If the plugin is not enabled then these methods will return `null` and the
+trace will not be performed.
+
+Disabling the plugin can be done as followed:
+
+ * Setting the system property `com.iopipe.plugin.trace` to `false`.
+ * Setting the environment variable `IOPIPE_TRACE_ENABLE` to `false`.
+
 # Building and Installing the Project Locally
 
 This project requires at least Java 8 to run and additionally required Maven

@@ -5,6 +5,7 @@ import com.iopipe.http.RemoteResult;
 import com.iopipe.plugin.trace.TraceExecution;
 import com.iopipe.plugin.trace.TraceMeasurement;
 import com.iopipe.plugin.trace.TracePlugin;
+import com.iopipe.plugin.trace.TraceUtils;
 import java.util.Map;
 import javax.json.JsonObject;
 import javax.json.JsonString;
@@ -12,6 +13,8 @@ import javax.json.JsonValue;
 
 /**
  * Tests that the trace plugin exists.
+ *
+ * This ensures that the executed traces are in their given execution order.
  *
  * @since 2018/01/24
  */
@@ -44,6 +47,14 @@ class __DoTracePlugin__
 	/** Was a measurement made? */
 	protected final BooleanValue mademeasurement =
 		new BooleanValue("mademeasurement");
+		
+	/** Was a utilities mark made? */
+	protected final BooleanValue madeumark =
+		new BooleanValue("madeumark");
+	
+	/** Was a utilities measurement made? */
+	protected final BooleanValue madeumeasurement =
+		new BooleanValue("madeumeasurement");
 	
 	/**
 	 * Constructs the test.
@@ -76,6 +87,8 @@ class __DoTracePlugin__
 		super.assertEquals(enabled, this.tracepluginexecuted);
 		super.assertEquals(enabled, this.mademark);
 		super.assertEquals(enabled, this.mademeasurement);
+		super.assertEquals(enabled, this.madeumark);
+		super.assertEquals(enabled, this.madeumeasurement);
 	}
 	
 	/**
@@ -117,14 +130,32 @@ class __DoTracePlugin__
 		}
 		
 		// Was a measurement made?
-		if (__Utils__.isEqual(expand.get(
-			".performanceEntries[0].entryType"), "measurement"))
+		if (__Utils__.isEqual(expand.get(".performanceEntries[0].name"),
+				"measurement") &&
+			__Utils__.isEqual(expand.get(".performanceEntries[0].entryType"),
+				"measurement"))
 			this.mademeasurement.set(true);
 			
 		// Was a mark made?
-		if (__Utils__.isEqual(expand.get(
-			".performanceEntries[1].entryType"), "mark"))
+		if (__Utils__.isEqual(expand.get(".performanceEntries[1].name"),
+				"mark") &&
+			__Utils__.isEqual(expand.get(".performanceEntries[1].entryType"),
+				"mark"))
 			this.mademark.set(true);
+		
+		// Was a utilities measurement made?
+		if (__Utils__.isEqual(expand.get(".performanceEntries[2].name"),
+				"umeasurement") &&
+			__Utils__.isEqual(expand.get(".performanceEntries[2].entryType"),
+				"measurement"))
+			this.madeumeasurement.set(true);
+			
+		// Was a utilities mark made?
+		if (__Utils__.isEqual(expand.get(".performanceEntries[3].name"),
+				"umark") &&
+			__Utils__.isEqual(expand.get(".performanceEntries[3].entryType"),
+				"mark"))
+			this.madeumark.set(true);
 	}
 	
 	/**
@@ -146,6 +177,7 @@ class __DoTracePlugin__
 	public void run(IOpipeExecution __e)
 		throws Throwable
 	{
+		// Via plugin state
 		__e.<TraceExecution>plugin(TraceExecution.class, (__p) ->
 			{
 				this.tracepluginexecuted.set(true);
@@ -153,10 +185,35 @@ class __DoTracePlugin__
 				// Make a measurement
 				try (TraceMeasurement c = __p.measure("measurement"))
 				{
+					// Small delay to skew time
+					try
+					{
+						Thread.sleep(10);
+					}
+					catch (InterruptedException e)
+					{
+					}
+					
 					// Make a mark
 					__p.mark("mark");
 				}
 			});
+		
+		// Make a measurement via TraceUtils
+		try (TraceMeasurement c = TraceUtils.measure(__e, "umeasurement"))
+		{
+			// Small delay to skew time
+			try
+			{
+				Thread.sleep(10);
+			}
+			catch (InterruptedException e)
+			{
+			}
+			
+			// Make a mark
+			TraceUtils.mark(__e, "umark");
+		}
 	}
 }
 

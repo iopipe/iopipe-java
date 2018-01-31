@@ -61,7 +61,8 @@ public class TraceExecution
 	 * recorded.
 	 *
 	 * @param __name The name of the measurement.
-	 * @return NullPointerException On null arguments.
+	 * @return The measurement which was added to the report.
+	 * @throws NullPointerException On null arguments.
 	 * @since 2018/01/23
 	 */
 	public TraceMeasurement measure(String __name)
@@ -90,7 +91,7 @@ public class TraceExecution
 		TraceMark __b)
 		throws NullPointerException
 	{
-		if (__a == null || __b == null)
+		if (__name == null || __a == null || __b == null)
 			throw new NullPointerException();
 		
 		TraceMeasurementMark rv = new TraceMeasurementMark(__name, __a, __b);
