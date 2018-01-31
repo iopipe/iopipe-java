@@ -3,9 +3,6 @@ package com.iopipe.plugin.trace;
 import com.iopipe.IOpipeExecution;
 import com.iopipe.IOpipeMeasurement;
 import com.iopipe.plugin.IOpipePluginExecution;
-import com.iopipe.TraceMark;
-import com.iopipe.TraceMeasurement;
-import com.iopipe.TraceMeasurementMark;
 
 /**
  * This is the trace plugin which is used to track specific marks and measure

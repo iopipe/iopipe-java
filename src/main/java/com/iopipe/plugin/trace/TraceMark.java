@@ -1,4 +1,6 @@
-package com.iopipe;
+package com.iopipe.plugin.trace;
+
+import com.iopipe.PerformanceEntry;
 
 /**
  * This represents a mark which indicates a single point in time during
@@ -7,7 +9,7 @@ package com.iopipe;
  * @since 2018/01/19
  */
 public final class TraceMark
-	implements TracePerformanceEntry
+	implements PerformanceEntry
 {
 	/** The name of this trace. */
 	protected final String name;

@@ -1,4 +1,6 @@
-package com.iopipe;
+package com.iopipe.plugin.trace;
+
+import com.iopipe.PerformanceEntry;
 
 /**
  * This class measures a duration of time and is intended to be used with
@@ -10,7 +12,7 @@ package com.iopipe;
  * @since 2018/01/19
  */
 public final class TraceMeasurement
-	implements AutoCloseable, TracePerformanceEntry
+	implements AutoCloseable, PerformanceEntry
 {
 	/** The name of this trace. */
 	protected final String name;

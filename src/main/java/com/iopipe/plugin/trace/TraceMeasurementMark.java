@@ -1,4 +1,6 @@
-package com.iopipe;
+package com.iopipe.plugin.trace;
+
+import com.iopipe.PerformanceEntry;
 
 /**
  * This is used to measure the time between two marks.
@@ -6,7 +8,7 @@ package com.iopipe;
  * @since 2018/01/20
  */
 public final class TraceMeasurementMark
-	implements TracePerformanceEntry
+	implements PerformanceEntry
 {
 	/** The name of this trace. */
 	protected final String name;

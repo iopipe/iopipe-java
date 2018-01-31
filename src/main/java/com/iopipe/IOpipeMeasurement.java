@@ -49,7 +49,7 @@ public final class IOpipeMeasurement
 	 * Performance entries which have been added to the measurement, this
 	 * field is locked since multiple threads may be adding entries.
 	 */
-	private final Set<TracePerformanceEntry> _perfentries =
+	private final Set<PerformanceEntry> _perfentries =
 		new TreeSet<>();
 	
 	/** Custom metrics that have been added, locked for thread safety. */
@@ -114,14 +114,14 @@ public final class IOpipeMeasurement
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/01/19
 	 */
-	public void addPerformanceEntry(TracePerformanceEntry __e)
+	public void addPerformanceEntry(PerformanceEntry __e)
 		throws NullPointerException
 	{
 		if (__e == null)
 			throw new NullPointerException();
 		
 		// Multiple threads could be adding entries
-		Set<TracePerformanceEntry> perfentries = this._perfentries;
+		Set<PerformanceEntry> perfentries = this._perfentries;
 		synchronized (perfentries)
 		{
 			perfentries.add(__e);
@@ -396,7 +396,7 @@ public final class IOpipeMeasurement
 			// Multiple threads may have stored performance entries, so it
 			// is possible that the list may be in a state where it is
 			// inconsistent due to cache differences
-			Set<TracePerformanceEntry> perfentries = this._perfentries;
+			Set<PerformanceEntry> perfentries = this._perfentries;
 			synchronized (perfentries)
 			{
 				if (!perfentries.isEmpty())
@@ -405,7 +405,7 @@ public final class IOpipeMeasurement
 					gen.writeStartArray("performanceEntries");
 					
 					// Write each entry
-					for (TracePerformanceEntry e : perfentries)
+					for (PerformanceEntry e : perfentries)
 					{
 						gen.writeStartObject();
 						

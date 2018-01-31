@@ -11,8 +11,8 @@ import java.util.Objects;
  *
  * @since 2018/01/19
  */
-public interface TracePerformanceEntry
-	extends Comparable<TracePerformanceEntry>
+public interface PerformanceEntry
+	extends Comparable<PerformanceEntry>
 {
 	/**
 	 * Returns the name of the performance entry.
@@ -58,7 +58,7 @@ public interface TracePerformanceEntry
 	 * @since 2018/01/19
 	 */
 	@Override
-	public default int compareTo(TracePerformanceEntry __o)
+	public default int compareTo(PerformanceEntry __o)
 		throws NullPointerException
 	{
 		if (__o == null)
