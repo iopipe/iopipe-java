@@ -91,11 +91,12 @@ There are three ways to use the service:
 This class provides an implementation of `RequestHandler<I, O>`.
 
  * Add the following import statement:
+   * `import com.iopipe.IOpipeExecution;`
    * `import com.iopipe.SimpleRequestHandlerWrapper;`
  * Add a class which extends:
    * `SimpleRequestHandlerWrapper<I, O>`
  * Implement the following method:
-   * `protected O wrappedHandleRequest(I __input, Context __context)`
+   * `protected O wrappedHandleRequest(IOpipeExecution __exec, String __input)`
 
 ### Implement `com.iopipe.SimpleRequestStreamHandlerWrapper`.
 
@@ -103,6 +104,7 @@ This class provides an implementation of `RequestStreamHandler`.
 
  * Add the following import statements:
    * `import com.amazonaws.services.lambda.runtime.Context;`
+   * `import com.iopipe.IOpipeExecution;`
    * `import com.iopipe.SimpleRequestStreamHandlerWrapper;`
    * `import java.io.InputStream;`
    * `import java.io.IOException;`
@@ -110,8 +112,8 @@ This class provides an implementation of `RequestStreamHandler`.
  * Add a class which extends:
    * `SimpleRequestStreamHandlerWrapper`
  * Implement the following method:
-   * `protected void wrappedHandleRequest(InputStream __in, `
-     `OutputStream __out, Context __context)`
+   * `protected void wrappedHandleRequest(IOpipeExecution __exec, InputStream __in, `
+     `OutputStream __out) throws IOException`
 
 ### Using the service directly.
 
@@ -227,4 +229,3 @@ to build.
 * `mvn install`         -- Install the project into your own Maven repository.
 * `mvn site`            -- Generate Maven informational pages.
 * `mvn javadoc:javadoc` -- Generate JavaDoc.
-
