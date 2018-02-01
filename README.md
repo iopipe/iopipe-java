@@ -126,8 +126,8 @@ This may be used with any request handler such as `RequestHandler` or
  * Obtain an instance of `IOpipeService`:
    * `IOpipeService service = IOpipeService.instance();`
  * Run by passing a lambda or a class which implements the functional
-   interface `Supplier<R>`:
-   * `service.<String>run(() -> "Hello World!");`
+   interface `Function<IOpipeExecution, R>`:
+   * `service.<String>run(context, (exec) -> "Hello World!");`
 
 ### Setting system properties and environment variables
 
