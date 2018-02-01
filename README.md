@@ -96,7 +96,7 @@ This class provides an implementation of `RequestHandler<I, O>`.
  * Add a class which extends:
    * `SimpleRequestHandlerWrapper<I, O>`
  * Implement the following method:
-   * `protected O wrappedHandleRequest(IOpipeExecution __exec, String __input)`
+   * `protected O wrappedHandleRequest(IOpipeExecution __exec, I __input)`
 
 ### Implement `com.iopipe.SimpleRequestStreamHandlerWrapper`.
 
