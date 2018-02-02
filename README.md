@@ -1,4 +1,4 @@
-# IOpipe Telemetry Agent for Java
+# IOpipe Telemetry Agent for Java [![Download](https://api.bintray.com/packages/iopipe/iopipe/iopipe/images/download.svg) ](https://bintray.com/iopipe/iopipe/iopipe/_latestVersion)
 
  * <https://www.iopipe.com/>
  * Licensed under the Apache 2.0 License.
