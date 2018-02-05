@@ -22,4 +22,4 @@ deployment:
     branch: master
     commands:
       - build-support/handle-mvn-release.sh
-      - cd example; mvn clean install package; serverless deploy
+      - cd example; mvn clean; mvn install -U; mvn package; serverless deploy
