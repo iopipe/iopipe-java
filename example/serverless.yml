@@ -15,3 +15,7 @@ functions:
     handler: com.iopipe.examples.Hello
     environment:
       IOPIPE_TOKEN: ${env:IOPIPE_TOKEN}
+    events:
+      - schedule:
+        rate: rate(5 minute)
+        input: "IOpipe"
