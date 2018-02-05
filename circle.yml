@@ -4,6 +4,11 @@ machine:
   environment:
     MAVEN_OPTS: -Xmx3200m
 
+dependencies:
+  pre:
+    - npm install serverless
+    - which serverless
+
 checkout:
   post:
     - git submodule sync
@@ -14,4 +19,4 @@ deployment:
     branch: master
     commands:
       - build-support/handle-mvn-release.sh
-      - serverless deploy
+      - cd example; mvn clean install package; serverless deploy
