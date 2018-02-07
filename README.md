@@ -1,4 +1,6 @@
-# IOpipe Telemetry Agent for Java [![Download](https://api.bintray.com/packages/iopipe/iopipe/iopipe/images/download.svg) ](https://bintray.com/iopipe/iopipe/iopipe/_latestVersion)
+# IOpipe Telemetry Agent for Java
+
+[![Download](https://api.bintray.com/packages/iopipe/iopipe/iopipe/images/download.svg) ](https://bintray.com/iopipe/iopipe/iopipe/_latestVersion)
 
 This project provides analytics and distributed tracing for event-driven
 applications running on AWS Lambda using [IOpipe](https://www.iopipe.com).
@@ -174,6 +176,13 @@ To use custom metrics, you can simply call the following two methods in the
 
 Calling either of these will add a custom metric with the specified name and
 the given value.
+
+## Profiling
+
+Information and usage on the profiler is contained within the following
+document:
+
+ * [PROFILER.md](PROFILER.md)
 
 ## Tracing
 
