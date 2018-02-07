@@ -1,10 +1,7 @@
 # IOpipe Telemetry Agent for Java [![Download](https://api.bintray.com/packages/iopipe/iopipe/iopipe/images/download.svg) ](https://bintray.com/iopipe/iopipe/iopipe/_latestVersion)
 
- * <https://www.iopipe.com/>
- * Licensed under the Apache 2.0 License.
-
 This project provides analytics and distributed tracing for event-driven
-applications running on AWS Lambda using the IOpipe service.
+applications running on AWS Lambda using [IOpipe](https://www.iopipe.com).
 
 # Installation & usage
 
