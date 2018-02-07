@@ -20,3 +20,11 @@ functions:
           rate: rate(5 minutes)
           input:
             name: "IOpipe"
+  # This function will error because name is not provided.
+  HelloError:
+    handler: com.iopipe.examples.Hello
+    environment:
+      IOPIPE_TOKEN: ${env:IOPIPE_TOKEN}
+    events:
+      - schedule:
+          rate: rate(5 minutes)

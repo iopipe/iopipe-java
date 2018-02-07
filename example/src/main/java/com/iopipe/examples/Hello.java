@@ -16,6 +16,7 @@ import com.iopipe.SimpleRequestHandlerWrapper;
  *
  * @since 2017/12/18
  */
+
 public class Hello
 	extends SimpleRequestHandlerWrapper<Map<String,String>, String>
 {
@@ -61,6 +62,10 @@ public class Hello
 			
 			// Store the result of the math
 			__exec.customMetric("result", (long)result);
+		}
+
+		if (name == null) {
+			throw new RuntimeException("Invoked with no name!");
 		}
 
 		// Say hello to them!
