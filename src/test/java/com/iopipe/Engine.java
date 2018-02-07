@@ -34,6 +34,7 @@ public abstract class Engine
 			__DoCustomMetric__::new,
 			(__e) -> new __DoPluginTest__(__e, true),
 			(__e) -> new __DoPluginTest__(__e, false),
+			__DoProfilerPlugin__::new,
 		};
 	
 	/** The base name for this engine. */
