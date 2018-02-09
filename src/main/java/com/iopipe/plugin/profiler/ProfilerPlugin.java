@@ -44,7 +44,7 @@ public class ProfilerPlugin
 	public IOpipePluginExecution execute(IOpipeExecution __e)
 		throws NullPointerException
 	{
-		throw new Error("TODO");
+		return new ProfilerExecution(__e);
 	}
 	
 	/**
@@ -75,7 +75,10 @@ public class ProfilerPlugin
 	public void preExecute(IOpipePluginExecution __e)
 		throws NullPointerException
 	{
-		throw new Error("TODO");
+		if (__e == null)
+			throw new NullPointerException();
+		
+		((ProfilerExecution)__e).__pre();
 	}
 	
 	/**
@@ -86,7 +89,10 @@ public class ProfilerPlugin
 	public void postExecute(IOpipePluginExecution __e)
 		throws NullPointerException
 	{
-		throw new Error("TODO");
+		if (__e == null)
+			throw new NullPointerException();
+		
+		((ProfilerExecution)__e).__post();
 	}
 	
 	/**
