@@ -12,5 +12,43 @@ import com.iopipe.plugin.IOpipePluginExecution;
 public class ProfilerExecution
 	implements IOpipePluginExecution
 {
+	/** The execution state. */
+	protected final IOpipeExecution execution;
+	
+	/**
+	 * Initializes the profiler state.
+	 *
+	 * @param __e The execution state.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/02/03
+	 */
+	public ProfilerExecution(IOpipeExecution __e)
+		throws NullPointerException
+	{
+		if (__e == null)
+			throw new NullPointerException();
+		
+		this.execution = __e;
+	}
+	
+	/**
+	 * Post execution.
+	 *
+	 * @since 2018/02/09
+	 */
+	final void __post()
+	{
+		throw new Error("TODO");
+	}
+	
+	/**
+	 * Pre execution.
+	 *
+	 * @since 2018/02/09
+	 */
+	final void __pre()
+	{
+		throw new Error("TODO");
+	}
 }
 
