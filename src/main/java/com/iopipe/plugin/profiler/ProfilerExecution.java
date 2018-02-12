@@ -112,7 +112,7 @@ public class ProfilerExecution
 			try (ZipOutputStream zos = new ZipOutputStream(baos))
 			{
 				// Use deflate compression to save sapce
-				zos.setMethod(ZipOutputStream.DEFLATE);
+				zos.setMethod(ZipOutputStream.DEFLATED);
 				zos.setLevel(9);
 				
 				// Export CPU data
