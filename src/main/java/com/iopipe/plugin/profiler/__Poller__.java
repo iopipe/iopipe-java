@@ -91,8 +91,11 @@ final class __Poller__
 			
 			// Handle traces for all threads
 			for (int i = 0; i < count; i++)
+			{
+				Thread thread = threads[i];
 				tracker.__parseStackTrace(runtime, reltime,
-					threads[i].getStackTrace());
+					thread, thread.getStackTrace());
+			}
 			
 			// Rest for a duration so that the next sample is the sampling
 			// rate after this one

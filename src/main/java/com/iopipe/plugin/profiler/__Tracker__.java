@@ -15,17 +15,15 @@ final class __Tracker__
 	 * @param __abs The absolute time since the start of execution in
 	 * nanoseconds.
 	 * @param __rel The relative time since the last trace.
+	 * @param __thread The thread which was traced.
 	 * @param __trace The stack trace to handle.
 	 * @since 2018/02/12
 	 */
 	final void __parseStackTrace(long __abs, int __rel,
-		StackTraceElement... __trace)
+		Thread __thread, StackTraceElement... __trace)
 	{
 		if (__trace == null)
 			__trace = new StackTraceElement[0];
-		
-		System.err.printf("%8d %8d - %s%n", __abs, __rel,
-			Arrays.<StackTraceElement>asList(__trace));
 	}
 }
 
