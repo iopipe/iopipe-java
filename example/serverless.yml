@@ -26,4 +26,7 @@ functions:
     environment:
       IOPIPE_TOKEN: ${env:IOPIPE_TOKEN}
     events:
-      - schedule: rate(5 minutes)
+      - schedule:
+          rate: rate(5 minutes)
+          input:
+            otherInput: "Not a name"
