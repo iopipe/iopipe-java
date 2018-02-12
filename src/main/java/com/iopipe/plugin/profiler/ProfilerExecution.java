@@ -12,6 +12,13 @@ import com.iopipe.plugin.IOpipePluginExecution;
 public class ProfilerExecution
 	implements IOpipePluginExecution
 {
+	/** The default sampling rate. */
+	public static final int DEFAULT_SAMPLE_RATE =
+		50_000_000;
+	
+	/** The number of nanoseconds between each polling period. */
+	public static final int SAMPLE_RATE;
+	
 	/** The execution state. */
 	protected final IOpipeExecution execution;
 	
@@ -24,6 +31,32 @@ public class ProfilerExecution
 	
 	/** The poller for execution. */
 	private volatile __Poller__ _poller;
+	
+	/**
+	 * Determine the sample rate.
+	 *
+	 * @since 2018/02/12
+	 */
+	static
+	{
+		// Use system properties then default to the environment
+		long sr;
+		try
+		{
+			sr = Integer.parseInt(System.getProperty(
+				"com.iopipe.plugin.profiler.samplerate",
+				System.getenv("IOPIPE_PROFILER_SAMPLERATE")), 10) * 1000L;
+		}
+		
+		// Could not parse a valid number
+		catch (NumberFormatException e)
+		{
+			sr = DEFAULT_SAMPLE_RATE;
+		}
+		
+		SAMPLE_RATE = Math.max(1,
+			(int)Math.min(Integer.MAX_VALUE, sr));
+	}
 	
 	/**
 	 * Initializes the profiler state.
@@ -69,8 +102,20 @@ public class ProfilerExecution
 		// Initialize the polling thread
 		Thread pollthread = new Thread(poller);
 		pollthread.setDaemon(true);
-		this._pollthread = pollthread;
+		
+		// Set a higher priority if that is possible so that way the traces
+		// run as soon as they can, but this might not be permitted
+		try
+		{
+			pollthread.setPriority(Thread.MAX_PRIORITY);
+		}
+		catch (SecurityException e)
+		{
+		}
+		
+		// Start it
 		pollthread.start();
+		this._pollthread = pollthread;
 	}
 }
 

@@ -49,18 +49,37 @@ final class __Poller__
 		Thread[] threads = new Thread[1];
 		
 		// Used to measure how long a method has been in execution
-		long basetime = System.nanoTime();
+		long basetime = System.nanoTime(),
+			lasttime = basetime;
 		
 		// Keep polling threads
+		int samplerate = ProfilerExecution.SAMPLE_RATE,
+			resttime = 0;
 		for (;;)
 		{
+			// Sleep for the sample rate time using the higher precision
+			// sleep
+			if (resttime > 0)
+				try
+				{
+					Thread.sleep(resttime / 1_000_000,
+						resttime % 1_000_000);
+				}
+				catch (InterruptedException e)
+				{
+					// Ignore
+				}
+			
 			// Stop polling?
 			if (this._stop)
 				break;
 			
 			// Calculate how long the method has been running, this is used
 			// to measure real time
-			long runtime = System.nanoTime() - basetime;
+			long nowtime = System.nanoTime(),
+				runtime = nowtime - basetime;
+			int reltime = (int)(nowtime - lasttime);
+			lasttime = nowtime;
 			
 			// Try to resize the array based on the number of active threads
 			int guessedactivecount = group.activeCount();
@@ -72,7 +91,14 @@ final class __Poller__
 			
 			// Handle traces for all threads
 			for (int i = 0; i < count; i++)
-				tracker.__parseStackTrace(runtime, threads[i].getStackTrace());
+				tracker.__parseStackTrace(runtime, reltime,
+					threads[i].getStackTrace());
+			
+			// Rest for a duration so that the next sample is the sampling
+			// rate after this one
+			resttime = samplerate - (int)(System.nanoTime() - nowtime);
+			if (resttime > samplerate)
+				resttime = samplerate;
 		}
 	}
 }
