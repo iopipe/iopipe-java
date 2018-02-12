@@ -54,7 +54,7 @@ public class TracePlugin
 	@Override
 	public String homepage()
 	{
-		return "https://github.com/iopipe/iopipe-java-core";
+		return "https://github.com/iopipe/iopipe-java";
 	}
 	
 	/**
