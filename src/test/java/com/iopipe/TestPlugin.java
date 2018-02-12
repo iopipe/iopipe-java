@@ -45,7 +45,7 @@ public class TestPlugin
 	@Override
 	public final String homepage()
 	{
-		return "https://github.com/iopipe/iopipe-java-core";
+		return "https://github.com/iopipe/iopipe-java";
 	}
 	
 	/**

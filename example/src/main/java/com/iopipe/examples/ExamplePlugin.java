@@ -22,10 +22,10 @@ public class ExamplePlugin
 	{
 		if (__e == null)
 			throw new NullPointerException();
-		
+
 		return new ExampleExecution(__e);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 * @since 2018/01/22
@@ -35,7 +35,7 @@ public class ExamplePlugin
 	{
 		return ExampleExecution.class;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 * @since 2018/01/22
@@ -43,9 +43,9 @@ public class ExamplePlugin
 	@Override
 	public final String homepage()
 	{
-		return "https://github.com/iopipe/iopipe-java-core";
+		return "https://github.com/iopipe/iopipe-java";
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 * @since 2018/01/22
@@ -55,7 +55,7 @@ public class ExamplePlugin
 	{
 		return "exampleplugin";
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 * @since 2018/01/22
@@ -66,4 +66,3 @@ public class ExamplePlugin
 		return "1.0.0";
 	}
 }
-
