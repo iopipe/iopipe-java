@@ -114,6 +114,13 @@ class __DoProfilerPlugin__
 		throws Throwable
 	{
 		// Do something long that can be profiled
+		try
+		{
+			Thread.sleep(1000);
+		}
+		catch (InterruptedException e)
+		{
+		}
 	}
 }
 
