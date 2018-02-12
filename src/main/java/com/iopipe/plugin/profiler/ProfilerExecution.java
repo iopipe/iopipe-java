@@ -15,6 +15,16 @@ public class ProfilerExecution
 	/** The execution state. */
 	protected final IOpipeExecution execution;
 	
+	/** Tracker state. */
+	private final __Tracker__ _tracker =
+		new __Tracker__();
+	
+	/** The tread which is pollng for profiling. */
+	private volatile Thread _pollthread;
+	
+	/** The poller for execution. */
+	private volatile __Poller__ _poller;
+	
 	/**
 	 * Initializes the profiler state.
 	 *
@@ -38,7 +48,10 @@ public class ProfilerExecution
 	 */
 	final void __post()
 	{
-		throw new Error("TODO");
+		// Tell the poller to stop and interrupt it so it wakes up from any
+		// sleep state
+		this._poller._stop = true;
+		this._pollthread.interrupt();
 	}
 	
 	/**
@@ -48,7 +61,16 @@ public class ProfilerExecution
 	 */
 	final void __pre()
 	{
-		throw new Error("TODO");
+		// Setup poller which will constantly read thread state
+		__Poller__ poller = new __Poller__(this._tracker,
+			this.execution.threadGroup());
+		this._poller = poller;
+		
+		// Initialize the polling thread
+		Thread pollthread = new Thread(poller);
+		pollthread.setDaemon(true);
+		this._pollthread = pollthread;
+		pollthread.start();
 	}
 }
 
