@@ -2,6 +2,15 @@ package com.iopipe.plugin.profiler;
 
 import com.iopipe.IOpipeExecution;
 import com.iopipe.plugin.IOpipePluginExecution;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.time.format.DateTimeFormatter;
+import java.time.LocalDate;
+import java.util.Base64;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * This contains the execution state for the profile plugin. This class is not
@@ -12,6 +21,10 @@ import com.iopipe.plugin.IOpipePluginExecution;
 public class ProfilerExecution
 	implements IOpipePluginExecution
 {
+	/** Logging. */
+	private static final Logger _LOGGER =
+		LogManager.getLogger(ProfilerExecution.class);
+	
 	/** The default sampling rate. */
 	public static final int DEFAULT_SAMPLE_RATE =
 		50_000_000;
@@ -85,6 +98,51 @@ public class ProfilerExecution
 		// sleep state
 		this._poller._stop = true;
 		this._pollthread.interrupt();
+		
+		// Date prefix used for file export
+		String prefix = DateTimeFormatter.BASIC_ISO_DATE.format(
+			LocalDate.now());
+		
+		// Export tracker data to a ZIP file
+		byte[] exported = null;
+		try (ByteArrayOutputStream baos = new ByteArrayOutputStream())
+		{
+			__Tracker__ tracker = this._tracker;
+			
+			try (ZipOutputStream zos = new ZipOutputStream(baos))
+			{
+				// Use deflate compression to save sapce
+				zos.setMethod(ZipOutputStream.DEFLATE);
+				zos.setLevel(9);
+				
+				// Export CPU data
+				zos.putNextEntry(new ZipEntry(prefix + "_cpu.nps"));
+				new __CPUExport__(tracker).run(zos);
+				zos.closeEntry();
+				
+				// Finish the ZIP
+				zos.finish();
+				zos.flush();
+			}
+			
+			// Export the ZUIP
+			exported = baos.toByteArray();
+		}
+		catch (IOException e)
+		{
+			// Ignore
+			exported = null;
+		}
+		
+		// Snapshots were generated
+		if (exported != null)
+		{
+			// Debug exported bytes to UUEncoded file data
+			final byte[] fexported = exported;
+			_LOGGER.debug(() -> "\nbegin-base64 644 " + prefix + ".zip\n" +
+				Base64.getMimeEncoder().encodeToString(fexported) +
+				"\n====\n");
+		}
 	}
 	
 	/**
