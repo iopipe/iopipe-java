@@ -188,7 +188,6 @@ very simple.
 Import the following classes:
 
 ```
-import com.iopipe.plugin.trace.TraceMark;
 import com.iopipe.plugin.trace.TraceMeasurement;
 import com.iopipe.plugin.trace.TraceUtils;
 ```
