@@ -188,17 +188,13 @@ very simple.
 Import the following classes:
 
 ```
-import com.iopipe.plugin.trace.TraceMark;
 import com.iopipe.plugin.trace.TraceMeasurement;
 import com.iopipe.plugin.trace.TraceUtils;
 ```
 
 Marks and measurements can be made by calling:
 
- * `TraceUtils.mark(IOpipeExecution execution, String __name)`
- * `TraceUtils.measurement(IOpipeExecution execution, String __name)`
- * `TraceUtils.measurement(IOpipeExecution execution, String __name,`
-   `TraceMark a, TraceMark b)`
+ * `TraceUtils.measure(IOpipeExecution execution, String __name)`
 
 `TraceMeasurement` can be used with try-with-resources like the following:
 
@@ -209,8 +205,9 @@ try (TraceMeasurement m = TraceUtils.measurement(execution, "watchthis"))
 }
 ```
 
-If the plugin is not enabled then these methods will return `null` and the
-trace will not be performed.
+or it may be used without try-with-resources and manually closed.
+
+If the plugin is not enabled then the measurement will not record anything.
 
 Disabling the plugin can be done as followed:
 
