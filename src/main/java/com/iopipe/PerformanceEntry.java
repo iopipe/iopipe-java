@@ -3,7 +3,8 @@ package com.iopipe;
 import java.util.Objects;
 
 /**
- * This class represents a single performance entry which defines
+ * This class represents a single performance entry which is used to record
+ * the start time and the potential duration of an event.
  *
  * @since 2018/01/19
  */
@@ -61,15 +62,23 @@ public final class PerformanceEntry
 		if (__o == null)
 			throw new NullPointerException();
 		
-		long diff = this.startNanoTime() - __o.startNanoTime();
-		if (diff < 0)
-			return (int)Math.max(diff, Integer.MIN_VALUE);
-		else if (diff > 0)
-			return (int)Math.min(diff, Integer.MAX_VALUE);
+		int rv = Long.compare(this.startns, __o.startns);
+		if (rv != 0)
+			return rv;
+			
+		rv = Long.compare(this.startms, __o.startms);
+		if (rv != 0)
+			return rv;
 		
-		// Compare by name so that two entries do not occur at the same point
-		return Objects.toString(this.name(), "").compareTo(
-			Objects.toString(__o.name(), ""));
+		rv = Long.compare(this.durationns, __o.durationns);
+		if (rv != 0)
+			return rv;
+		
+		rv = this.name.compareTo(__o.name);
+		if (rv != 0)
+			return rv;
+		
+		return this.type.compareTo(__o.type);
 	}
 	
 	/**
@@ -84,6 +93,36 @@ public final class PerformanceEntry
 	public final long durationNanoTime()
 	{
 		return this.durationns;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @since 2018/02/13
+	 */
+	@Override
+	public final boolean equals(Object __o)
+	{
+		if (this == __o)
+			return true;
+		
+		if (!(__o instanceof PerformanceEntry))
+			return false;
+		
+		return 0 == this.compareTo((PerformanceEntry)__o);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @since 2018/02/13
+	 */
+	@Override
+	public final int hashCode()
+	{
+		return this.name.hashCode() ^
+			this.type.hashCode() ^
+			Long.hashCode(this.startns) ^
+			Long.hashCode(this.startms) ^
+			Long.hashCode(this.durationns);
 	}
 	
 	/**
