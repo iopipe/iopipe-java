@@ -20,7 +20,7 @@ Logging can be enabled by following the instructions at:
 
 In the `pom.xml`, add the following block to your `<dependencies>`:
 
-```
+```xml
 <dependency>
   <groupId>com.iopipe</groupId>
   <artifactId>iopipe</artifactId>
@@ -30,7 +30,7 @@ In the `pom.xml`, add the following block to your `<dependencies>`:
 
 For debugging on Amazon AWS, the additional dependency is required:
 
-```
+```xml
 <dependency>
   <groupId>com.amazonaws</groupId>
   <artifactId>aws-lambda-java-log4j2</artifactId>
@@ -40,7 +40,7 @@ For debugging on Amazon AWS, the additional dependency is required:
 
 The shade plugin must also have the following transformer:
 
-```
+```xml
 <configuration>
   <transformers>
     <transformer implementation="com.github.edwgiz.mavenShadePlugin.log4j2CacheTransformer.PluginsCacheFileTransformer" />
@@ -48,15 +48,13 @@ The shade plugin must also have the following transformer:
 </configuration>
 ```
 
-It is highly recommened to configure the shade plugin so that is merges
-together service resources, this will be _especially_ important if you plan to
+It is highly recommended to configure the shade plugin so that it merges service resources together, this will be _especially_ important if you plan to
 use a number of plugins which may exist across different packages. By default
 the shade plugin will not merge resources for you and as a result plugins will
 appear to disappear. As such, add the following transformer to the shade
 plugin:
 
-
-```
+```xml
 <configuration>
   <transformers>
     <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
@@ -66,13 +64,17 @@ plugin:
 
 To create a package which is ready for deployment you may run:
 
- * `mvn package`
+```bash
+mvn package
+```
 
 If you wish to strip all debugging information in the JAR file __including__
 __potentially meaningful source lines to stack traces__ you can run the
 following command:
 
-`pack200 -r -G file.jar`
+```bash
+pack200 -r -G file.jar
+```
 
 Deployment is the same as other Java programs on the Amazon Lambda platform.
 
@@ -90,44 +92,76 @@ There are three ways to use the service:
 
 This class provides an implementation of `RequestHandler<I, O>`.
 
- * Add the following import statement:
-   * `import com.iopipe.IOpipeExecution;`
-   * `import com.iopipe.SimpleRequestHandlerWrapper;`
- * Add a class which extends:
-   * `SimpleRequestHandlerWrapper<I, O>`
- * Implement the following method:
-   * `protected O wrappedHandleRequest(IOpipeExecution __exec, I __input)`
+Add the following import statement:
+
+```java
+import com.iopipe.IOpipeExecution;
+import com.iopipe.SimpleRequestHandlerWrapper;
+```
+
+Add a class which extends:
+
+```java
+SimpleRequestHandlerWrapper<I, O>
+```
+
+Implement the following method:
+
+```java
+protected O wrappedHandleRequest(IOpipeExecution __exec, I __input)
+```
 
 ### Implement `com.iopipe.SimpleRequestStreamHandlerWrapper`.
 
 This class provides an implementation of `RequestStreamHandler`.
 
- * Add the following import statements:
-   * `import com.amazonaws.services.lambda.runtime.Context;`
-   * `import com.iopipe.IOpipeExecution;`
-   * `import com.iopipe.SimpleRequestStreamHandlerWrapper;`
-   * `import java.io.InputStream;`
-   * `import java.io.IOException;`
-   * `import java.io.OutputStream;`
- * Add a class which extends:
-   * `SimpleRequestStreamHandlerWrapper`
- * Implement the following method:
-   * `protected void wrappedHandleRequest(IOpipeExecution __exec, InputStream __in, `
-     `OutputStream __out) throws IOException`
+Add the following import statements:
+
+```java
+import com.amazonaws.services.lambda.runtime.Context;
+import com.iopipe.IOpipeExecution;
+import com.iopipe.SimpleRequestStreamHandlerWrapper;
+import java.io.InputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+```
+
+Add a class which extends:
+
+```java
+SimpleRequestStreamHandlerWrapper
+```
+
+Implement the following method:
+
+```java
+protected void wrappedHandleRequest(IOpipeExecution __exec, InputStream __in, OutputStream __out) throws IOException
+```
 
 ### Using the service directly.
 
 This may be used with any request handler such as `RequestHandler` or
 `RequestStreamHandler`, although it is not limited to those interfaces.
 
- * Add the following import statements:
-   * `import com.amazonaws.services.lambda.runtime.Context;`
-   * `import com.iopipe.IOpipeService;`
- * Obtain an instance of `IOpipeService`:
-   * `IOpipeService service = IOpipeService.instance();`
- * Run by passing a lambda or a class which implements the functional
-   interface `Function<IOpipeExecution, R>`:
-   * `service.<String>run(context, (exec) -> "Hello World!");`
+Add the following import statements:
+
+```java
+import com.amazonaws.services.lambda.runtime.Context;
+import com.iopipe.IOpipeService;
+```
+
+Obtain an instance of `IOpipeService`:
+
+```java
+IOpipeService service = IOpipeService.instance();
+```
+
+Run by passing a lambda or a class which implements the functional interface
+`Function<IOpipeExecution, R>`:
+
+```java
+service.<String>run(context, (exec) -> "Hello World!");
+```
 
 ### Setting system properties and environment variables
 
@@ -172,8 +206,10 @@ The associated package is `com.iopipe`.
 To use custom metrics, you can simply call the following two methods in the
 `IOpipeExecution` instance:
 
- * `customMetric(String name, String value)`
- * `customMetric(String name, long value)`
+```java
+customMetric(String name, String value)
+customMetric(String name, long value)
+```
 
 Calling either of these will add a custom metric with the specified name and
 the given value.
@@ -187,18 +223,20 @@ very simple.
 
 Import the following classes:
 
-```
+```java
 import com.iopipe.plugin.trace.TraceMeasurement;
 import com.iopipe.plugin.trace.TraceUtils;
 ```
 
 Marks and measurements can be made by calling:
 
- * `TraceUtils.measure(IOpipeExecution execution, String __name)`
+```java
+TraceUtils.measure(IOpipeExecution execution, String __name)
+```
 
 `TraceMeasurement` can be used with try-with-resources like the following:
 
-```
+```java
 try (TraceMeasurement m = TraceUtils.measurement(execution, "watchthis"))
 {
     // Perform a lengthy operation
@@ -219,10 +257,48 @@ Disabling the plugin can be done as followed:
 This project requires at least Java 8 to run and additionally required Maven
 to build.
 
-* `mvn compile`         -- Compile the project.
-* `mvn package`         -- Compile JAR package.
-* `mvn test`            -- Run tests.
-* `mvn clean`           -- Clean build.
-* `mvn install`         -- Install the project into your own Maven repository.
-* `mvn site`            -- Generate Maven informational pages.
-* `mvn javadoc:javadoc` -- Generate JavaDoc.
+Compile the project:
+
+```bash
+mvn compile
+```
+
+Compile JAR package:
+
+```bash
+mvn package
+```
+
+Run tests:
+
+```bash
+mvn test
+```
+
+Clean build:
+
+```bash
+mvn clean
+```
+
+Install the project into your own Maven repository:
+
+```bash
+mvn install
+```
+
+Generate Maven informational pages:
+
+```bash
+mvn site
+```
+
+generate JavaDoc:
+
+```bash
+mvn javadoc:javadoc
+```
+
+## License
+
+Apache 2.0
