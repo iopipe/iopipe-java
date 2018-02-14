@@ -20,7 +20,7 @@ functions:
           rate: rate(5 minutes)
           input:
             name: "IOpipe"
-   ManualHello:
+  ManualHello:
     handler: com.iopipe.examples.ManualHello
     environment:
       IOPIPE_TOKEN: ${env:IOPIPE_TOKEN}
@@ -39,12 +39,11 @@ functions:
           rate: rate(5 minutes)
           input:
             otherInput: "Not a name"
-   # Baseline Lambda for data collection
-   PlainHelloBaseline:
+  # Baseline Lambda for data collection
+  PlainHelloBaseline:
     handler: com.iopipe.examples.PlainHello
     events:
       - schedule:
           rate: rate(5 minutes)
           input:
             name: "IOpipe"
-
