@@ -24,7 +24,7 @@ In the `pom.xml`, add the following block to your `<dependencies>`:
 <dependency>
   <groupId>com.iopipe</groupId>
   <artifactId>iopipe</artifactId>
-  <version>0.7</version>
+  <version>0.8.0</version>
 </dependency>
 ```
 
