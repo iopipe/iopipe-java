@@ -29,6 +29,10 @@ public class Hello
 	{
 		String name = request.containsKey("name") ? request.get("name") : null;
 
+		if (name == null) {
+			throw new RuntimeException("Invoked with no name!");
+		}
+
 		// Send a message to the example plugin
 		__exec.<ExampleExecution>plugin(ExampleExecution.class, (__s) ->
 			{
@@ -51,10 +55,6 @@ public class Hello
 			
 			// Store the result of the math
 			__exec.customMetric("result", (long)result);
-		}
-
-		if (name == null) {
-			throw new RuntimeException("Invoked with no name!");
 		}
 
 		// Say hello to them!
