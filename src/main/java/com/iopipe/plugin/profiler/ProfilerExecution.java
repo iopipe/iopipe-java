@@ -94,6 +94,8 @@ public class ProfilerExecution
 	 */
 	final void __post()
 	{
+		IOpipeExecution execution = this.execution;
+		
 		// Tell the poller to stop and interrupt it so it wakes up from any
 		// sleep state
 		this._poller._stop = true;
@@ -120,7 +122,7 @@ public class ProfilerExecution
 				
 				// Export CPU data
 				zos.putNextEntry(new ZipEntry(prefix + "_cpu.nps"));
-				new __CPUExport__(tracker).run(zos);
+				new __CPUExport__(tracker, execution).run(zos);
 				zos.closeEntry();
 				
 				// Finish the ZIP

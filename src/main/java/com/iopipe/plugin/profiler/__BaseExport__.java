@@ -1,5 +1,7 @@
 package com.iopipe.plugin.profiler;
 
+import com.iopipe.IOpipeExecution;
+import com.iopipe.IOpipeMeasurement;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -18,20 +20,29 @@ abstract class __BaseExport__
 	/** The tracker data. */
 	protected final __Tracker__ tracker;
 	
+	/** The execution. */
+	protected final IOpipeExecution execution;
+	
+	/** The measurement. */
+	protected final IOpipeMeasurement measurement;
+	
 	/**
 	 * Initializes the exporter.
 	 *
 	 * @param __t The tracker data.
+	 * @param __e Execution context.
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/02/12
 	 */
-	__BaseExport__(__Tracker__ __t)
+	__BaseExport__(__Tracker__ __t, IOpipeExecution __e)
 		throws NullPointerException
 	{
-		if (__t == null)
+		if (__t == null || __e == null)
 			throw new NullPointerException();
 		
 		this.tracker = __t;
+		this.execution = __e;
+		this.measurement = __e.measurement();
 	}
 	
 	/**

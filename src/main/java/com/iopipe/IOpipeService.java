@@ -200,7 +200,7 @@ public final class IOpipeService
 		IOpipeMeasurement measurement = new IOpipeMeasurement(config,
 			__context, this);
 		IOpipeExecution exec = new IOpipeExecution(this, config, __context,
-			measurement, threadgroup);
+			measurement, threadgroup, System.currentTimeMillis());
 		
 		// If disabled, just run the function
 		IOpipeConfiguration config = this.config;
