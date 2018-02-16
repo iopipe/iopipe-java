@@ -111,9 +111,12 @@ public class ProfilerExecution
 			
 			try (ZipOutputStream zos = new ZipOutputStream(baos))
 			{
-				// Use deflate compression to save sapce
+				// Do not bother compressing because the snapshot data is
+				// compressed anyway. The header and footer could be compressed
+				// but that would probably save only a dozen bytes so the
+				// loss of speed compressing compressed data is pointless
 				zos.setMethod(ZipOutputStream.DEFLATED);
-				zos.setLevel(9);
+				zos.setLevel(0);
 				
 				// Export CPU data
 				zos.putNextEntry(new ZipEntry(prefix + "_cpu.nps"));
@@ -130,6 +133,8 @@ public class ProfilerExecution
 		}
 		catch (IOException e)
 		{
+			_LOGGER.debug("Failed to export snapshot data.", e);
+			
 			// Ignore
 			exported = null;
 		}
