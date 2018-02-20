@@ -31,11 +31,12 @@ final class __CPUExport__
 	 *
 	 * @param __t The tracker data.
 	 * @param __e Execution context.
+	 * @param __sr The sampling rate.
 	 * @since 2018/02/12
 	 */
-	__CPUExport__(Tracker __t, IOpipeExecution __e)
+	__CPUExport__(Tracker __t, IOpipeExecution __e, int __sr)
 	{
-		super(__t, __e);
+		super(__t, __e, __sr);
 	}
 	
 	/**
@@ -132,7 +133,7 @@ final class __CPUExport__
 				MethodTracker.TrackedMethod method = node.method();
 				
 				dos.writeShort(method.index());
-				dos.writeInt(node.numCalls());
+				dos.writeInt(Math.max(1, node.numCalls()));
 				
 				// Record time spent in method
 				long abs = node.absoluteTime(),

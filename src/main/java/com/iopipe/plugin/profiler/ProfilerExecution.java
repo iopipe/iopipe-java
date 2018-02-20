@@ -122,7 +122,7 @@ public class ProfilerExecution
 				
 				// Export CPU data
 				zos.putNextEntry(new ZipEntry(prefix + "_cpu.nps"));
-				new __CPUExport__(tracker, execution).run(zos);
+				new __CPUExport__(tracker, execution, SAMPLE_RATE).run(zos);
 				zos.closeEntry();
 				
 				// Finish the ZIP
