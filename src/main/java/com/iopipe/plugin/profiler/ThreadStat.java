@@ -43,8 +43,11 @@ public final class ThreadStat
 	/** Time spent sleeping in this thread. */
 	private volatile long _wgsleeptime;
 	
-	/** Gross absolute time for each node. */
+	/** Gross time for each node when not asleep. */
 	private volatile long _grosswgtime;
+	
+	/** Gross time for each node even when asleep. */
+	private volatile long _grosswgtimeabs;
 	
 	/**
 	 * Initializes the thread information.
@@ -67,7 +70,7 @@ public final class ThreadStat
 	}
 	
 	/**
-	 * Returns the gross time executing all the nodes.
+	 * Returns the gross time executing all the nodes when not asleep.
 	 *
 	 * @return The entire tree gross time.
 	 * @since 2018/02/19
@@ -78,15 +81,14 @@ public final class ThreadStat
 	}
 	
 	/**
-	 * An approximation of how much this thread has spent executing on the
-	 * CPU when not asleep.
+	 * Returns the absolute gross time executing nodes.
 	 *
-	 * @return The estimated gross time not spent sleeping.
+	 * @return The absolute gross time.
 	 * @since 2018/02/19
 	 */
-	public final long grossWholeGraphTimeApproxNotSleeping()
+	public final long grossWholeGraphTimeAbsolute()
 	{
-		return this._grosswgtime - this._wgsleeptime;
+		return this._grosswgtimeabs;
 	}
 	
 	/**
@@ -135,30 +137,28 @@ public final class ThreadStat
 		Thread thread = this.thread;
 		MethodTracker methods = this.methods;
 		
-		// Only count threads which are running, not any which are blocked by
-		// a lock or terminated because they consume no CPU time
+		// Do not track terminated threads, but treat all other states as
+		// being asleep
 		Thread.State state = thread.getState();
+		boolean asleep = false;
 		if (state != Thread.State.RUNNABLE)
 		{
 			if (state == Thread.State.TERMINATED)
 				return;
 			
-			// Add time spent sleeping or waiting on a lock
-			this._wgabstime += __rel;
-			this._wgsleeptime += __rel;
-			
-			// Add to the gross time to keep an estimate during sleep
-			this._grosswgtime += __rel;
-			
-			return;
+			asleep = true;
 		}
 		
 		// Add to whole graph time
 		this._wgabstime += __rel;
-		this._wgtime += __rel;
+		if (asleep)
+			this._wgsleeptime += __rel;
+		else
+			this._wgtime += __rel;
 		
-		// Gross 
+		// Gross time spent in thread
 		long grosswgtime = this._grosswgtime;
+		long grosswgtimeabs = this._grosswgtimeabs;
 		
 		// Node traversal starts at the root node
 		ThreadStatNodeTraversal traversal = this;
@@ -175,7 +175,9 @@ public final class ThreadStat
 		for (int i = n - 1; i >= 0; i--, top = false)
 		{
 			// Add gross time spent executing nodes
-			grosswgtime += __rel;
+			grosswgtimeabs += __rel;
+			if (!asleep)
+				grosswgtime += __rel;
 			
 			// Find the index for this unique method
 			StackTraceElement trace = traces[i];
@@ -185,7 +187,7 @@ public final class ThreadStat
 			Node sub = traversal.subNode(tracked);
 			
 			// Parse this node
-			sub.parse(__abs, __rel, top);
+			sub.parse(__abs, __rel, top, asleep);
 			
 			// Traverse into the sub-tree
 			traversal = sub;
@@ -193,6 +195,7 @@ public final class ThreadStat
 		
 		// Record gross time after time spent in nodes calculated
 		this._grosswgtime = grosswgtime;
+		this._grosswgtimeabs = grosswgtimeabs;
 	}
 	
 	/** 
@@ -308,16 +311,18 @@ public final class ThreadStat
 		 * nanoseconds.
 		 * @param __rel The relative time since the last trace.
 		 * @param __top Is this node at the top of the stack?
+		 * @param __asleep Is the thread asleep?
 		 * @since 2018/02/19
 		 */
-		public final void parse(long __abs, int __rel, boolean __top)
+		public final void parse(long __abs, int __rel, boolean __top,
+			boolean __asleep)
 		{
 			// Time was spent in this method so always add it
 			this._graphtime += __rel;
 			
 			// But it is only considered executing if it is at the top of
-			// the stack
-			if (__top)
+			// the stack and is not asleep
+			if (__top && !__asleep)
 				this._selftime += __rel;
 		}
 		

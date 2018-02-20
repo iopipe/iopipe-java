@@ -119,8 +119,8 @@ final class __CPUExport__
 		__dos.writeInt(28);
 		
 		// Gross time executing nodes in the thread
+		__dos.writeLong(__t.grossWholeGraphTimeAbsolute());
 		__dos.writeLong(__t.grossWholeGraphTime());
-		__dos.writeLong(__t.grossWholeGraphTimeApproxNotSleeping());
 		
 		// Time spent in inject methods, this always seems to be zero
 		__dos.writeDouble(0);
