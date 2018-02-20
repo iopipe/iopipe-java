@@ -135,7 +135,7 @@ final class __CPUExport__
 		__dos.writeLong(__t.wholeGraphTime());
 		
 		// Invocation count
-		__dos.writeLong(__t.invocationCount());
+		__dos.writeLong(Math.max(1, __t.invocationCount()));
 		
 		// Always display whole thread CPU time
 		__dos.writeBoolean(true);
