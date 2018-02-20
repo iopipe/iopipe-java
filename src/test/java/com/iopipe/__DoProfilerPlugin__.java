@@ -6,6 +6,10 @@ import com.iopipe.plugin.trace.TraceExecution;
 import com.iopipe.plugin.trace.TraceMeasurement;
 import com.iopipe.plugin.trace.TracePlugin;
 import com.iopipe.plugin.trace.TraceUtils;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Random;
+import java.util.List;
 import java.util.Map;
 import javax.json.JsonObject;
 import javax.json.JsonString;
@@ -20,6 +24,18 @@ import javax.json.JsonValue;
 class __DoProfilerPlugin__
 	extends Single
 {
+	/** Random element count. */
+	public static final int RANDOM_COUNT =
+		100_000;
+	
+	/** Maximum entries for selection sort (it is really slow). */
+	public static final int RANDOM_COUNT_SELECT_CAP =
+		20_000;
+	
+	/** Marking interval. */
+	public static final int MARK =
+		1_000;
+	
 	/** Sent with no exception? */
 	protected final BooleanValue noerror =
 		new BooleanValue("noerror");
@@ -67,6 +83,7 @@ class __DoProfilerPlugin__
 			throw new NullPointerException();
 		
 		__cb.setPluginEnabled("profiler", true);
+		__cb.setTimeOutWindow(0);
 	}
 	
 	/**
@@ -113,14 +130,92 @@ class __DoProfilerPlugin__
 	public void run(IOpipeExecution __e)
 		throws Throwable
 	{
-		// Do something long that can be profiled
-		try
-		{
-			Thread.sleep(1000);
-		}
-		catch (InterruptedException e)
-		{
-		}
+		// Generate a bunch of random numbers
+		Random rand = new Random(0x537175697272656CL);
+		List<Long> unsorted = new ArrayList<>(RANDOM_COUNT);
+		for (int i = 0; i < RANDOM_COUNT; i++)
+			unsorted.add(rand.nextLong());
+		
+		// Selection sort
+		Thread sel = new Thread(() ->
+			{
+				List<Long> result = new ArrayList<>(RANDOM_COUNT);
+				
+				// Selection sort is really slow so limit the maximum size
+				for (int i = 0; i < RANDOM_COUNT_SELECT_CAP &&
+					i < RANDOM_COUNT; i++)
+					result.add(unsorted.get(i));
+					
+				for (int i = 0, n = result.size(); i < n; i++)
+				{
+					if (false && ((i + 1) % MARK) == 0)
+						System.err.printf("SEL %d%n", i);
+					
+					Long v = result.get(i);
+					
+					int lowdx = i;
+					Long lowva = v;
+					for (int j = i; j < n; j++)
+					{
+						Long temp = result.get(j);
+						if (temp.compareTo(lowva) < 0)
+						{
+							lowdx = j;
+							lowva = temp;
+						}
+					}
+					
+					if (i != lowdx)
+					{
+						result.set(i, lowva);
+						result.set(lowdx, v);
+					}
+				}
+			}, "SelectionSort");
+		sel.start();
+		
+		// Binary-ish insertion sort
+		Thread ins = new Thread(() ->
+			{
+				List<Long> result = new ArrayList<>(RANDOM_COUNT);
+				
+				int dxcount = 0;
+				for (Long l : unsorted)
+				{
+					// Status debug
+					int dxat = dxcount++;
+					if (false && ((dxat + 1) % MARK) == 0)
+						System.err.printf("BIN %d%n", dxat);
+					
+					int pos = Collections.<Long>binarySearch(result, l);
+					if (pos < 0)
+						pos = (-pos) - 1;
+					result.add(pos, l);
+				}
+			}, "BinaryInsertionSort");
+		ins.start();
+		
+		// Wait for selection sort to end
+		for (;;)
+			try
+			{
+				sel.join();
+				break;
+			}
+			catch (InterruptedException e)
+			{
+			}
+		
+		// Wait for insertion sort to end
+		for (;;)
+			try
+			{
+				ins.join();
+				break;
+			}
+			catch (InterruptedException e)
+			{
+			}
 	}
 }
 
