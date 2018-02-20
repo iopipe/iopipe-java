@@ -138,14 +138,14 @@ final class __CPUExport__
 				dos.writeInt(Math.max(1, node.numCalls()));
 				
 				// Record time spent in method
-				long abs = node.absoluteTime(),
-					cpu = node.cpuTime();
-				__writeFive(dos, abs);
-				__writeFive(dos, cpu);
+				TimeKeeper graph = node.timeGraph();
+				__writeFive(dos, graph.absolute());
+				__writeFive(dos, graph.self());
 				
 				// Use same times for thread time
-				__writeFive(dos, abs);
-				__writeFive(dos, cpu);
+				TimeKeeper cpu = node.timeCPU();
+				__writeFive(dos, cpu.absolute());
+				__writeFive(dos, cpu.self());
 				
 				// Write sub-node offsets
 				ThreadStat.Node[] subs = node.subNodes();

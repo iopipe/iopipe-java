@@ -291,15 +291,17 @@ public final class ThreadStat
 		/** The method being tracked. */
 		protected final MethodTracker.TrackedMethod method;
 		
+		/** Graph time. */
+		protected final TimeKeeper graph =
+			new TimeKeeper();
+		
+		/** CPU time. */
+		protected final TimeKeeper cpu =
+			new TimeKeeper();
+		
 		/** Nodes within this tree. */
 		private final Map<MethodTracker.TrackedMethod, Node> _nodes =
 			new LinkedHashMap<>();
-		
-		/** Time spent with this node in the stack trace. */
-		private volatile long _graphtime;
-		
-		/** Time spent actually at the top of the stack. */
-		private volatile long _selftime;
 		
 		/** The number of calls made to this method. */
 		private volatile int _numcalls;
@@ -318,28 +320,6 @@ public final class ThreadStat
 				throw new NullPointerException();
 			
 			this.method = __m;
-		}
-		
-		/**
-		 * Returns the time spent in this node.
-		 *
-		 * @return The time spent in the node.
-		 * @since 2018/02/20
-		 */
-		public final long absoluteTime()
-		{
-			return this._graphtime;
-		}
-		
-		/**
-		 * Returns the time spent actually executing in this node.
-		 *
-		 * @return The time spent actually executing in the node.
-		 * @since 2018/02/20
-		 */
-		public final long cpuTime()
-		{
-			return this._selftime;
 		}
 		
 		/**
@@ -377,13 +357,12 @@ public final class ThreadStat
 		public final void parse(long __abs, int __rel, boolean __top,
 			boolean __asleep)
 		{
-			// Time was spent in this method so always add it
-			this._graphtime += __rel;
+			// Add graph time regardless if the thread is asleep or not
+			this.graph.addTime(__top, __rel);
 			
-			// But it is only considered executing if it is at the top of
-			// the stack and is not asleep
-			if (__top && !__asleep)
-				this._selftime += __rel;
+			// Add CPU time if not asleep
+			if (!__asleep)
+				this.cpu.addTime(__top, __rel);
 		}
 		
 		/** 
@@ -420,6 +399,28 @@ public final class ThreadStat
 				Collection<Node> values = nodes.values();
 				return values.<Node>toArray(new Node[values.size()]);
 			}
+		}
+		
+		/**
+		 * Time spent on the CPU.
+		 *
+		 * @return The CPU time.
+		 * @since 2018/02/20
+		 */
+		public final TimeKeeper timeCPU()
+		{
+			return this.cpu;
+		}
+		
+		/**
+		 * Time spent on the graph.
+		 *
+		 * @return The graph time.
+		 * @since 2018/02/20
+		 */
+		public final TimeKeeper timeGraph()
+		{
+			return this.graph;
 		}
 	}
 }
