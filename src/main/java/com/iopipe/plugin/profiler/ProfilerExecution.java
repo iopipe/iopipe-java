@@ -27,7 +27,7 @@ public class ProfilerExecution
 	
 	/** The default sampling rate. */
 	public static final int DEFAULT_SAMPLE_RATE =
-		50_000_000;
+		25_000_000;
 	
 	/** The number of nanoseconds between each polling period. */
 	public static final int SAMPLE_RATE;
