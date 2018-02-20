@@ -18,7 +18,7 @@ abstract class __BaseExport__
 	implements __SnapshotConstants__
 {
 	/** The tracker data. */
-	protected final __Tracker__ tracker;
+	protected final Tracker tracker;
 	
 	/** The execution. */
 	protected final IOpipeExecution execution;
@@ -34,7 +34,7 @@ abstract class __BaseExport__
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/02/12
 	 */
-	__BaseExport__(__Tracker__ __t, IOpipeExecution __e)
+	__BaseExport__(Tracker __t, IOpipeExecution __e)
 		throws NullPointerException
 	{
 		if (__t == null || __e == null)

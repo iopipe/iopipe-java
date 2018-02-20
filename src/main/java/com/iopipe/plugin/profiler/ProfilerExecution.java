@@ -36,8 +36,8 @@ public class ProfilerExecution
 	protected final IOpipeExecution execution;
 	
 	/** Tracker state. */
-	private final __Tracker__ _tracker =
-		new __Tracker__();
+	private final Tracker _tracker =
+		new Tracker();
 	
 	/** The tread which is pollng for profiling. */
 	private volatile Thread _pollthread;
@@ -109,7 +109,7 @@ public class ProfilerExecution
 		byte[] exported = null;
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream())
 		{
-			__Tracker__ tracker = this._tracker;
+			Tracker tracker = this._tracker;
 			
 			try (ZipOutputStream zos = new ZipOutputStream(baos))
 			{
