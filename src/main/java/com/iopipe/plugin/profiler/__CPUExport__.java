@@ -5,6 +5,7 @@ import com.iopipe.IOpipeMeasurement;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Objects;
 
 /**
  * This class contains all the methods which are needed to export a tracker
@@ -27,7 +28,7 @@ final class __CPUExport__
 	 * @param __e Execution context.
 	 * @since 2018/02/12
 	 */
-	__CPUExport__(__Tracker__ __t, IOpipeExecution __e)
+	__CPUExport__(Tracker __t, IOpipeExecution __e)
 	{
 		super(__t, __e);
 	}
@@ -53,7 +54,8 @@ final class __CPUExport__
 		if (__dos == null)
 			throw new NullPointerException();
 		
-		__Tracker__ tracker = this.tracker;
+		Tracker tracker = this.tracker;
+		MethodTracker methods = tracker.methods();
 		IOpipeExecution execution = this.execution;
 		IOpipeMeasurement measurement = this.measurement;
 		
@@ -65,8 +67,21 @@ final class __CPUExport__
 		// Measure each thread time
 		__dos.writeBoolean(true);
 		
-		// Count and instrumented methods
-		__dos.writeInt(0);
+		// Record instrumented methods
+		MethodTracker.TrackedMethod[] instrumented = methods.methods();
+		int n = instrumented.length;
+		__dos.writeInt(n);
+		for (int i = 0; i < n; i++)
+		{
+			MethodTracker.TrackedMethod m = instrumented[i];
+			
+			// These may be null in which case use an empty string instead
+			__dos.writeUTF(Objects.toString(m.className(), ""));
+			__dos.writeUTF(Objects.toString(m.methodName(), ""));
+			
+			// No descriptor is used
+			__dos.writeUTF("");
+		}
 		
 		// Count and threads
 		__dos.writeInt(0);

@@ -9,7 +9,7 @@ final class __Poller__
 	implements Runnable
 {
 	/** The tracker to write to. */
-	protected final __Tracker__ tracker;
+	protected final Tracker tracker;
 	
 	/** The thread group to poll for events. */
 	protected final ThreadGroup group;
@@ -25,7 +25,7 @@ final class __Poller__
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/02/12
 	 */
-	__Poller__(__Tracker__ __t, ThreadGroup __g)
+	__Poller__(Tracker __t, ThreadGroup __g)
 		throws NullPointerException
 	{
 		if (__t == null || __g == null)
@@ -43,7 +43,7 @@ final class __Poller__
 	public void run()
 	{
 		ThreadGroup group = this.group;
-		__Tracker__ tracker = this.tracker;
+		Tracker tracker = this.tracker;
 		
 		// Used as temporary storage for active thread enumeration
 		Thread[] threads = new Thread[1];
@@ -93,8 +93,7 @@ final class __Poller__
 			for (int i = 0; i < count; i++)
 			{
 				Thread thread = threads[i];
-				tracker.__parseStackTrace(runtime, reltime,
-					thread, thread.getStackTrace());
+				tracker.parseStackTrace(runtime, reltime, thread);
 			}
 			
 			// Rest for a duration so that the next sample is the sampling
