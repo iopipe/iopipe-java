@@ -67,6 +67,9 @@ class __DoProfilerPlugin__
 			throw new NullPointerException();
 		
 		__cb.setPluginEnabled("profiler", true);
+		
+		// Use a long timeout so more work can be done!
+		__cb.setTimeOutWindow(30_000);
 	}
 	
 	/**
@@ -116,7 +119,7 @@ class __DoProfilerPlugin__
 		// Do something long that can be profiled
 		try
 		{
-			Thread.sleep(1000);
+			Thread.sleep(10000);
 		}
 		catch (InterruptedException e)
 		{
