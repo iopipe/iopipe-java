@@ -2,10 +2,15 @@ package com.iopipe.plugin.profiler;
 
 import com.iopipe.IOpipeExecution;
 import com.iopipe.IOpipeMeasurement;
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+import java.util.List;
 
 /**
  * This class contains all the methods which are needed to export a tracker
@@ -92,6 +97,76 @@ final class __CPUExport__
 	}
 	
 	/**
+	 * Writes the compact data information.
+	 *
+	 * @param __t The thread with the nodes to write.
+	 * @throws IOException On write errors.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/02/20
+	 */
+	private final byte[] __writeCompact(ThreadStat __t)
+		throws IOException, NullPointerException
+	{
+		if (__t == null)
+			throw new NullPointerException();
+		
+		// Determine the position of each node in the thread
+		__Compact__ compact = new __Compact__();
+		for (ThreadStat.Node sub : __t.subNodes())
+			compact.recurse(sub);
+			
+		// The list makes it easier to write nodes since it can be done
+		// linearly
+		boolean iswide = compact.isWide();
+		List<ThreadStat.Node> byindex = compact._byindex;
+		Map<ThreadStat.Node, __Pointer__> offsets = compact._offsets;
+		
+		// Write compacted node data
+		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(
+			compact.approxMaxSize());
+			DataOutputStream dos = new DataOutputStream(baos))
+		{
+			// Write every node
+			for (ThreadStat.Node node : byindex)
+			{
+				MethodTracker.TrackedMethod method = node.method();
+				
+				dos.writeShort(method.index());
+				dos.writeInt(node.numCalls());
+				
+				// Record time spent in method
+				long abs = node.absoluteTime(),
+					cpu = node.cpuTime();
+				__writeFive(dos, abs);
+				__writeFive(dos, cpu);
+				
+				// Use same times for thread time
+				__writeFive(dos, abs);
+				__writeFive(dos, cpu);
+				
+				// Write sub-node offsets
+				ThreadStat.Node[] subs = node.subNodes();
+				int n = subs.length;
+				dos.writeShort(n);
+				for (int i = 0; i < n; i++)
+				{
+					ThreadStat.Node sub = subs[i];
+					int p = offsets.get(sub).pointer(iswide);
+					
+					if (iswide)
+						dos.writeInt(p);
+					else
+						__writeThree(dos, p);
+				}
+			}
+			
+			// Finish off
+			dos.flush();
+			return baos.toByteArray();
+		}
+	}
+	
+	/**
 	 * Writes the thread information.
 	 *
 	 * @param __dos The stream to write to.
@@ -112,8 +187,10 @@ final class __CPUExport__
 		// Always measure thread time
 		__dos.writeBoolean(true);
 		
-		// TODO: write compact data
-		__dos.writeInt(0);
+		// Write compact node data
+		byte[] compact = this.__writeCompact(__t);
+		__dos.writeInt(compact.length);
+		__dos.write(compact);
 		
 		// Base sub-node size is always 28
 		__dos.writeInt(28);
@@ -139,6 +216,186 @@ final class __CPUExport__
 		
 		// Always display whole thread CPU time
 		__dos.writeBoolean(true);
+	}
+	
+	/**
+	 * Writes three bytes to the output stream.
+	 *
+	 * @param __dos The stream to write to.
+	 * @param __val The value to write.
+	 * @throws IOException On write errors.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/02/20
+	 */
+	private static final void __writeThree(DataOutputStream __dos, int __val)
+		throws IOException, NullPointerException
+	{
+		if (__dos == null)
+			throw new NullPointerException();
+		
+		__dos.writeByte((byte)(__val >>> 16));
+		__dos.writeByte((byte)(__val >>> 8));
+		__dos.writeByte((byte)(__val));
+	}
+	
+	/**
+	 * Writes five bytes to the output stream.
+	 *
+	 * @param __dos The stream to write to.
+	 * @param __val The value to write.
+	 * @throws IOException On write errors.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/02/20
+	 */
+	private static final void __writeFive(DataOutputStream __dos, long __val)
+		throws IOException, NullPointerException
+	{
+		if (__dos == null)
+			throw new NullPointerException();
+		
+		__dos.writeByte((byte)(__val >>> 32));
+		__dos.writeByte((byte)(__val >>> 24));
+		__dos.writeByte((byte)(__val >>> 16));
+		__dos.writeByte((byte)(__val >>> 8));
+		__dos.writeByte((byte)(__val));
+	}
+	
+	/**
+	 * Stored node information.
+	 *
+	 * @since 2018/02/20
+	 */
+	private static final class __Compact__
+	{
+		/** Nodes in index order. */
+		final List<ThreadStat.Node> _byindex =
+			new ArrayList<>();
+		
+		/** Offsets for every node. */
+		final Map<ThreadStat.Node, __Pointer__> _offsets =
+			new HashMap<>();
+		
+		/** Current write pointer (for narrow compact data). */
+		private volatile int _narrowp;
+		
+		/** Current write pointer (for wide compact data). */
+		private volatile int _widep;
+		
+		/**
+		 * Returns the approximated maximum compact data size.
+		 *
+		 * @return The approximated maximum compact data size.
+		 * @since 2018/02/20
+		 */
+		public final int approxMaxSize()
+		{
+			return (this.isWide() ? this._widep : this._narrowp);
+		}
+		
+		/**
+		 * Should the compact data be written wide?
+		 *
+		 * @return Is the data to be wide?
+		 * @since 2018/02/20
+		 */
+		public final boolean isWide()
+		{
+			// After this many bytes, this becomes wide
+			return this._narrowp > 16777215;
+		}
+		
+		/**
+		 * Recursively handles each node.
+		 *
+		 * @param __n The initial node.
+		 * @throws NullPointerException On null arguments.
+		 * @since 2018/02/20
+		 */
+		public final void recurse(ThreadStat.Node __n)
+			throws NullPointerException
+		{
+			if (__n == null)
+				throw new NullPointerException();
+			
+			// Internal recursive handling
+			this.__recurse(__n);
+		}
+		
+		/**
+		 * Recursively handles each node, using internal logic.
+		 *
+		 * @param __n The initial node.
+		 * @throws NullPointerException On null arguments.
+		 * @since 2018/02/20
+		 */
+		private final void __recurse(ThreadStat.Node __n)
+			throws NullPointerException
+		{
+			if (__n == null)
+				throw new NullPointerException();
+			
+			// Register this node in the global list
+			this._byindex.add(__n);
+			
+			// Set base offsets for this node
+			int narrowp = this._narrowp,
+				widep = this._widep;
+			this._offsets.put(__n, new __Pointer__(narrowp, widep));
+			
+			// Determine the next positions for the following pointers
+			ThreadStat.Node[] subs = __n.subNodes();
+			int n = subs.length;
+			narrowp += 28 + (n * 3);
+			widep += 28 + (n * 4);
+			
+			// Set next pointer position
+			this._narrowp = narrowp;
+			this._widep = widep;
+			
+			// Recurse through subnodes to calculation their positions
+			for (ThreadStat.Node sub : subs)
+				this.recurse(sub);
+		}
+	}
+	
+	/**
+	 * This is used to store the narrow and wide positions since recorded
+	 * snapshots node data may come in two variable sizes.
+	 *
+	 * @since 2018/02/20
+	 */
+	private static final class __Pointer__
+	{
+		/** Pointer if the node list is narrow. */
+		public final int narrow;
+		
+		/** Pointer if the node list is wide. */
+		public final int wide;
+		
+		/**
+		 * Initializes the pointer.
+		 *
+		 * @param __n The narrow pointer.
+		 * @param __w The wide pointer.
+		 * @since 2018/02/20
+		 */
+		public __Pointer__(int __n, int __w)
+		{
+			this.narrow = __n;
+			this.wide = __w;
+		}
+		
+		/**
+		 * Returns the appropriate pointer.
+		 *
+		 * @param __w Is this wide?
+		 * @return The used pointer.
+		 * @since 2018/02/20
+		 */
+		public final int pointer(boolean __w)
+		{
+			return (__w ? this.wide : this.narrow);
+		}
 	}
 }
 

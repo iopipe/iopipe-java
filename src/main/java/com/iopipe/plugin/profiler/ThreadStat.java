@@ -114,6 +114,17 @@ public final class ThreadStat
 	}
 	
 	/**
+	 * Returns the method tracker.
+	 *
+	 * @return The method tracker.
+	 * @since 2018/02/20
+	 */
+	public final MethodTracker methods()
+	{
+		return this.methods;
+	}
+	
+	/**
 	 * Returns the name of the thread.
 	 *
 	 * @return The thread name.
@@ -288,6 +299,9 @@ public final class ThreadStat
 		/** Time spent actually at the top of the stack. */
 		private volatile long _selftime;
 		
+		/** The number of calls made to this method. */
+		private volatile int _numcalls;
+		
 		/**
 		 * Initializes the node for tracking this method.
 		 *
@@ -302,6 +316,50 @@ public final class ThreadStat
 				throw new NullPointerException();
 			
 			this.method = __m;
+		}
+		
+		/**
+		 * Returns the time spent in this node.
+		 *
+		 * @return The time spent in the node.
+		 * @since 2018/02/20
+		 */
+		public final long absoluteTime()
+		{
+			return this._graphtime;
+		}
+		
+		/**
+		 * Returns the time spent actually executing in this node.
+		 *
+		 * @return The time spent actually executing in the node.
+		 * @since 2018/02/20
+		 */
+		public final long cpuTime()
+		{
+			return this._selftime;
+		}
+		
+		/**
+		 * Returns the method this is tracking.
+		 *
+		 * @return The tracked method.
+		 * @since 2018/02/20
+		 */
+		public final MethodTracker.TrackedMethod method()
+		{
+			return this.method;
+		}
+		
+		/**
+		 * Returns the number of calls made to this node.
+		 *
+		 * @return The call count for this node.
+		 * @since 2018/02/20
+		 */
+		public final int numCalls()
+		{
+			return this._numcalls;
 		}
 		
 		/**
