@@ -1,6 +1,7 @@
 package com.iopipe.plugin.profiler;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -60,6 +61,22 @@ public final class Tracker
 		
 		// Record thread information
 		stat.parseStackTrace(__abs, __rel);
+	}
+	
+	/**
+	 * Returns the state information for each thread.
+	 *
+	 * @return The thread information.
+	 * @since 2018/02/19
+	 */
+	public final ThreadStat[] threads()
+	{
+		Map<Thread, ThreadStat> threads = this._threads;
+		synchronized (threads)
+		{
+			Collection<ThreadStat> values = threads.values();
+			return values.<ThreadStat>toArray(new ThreadStat[values.size()]);
+		}
 	}
 }
 

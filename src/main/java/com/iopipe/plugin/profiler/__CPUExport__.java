@@ -64,7 +64,7 @@ final class __CPUExport__
 		__dos.writeLong(execution.startTimestamp());
 		__dos.writeLong(measurement.getDuration());
 		
-		// Measure each thread time
+		// Always measure thread time
 		__dos.writeBoolean(true);
 		
 		// Record instrumented methods
@@ -83,8 +83,62 @@ final class __CPUExport__
 			__dos.writeUTF("");
 		}
 		
-		// Count and threads
+		// Dump thread information
+		ThreadStat[] threads = tracker.threads();
+		n = threads.length;
+		__dos.writeInt(n);
+		for (int i = 0; i < n; i++)
+			this.__writeThread(__dos, threads[i]);
+	}
+	
+	/**
+	 * Writes the thread information.
+	 *
+	 * @param __dos The stream to write to.
+	 * @param __t The thread information.
+	 * @throws IOException On write errors.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/02/19
+	 */
+	private final void __writeThread(DataOutputStream __dos, ThreadStat __t)
+		throws IOException, NullPointerException
+	{
+		if (__dos == null || __t == null)
+			throw new NullPointerException();
+		
+		__dos.writeInt(__t.logicalIndex());
+		__dos.writeUTF(__t.name());
+		
+		// Always measure thread time
+		__dos.writeBoolean(true);
+		
+		// TODO: write compact data
 		__dos.writeInt(0);
+		
+		// Base sub-node size is always 28
+		__dos.writeInt(28);
+		
+		// Gross time executing nodes in the thread
+		__dos.writeLong(__t.grossWholeGraphTime());
+		__dos.writeLong(__t.grossWholeGraphTimeApproxNotSleeping());
+		
+		// Time spent in inject methods, this always seems to be zero
+		__dos.writeDouble(0);
+		__dos.writeDouble(0);
+		
+		// Pure time??? Always seems to be this value
+		__dos.writeLong(Integer.MAX_VALUE);
+		__dos.writeLong(Integer.MAX_VALUE);
+		
+		// Time spent in thread and time spent not sleeping
+		__dos.writeLong(__t.wholeGraphAbsoluteTime());
+		__dos.writeLong(__t.wholeGraphTime());
+		
+		// Invocation count
+		__dos.writeLong(__t.invocationCount());
+		
+		// Always display whole thread CPU time
+		__dos.writeBoolean(true);
 	}
 }
 
