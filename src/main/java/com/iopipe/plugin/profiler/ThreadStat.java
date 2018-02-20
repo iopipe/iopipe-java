@@ -182,9 +182,11 @@ public final class ThreadStat
 		// the root node
 		StackTraceElement[] traces = thread.getStackTrace();
 		int n = traces.length;
-		boolean top = true;
-		for (int i = n - 1; i >= 0; i--, top = false)
+		for (int i = n - 1; i >= 0; i--)
 		{
+			// Top of the stack is the first element
+			boolean top = (i == 0);
+			
 			// Add gross time spent executing nodes
 			grosswgtimeabs += __rel;
 			if (!asleep)
