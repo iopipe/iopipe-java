@@ -67,8 +67,10 @@ final class __CPUExport__
 		
 		// Write header fields
 		__dos.writeInt(VERSION);
-		__dos.writeLong(execution.startTimestamp());
-		__dos.writeLong(measurement.getDuration());
+		long starttime = execution.startTimestamp(); 
+		__dos.writeLong(starttime);
+		__dos.writeLong((starttime) +
+			(measurement.getDuration() / 1_000_000L));
 		
 		// Always measure thread time
 		__dos.writeBoolean(true);
