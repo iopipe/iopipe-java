@@ -1,16 +1,29 @@
 package com.iopipe.plugin.profiler;
 
+import com.amazonaws.services.lambda.runtime.Context;
+import com.iopipe.http.RemoteConnection;
+import com.iopipe.http.RemoteConnectionFactory;
+import com.iopipe.http.RemoteException;
+import com.iopipe.http.RemoteRequest;
+import com.iopipe.http.RemoteResult;
+import com.iopipe.IOpipeConfiguration;
+import com.iopipe.IOpipeConstants;
 import com.iopipe.IOpipeExecution;
 import com.iopipe.plugin.IOpipePluginExecution;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDate;
 import java.util.Base64;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import javax.json.Json;
+import javax.json.JsonException;
+import javax.json.stream.JsonGenerator;
+import okhttp3.HttpUrl;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * This contains the execution state for the profile plugin. This class is not
@@ -38,6 +51,16 @@ public class ProfilerExecution
 	/** Tracker state. */
 	private final Tracker _tracker =
 		new Tracker();
+	
+	/** Remote URL access lock. */
+	private final Object _remotelock =
+		new Object();
+	
+	/** Remote URL. */
+	private volatile HttpUrl _remote;
+	
+	/** Was the remote invalid? */
+	private volatile boolean _remoteinvalid;
 	
 	/** The tread which is pollng for profiling. */
 	private volatile Thread _pollthread;
@@ -149,6 +172,89 @@ public class ProfilerExecution
 			_LOGGER.debug(() -> "\nbegin-base64 644 " + prefix + ".zip\n" +
 				Base64.getMimeEncoder().encodeToString(fexported) +
 				"\n====\n");
+			
+			// Await remote URL to send to
+			HttpUrl remote = __awaitRemote();
+			if (remote == null)
+			{
+				_LOGGER.error("Could not obtain the remote URL.");
+				return;
+			}
+			
+			throw new Error("TODO");
+		}
+	}
+	
+	/**
+	 * Awaits the remote URL.
+	 *
+	 * @return The remote URL.
+	 * @since 2018/02/22
+	 */
+	private final HttpUrl __awaitRemote()
+	{
+		Object remotelock = this._remotelock;
+		synchronized (remotelock)
+		{
+			throw new Error("TODO");
+		}
+	}
+	
+	/**
+	 * Obtains the remote URL to send a report to.
+	 *
+	 * @since 2018/02/22
+	 */
+	private final void __getRemote()
+	{
+		// Use a connection to an alternative URL using the same connection
+		// type as the other.
+		try
+		{
+			IOpipeExecution execution = this.execution;
+			IOpipeConfiguration conf = execution.config();
+			
+			// Use URL from the profiler
+			String desiredurl = conf.getProfilerUrl();
+			if (desiredurl == null)
+				throw new RuntimeException("No profiler URL specified.");
+			
+			// Setup connection to the signed service to determine which
+			// URL we upload to
+			Context context = execution.context();
+			RemoteConnectionFactory fact = conf.getRemoteConnectionFactory();
+			RemoteConnection con = fact.connectAlternateUrl(desiredurl);
+			
+			// Build request to remote end
+			StringWriter out = new StringWriter();
+			try (JsonGenerator gen = Json.createGenerator(out))
+			{
+				gen.writeStartObject();
+				
+				gen.write("arn", context.getInvokedFunctionArn());
+				gen.write("requestId", context.getAwsRequestId());
+				gen.write("timestam", IOpipeConstants.LOAD_TIME);
+				
+				// Finished
+				gen.writeEnd();
+				gen.flush();
+			}
+			
+			// Ask which URL to send to
+			RemoteResult resp = con.sendWithAuthorization(
+				new RemoteRequest(out.toString()), conf.getProjectToken());
+			
+			
+			throw new Error("TODO");
+		}
+		
+		// Could not send to the remote end
+		catch (RuntimeException e)
+		{
+			_LOGGER.error("Could not determine the profiler upload URL.", e);
+			
+			// Mark invalid
+			this._remoteinvalid = true;
 		}
 	}
 	
@@ -159,6 +265,12 @@ public class ProfilerExecution
 	 */
 	final void __pre()
 	{
+		// Need to determine which server to send to, can be done in another
+		// thread
+		Thread getter = new Thread(this::__getRemote, "ProfilerGetURL");
+		getter.setDaemon(true);
+		getter.start();
+		
 		// Setup poller which will constantly read thread state
 		__Poller__ poller = new __Poller__(this._tracker,
 			this.execution.threadGroup());
