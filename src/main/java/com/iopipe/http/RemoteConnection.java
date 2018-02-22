@@ -24,5 +24,24 @@ public interface RemoteConnection
 	 */
 	public abstract RemoteResult send(RemoteRequest __r)
 		throws NullPointerException, RemoteException;
+	
+	/**
+	 * Sends the request but with the specified authorization instead.
+	 *
+	 * @param __r The request to send to.
+	 * @param __authtoken The authorization token to use.
+	 * @throws NullPointerException On null arguments.
+	 * @throws RemoteException If the request could not be sent.
+	 * @since 2018/02/22
+	 */
+	public default RemoteResult sendWithAuthorization(RemoteRequest __r,
+		String __authtoken)
+		throws NullPointerException, RemoteException
+	{
+		if (__r == null || __authtoken == null)
+			throw new NullPointerException();
+		
+		throw new RemoteException("Send with authorization not implemented.");
+	}
 }
 

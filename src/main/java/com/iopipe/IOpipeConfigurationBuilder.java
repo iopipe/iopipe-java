@@ -34,6 +34,9 @@ public class IOpipeConfigurationBuilder
 	/** Install method. */
 	volatile String _installmethod;
 	
+	/** The URL to ask for where to send profile results. */
+	volatile String _profilerurl;
+	
 	/**
 	 * Initializes the builder with uninitialized values.
 	 *
@@ -62,6 +65,7 @@ public class IOpipeConfigurationBuilder
 		this._connectionfactory = __c.getRemoteConnectionFactory();
 		this._timeoutwindow = __c.getTimeOutWindow();
 		this._installmethod = __c.getInstallMethod();
+		this._profilerurl = __c.getProfilerUrl();
 	}
 	
 	/**
@@ -129,6 +133,17 @@ public class IOpipeConfigurationBuilder
 			throw new NullPointerException();
 		
 		this._pluginstate.put(__p, __e);
+	}
+	
+	/**
+	 * Sets the URL to use for requests made by the profiler.
+	 *
+	 * @param __u The request URL to use for the profiler.
+	 * @since 2018/02/22
+	 */
+	public final void setProfilerUrl(String __u)
+	{
+		this._profilerurl = __u;
 	}
 	
 	/**

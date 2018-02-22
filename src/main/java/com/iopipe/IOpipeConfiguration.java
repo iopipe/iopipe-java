@@ -63,6 +63,9 @@ public final class IOpipeConfiguration
 	/** Install method. */
 	protected final String installmethod;
 	
+	/** The URL to the profiler. */
+	protected final String profilerurl;
+	
 	/** The state of plugins. */
 	private final Map<String, Boolean> _pluginstate =
 		new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
@@ -85,6 +88,7 @@ public final class IOpipeConfiguration
 		cb.setInstallMethod("Disabled");
 		cb.setRemoteConnectionFactory(new NullConnectionFactory());
 		cb.setTimeOutWindow(0);
+		cb.setProfilerUrl(null);
 		
 		DISABLED_CONFIG = cb.build();
 		
@@ -148,6 +152,9 @@ public final class IOpipeConfiguration
 		this.timeoutwindow = timeoutwindow;
 		this.installmethod = installmethod;
 		
+		// This may be null
+		this.profilerurl = __builder._profilerurl;
+		
 		this._pluginstate.putAll(__builder._pluginstate);
 	}
 	
@@ -193,6 +200,17 @@ public final class IOpipeConfiguration
 	public final String getInstallMethod()
 	{
 		return this.installmethod;
+	}
+	
+	/**
+	 * Returns the URL to use for the profiler.
+	 *
+	 * @return The profiler URL.
+	 * @since 2018/02/22
+	 */
+	public final String getProfilerUrl()
+	{
+		return this.profilerurl;
 	}
 	
 	/**
