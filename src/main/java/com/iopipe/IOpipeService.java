@@ -319,7 +319,7 @@ public final class IOpipeService
 		try
 		{
 			// Report what is to be sent
-			_LOGGER.debug(() -> "Send: " + __r);
+			_LOGGER.debug(() -> "Send: " + __r + " " + __debugBody(__r));
 			
 			RemoteResult result = this.connection.send(RequestType.POST, __r);
 			
@@ -330,14 +330,14 @@ public final class IOpipeService
 				this._badresultcount++;
 				
 				// Emit errors for failed requests
-				_LOGGER.error(() -> "Recv (" + result.code() + "): " +
-					result.body());
+				_LOGGER.error(() -> "Recv: " + result + " " +
+					__debugBody(result));
 			}
 			
 			// Debug log successful requests
 			else
-				_LOGGER.debug(() -> "Recv (" + result.code() + "): " +
-					result.body());
+				_LOGGER.debug(() -> "Recv: " + result + " " +
+					__debugBody(result));
 			
 			return result;
 		}
@@ -368,6 +368,28 @@ public final class IOpipeService
 			_INSTANCE = (rv = new IOpipeService());
 		}
 		return rv;
+	}
+	
+	/**
+	 * Shows string representation of the body.
+	 *
+	 * @param __b The body to decode.
+	 * @return The string result.
+	 * @since 2018/02/24
+	 */
+	private static final String __debugBody(RemoteBody __b)
+	{
+		try
+		{
+			String rv = __b.bodyAsString();
+			if (rv.indexOf('\0') >= 0)
+				return "BINARY DATA";
+			return rv;
+		}
+		catch (Throwable t)
+		{
+			return "Could not decode!";
+		}
 	}
 	
 	/**
