@@ -51,9 +51,9 @@ class __DoEmptyMethod__
 	 * @since 2018/01/23
 	 */
 	@Override
-	public void remoteRequest(RemoteRequest __r)
+	public void remoteRequest(WrappedRequest __r)
 	{
-		if (null == __Utils__.hasError(__r))
+		if (null == __Utils__.hasError(__r.request))
 			this.errorwasnotsent.set(true);
 	}
 	
@@ -62,9 +62,9 @@ class __DoEmptyMethod__
 	 * @since 2018/01/23
 	 */
 	@Override
-	public void remoteResult(RemoteResult __r)
+	public void remoteResult(WrappedResult __r)
 	{
-		if (__Utils__.isResultOkay(__r))
+		if (__Utils__.isResultOkay(__r.result))
 			this.remoterecvokay.set(true);
 	}
 	

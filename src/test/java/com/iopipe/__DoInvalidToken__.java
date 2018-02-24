@@ -66,11 +66,11 @@ class __DoInvalidToken__
 	 * @since 2018/01/26
 	 */
 	@Override
-	public void remoteRequest(RemoteRequest __r)
+	public void remoteRequest(WrappedRequest __r)
 	{
 		// Even though the request will fail, it still must be sent without
 		// error
-		if (null == __Utils__.hasError(__r))
+		if (null == __Utils__.hasError(__r.request))
 			this.noerror.set(true);
 	}
 	
@@ -79,9 +79,9 @@ class __DoInvalidToken__
 	 * @since 2018/01/26
 	 */
 	@Override
-	public void remoteResult(RemoteResult __r)
+	public void remoteResult(WrappedResult __r)
 	{
-		if (!__Utils__.isResultOkay(__r))
+		if (!__Utils__.isResultOkay(__r.result))
 			this.remoterecvfailed.set(true);
 	}
 	

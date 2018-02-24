@@ -73,7 +73,7 @@ class __DoTimeOut__
 	 * @since 2018/01/26
 	 */
 	@Override
-	public void remoteRequest(RemoteRequest __r)
+	public void remoteRequest(WrappedRequest __r)
 	{
 		// Increment count
 		int now = this.xmitcount.incrementAndGet();
@@ -82,7 +82,7 @@ class __DoTimeOut__
 		if (now == 1)
 		{
 			// It must have an error condition
-			if (null != __Utils__.hasError(__r))
+			if (null != __Utils__.hasError(__r.request))
 				this.haserror.set(true);
 		}
 	}
@@ -92,9 +92,9 @@ class __DoTimeOut__
 	 * @since 2018/01/26
 	 */
 	@Override
-	public void remoteResult(RemoteResult __r)
+	public void remoteResult(WrappedResult __r)
 	{
-		if (__Utils__.isResultOkay(__r))
+		if (__Utils__.isResultOkay(__r.result))
 			this.remoterecvokay.set(true);
 	}
 	

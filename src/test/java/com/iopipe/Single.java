@@ -49,7 +49,7 @@ public abstract class Single
 	 * @param __r The request which was made.
 	 * @since 2018/01/23
 	 */
-	public abstract void remoteRequest(RemoteRequest __r);
+	public abstract void remoteRequest(WrappedRequest __r);
 	
 	/**
 	 * This is called when the remote end returns a result.
@@ -57,7 +57,7 @@ public abstract class Single
 	 * @param __r The result returned from the remote end.
 	 * @since 2018/01/23
 	 */
-	public abstract void remoteResult(RemoteResult __r);
+	public abstract void remoteResult(WrappedResult __r);
 	
 	/**
 	 * Runs the test.

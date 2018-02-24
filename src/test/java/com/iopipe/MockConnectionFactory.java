@@ -16,13 +16,16 @@ public final class MockConnectionFactory
 {
 	/**
 	 * {@inheritDoc}
-	 * @since 2017/12/13
+	 * @since 2017/12/19
 	 */
 	@Override
-	public RemoteConnection connect()
-		throws RemoteException
+	public final RemoteConnection connect(String __url, String __auth)
+		throws NullPointerException, RemoteException
 	{
-		return new MockConnection();
+		if (__url == null)
+			throw new NullPointerException();
+		
+		return new MockConnection(__url, __auth);
 	}
 }
 
