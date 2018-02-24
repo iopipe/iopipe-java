@@ -67,6 +67,9 @@ public class ProfilerExecution
 	/** Was the remote invalid? */
 	private volatile boolean _remoteinvalid;
 	
+	/** Access token for the uploaded data. */
+	private volatile String _jwtaccesstoken;
+	
 	/** The tread which is pollng for profiling. */
 	private volatile Thread _pollthread;
 	
@@ -198,6 +201,12 @@ public class ProfilerExecution
 			// Debug result
 			_LOGGER.debug(() -> "Profiler recv: " + result + " " +
 				result.bodyAsString());
+			
+			// Set custom metric to define where to look for the profiled
+			// data
+			String jwtaccesstoken = this._jwtaccesstoken;
+			execution.measurement().customMetric("@iopipe/profiler.jwtAccess",
+				jwtaccesstoken);
 		}
 	}
 	
@@ -292,16 +301,25 @@ public class ProfilerExecution
 			JsonValue jv = jo.get("signedRequest");
 			if (jv == null)
 				throw new RuntimeException("Server did not respond with URL.");
-			
-			// Get URL
 			String url = ((JsonString)jv).getString();
 			
+			// Need access token to tell the dashboard where to find the
+			// uploaded file
+			JsonValue atv = jo.get("jwtAccess");
+			if (atv == null)
+				throw new RuntimeException("Server did not access token.");
+			String jwtaccesstoken = ((JsonString)atv).getString();
+			
 			_LOGGER.debug(() -> "Got upload URL: " + url);
+			_LOGGER.debug(() -> "Got access token: " + jwtaccesstoken);
+			_LOGGER.debug(() -> "Signer sent: " + resp + " " +
+				resp.bodyAsString());
 			
 			// Return it
 			synchronized (remotelock)
 			{
 				this._remote = url;
+				this._jwtaccesstoken = jwtaccesstoken;
 				remotelock.notifyAll();
 			}
 		}
