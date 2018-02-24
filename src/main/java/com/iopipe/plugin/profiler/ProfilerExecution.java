@@ -22,6 +22,10 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import javax.json.Json;
 import javax.json.JsonException;
+import javax.json.JsonObject;
+import javax.json.JsonString;
+import javax.json.JsonStructure;
+import javax.json.JsonValue;
 import javax.json.stream.JsonGenerator;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -119,6 +123,7 @@ public class ProfilerExecution
 	final void __post()
 	{
 		IOpipeExecution execution = this.execution;
+		IOpipeConfiguration conf = execution.config();
 		
 		// Tell the poller to stop and interrupt it so it wakes up from any
 		// sleep state
@@ -182,7 +187,17 @@ public class ProfilerExecution
 				return;
 			}
 			
-			throw new Error("TODO");
+			// Build request to send to server
+			RemoteRequest request = new RemoteRequest("application/zip",
+				exported);
+			
+			// Send request
+			RemoteResult result = conf.getRemoteConnectionFactory().connect(
+				remote, conf.getProjectToken()).send(RequestType.POST,
+				request);
+			
+			// Debug result
+			_LOGGER.debug(() -> "Profiler recv: " + result);
 		}
 	}
 	
@@ -197,7 +212,32 @@ public class ProfilerExecution
 		Object remotelock = this._remotelock;
 		synchronized (remotelock)
 		{
-			throw new Error("TODO");
+			for (;;)
+			{
+				String rv = this._remote;
+				
+				// Not specified?
+				if (rv == null)
+				{
+					// Not valid
+					if (this._remoteinvalid)
+						return null;
+					
+					// Wait for it to be read
+					else
+						try
+						{
+							remotelock.wait();
+						}
+						catch (InterruptedException e)
+						{
+						}
+				}
+				
+				// Use that URL
+				else
+					return rv;
+			}
 		}
 	}
 	
@@ -210,6 +250,7 @@ public class ProfilerExecution
 	{
 		// Use a connection to an alternative URL using the same connection
 		// type as the other.
+		Object remotelock = this._remotelock;
 		try
 		{
 			IOpipeExecution execution = this.execution;
@@ -246,16 +287,36 @@ public class ProfilerExecution
 			RemoteResult resp = con.send(RequestType.POST,
 				new RemoteRequest(RemoteBody.MIMETYPE_JSON, out.toString()));
 			
-			throw new Error("TODO");
+			// Decode response
+			JsonObject jo = (JsonObject)resp.bodyAsJsonStructure();
+			JsonValue jv = jo.get("signedRequest");
+			if (jv == null)
+				throw new RuntimeException("Server did not respond with URL.");
+			
+			// Get URL
+			String url = ((JsonString)jv).getString();
+			
+			_LOGGER.debug(() -> "Got upload URL: " + url);
+			
+			// Return it
+			synchronized (remotelock)
+			{
+				this._remote = url;
+				remotelock.notifyAll();
+			}
 		}
 		
 		// Could not send to the remote end
-		catch (RuntimeException e)
+		catch (RuntimeException|Error e)
 		{
 			_LOGGER.error("Could not determine the profiler upload URL.", e);
 			
 			// Mark invalid
-			this._remoteinvalid = true;
+			synchronized (remotelock)
+			{
+				this._remoteinvalid = true;
+				remotelock.notifyAll();
+			}
 		}
 	}
 	

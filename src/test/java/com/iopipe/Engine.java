@@ -9,6 +9,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.List;
 import java.util.ServiceLoader;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.junit.jupiter.api.DynamicTest;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,6 +23,10 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public abstract class Engine
 {
+	/** Logging. */
+	private static final Logger _LOGGER =
+		LogManager.getLogger(Engine.class);
+	
 	/** The tests which should be ran through each engine. */
 	private static final SingleTestConstructor[] _RUN_TESTS =
 		new SingleTestConstructor[]
@@ -91,6 +97,8 @@ public abstract class Engine
 	{
 		if (__s == null)
 			throw new NullPointerException("NARG");
+		
+		_LOGGER.debug(() -> ">>> BEGIN TEST: " + __s.fullName());
 		
 		// Run it
 		IOpipeService sv = null;
@@ -170,6 +178,8 @@ public abstract class Engine
 		
 		// Common end of service
 		__s.end();
+		
+		_LOGGER.debug(() -> "<<< END TEST  : " + __s.fullName());
 	}
 	
 	/**

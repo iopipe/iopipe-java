@@ -22,6 +22,10 @@ public class MockEngine
 	public static final String PROFILER_URL =
 		"https://localhost/profiler";
 	
+	/** URL Result for the profiler. */
+	public static final String PROFILER_RESULT_URL =
+		"https://localhost/profiler-result";
+	
 	/**
 	 * Initializes the engine.
 	 *
