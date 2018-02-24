@@ -197,7 +197,8 @@ public class ProfilerExecution
 				request);
 			
 			// Debug result
-			_LOGGER.debug(() -> "Profiler recv: " + result);
+			_LOGGER.debug(() -> "Profiler recv: " + result + " " +
+				result.bodyAsString());
 		}
 	}
 	

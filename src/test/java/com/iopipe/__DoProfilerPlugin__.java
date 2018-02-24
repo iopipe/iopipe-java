@@ -2,6 +2,7 @@ package com.iopipe;
 
 import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RemoteResult;
+import com.iopipe.http.RequestType;
 import com.iopipe.plugin.trace.TraceExecution;
 import com.iopipe.plugin.trace.TraceMeasurement;
 import com.iopipe.plugin.trace.TracePlugin;
@@ -93,6 +94,10 @@ class __DoProfilerPlugin__
 	@Override
 	public void remoteRequest(WrappedRequest __r)
 	{
+		// Ignore profiler PUT
+		if (__r.type == RequestType.PUT)
+			return;
+		
 		Map<String, JsonValue> expand = __Utils__.expandObject(__r.request);
 		
 		// It is invalid if there is an error
