@@ -34,7 +34,10 @@ public class IOpipeConfigurationBuilder
 	/** Install method. */
 	volatile String _installmethod;
 	
-	/** The URL to ask for where to send profile results. */
+	/** The URL to send service requests to. */
+	volatile String _serviceurl;
+	
+	/** The URL to send profiler requests to. */
 	volatile String _profilerurl;
 	
 	/**
@@ -65,6 +68,7 @@ public class IOpipeConfigurationBuilder
 		this._connectionfactory = __c.getRemoteConnectionFactory();
 		this._timeoutwindow = __c.getTimeOutWindow();
 		this._installmethod = __c.getInstallMethod();
+		this._serviceurl = __c.getServiceUrl();
 		this._profilerurl = __c.getProfilerUrl();
 	}
 	
@@ -136,10 +140,10 @@ public class IOpipeConfigurationBuilder
 	}
 	
 	/**
-	 * Sets the URL to use for requests made by the profiler.
+	 * Sets the URL to use when connecting to the profiler service.
 	 *
-	 * @param __u The request URL to use for the profiler.
-	 * @since 2018/02/22
+	 * @param __u The URL to use to send profiler requests to.
+	 * @since 2018/02/24
 	 */
 	public final void setProfilerUrl(String __u)
 	{
@@ -168,6 +172,17 @@ public class IOpipeConfigurationBuilder
 		RemoteConnectionFactory __cf)
 	{
 		this._connectionfactory = __cf;
+	}
+	
+	/**
+	 * Sets the URL to use when connecting to the IOpipe service.
+	 *
+	 * @param __u The URL to use to send requests to.
+	 * @since 2018/02/24
+	 */
+	public final void setServiceUrl(String __u)
+	{
+		this._serviceurl = __u;
 	}
 	
 	/**

@@ -15,9 +15,12 @@ public final class NullConnectionFactory
 	 * @since 2017/12/19
 	 */
 	@Override
-	public RemoteConnection connect()
-		throws RemoteException
+	public final RemoteConnection connect(String __url, String __auth)
+		throws NullPointerException, RemoteException
 	{
+		if (__url == null)
+			throw new NullPointerException();
+		
 		return new NullConnection();
 	}
 }

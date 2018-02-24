@@ -14,14 +14,14 @@ public final class NullConnection
 	 * @since 2017/12/15
 	 */
 	@Override
-	public RemoteResult send(RemoteRequest __r)
+	public final RemoteResult send(RequestType __t, RemoteRequest __r)
 		throws NullPointerException, RemoteException
 	{
-		if (__r == null)
+		if (__t == null || __r == null)
 			throw new NullPointerException();
 		
 		// Report service not available
-		return new RemoteResult(503, "");
+		return new RemoteResult(503, RemoteBody.MIMETYPE_JSON, new byte[0]);
 	}
 }
 

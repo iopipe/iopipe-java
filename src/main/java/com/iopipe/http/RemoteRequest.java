@@ -1,13 +1,5 @@
 package com.iopipe.http;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.lang.ref.Reference;
-import java.lang.ref.WeakReference;
-import javax.json.Json;
-import javax.json.JsonException;
-import javax.json.JsonStructure;
-
 /**
  * This is used to store a request which is sent to a remote server.
  *
@@ -16,101 +8,62 @@ import javax.json.JsonStructure;
  * @since 2017/12/13
  */
 public final class RemoteRequest
+	extends RemoteBody
 {
-	/** The body of the request containing JSON data. */
-	protected final String body;
-	
-	/** Json representation of the body. */
-	private volatile Reference<JsonStructure> _jsonvalue;
-	
 	/**
-	 * Initializes the request.
+	 * Initializes the request with the given data.
 	 *
-	 * @param __body The body of the request which contains the JSON data.
+	 * @param __t The mime type of the body.
+	 * @param __b The data making up the body.
 	 * @throws NullPointerException On null arguments.
-	 * @since 2017/12/13
+	 * @since 2018/02/24
 	 */
-	public RemoteRequest(String __body)
+	public RemoteRequest(String __t, byte[] __b)
 		throws NullPointerException
 	{
-		if (__body == null)
-			throw new NullPointerException();
-		
-		this.body = __body;
+		super(__t, __b);
 	}
 	
 	/**
-	 * Returns the message body.
+	 * Initializes the request with the given data.
 	 *
-	 * @return The message body.
-	 * @since 2017/12/13
+	 * @param __t The mime type of the body.
+	 * @param __b The data making up the body.
+	 * @param __o The offset.
+	 * @param __l The length.
+	 * @throws ArrayIndexOutOfBoundsException If the offset and/or length
+	 * exceed the array bounds or are negative.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/02/24
 	 */
-	public String body()
+	public RemoteRequest(String __t, byte[] __b, int __o, int __l)
+		throws ArrayIndexOutOfBoundsException, NullPointerException
 	{
-		return this.body;
+		super(__t, __b, __o, __l);
 	}
 	
 	/**
-	 * Returns the value of the body as a structure.
+	 * Initializes the request with the given string.
 	 *
-	 * @return The value of the body as a structure.
-	 * @throws RemoteException If the JSON is not valid.
-	 * @since 2017/12/17
+	 * @param __t The mime type of the body.
+	 * @param __s The string to initialize the body with.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/02/24
 	 */
-	public JsonStructure bodyValue()
-		throws RemoteException
+	public RemoteRequest(String __t, String __s)
+		throws NullPointerException
 	{
-		Reference<JsonStructure> ref = this._jsonvalue;
-		JsonStructure rv;
-		
-		if (ref == null || null == (rv = ref.get()))
-			try
-			{
-				this._jsonvalue = new WeakReference<>((rv =
-					Json.createReader(new StringReader(this.body)).read()));
-			}
-			catch (JsonException e)
-			{
-				throw new RemoteException("Failed to parse the body.", e);
-			}
-		
-		return rv;
+		super(__t, __s);
 	}
 	
 	/**
 	 * {@inheritDoc}
-	 * @since 2017/12/13
+	 * @since 2018/02/24
 	 */
 	@Override
-	public boolean equals(Object __o)
+	public final boolean equals(Object __o)
 	{
-		if (this == __o)
-			return true;
-		
-		if (!(__o instanceof RemoteRequest))
-			return false;
-		
-		return this.body.equals(((RemoteRequest)__o).body);
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * @since 2017/12/13
-	 */
-	@Override
-	public int hashCode()
-	{
-		return this.body.hashCode();
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * @since 2017/12/13
-	 */
-	@Override
-	public String toString()
-	{
-		return this.body.toString();
+		return super.equals(__o) && (__o instanceof RemoteRequest);
 	}
 }
 

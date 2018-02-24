@@ -1,12 +1,7 @@
 package com.iopipe.http;
 
-import java.io.IOException;
-import java.io.StringReader;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
-import javax.json.Json;
-import javax.json.JsonException;
-import javax.json.JsonStructure;
 
 /**
  * This is used to store the result of a request made to the service.
@@ -16,92 +11,86 @@ import javax.json.JsonStructure;
  * @since 2017/12/13
  */
 public final class RemoteResult
+	extends RemoteBody
 {
 	/** The response code of the result. */
 	protected final int code;
 	
-	/** The body of the result. */
-	protected final String body;
-	
 	/** String representation. */
 	private volatile Reference<String> _string;
 	
-	/** Json representation of the body. */
-	private volatile Reference<JsonStructure> _jsonvalue;
-	
 	/**
-	 * Initializes the result.
+	 * Initializes the request with the given data.
 	 *
-	 * @param __code The result code of the request.
-	 * @param __body The body of the result.
+	 * @param __c The status code of the result.
+	 * @param __t The mime type of the body.
+	 * @param __b The data making up the body.
 	 * @throws NullPointerException On null arguments.
-	 * @since 2017/12/13
+	 * @since 2018/02/24
 	 */
-	public RemoteResult(int __code, String __body)
+	public RemoteResult(int __c, String __t, byte[] __b)
 		throws NullPointerException
 	{
-		if (__body == null)
-			throw new NullPointerException();
+		super(__t, __b);
 		
-		this.code = __code;
-		this.body = __body;
+		this.code = __c;
 	}
 	
 	/**
-	 * Returns the message body.
+	 * Initializes the request with the given data.
 	 *
-	 * @return The message body.
-	 * @since 2017/12/13
+	 * @param __c The status code of the result.
+	 * @param __t The mime type of the body.
+	 * @param __b The data making up the body.
+	 * @param __o The offset.
+	 * @param __l The length.
+	 * @throws ArrayIndexOutOfBoundsException If the offset and/or length
+	 * exceed the array bounds or are negative.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/02/24
 	 */
-	public String body()
+	public RemoteResult(int __c, String __t, byte[] __b, int __o, int __l)
+		throws ArrayIndexOutOfBoundsException, NullPointerException
 	{
-		return this.body;
+		super(__t, __b, __o, __l);
+		
+		this.code = __c;
 	}
 	
 	/**
-	 * Returns the value of the body as a structure.
+	 * Initializes the request with the given string.
 	 *
-	 * @return The value of the body as a structure.
-	 * @throws RemoteException If the body could not be parsed.
-	 * @since 2017/12/17
+	 * @param __c The status code of the result.
+	 * @param __t The mime type of the body.
+	 * @param __s The string to initialize the body with.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/02/24
 	 */
-	public JsonStructure bodyValue()
-		throws RemoteException
+	public RemoteResult(int __c, String __t, String __s)
+		throws NullPointerException
 	{
-		Reference<JsonStructure> ref = this._jsonvalue;
-		JsonStructure rv;
+		super(__t, __s);
 		
-		if (ref == null || null == (rv = ref.get()))
-			try
-			{
-				this._jsonvalue = new WeakReference<>((rv =
-					Json.createReader(new StringReader(this.body)).read()));
-			}
-			catch (JsonException e)
-			{
-				throw new RemoteException("Failed to parse the body.", e);
-			}
-		
-		return rv;
+		this.code = __c;
 	}
 	
 	/**
-	 * Returns the HTTP result code.
+	 * Returns the status code of the result.
 	 *
-	 * @return The HTTP result code.
-	 * @since 2017/12/13
+	 * @return The result status code.
+	 * @since 2018/02/24
 	 */
-	public int code()
+	public final int code()
 	{
 		return this.code;
 	}
 	
 	/**
 	 * {@inheritDoc}
-	 * @since 2017/12/13
+	 * @since 2018/02/24
 	 */
 	@Override
-	public boolean equals(Object __o)
+	public final boolean equals(Object __o)
 	{
 		if (this == __o)
 			return true;
@@ -110,33 +99,24 @@ public final class RemoteResult
 			return false;
 		
 		RemoteResult o = (RemoteResult)__o;
-		return this.code == o.code &&
-			this.body.equals(o.body);
+		return super.equals(o) &&
+			this.code == o.code;
 	}
 	
 	/**
 	 * {@inheritDoc}
-	 * @since 2017/12/13
+	 * @since 2018/02/24
 	 */
 	@Override
-	public int hashCode()
-	{
-		return this.code ^ this.body.hashCode();
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * @since 2017/12/13
-	 */
-	@Override
-	public String toString()
+	public final String toString()
 	{
 		Reference<String> ref = this._string;
 		String rv;
 		
 		if (ref == null || null == (rv = ref.get()))
-			this._string = new WeakReference<>((rv = String.format(
-				"{result=%d, body=%s}", this.code, this.body)));
+			this._string = new WeakReference<>((rv =
+				String.format("{result=%d, type=%s, body=%d bytes}",
+					this.code, this.mimetype, this.body().length)));
 		
 		return rv;
 	}
