@@ -1,11 +1,13 @@
 package com.iopipe.plugin.profiler;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import com.iopipe.http.RemoteBody;
 import com.iopipe.http.RemoteConnection;
 import com.iopipe.http.RemoteConnectionFactory;
 import com.iopipe.http.RemoteException;
 import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RemoteResult;
+import com.iopipe.http.RequestType;
 import com.iopipe.IOpipeConfiguration;
 import com.iopipe.IOpipeConstants;
 import com.iopipe.IOpipeExecution;
@@ -21,7 +23,6 @@ import java.util.zip.ZipOutputStream;
 import javax.json.Json;
 import javax.json.JsonException;
 import javax.json.stream.JsonGenerator;
-import okhttp3.HttpUrl;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -57,7 +58,7 @@ public class ProfilerExecution
 		new Object();
 	
 	/** Remote URL. */
-	private volatile HttpUrl _remote;
+	private volatile String _remote;
 	
 	/** Was the remote invalid? */
 	private volatile boolean _remoteinvalid;
@@ -174,7 +175,7 @@ public class ProfilerExecution
 				"\n====\n");
 			
 			// Await remote URL to send to
-			HttpUrl remote = __awaitRemote();
+			String remote = __awaitRemote();
 			if (remote == null)
 			{
 				_LOGGER.error("Could not obtain the remote URL.");
@@ -191,7 +192,7 @@ public class ProfilerExecution
 	 * @return The remote URL.
 	 * @since 2018/02/22
 	 */
-	private final HttpUrl __awaitRemote()
+	private final String __awaitRemote()
 	{
 		Object remotelock = this._remotelock;
 		synchronized (remotelock)
@@ -223,7 +224,8 @@ public class ProfilerExecution
 			// URL we upload to
 			Context context = execution.context();
 			RemoteConnectionFactory fact = conf.getRemoteConnectionFactory();
-			RemoteConnection con = fact.connectAlternateUrl(desiredurl);
+			RemoteConnection con = fact.connect(desiredurl,
+				conf.getProjectToken());
 			
 			// Build request to remote end
 			StringWriter out = new StringWriter();
@@ -233,7 +235,7 @@ public class ProfilerExecution
 				
 				gen.write("arn", context.getInvokedFunctionArn());
 				gen.write("requestId", context.getAwsRequestId());
-				gen.write("timestam", IOpipeConstants.LOAD_TIME);
+				gen.write("timestamp", IOpipeConstants.LOAD_TIME);
 				
 				// Finished
 				gen.writeEnd();
@@ -241,9 +243,8 @@ public class ProfilerExecution
 			}
 			
 			// Ask which URL to send to
-			RemoteResult resp = con.sendWithAuthorization(
-				new RemoteRequest(out.toString()), conf.getProjectToken());
-			
+			RemoteResult resp = con.send(RequestType.POST,
+				new RemoteRequest(RemoteBody.MIMETYPE_JSON, out.toString()));
 			
 			throw new Error("TODO");
 		}

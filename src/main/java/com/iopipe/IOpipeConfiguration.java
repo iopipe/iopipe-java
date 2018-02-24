@@ -63,6 +63,9 @@ public final class IOpipeConfiguration
 	/** Install method. */
 	protected final String installmethod;
 	
+	/** The URL to the service. */
+	protected final String serviceurl;
+	
 	/** The URL to the profiler. */
 	protected final String profilerurl;
 	
@@ -88,7 +91,8 @@ public final class IOpipeConfiguration
 		cb.setInstallMethod("Disabled");
 		cb.setRemoteConnectionFactory(new NullConnectionFactory());
 		cb.setTimeOutWindow(0);
-		cb.setProfilerUrl(null);
+		cb.setServiceUrl("https://localhost:80/event");
+		cb.setProfilerUrl("https://localhost:80/profiler");
 		
 		DISABLED_CONFIG = cb.build();
 		
@@ -133,6 +137,7 @@ public final class IOpipeConfiguration
 			__builder._connectionfactory;
 		int timeoutwindow = __builder._timeoutwindow;
 		String installmethod = __builder._installmethod;
+		String serviceurl = __builder._serviceurl;
 		
 		if (token == null)
 			throw new IllegalArgumentException("A project token must be " +
@@ -146,13 +151,18 @@ public final class IOpipeConfiguration
 			throw new IllegalArgumentException("The timeout window cannot " +
 				"be negative.");
 		
+		if (serviceurl == null)
+			throw new IllegalArgumentException("A remote service URL must " +
+				"be specified.");
+		
 		this.enabled = enabled;
 		this.token = token;
 		this.connectionfactory = connectionfactory;
 		this.timeoutwindow = timeoutwindow;
 		this.installmethod = installmethod;
+		this.serviceurl = serviceurl;
 		
-		// This may be null
+		// Optional
 		this.profilerurl = __builder._profilerurl;
 		
 		this._pluginstate.putAll(__builder._pluginstate);
@@ -177,7 +187,9 @@ public final class IOpipeConfiguration
 			Objects.equals(this.connectionfactory, o.connectionfactory) &&
 			this.timeoutwindow == o.timeoutwindow &&
 			Objects.equals(this.installmethod, o.installmethod) &&
-			this._pluginstate.equals(o._pluginstate);
+			this._pluginstate.equals(o._pluginstate) &&
+			Objects.equals(this.serviceurl, o.serviceurl) &&
+			Objects.equals(this.profilerurl, o.profilerurl);
 	}
 	
 	/**
@@ -203,10 +215,10 @@ public final class IOpipeConfiguration
 	}
 	
 	/**
-	 * Returns the URL to use for the profiler.
+	 * Returns the URL to use for sending profiler requests.
 	 *
-	 * @return The profiler URL.
-	 * @since 2018/02/22
+	 * @return The URL to use for profiler requests.
+	 * @since 2018/02/24
 	 */
 	public final String getProfilerUrl()
 	{
@@ -222,6 +234,17 @@ public final class IOpipeConfiguration
 	public final String getProjectToken()
 	{
 		return this.token;
+	}
+	
+	/**
+	 * Returns the URL to use for service events.
+	 *
+	 * @return The URL for service events.
+	 * @since 2018/02/24
+	 */
+	public final String getServiceUrl()
+	{
+		return this.serviceurl;
 	}
 	
 	/**
@@ -248,7 +271,9 @@ public final class IOpipeConfiguration
 			Objects.hashCode(this.connectionfactory) ^
 			this.timeoutwindow ^
 			Objects.hashCode(this.installmethod) ^
-			this._pluginstate.hashCode();
+			this._pluginstate.hashCode() ^
+			Objects.hashCode(this.serviceurl) ^
+			Objects.hashCode(this.profilerurl);
 	}
 	
 	/**
@@ -301,10 +326,11 @@ public final class IOpipeConfiguration
 				String.format("{enabled=%s, token=%s, " +
 					"connectionfactory=%s, timeoutwindow=%d, " +
 					"installmethod=%s, " +
-					"pluginstate=%s}", this.enabled,
+					"pluginstate=%s, serviceurl=%s, profilerurl=%s}",
+					this.enabled,
 					this.token, this.connectionfactory, this.timeoutwindow,
 					this.installmethod,
-					this._pluginstate)));
+					this._pluginstate, this.serviceurl, this.profilerurl)));
 		
 		return rv;
 	}
@@ -379,28 +405,37 @@ public final class IOpipeConfiguration
 						Boolean.valueOf(v));
 			}
 			
+			// Just use the standard service connction
+			rv.setRemoteConnectionFactory(new ServiceConnectionFactory());
+			
 			// Determine the URI which is used to collect resources, use the
 			// same region as the AWS service if it is supported.
 			String awsregion = Objects.toString(System.getenv("AWS_REGION"),
-				IOpipeConstants.DEFAULT_REGION);
+				IOpipeConstants.DEFAULT_REGION),
+				origawsregion = awsregion;
 			if (!IOpipeConstants.SUPPORTED_REGIONS.contains(awsregion))
 				awsregion = IOpipeConstants.DEFAULT_REGION;
-		
-			// Build hostname from region
+			
+			// Setup service URL
 			String hostname = (awsregion.equals(
 				IOpipeConstants.DEFAULT_REGION) ?
 				"metrics-api.iopipe.com" :
-				String.format("metrics-api.%s.iopipe.com", awsregion));
-			HttpUrl url;
-			rv.setRemoteConnectionFactory(new ServiceConnectionFactory(
-				(url = new HttpUrl.Builder().
-					scheme("https").
-					host(hostname).
-					addPathSegment("v0").
-					addPathSegment("event").
-					build())));
+				String.format("metrics-api.%s.iopipe.com", awsregion)),
+				surl;
+			rv.setServiceUrl((surl = String.format("https://%s/v0/event",
+				hostname)));
 			
-			_LOGGER.debug(() -> "Remote URL: " + url);
+			_LOGGER.debug(() -> "Remote URL: " + surl);
+			
+			// Profiled events go to any supported region but if the region
+			// is not supported then use a default provided one
+			String purl;
+			rv.setProfilerUrl((purl = String.format(
+				"https://signer.%s.iopipe.com/",
+				(!IOpipeConstants.SUPPORTED_REGIONS.contains(origawsregion) ?
+				IOpipeConstants.PROFILER_DEFAULT_REGION : origawsregion))));
+			
+			_LOGGER.debug(() -> "Profiler URL: " + purl);
 		}
 		
 		// Fallback to disabled configuration

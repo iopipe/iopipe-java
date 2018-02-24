@@ -2,11 +2,13 @@ package com.iopipe;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.iopipe.http.NullConnection;
+import com.iopipe.http.RemoteBody;
 import com.iopipe.http.RemoteConnection;
 import com.iopipe.http.RemoteConnectionFactory;
 import com.iopipe.http.RemoteException;
 import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RemoteResult;
+import com.iopipe.http.RequestType;
 import com.iopipe.plugin.IOpipePlugin;
 import com.iopipe.plugin.IOpipePluginExecution;
 import com.iopipe.plugin.IOpipePluginPostExecutable;
@@ -109,7 +111,8 @@ public final class IOpipeService
 		if (__config.isEnabled())
 			try
 			{
-				connection = __config.getRemoteConnectionFactory().connect();
+				connection = __config.getRemoteConnectionFactory().connect(
+					__config.getServiceUrl(), __config.getProjectToken());
 				enabled = true;
 			}
 			
@@ -318,7 +321,7 @@ public final class IOpipeService
 			// Report what is to be sent
 			_LOGGER.debug(() -> "Send: " + __r);
 			
-			RemoteResult result = this.connection.send(__r);
+			RemoteResult result = this.connection.send(RequestType.POST, __r);
 			
 			// Only the 200 range is valid for okay responses
 			int code = result.code();
@@ -345,7 +348,7 @@ public final class IOpipeService
 			_LOGGER.error("Could not sent request to server.", e);
 			
 			this._badresultcount++;
-			return new RemoteResult(503, "");
+			return new RemoteResult(503, RemoteBody.MIMETYPE_JSON, "");
 		}
 	}
 	
