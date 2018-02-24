@@ -91,9 +91,9 @@ class __DoProfilerPlugin__
 	 * @since 2018/02/07
 	 */
 	@Override
-	public void remoteRequest(RemoteRequest __r)
+	public void remoteRequest(WrappedRequest __r)
 	{
-		Map<String, JsonValue> expand = __Utils__.expandObject(__r);
+		Map<String, JsonValue> expand = __Utils__.expandObject(__r.request);
 		
 		// It is invalid if there is an error
 		if (null == __Utils__.hasError(expand))
@@ -116,9 +116,9 @@ class __DoProfilerPlugin__
 	 * @since 2018/02/07
 	 */
 	@Override
-	public void remoteResult(RemoteResult __r)
+	public void remoteResult(WrappedResult __r)
 	{
-		if (__Utils__.isResultOkay(__r))
+		if (__Utils__.isResultOkay(__r.result))
 			this.remoterecvokay.set(true);
 	}
 	
