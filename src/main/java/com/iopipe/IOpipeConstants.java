@@ -30,7 +30,7 @@ public interface IOpipeConstants
 	
 	/** Default region for the profiler to connect to. */
 	public static final String PROFILER_DEFAULT_REGION =
-		DEFAULT_REGION;//"us-west-2";
+		"us-west-2";
 	
 	/** The regions which are supported by this agent. */
 	public static final Set<String> SUPPORTED_REGIONS =

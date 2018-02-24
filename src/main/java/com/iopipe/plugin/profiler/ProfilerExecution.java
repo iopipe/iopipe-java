@@ -188,12 +188,11 @@ public class ProfilerExecution
 			}
 			
 			// Build request to send to server
-			RemoteRequest request = new RemoteRequest("application/zip",
-				exported);
+			RemoteRequest request = new RemoteRequest("", exported);
 			
 			// Send request
 			RemoteResult result = conf.getRemoteConnectionFactory().connect(
-				remote, conf.getProjectToken()).send(RequestType.PUT,
+				remote, null).send(RequestType.PUT,
 				request);
 			
 			// Debug result

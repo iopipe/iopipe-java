@@ -69,8 +69,13 @@ public final class ServiceConnection
 			if (authtoken != null)
 				request.header("Authorization", authtoken);
 			
-			RequestBody body = RequestBody.create(
-				MediaType.parse(__r.mimeType()), __r.body());
+			String mimetype = __r.mimeType();
+			RequestBody body;
+			if (mimetype == null || mimetype.isEmpty())
+				body = RequestBody.create(null, __r.body());
+			else
+				body = RequestBody.create(MediaType.parse(mimetype),
+					__r.body());
 			
 			switch (__t)
 			{
@@ -93,8 +98,7 @@ public final class ServiceConnection
 			try (ResponseBody rb = hr.body())
 			{
 				if (rb == null)
-					return new RemoteResult(hr.code(),
-						RemoteBody.MIMETYPE_JSON, new byte[0]);
+					return new RemoteResult(hr.code(), "", new byte[0]);
 				else
 					return new RemoteResult(hr.code(),
 						Objects.toString(rb.contentType(),
