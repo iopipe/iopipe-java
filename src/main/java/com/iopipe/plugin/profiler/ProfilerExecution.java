@@ -193,7 +193,7 @@ public class ProfilerExecution
 			
 			// Send request
 			RemoteResult result = conf.getRemoteConnectionFactory().connect(
-				remote, conf.getProjectToken()).send(RequestType.POST,
+				remote, conf.getProjectToken()).send(RequestType.PUT,
 				request);
 			
 			// Debug result
