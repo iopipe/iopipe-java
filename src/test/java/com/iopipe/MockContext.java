@@ -144,7 +144,7 @@ public final class MockContext
 	@Override
 	public final int getMemoryLimitInMB()
 	{
-		return Integer.MAX_VALUE;
+		return 1024;
 	}
 	
 	/**
