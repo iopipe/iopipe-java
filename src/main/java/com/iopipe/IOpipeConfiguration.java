@@ -431,7 +431,7 @@ public final class IOpipeConfiguration
 			// is not supported then use a default provided one
 			String purl;
 			rv.setProfilerUrl((purl = String.format(
-				"https://signer.%s.iopipe.com/",
+				"https://signer.%s.iopipe.com/?extension=.zip",
 				(!IOpipeConstants.SUPPORTED_REGIONS.contains(origawsregion) ?
 				IOpipeConstants.PROFILER_DEFAULT_REGION : origawsregion))));
 			

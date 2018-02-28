@@ -49,6 +49,10 @@ class __DoProfilerPlugin__
 	protected final BooleanValue profilerpluginspecified =
 		new BooleanValue("profilerpluginspecified");
 	
+	/** Was a post made? */
+	protected final BooleanValue gotpost =
+		new BooleanValue("gotpost");
+	
 	/**
 	 * Constructs the test.
 	 *
@@ -70,6 +74,7 @@ class __DoProfilerPlugin__
 		super.assertTrue(this.remoterecvokay);
 		super.assertTrue(this.noerror);
 		super.assertTrue(this.profilerpluginspecified);
+		super.assertTrue(this.gotpost);
 	}
 	
 	/**
@@ -96,7 +101,10 @@ class __DoProfilerPlugin__
 	{
 		// Ignore profiler PUT
 		if (__r.type == RequestType.PUT)
+		{
+			this.gotpost.set(true);
 			return;
+		}
 		
 		Map<String, JsonValue> expand = __Utils__.expandObject(__r.request);
 		

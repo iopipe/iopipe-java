@@ -77,8 +77,22 @@ public final class MockConnection
 		// Profiling URL
 		else if (url.equals(MockEngine.PROFILER_URL))
 		{
-			//PROFILER_RESULT_URL
-			throw new Error("TODO");
+			// Authorization must be sent
+			if (!MockConnection.VALID_TOKEN.equals(this.authtoken))
+				return new RemoteResult(403, RemoteBody.MIMETYPE_JSON,
+					"{\"message\":\"Not authorized.\"}");
+			
+			// Use a mocked upload URL
+			return new RemoteResult(201, RemoteBody.MIMETYPE_JSON,
+				"{\"signedRequest\":\"" + MockEngine.PROFILER_RESULT_URL +
+					"\", \"jwtAccess\":\"token\", " +
+					"\"url\":\"http://localhost/snapshot\"}");
+		}
+		
+		// Profiling URL result
+		else if (url.equals(MockEngine.PROFILER_RESULT_URL))
+		{
+			return new RemoteResult(200, "", "");
 		}
 		
 		// Unknown
