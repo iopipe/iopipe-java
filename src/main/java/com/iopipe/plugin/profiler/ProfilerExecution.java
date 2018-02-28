@@ -16,8 +16,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.time.format.DateTimeFormatter;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Base64;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import javax.json.Json;
@@ -134,8 +138,12 @@ public class ProfilerExecution
 		this._pollthread.interrupt();
 		
 		// Date prefix used for file export
+		LocalDateTime now = LocalDateTime.ofInstant(Instant.ofEpochMilli(
+			execution.startTimestamp()), ZoneId.of("UTC"));
 		String prefix = DateTimeFormatter.BASIC_ISO_DATE.format(
-			LocalDate.now());
+			now.toLocalDate()) + '_' + DateTimeFormatter.ISO_LOCAL_TIME.
+			format(now.toLocalTime()).replaceAll(Pattern.quote(":"), "").
+			replaceAll(Pattern.quote("."), "_");
 		
 		// Export tracker data to a ZIP file
 		byte[] exported = null;
