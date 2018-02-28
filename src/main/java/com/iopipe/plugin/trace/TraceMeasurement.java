@@ -1,6 +1,7 @@
 package com.iopipe.plugin.trace;
 
 import com.iopipe.IOpipeConstants;
+import com.iopipe.IOpipeMeasurement;
 import com.iopipe.PerformanceEntry;
 
 /**
@@ -13,44 +14,52 @@ import com.iopipe.PerformanceEntry;
  * @since 2018/01/19
  */
 public final class TraceMeasurement
-	implements AutoCloseable, PerformanceEntry
+	implements AutoCloseable
 {
+	/** Is this measurement to be enabled? */
+	protected final boolean enabled;
+	
+	/** The measurement to record to. */
+	protected final IOpipeMeasurement measurement;
+	
 	/** The name of this trace. */
 	protected final String name;
 	
-	/** The nano time this measurement was started. */
-	protected final long startnanotime =
-		System.nanoTime() - IOpipeConstants.LOAD_TIME_NANOS;
-	
-	/** The system time this measurement was started. */
-	protected final long starttimemillis =
-		System.currentTimeMillis();
+	/** The start time of this measurement, used to count duration. */
+	protected final long startns;
 	
 	/** Has this been closed? */
 	private volatile boolean _closed;
 	
-	/** The ending nano time when this was closed. */
-	private volatile long _endnanotime =
-		this.startnanotime;
-	
-	/** The ending system time when this was closed. */
-	private volatile long _endtimemillis =
-		this.starttimemillis;
-	
 	/**
-	 * Initializes the trace measurement.
+	 * Initializes the measurement tracking.
 	 *
+	 * @param __enabled Is this enabled?
+	 * @param __m Where measurements are to be placed.
 	 * @param __name The name of this trace.
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/01/19
 	 */
-	public TraceMeasurement(String __name)
+	public TraceMeasurement(boolean __enabled, IOpipeMeasurement __m,
+		String __name)
 		throws NullPointerException
 	{
-		if (__name == null)
+		if (__m == null || __name == null)
 			throw new NullPointerException();
 		
+		this.enabled = __enabled;
+		this.measurement = __m;
 		this.name = __name;
+		
+		// Initialize start time
+		long startns = System.nanoTime();
+		this.startns = startns;
+		
+		// Create initial start mark if this is enabled
+		if (__enabled)
+			__m.addPerformanceEntry(new PerformanceEntry("start:" + __name,
+				"mark", startns - IOpipeConstants.LOAD_TIME_NANOS,
+				System.currentTimeMillis(), 0));
 	}
 	
 	/**
@@ -60,109 +69,26 @@ public final class TraceMeasurement
 	@Override
 	public void close()
 	{
-		if (!this._closed)
-		{
-			this._closed = true;
-			
-			this._endnanotime = System.nanoTime() -
-				IOpipeConstants.LOAD_TIME_NANOS;
-			this._endtimemillis = System.currentTimeMillis();
-		}
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * @since 2018/01/19
-	 */
-	@Override
-	public long endNanoTime()
-	{
-		return this._endnanotime;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * @since 2018/01/19
-	 */
-	@Override
-	public long endTimeMillis()
-	{
-		return this._endtimemillis;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * @since 2018/01/20
-	 */
-	@Override
-	public boolean equals(Object __o)
-	{
-		if (__o == this)
-			return true;
-		
-		if (!(__o instanceof TraceMeasurement))
-			return false;
-		
-		TraceMeasurement o = (TraceMeasurement)__o;
-		return this.name.equals(o.name) &&
-			this.startnanotime == o.startnanotime &&
-			this.starttimemillis == o.starttimemillis &&
-			this._endnanotime == o._endnanotime &&
-			this._endtimemillis == o._endtimemillis;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * @since 2018/01/20
-	 */
-	@Override
-	public int hashCode()
-	{
-		return this.name.hashCode() ^
-			Long.hashCode(this.startnanotime) ^
-			Long.hashCode(this.starttimemillis) ^
-			Long.hashCode(this._endnanotime) ^
-			Long.hashCode(this._endtimemillis);
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * @since 2018/01/19
-	 */
-	@Override
-	public String name()
-	{
-		return this.name;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * @since 2018/01/19
-	 */
-	@Override
-	public long startNanoTime()
-	{
-		return this.startnanotime;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * @since 2018/01/19
-	 */
-	@Override
-	public long startTimeMillis()
-	{
-		return this.starttimemillis;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * @since 2018/01/19
-	 */
-	@Override
-	public String type()
-	{
-		return "measurement";
+		if (this.enabled)
+			if (!this._closed)
+			{
+				this._closed = true;
+				
+				// There are two end marks, one for the end mark and the
+				// actual duration but they end at the same time
+				long endns = System.nanoTime(),
+					endms = System.currentTimeMillis(),
+					relendns = endns -  - IOpipeConstants.LOAD_TIME_NANOS;
+				
+				IOpipeMeasurement measurement = this.measurement;
+				String name = this.name;
+				
+				measurement.addPerformanceEntry(new PerformanceEntry(
+					"end:" + name, "mark", relendns, endms, 0));
+				measurement.addPerformanceEntry(new PerformanceEntry(
+					"measure:" + name, "measure", relendns, endms,
+					endns - this.startns));
+			}
 	}
 }
 

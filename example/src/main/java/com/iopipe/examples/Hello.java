@@ -5,7 +5,6 @@ import java.util.Map;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.iopipe.IOpipeExecution;
-import com.iopipe.plugin.trace.TraceMark;
 import com.iopipe.plugin.trace.TraceMeasurement;
 import com.iopipe.plugin.trace.TraceUtils;
 import com.iopipe.SimpleRequestHandlerWrapper;
@@ -30,6 +29,10 @@ public class Hello
 	{
 		String name = request.containsKey("name") ? request.get("name") : null;
 
+		if (name == null) {
+			throw new RuntimeException("Invoked with no name!");
+		}
+
 		// Send a message to the example plugin
 		__exec.<ExampleExecution>plugin(ExampleExecution.class, (__s) ->
 			{
@@ -43,29 +46,15 @@ public class Hello
 		// Measure performance of this method via the trace plugin
 		try (TraceMeasurement m = TraceUtils.measure(__exec, "math"))
 		{
-			// Add a bunch of numbers together
-			TraceMark addstart = TraceUtils.mark(__exec, "addstart");
-
 			long result = 0;
 			for (int i = 1; i < 10000; i++)
 				result += new Long(i);
-
-			// Multiply a bunch of numbers into the result
-			TraceMark mulstart = TraceUtils.mark(__exec, "mulstart");
-
+			
 			for (int i = 1; i < 10000; i++)
 				result *= new Long(i);
-
-			// How long did multiplication take?
-			TraceUtils.measure(__exec, "multime", mulstart,
-				TraceUtils.mark(__exec, "mulend"));
 			
 			// Store the result of the math
 			__exec.customMetric("result", (long)result);
-		}
-
-		if (name == null) {
-			throw new RuntimeException("Invoked with no name!");
 		}
 
 		// Say hello to them!

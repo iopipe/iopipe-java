@@ -21,6 +21,18 @@ import javax.json.JsonValue;
 class __DoTracePlugin__
 	extends Single
 {
+	/** The expected order of names and types, sorted by start time. */
+	private static final String[] _ORDER =
+		new String[]
+		{
+			"start:byplugin", "mark",
+			"start:byutils", "mark",
+			"end:byplugin", "mark",
+			"measure:byplugin", "measure",
+			"end:byutils", "mark",
+			"measure:byutils", "measure",
+		};
+	
 	/** Is the plugin enabled? */
 	protected final boolean enabled;
 		
@@ -39,22 +51,10 @@ class __DoTracePlugin__
 	/** Was the trace plugin specified? */
 	protected final BooleanValue tracepluginspecified =
 		new BooleanValue("tracepluginspecified");
-		
-	/** Was a mark made? */
-	protected final BooleanValue mademark =
-		new BooleanValue("mademark");
 	
-	/** Was a measurement made? */
-	protected final BooleanValue mademeasurement =
-		new BooleanValue("mademeasurement");
-		
-	/** Was a utilities mark made? */
-	protected final BooleanValue madeumark =
-		new BooleanValue("madeumark");
-	
-	/** Was a utilities measurement made? */
-	protected final BooleanValue madeumeasurement =
-		new BooleanValue("madeumeasurement");
+	/** Order depth. */
+	protected final IntegerValue orderdepth =
+		new IntegerValue("orderdepth");
 	
 	/**
 	 * Constructs the test.
@@ -85,10 +85,7 @@ class __DoTracePlugin__
 		boolean enabled = this.enabled;
 		
 		super.assertEquals(enabled, this.tracepluginexecuted);
-		super.assertEquals(enabled, this.mademark);
-		super.assertEquals(enabled, this.mademeasurement);
-		super.assertEquals(enabled, this.madeumark);
-		super.assertEquals(enabled, this.madeumeasurement);
+		super.assertEquals((enabled ? _ORDER.length / 2 : 0), this.orderdepth);
 	}
 	
 	/**
@@ -129,33 +126,24 @@ class __DoTracePlugin__
 				this.tracepluginspecified.set(true);
 		}
 		
-		// Was a measurement made?
-		if (__Utils__.isEqual(expand.get(".performanceEntries[0].name"),
-				"measurement") &&
-			__Utils__.isEqual(expand.get(".performanceEntries[0].entryType"),
-				"measurement"))
-			this.mademeasurement.set(true);
+		// Check all entries that they are in the right order
+		IntegerValue orderdepth = this.orderdepth;
+		for (int i = 0; i >= 0; i++)
+		{
+			JsonValue nv = expand.get(".performanceEntries[" + i + "].name"),
+				tv = expand.get(".performanceEntries[" + i + "].entryType");
+			if (nv == null)
+				break;
 			
-		// Was a mark made?
-		if (__Utils__.isEqual(expand.get(".performanceEntries[1].name"),
-				"mark") &&
-			__Utils__.isEqual(expand.get(".performanceEntries[1].entryType"),
-				"mark"))
-			this.mademark.set(true);
-		
-		// Was a utilities measurement made?
-		if (__Utils__.isEqual(expand.get(".performanceEntries[2].name"),
-				"umeasurement") &&
-			__Utils__.isEqual(expand.get(".performanceEntries[2].entryType"),
-				"measurement"))
-			this.madeumeasurement.set(true);
+			// What is wanted?
+			int dx = i * 2, mdx = _ORDER.length;
+			String wv = (dx < mdx ? _ORDER[dx] : null),
+				wt = (dx + 1 < mdx ? _ORDER[dx + 1] : null);
 			
-		// Was a utilities mark made?
-		if (__Utils__.isEqual(expand.get(".performanceEntries[3].name"),
-				"umark") &&
-			__Utils__.isEqual(expand.get(".performanceEntries[3].entryType"),
-				"mark"))
-			this.madeumark.set(true);
+			if (__Utils__.isEqual(nv, wv) &&
+				__Utils__.isEqual(tv, wt))
+				orderdepth.incrementAndGet();
+		}
 	}
 	
 	/**
@@ -183,7 +171,7 @@ class __DoTracePlugin__
 				this.tracepluginexecuted.set(true);
 				
 				// Make a measurement
-				try (TraceMeasurement c = __p.measure("measurement"))
+				try (TraceMeasurement c = __p.measure("byplugin"))
 				{
 					// Small delay to skew time
 					try
@@ -193,14 +181,11 @@ class __DoTracePlugin__
 					catch (InterruptedException e)
 					{
 					}
-					
-					// Make a mark
-					__p.mark("mark");
 				}
 			});
 		
 		// Make a measurement via TraceUtils
-		try (TraceMeasurement c = TraceUtils.measure(__e, "umeasurement"))
+		try (TraceMeasurement c = TraceUtils.measure(__e, "byutils"))
 		{
 			// Small delay to skew time
 			try
@@ -210,9 +195,6 @@ class __DoTracePlugin__
 			catch (InterruptedException e)
 			{
 			}
-			
-			// Make a mark
-			TraceUtils.mark(__e, "umark");
 		}
 	}
 }
