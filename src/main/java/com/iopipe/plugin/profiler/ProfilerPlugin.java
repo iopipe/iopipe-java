@@ -1,5 +1,6 @@
 package com.iopipe.plugin.profiler;
 
+import com.iopipe.IOpipeConstants;
 import com.iopipe.IOpipeExecution;
 import com.iopipe.plugin.IOpipePlugin;
 import com.iopipe.plugin.IOpipePluginExecution;
@@ -102,7 +103,7 @@ public class ProfilerPlugin
 	@Override
 	public String version()
 	{
-		return "1.0.0";
+		return IOpipeConstants.AGENT_VERSION;
 	}
 }
 

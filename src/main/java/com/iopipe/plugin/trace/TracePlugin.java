@@ -1,5 +1,6 @@
 package com.iopipe.plugin.trace;
 
+import com.iopipe.IOpipeConstants;
 import com.iopipe.IOpipeExecution;
 import com.iopipe.IOpipeMeasurement;
 import com.iopipe.plugin.IOpipePlugin;
@@ -74,7 +75,7 @@ public class TracePlugin
 	@Override
 	public String version()
 	{
-		return "0.1.0";
+		return IOpipeConstants.AGENT_VERSION;
 	}
 }
 
