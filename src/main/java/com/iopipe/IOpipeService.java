@@ -189,8 +189,9 @@ public final class IOpipeService
 		int execcount = ++this._execcount;
 		
 		// Setup execution information
+		long nowtime = System.currentTimeMillis();
 		IOpipeMeasurement measurement = new IOpipeMeasurement(config,
-			__context, this);
+			__context, this, nowtime);
 		IOpipeExecution exec = new IOpipeExecution(this, config, __context,
 			measurement);
 		

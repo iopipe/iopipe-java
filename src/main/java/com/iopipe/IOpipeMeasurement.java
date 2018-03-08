@@ -45,6 +45,9 @@ public final class IOpipeMeasurement
 	/** The service which initialized this class. */
 	protected final IOpipeService service;
 	
+	/** The start execution time. */
+	protected final long starttime;
+	
 	/**
 	 * Performance entries which have been added to the measurement, this
 	 * field is locked since multiple threads may be adding entries.
@@ -71,11 +74,12 @@ public final class IOpipeMeasurement
 	 *
 	 * @param __config The configuration for the context.
 	 * @param __context The context this holds measurements for.
+	 * @param __now The start time of the measurement.
 	 * @throws NullPointerException On null arguments.
 	 * @since 2017/12/17
 	 */
 	IOpipeMeasurement(IOpipeConfiguration __config, Context __context,
-		IOpipeService __sv)
+		IOpipeService __sv, long __now)
 		throws NullPointerException
 	{
 		if (__config == null || __context == null || __sv == null)
@@ -84,6 +88,7 @@ public final class IOpipeMeasurement
 		this.config = __config;
 		this.context = __context;
 		this.service = __sv;
+		this.starttime = __now;
 	}
 	
 	/**
@@ -196,7 +201,7 @@ public final class IOpipeMeasurement
 				gen.write("duration", duration);
 
 			gen.write("processId", sysinfo.pid);
-			gen.write("timestamp", IOpipeConstants.LOAD_TIME);
+			gen.write("timestamp", this.starttime);
 			gen.write("timestampEnd", nowtimestamp);
 			
 			// AWS Context information
