@@ -200,8 +200,9 @@ public final class IOpipeService
 				System.identityHashCode(__context))));
 		
 		// Setup execution information
+		long nowtime = System.currentTimeMillis();
 		IOpipeMeasurement measurement = new IOpipeMeasurement(config,
-			__context, this);
+			__context, this, nowtime);
 		IOpipeExecution exec = new IOpipeExecution(this, config, __context,
 			measurement, threadgroup, System.currentTimeMillis());
 		
