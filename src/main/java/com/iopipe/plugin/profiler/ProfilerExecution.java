@@ -293,7 +293,7 @@ public class ProfilerExecution
 				
 				gen.write("arn", context.getInvokedFunctionArn());
 				gen.write("requestId", context.getAwsRequestId());
-				gen.write("timestamp", IOpipeConstants.LOAD_TIME);
+				gen.write("timestamp", execution.startTimestamp());
 				
 				// Finished
 				gen.writeEnd();
