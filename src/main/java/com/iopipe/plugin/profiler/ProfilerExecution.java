@@ -212,9 +212,9 @@ public class ProfilerExecution
 			
 			// Set custom metric to define where to look for the profiled
 			// data
-			String jwtaccesstoken = this._jwtaccesstoken;
+			/*String jwtaccesstoken = this._jwtaccesstoken;
 			execution.measurement().customMetric("@iopipe/profiler.jwtAccess",
-				jwtaccesstoken);
+				jwtaccesstoken);*/
 		}
 	}
 	
