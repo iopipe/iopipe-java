@@ -163,7 +163,11 @@ public final class IOpipeConfiguration
 		this.installmethod = installmethod;
 		
 		// Optional
-		this.profilerurl = __builder._profilerurl;
+		String profilerurl = __builder._profilerurl;
+		if (profilerurl == null)
+			this.profilerurl = IOpipeConstants.DEFAULT_PROFILER_URL;
+		else
+			this.profilerurl = profilerurl;
 		
 		this._pluginstate.putAll(__builder._pluginstate);
 	}
