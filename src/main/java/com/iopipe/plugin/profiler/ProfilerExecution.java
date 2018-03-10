@@ -278,6 +278,9 @@ public class ProfilerExecution
 			if (desiredurl == null)
 				throw new RuntimeException("No profiler URL specified.");
 			
+			// Indicate where the profiler is uploading to
+			_LOGGER.debug(() -> "Profiler URL: " + desiredurl);
+			
 			// Setup connection to the signed service to determine which
 			// URL we upload to
 			Context context = execution.context();

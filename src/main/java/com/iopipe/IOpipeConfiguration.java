@@ -90,8 +90,8 @@ public final class IOpipeConfiguration
 		cb.setInstallMethod("Disabled");
 		cb.setRemoteConnectionFactory(new NullConnectionFactory());
 		cb.setTimeOutWindow(0);
-		cb.setServiceUrl("https://localhost:80/event");
-		cb.setProfilerUrl("https://localhost:80/profiler");
+		cb.setServiceUrl(IOpipeConstants.DEFAULT_SERVICE_URL);
+		cb.setProfilerUrl(IOpipeConstants.DEFAULT_PROFILER_URL);
 		
 		DISABLED_CONFIG = cb.build();
 		
@@ -103,7 +103,7 @@ public final class IOpipeConfiguration
 			_LOGGER.debug("Initializing default configuration.");
 			use = IOpipeConfiguration.byDefault();
 		}
-		catch (IllegalArgumentException e)
+		catch (IllegalArgumentException|SecurityException e)
 		{
 			_LOGGER.error("Failed to initialize default configuration, " +
 				"your method will still run however it will not report " +
@@ -150,16 +150,17 @@ public final class IOpipeConfiguration
 			throw new IllegalArgumentException("The timeout window cannot " +
 				"be negative.");
 		
+		// If no custom URL was specified then fallback to the default
 		if (serviceurl == null)
-			throw new IllegalArgumentException("A remote service URL must " +
-				"be specified.");
+			this.serviceurl = IOpipeConstants.DEFAULT_SERVICE_URL;
+		else
+			this.serviceurl = serviceurl;
 		
 		this.enabled = enabled;
 		this.token = token;
 		this.connectionfactory = connectionfactory;
 		this.timeoutwindow = timeoutwindow;
 		this.installmethod = installmethod;
-		this.serviceurl = serviceurl;
 		
 		// Optional
 		this.profilerurl = __builder._profilerurl;
@@ -416,25 +417,12 @@ public final class IOpipeConfiguration
 				awsregion = IOpipeConstants.DEFAULT_REGION;
 			
 			// Setup service URL
-			String hostname = (awsregion.equals(
-				IOpipeConstants.DEFAULT_REGION) ?
-				"metrics-api.iopipe.com" :
-				String.format("metrics-api.%s.iopipe.com", awsregion)),
-				surl;
-			rv.setServiceUrl((surl = String.format("https://%s/v0/event",
-				hostname)));
-			
+			String surl;
+			rv.setServiceUrl((surl = IOpipeConstants.DEFAULT_SERVICE_URL));
 			_LOGGER.debug(() -> "Remote URL: " + surl);
 			
-			// Profiled events go to any supported region but if the region
-			// is not supported then use a default provided one
-			String purl;
-			rv.setProfilerUrl((purl = String.format(
-				"https://signer.%s.iopipe.com/?extension=.zip",
-				(!IOpipeConstants.SUPPORTED_REGIONS.contains(origawsregion) ?
-				IOpipeConstants.PROFILER_DEFAULT_REGION : origawsregion))));
-			
-			_LOGGER.debug(() -> "Profiler URL: " + purl);
+			// And the profiler URL
+			rv.setProfilerUrl(IOpipeConstants.DEFAULT_PROFILER_URL);
 		}
 		
 		// Fallback to disabled configuration

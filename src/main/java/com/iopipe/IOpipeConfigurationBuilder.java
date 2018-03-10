@@ -177,7 +177,8 @@ public class IOpipeConfigurationBuilder
 	/**
 	 * Sets the URL to use when connecting to the IOpipe service.
 	 *
-	 * @param __u The URL to use to send requests to.
+	 * @param __u The URL to use to send requests to, using {@code null} will
+	 * initialize the configuration with the default URL.
 	 * @since 2018/02/24
 	 */
 	public final void setServiceUrl(String __u)
