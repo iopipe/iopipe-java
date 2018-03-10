@@ -209,12 +209,6 @@ public class ProfilerExecution
 			// Debug result
 			_LOGGER.debug(() -> "Profiler recv: " + result + " " +
 				result.bodyAsString());
-			
-			// Set custom metric to define where to look for the profiled
-			// data
-			/*String jwtaccesstoken = this._jwtaccesstoken;
-			execution.measurement().customMetric("@iopipe/profiler.jwtAccess",
-				jwtaccesstoken);*/
 		}
 	}
 	
