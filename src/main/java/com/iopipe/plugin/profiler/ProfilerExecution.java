@@ -47,9 +47,9 @@ public class ProfilerExecution
 	private static final Logger _LOGGER =
 		LogManager.getLogger(ProfilerExecution.class);
 	
-	/** The default sampling rate. */
+	/** The default sampling rate (in nanoseconds). */
 	public static final int DEFAULT_SAMPLE_RATE =
-		10_000_000;
+		1_000_000;
 	
 	/** The number of nanoseconds between each polling period. */
 	public static final int SAMPLE_RATE;

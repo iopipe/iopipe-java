@@ -18,7 +18,7 @@ The profiler may be customed by setting the specified properties and/or
 environment variables:
 
  * The duration of time between each sample, in microseconds:
-   * The default is 10,000 microseconds (10ms).
+   * The default is 1,000 microseconds (1ms).
    * `com.iopipe.plugin.profiler.samplerate`
    * `IOPIPE_PROFILER_SAMPLERATE`
 
