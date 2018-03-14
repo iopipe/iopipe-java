@@ -71,13 +71,22 @@
           <target>1.8</target>
         </configuration>
       </plugin>
+    </plugins>
+  </build>
+
+  <reporting>
+    <outputDirectory>docs</outputDirectory>
+    <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>3.0.0</version>
+        <configuration>
+          <reportOutputDirectory>${project.reporting.outputDirectory}</reportOutputDirectory>
+        </configuration>
       </plugin>
     </plugins>
-  </build>
+  </reporting>
 
   <dependencies>
     <!-- Tests -->
