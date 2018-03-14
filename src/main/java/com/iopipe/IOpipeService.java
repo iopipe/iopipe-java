@@ -2,11 +2,13 @@ package com.iopipe;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.iopipe.http.NullConnection;
+import com.iopipe.http.RemoteBody;
 import com.iopipe.http.RemoteConnection;
 import com.iopipe.http.RemoteConnectionFactory;
 import com.iopipe.http.RemoteException;
 import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RemoteResult;
+import com.iopipe.http.RequestType;
 import com.iopipe.plugin.IOpipePlugin;
 import com.iopipe.plugin.IOpipePluginExecution;
 import com.iopipe.plugin.IOpipePluginPostExecutable;
@@ -109,7 +111,8 @@ public final class IOpipeService
 		if (__config.isEnabled())
 			try
 			{
-				connection = __config.getRemoteConnectionFactory().connect();
+				connection = __config.getRemoteConnectionFactory().connect(
+					__config.getServiceUrl(), __config.getProjectToken());
 				enabled = true;
 			}
 			
@@ -188,16 +191,24 @@ public final class IOpipeService
 		
 		int execcount = ++this._execcount;
 		
+		// Create thread group so it is known which threads are part of this
+		// execution and not other executions
+		boolean enabled = config.isEnabled();
+		ThreadGroup threadgroup = (!enabled ?
+			Thread.currentThread().getThreadGroup() :
+			new ThreadGroup(String.format("IOpipe-execution-%08d",
+				System.identityHashCode(__context))));
+		
 		// Setup execution information
 		long nowtime = System.currentTimeMillis();
 		IOpipeMeasurement measurement = new IOpipeMeasurement(config,
 			__context, this, nowtime);
 		IOpipeExecution exec = new IOpipeExecution(this, config, __context,
-			measurement);
+			measurement, threadgroup, nowtime);
 		
 		// If disabled, just run the function
 		IOpipeConfiguration config = this.config;
-		if (!config.isEnabled())
+		if (!enabled)
 		{
 			// Disabled lambdas could still rely on measurements, despite them
 			// not doing anything useful at all
@@ -210,21 +221,7 @@ public final class IOpipeService
 		
 		// Is this coldstarted?
 		boolean coldstarted = !IOpipeService._THAWED.getAndSet(true);
-		
-		// Register timeout with this execution number so if execution takes
-		// longer than expected a timeout is generated
-		// Timeouts can be disabled if the timeout window is zero, but they
-		// may also be unsupported if the time remaining in the context is zero
-		__TimeOutWatchDog__ watchdog = null;
-		int windowtime;
-		if ((windowtime = config.getTimeOutWindow()) > 0 &&
-			__context.getRemainingTimeInMillis() > 0)
-			watchdog = new __TimeOutWatchDog__(this, __context,
-				Thread.currentThread(), windowtime, coldstarted, exec);
-		
-		// This method either returns a value or throwsn
-		R rv = null;
-		Throwable rt = null;
+		measurement.__setColdStart(coldstarted);
 		
 		// Run pre-execution plugins
 		__Plugins__.__Info__[] plugins = this._plugins.__info();
@@ -242,33 +239,38 @@ public final class IOpipeService
 				}
 		}
 		
-		// Keep track of how long execution takes
-		long ticker = System.nanoTime();
-		try
-		{
-			rv = __func.apply(exec);
-		}
+		// Run the function in another thread so that it becomes part of the
+		// given group, this is needed by the profiler plugin
+		__Runner__<R> runner = new __Runner__<R>(exec, __func);
+		Thread runnerthread = new Thread(threadgroup, runner, "main");
 		
-		// An exception or error was thrown, so that will be reported
-		// Error is very fatal, but still report that it occured
-		catch (RuntimeException|Error e)
-		{
-			rt = e;
-			
-			measurement.__setThrown(e);
-		}
+		// Register timeout with this execution number so if execution takes
+		// longer than expected a timeout is generated
+		// Timeouts can be disabled if the timeout window is zero, but they
+		// may also be unsupported if the time remaining in the context is zero
+		__TimeOutWatchDog__ watchdog = null;
+		int windowtime;
+		if ((windowtime = config.getTimeOutWindow()) > 0 &&
+			__context.getRemainingTimeInMillis() > 0)
+			watchdog = new __TimeOutWatchDog__(this, __context,
+				runnerthread, windowtime, coldstarted, exec);
 		
-		// Indicate that execution has finished to the timeout manager
-		// so that it no longer reports timeouts
-		finally
-		{
-			ticker = System.nanoTime() - ticker;
-			if (watchdog != null)
-				watchdog.__finished();
-		}
+		// Start the thread and wait until it dies
+		runnerthread.start();
+		for (;;)
+			try
+			{
+				runnerthread.join();
+				break;
+			}
+			catch (InterruptedException e)
+			{
+				// Ignore
+			}
 		
-		measurement.__setDuration(ticker);
-		measurement.__setColdStart(coldstarted);
+		// It died, so stop the watchdog
+		if (watchdog != null)
+			watchdog.__finished();
 		
 		// Run post-execution plugins
 		for (__Plugins__.__Info__ i : plugins)
@@ -291,12 +293,13 @@ public final class IOpipeService
 		
 		// Throw the called exception as if the wrapper did not have any
 		// trouble
+		Throwable rt = runner._thrownexception;
 		if (rt != null)
 			if (rt instanceof Error)
 				throw (Error)rt;
 			else
 				throw (RuntimeException)rt;
-		return rv;
+		return runner._returnvalue;
 	}
 	
 	/**
@@ -317,9 +320,9 @@ public final class IOpipeService
 		try
 		{
 			// Report what is to be sent
-			_LOGGER.debug(() -> "Send: " + __r);
+			_LOGGER.debug(() -> "Send: " + __r + " " + __debugBody(__r));
 			
-			RemoteResult result = this.connection.send(__r);
+			RemoteResult result = this.connection.send(RequestType.POST, __r);
 			
 			// Only the 200 range is valid for okay responses
 			int code = result.code();
@@ -328,14 +331,14 @@ public final class IOpipeService
 				this._badresultcount++;
 				
 				// Emit errors for failed requests
-				_LOGGER.error(() -> "Recv (" + result.code() + "): " +
-					result.body());
+				_LOGGER.error(() -> "Recv: " + result + " " +
+					__debugBody(result));
 			}
 			
 			// Debug log successful requests
 			else
-				_LOGGER.debug(() -> "Recv (" + result.code() + "): " +
-					result.body());
+				_LOGGER.debug(() -> "Recv: " + result + " " +
+					__debugBody(result));
 			
 			return result;
 		}
@@ -346,7 +349,7 @@ public final class IOpipeService
 			_LOGGER.error("Could not sent request to server.", e);
 			
 			this._badresultcount++;
-			return new RemoteResult(503, "");
+			return new RemoteResult(503, RemoteBody.MIMETYPE_JSON, "");
 		}
 	}
 	
@@ -366,6 +369,97 @@ public final class IOpipeService
 			_INSTANCE = (rv = new IOpipeService());
 		}
 		return rv;
+	}
+	
+	/**
+	 * Shows string representation of the body.
+	 *
+	 * @param __b The body to decode.
+	 * @return The string result.
+	 * @since 2018/02/24
+	 */
+	private static final String __debugBody(RemoteBody __b)
+	{
+		try
+		{
+			String rv = __b.bodyAsString();
+			if (rv.indexOf('\0') >= 0)
+				return "BINARY DATA";
+			return rv;
+		}
+		catch (Throwable t)
+		{
+			return "Could not decode!";
+		}
+	}
+	
+	/**
+	 * Runs the thread and logs execution time and any exceptions.
+	 *
+	 * @param <R> The type of value to return.
+	 * @since 2018/02/09
+	 */
+	private static final class __Runner__<R>
+		implements Runnable
+	{
+		/** The execution state. */
+		protected final IOpipeExecution execution;
+		
+		/** The function to execute. */
+		protected final Function<IOpipeExecution, R> function;
+		
+		/** The return value. */
+		volatile R _returnvalue;
+		
+		/** Exception which has been thrown. */
+		volatile Throwable _thrownexception;
+		
+		/**
+		 * Initializes the runner.
+		 *
+		 * @param __exec The execution.
+		 * @param __func The function to invoke.
+		 * @throws NullPointerException On null arguments.
+		 * @since 2018/02/09
+		 */
+		__Runner__(IOpipeExecution __exec, Function<IOpipeExecution, R> __func)
+			throws NullPointerException
+		{
+			if (__exec == null || __func == null)
+				throw new NullPointerException();
+			
+			this.execution = __exec;
+			this.function = __func;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 * @since 2018/02/09
+		 */
+		@Override
+		public void run()
+		{
+			IOpipeExecution exec = this.execution;
+			IOpipeMeasurement measurement = exec.measurement();
+			
+			// Keep track of execution time
+			long ticker = System.nanoTime();
+			try
+			{
+				this._returnvalue = this.function.apply(exec);
+			}
+			
+			// An exception or error was thrown, so that will be reported
+			// Error is very fatal, but still report that it occured
+			catch (RuntimeException|Error e)
+			{
+				this._thrownexception = e;
+				measurement.__setThrown(e);
+			}
+			
+			// Count how long execution has taken
+			measurement.__setDuration(System.nanoTime() - ticker);
+		}
 	}
 }
 

@@ -14,6 +14,18 @@ import javax.json.JsonObject;
 public class MockEngine
 	extends Engine
 {
+	/** Mocked event URL. */
+	public static final String EVENT_URL =
+		"https://localhost/event";
+	
+	/** Mocked profiler URL. */
+	public static final String PROFILER_URL =
+		"https://localhost/profiler";
+	
+	/** URL Result for the profiler. */
+	public static final String PROFILER_RESULT_URL =
+		"https://localhost/profiler-result";
+	
 	/**
 	 * Initializes the engine.
 	 *
@@ -40,6 +52,8 @@ public class MockEngine
 		rv.setEnabled(true);
 		rv.setProjectToken(MockConnection.VALID_TOKEN);
 		rv.setTimeOutWindow(150);
+		rv.setServiceUrl(EVENT_URL);
+		rv.setProfilerUrl(PROFILER_URL);
 		
 		// Use the request handler from the single test
 		rv.setRemoteConnectionFactory(new MockConnectionFactory());

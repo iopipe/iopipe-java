@@ -14,15 +14,16 @@ package com.iopipe.http;
 public interface RemoteConnection
 {
 	/**
-	 * Sends the specified request to the remote server.
+	 * Sends the given request to the remote server.
 	 *
+	 * @param __t The type of request to make.
 	 * @param __r The request to send to the remote server.
 	 * @return The result of the request.
 	 * @throws NullPointerException On null arguments.
 	 * @throws RemoteException If the request could not be sent.
 	 * @since 2017/12/13
 	 */
-	public abstract RemoteResult send(RemoteRequest __r)
+	public abstract RemoteResult send(RequestType __t, RemoteRequest __r)
 		throws NullPointerException, RemoteException;
 }
 

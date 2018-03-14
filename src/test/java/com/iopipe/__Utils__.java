@@ -111,7 +111,7 @@ final class __Utils__
 		if (__o == null)
 			throw new NullPointerException();
 		
-		return __Utils__.expandObject(__o.bodyValue());
+		return __Utils__.expandObject(__o.bodyAsJsonStructure());
 	}
 	
 	/**
@@ -131,7 +131,7 @@ final class __Utils__
 			throw new NullPointerException();
 		
 		return __Utils__.hasError(__Utils__.
-			expandObject(__r.bodyValue()));
+			expandObject(__r.bodyAsJsonStructure()));
 	}
 	
 	/**

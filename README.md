@@ -214,6 +214,13 @@ customMetric(String name, long value)
 Calling either of these will add a custom metric with the specified name and
 the given value.
 
+## Profiling
+
+Information and usage on the profiler is contained within the following
+document:
+
+ * [PROFILER.md](PROFILER.md)
+
 ## Tracing
 
 The tracing plugin is enabled by default and allows one to measure the

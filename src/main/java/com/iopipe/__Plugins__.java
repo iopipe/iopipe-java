@@ -4,8 +4,11 @@ import com.iopipe.plugin.IOpipePlugin;
 import com.iopipe.plugin.IOpipePluginExecution;
 import com.iopipe.plugin.IOpipePluginPostExecutable;
 import com.iopipe.plugin.IOpipePluginPreExecutable;
+import com.iopipe.plugin.profiler.ProfilerPlugin;
+import com.iopipe.plugin.trace.TracePlugin;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ServiceConfigurationError;
@@ -46,33 +49,25 @@ final class __Plugins__
 		// Load plugins from services
 		Map<Class<? extends IOpipePluginExecution>, __Info__> info =
 			this._info;
-		try
-		{
-			for (IOpipePlugin p : ServiceLoader.<IOpipePlugin>load(
-				IOpipePlugin.class))
-				try
-				{
-					__Info__ i = new __Info__(__enable, p, __conf);
-					info.put(i.executionClass(), i);
-				}
+		for (IOpipePlugin p : ServiceLoader.<IOpipePlugin>load(
+			IOpipePlugin.class))
+			try
+			{
+				__Info__ i = new __Info__(__enable, p, __conf);
 				
-				// Do not let plugin initailization fail
-				catch (RuntimeException e)
-				{
-					_LOGGER.error("Failed to initialize plugin {}.",
-						p.getClass().getName());
-					_LOGGER.error("Could not initialize plugin.", e);
-				}
-		}
-		
-		// There is a bad service configuration
-		catch (ServiceConfigurationError e)
-		{
-			_LOGGER.error("There is a service configuration error, this " +
-				"means that most and usually all plugins will be disabled." +
-				"The usual cause of this is META-INF/services which is" +
-				"missing a class or that class fails to load.", e);
-		}
+				Class<? extends IOpipePluginExecution> xcl =
+					i.executionClass();
+				if (!info.containsKey(xcl))
+					info.put(xcl, i);
+			}
+			
+			// Do not let plugin initailization fail
+			catch (RuntimeException e)
+			{
+				_LOGGER.error("Failed to initialize plugin {}.",
+					p.getClass().getName());
+				_LOGGER.error("Could not initialize plugin.", e);
+			}
 	}
 	
 	/**
@@ -103,6 +98,41 @@ final class __Plugins__
 	{
 		Collection<__Info__> rv = this._info.values();
 		return rv.<__Info__>toArray(new __Info__[rv.size()]);
+	}
+	
+	/**
+	 * This searches for plugins which are available being built-in and
+	 * made available by the service load.
+	 */
+	private static final Iterable<IOpipePlugin> __searchPlugins()
+	{
+		Collection<IOpipePlugin> rv = new LinkedList<>();
+		
+		// Provide some built-in plugins so that way if the service loader
+		// has issues or a user failed to merge the service files correctly
+		// then this will ensure that these plugins are available no matter
+		// what happens
+		rv.add(new TracePlugin());
+		rv.add(new ProfilerPlugin());
+		
+		// Use plugins provided by the service loader
+		try
+		{
+			for (IOpipePlugin p : ServiceLoader.<IOpipePlugin>load(
+				IOpipePlugin.class))
+				rv.add(p);
+		}
+		
+		// There is a bad service configuration
+		catch (ServiceConfigurationError e)
+		{
+			_LOGGER.error("There is a service configuration error, this " +
+				"means that most and usually all plugins will be disabled." +
+				"The usual cause of this is META-INF/services which is" +
+				"missing a class or that class fails to load.", e);
+		}
+		
+		return rv;
 	}
 	
 	/**

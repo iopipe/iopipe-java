@@ -5,6 +5,7 @@ import com.iopipe.http.RemoteConnectionFactory;
 import com.iopipe.http.RemoteException;
 import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RemoteResult;
+import com.iopipe.http.RequestType;
 
 /**
  * This is a connection factory which allows results to be monitored.
@@ -43,10 +44,11 @@ final class __WrappedConnectionFactory__
 	 * @since 2018/01/23
 	 */
 	@Override
-	public RemoteConnection connect()
-		throws RemoteException
+	public final RemoteConnection connect(String __url, String __auth)
+		throws NullPointerException, RemoteException
 	{
-		return new __Connection__(this.single, this.factory.connect());
+		return new __Connection__(this.single, __url, __auth,
+			this.factory.connect(__url, __auth));
 	}
 	
 	/**
@@ -62,22 +64,34 @@ final class __WrappedConnectionFactory__
 	
 		/** The connection to wrap. */
 		protected final RemoteConnection connection;
+		
+		/** The remote URL. */
+		protected final String url;
+		
+		/** The authorization token. */
+		protected final String authtoken;
 	
 		/**
 		 * Initializes the wrapped connection.
 		 *
 		 * @param __s The single to wrap.
+		 * @param __url The remote URL.
+		 * @param __auth The authorization token.
 		 * @param __c The connection to wrap.
-		 * @throws NullPointerException On null arguments.
+		 * @throws NullPointerException On null arguments except for
+		 * {@code __auth}.
 		 * @since 2018/01/23
 		 */
-		__Connection__(Single __s, RemoteConnection __c)
+		__Connection__(Single __s, String __url, String __auth,
+			RemoteConnection __c)
 			throws NullPointerException
 		{
-			if (__s == null || __c == null)
+			if (__s == null || __url == null || __c == null)
 				throw new NullPointerException();
 		
 			this.single = __s;
+			this.url = __url;
+			this.authtoken = __auth;
 			this.connection = __c;
 		}
 		
@@ -86,20 +100,21 @@ final class __WrappedConnectionFactory__
 		 * @since 2018/01/23
 		 */
 		@Override
-		public RemoteResult send(RemoteRequest __r)
+		public RemoteResult send(RequestType __t, RemoteRequest __r)
 			throws NullPointerException, RemoteException
 		{
 			// Snoop the request being sent to the server to make sure it is
 			// being formed correctly
 			Single single = this.single;
-			single.remoteRequest(__r);
+			single.remoteRequest(new WrappedRequest(
+				this.url, this.authtoken, __t, __r));
 			
 			// Send result to remote server, which generates some things
-			RemoteResult rv = this.connection.send(__r);
+			RemoteResult rv = this.connection.send(__t, __r);
 			
 			// Snoop and have the test see the result before the service
 			// sees it
-			single.remoteResult(rv);
+			single.remoteResult(new WrappedResult(this.url, rv));
 			
 			return rv;
 		}

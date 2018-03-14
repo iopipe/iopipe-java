@@ -1,2 +1,3 @@
 com.iopipe.plugin.trace.TracePlugin
+com.iopipe.plugin.profiler.ProfilerPlugin
 

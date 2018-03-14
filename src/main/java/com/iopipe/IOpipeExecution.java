@@ -34,6 +34,12 @@ public final class IOpipeExecution
 	/** The measurement. */
 	protected final IOpipeMeasurement measurement;
 	
+	/** The thread group this execution runs under. */
+	protected final ThreadGroup threadgroup;
+	
+	/** The starting time in milliseconds. */
+	protected final long starttimemillis;
+	
 	/** Plugins which currently have an active exection state. */
 	private final Map<Class<? extends IOpipePluginExecution>,
 		IOpipePluginExecution> _active =
@@ -46,21 +52,25 @@ public final class IOpipeExecution
 	 * @param __conf The configuration for this service.
 	 * @param __context The context for the execution.
 	 * @param __m Measurement which is used to provide access to tracing.
+	 * @param __tg The thread group which the execution runs under.
+	 * @param __st The start time in the system clock milliseconds.
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/01/19
 	 */
 	IOpipeExecution(IOpipeService __sv, IOpipeConfiguration __conf,
-		Context __context, IOpipeMeasurement __m)
+		Context __context, IOpipeMeasurement __m, ThreadGroup __tg, long __st)
 		throws NullPointerException
 	{
 		if (__sv == null || __conf == null || __context == null ||
-			__m == null)
+			__m == null || __tg == null)
 			throw new NullPointerException();
 		
 		this.service = __sv;
 		this.config = __conf;
 		this.context = __context;
 		this.measurement = __m;
+		this.threadgroup = __tg;
+		this.starttimemillis = __st;
 	}
 	
 	/**
@@ -318,6 +328,28 @@ public final class IOpipeExecution
 	public final IOpipeService service()
 	{
 		return this.service;
+	}
+	
+	/**
+	 * Returns the starting time of the execution on the wall clock.
+	 *
+	 * @return The starting time in milliseconds.
+	 * @since 2018/02/16
+	 */
+	public final long startTimestamp()
+	{
+		return this.starttimemillis;
+	}
+	
+	/**
+	 * Returns the thread group which this execution is running under.
+	 *
+	 * @return The thread group of this execution.
+	 * @since 2018/02/09
+	 */
+	public final ThreadGroup threadGroup()
+	{
+		return this.threadgroup;
 	}
 }
 

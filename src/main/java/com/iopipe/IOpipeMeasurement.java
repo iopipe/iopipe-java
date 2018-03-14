@@ -1,6 +1,7 @@
 package com.iopipe;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import com.iopipe.http.RemoteBody;
 import com.iopipe.http.RemoteException;
 import com.iopipe.http.RemoteRequest;
 import com.iopipe.plugin.IOpipePlugin;
@@ -469,7 +470,7 @@ public final class IOpipeMeasurement
 			throw new RemoteException("Could not build request", e);
 		}
 
-		return new RemoteRequest(out.toString());
+		return new RemoteRequest(RemoteBody.MIMETYPE_JSON, out.toString());
 	}
 
 	/**
