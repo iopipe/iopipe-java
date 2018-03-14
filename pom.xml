@@ -83,6 +83,7 @@
         <version>3.0.0</version>
         <configuration>
           <reportOutputDirectory>${project.reporting.outputDirectory}</reportOutputDirectory>
+          <notimestamp>true</notimestamp>
         </configuration>
       </plugin>
     </plugins>
