@@ -1,0 +1,5 @@
+com.iopipe
+com.iopipe.http
+com.iopipe.plugin
+com.iopipe.plugin.profiler
+com.iopipe.plugin.trace

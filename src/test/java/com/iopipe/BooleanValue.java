@@ -13,7 +13,7 @@ public final class BooleanValue
 	/** The internal value. */
 	protected final AtomicBoolean value =
 		new AtomicBoolean();
-	
+
 	/**
 	 * Initializes the storage.
 	 *
@@ -24,7 +24,7 @@ public final class BooleanValue
 	{
 		super(__n);
 	}
-	
+
 	/**
 	 * Obtains the value.
 	 *
@@ -35,12 +35,12 @@ public final class BooleanValue
 	{
 		return this.value.get();
 	}
-	
+
 	/**
 	 * Sets the value.
 	 *
 	 * @param __v The new value.
-	 * @sicne 2018/01/24
+	 * @since 2018/01/24
 	 */
 	public void set(boolean __v)
 	{
