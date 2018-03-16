@@ -40,15 +40,19 @@ public final class IOpipeMeasurement
 			System.getProperty("os.name", "unknown")) == 0;
 
 	/** The configuration. */
+	@Deprecated
 	protected final IOpipeConfiguration config;
 
 	/** The context this is taking the measurement for. */
+	@Deprecated
 	protected final Context context;
 	
 	/** The service which initialized this class. */
+	@Deprecated
 	protected final IOpipeService service;
 	
 	/** The start execution time. */
+	@Deprecated
 	protected final long starttime;
 	
 	/**
@@ -81,6 +85,7 @@ public final class IOpipeMeasurement
 	 * @throws NullPointerException On null arguments.
 	 * @since 2017/12/17
 	 */
+	@Deprecated
 	IOpipeMeasurement(IOpipeConfiguration __config, Context __context,
 		IOpipeService __sv, long __now)
 		throws NullPointerException
@@ -177,6 +182,7 @@ public final class IOpipeMeasurement
 	 * @throws RemoteException If the request could not be built.
 	 * @since 2017/12/17
 	 */
+	@Deprecated
 	public RemoteRequest buildRequest()
 		throws RemoteException
 	{
