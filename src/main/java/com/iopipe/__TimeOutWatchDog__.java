@@ -155,9 +155,9 @@ final class __TimeOutWatchDog__
 				reported.setStackTrace(sourcethread.getStackTrace());
 				
 				// Send report to the service
-				IOpipeMeasurement measurement = this.execution.measurement();
-				measurement.__setThrown(reported);
-				this.service.__sendRequest(measurement.buildRequest());
+				IOpipeExecution exec = this.execution;
+				exec.measurement().__setThrown(reported);
+				this.service.__sendRequest(exec.__buildRequest());
 				
 				// Do not need to execute anymore
 				return;

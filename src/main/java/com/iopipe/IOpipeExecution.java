@@ -1,15 +1,27 @@
 package com.iopipe;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import com.iopipe.http.RemoteBody;
+import com.iopipe.http.RemoteException;
+import com.iopipe.http.RemoteRequest;
 import com.iopipe.plugin.IOpipePlugin;
 import com.iopipe.plugin.IOpipePluginExecution;
 import com.iopipe.plugin.NoSuchPluginException;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.ref.WeakReference;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import javax.json.Json;
+import javax.json.JsonException;
+import javax.json.stream.JsonGenerator;
 
 /**
  * This class provides access to information and functionality which is
@@ -22,6 +34,11 @@ import java.util.Map;
  */
 public final class IOpipeExecution
 {
+	/** Is this a Linux system? */
+	private static final boolean _IS_LINUX =
+		"linux".compareToIgnoreCase(
+			System.getProperty("os.name", "unknown")) == 0;
+	
 	/** The service which invoked the method. */
 	protected final IOpipeService service;
 	
@@ -350,6 +367,307 @@ public final class IOpipeExecution
 	public final ThreadGroup threadGroup()
 	{
 		return this.threadgroup;
+	}
+
+	/**
+	 * Builds the request which is sent to the remote service.
+	 *
+	 * @return The remote request to send to the service.
+	 * @throws RemoteException If the request could not be built.
+	 * @since 2017/12/17
+	 */
+	final RemoteRequest __buildRequest()
+		throws RemoteException
+	{
+		Context aws = this.context;
+		IOpipeConfiguration config = this.config;
+		IOpipeMeasurement measurement = this.measurement;
+
+		// Snapshot system information
+		SystemMeasurement sysinfo = new SystemMeasurement();
+		
+		// The current timestamp
+		long nowtimestamp = System.currentTimeMillis();
+		
+		StringWriter out = new StringWriter();
+		try (JsonGenerator gen = Json.createGenerator(out))
+		{
+			gen.writeStartObject();
+
+			gen.write("client_id", config.getProjectToken());
+			// UNUSED: "projectId": "s"
+			gen.write("installMethod",
+				Objects.toString(config.getInstallMethod(), "unknown"));
+
+			long duration = measurement.getDuration();
+			if (duration >= 0)
+				gen.write("duration", duration);
+
+			gen.write("processId", sysinfo.pid);
+			gen.write("timestamp", this.starttimemillis);
+			gen.write("timestampEnd", nowtimestamp);
+			
+			// AWS Context information
+			gen.writeStartObject("aws");
+
+			gen.write("functionName", aws.getFunctionName());
+			gen.write("functionVersion", aws.getFunctionVersion());
+			gen.write("awsRequestId", aws.getAwsRequestId());
+			gen.write("invokedFunctionArn", aws.getInvokedFunctionArn());
+			gen.write("logGroupName", aws.getLogGroupName());
+			gen.write("logStreamName", aws.getLogStreamName());
+			gen.write("memoryLimitInMB", aws.getMemoryLimitInMB());
+			gen.write("getRemainingTimeInMillis",
+				aws.getRemainingTimeInMillis());
+			gen.write("traceId", Objects.toString(
+				System.getenv("_X_AMZN_TRACE_ID"), "unknown"));
+
+			gen.writeEnd();
+
+			// Memory Usage -- UNUSED
+			/*gen.writeStartObject("memory");
+
+			gen.write("rssMiB", );
+			gen.write("totalMiB", );
+			gen.write("rssTotalPercentage", );
+
+			gen.writeEnd();*/
+
+			// Environment start
+			gen.writeStartObject("environment");
+
+			// Agent
+			gen.writeStartObject("agent");
+			gen.write("runtime", "java");
+			gen.write("version", IOpipeConstants.AGENT_VERSION);
+			gen.write("load_time", IOpipeConstants.LOAD_TIME);
+			gen.writeEnd();
+
+			// Runtime information
+			gen.writeStartObject("runtime");
+			gen.write("name", "java");
+			gen.write("version", System.getProperty("java.version", ""));
+			gen.write("vendor", System.getProperty("java.vendor", ""));
+			gen.write("vmVendor", System.getProperty("java.vm.vendor", ""));
+			gen.write("vmVersion", System.getProperty("java.vm.version", ""));
+			gen.writeEnd();
+
+			// Unique operating system boot identifier
+			gen.writeStartObject("host");
+
+			gen.write("boot_id", SystemMeasurement.BOOTID);
+
+			gen.writeEnd();
+
+			// Operating System Start
+			gen.writeStartObject("os");
+
+			long totalmem, freemem;
+			gen.write("hostname", SystemMeasurement.HOSTNAME);
+			gen.write("totalmem", (totalmem = sysinfo.memorytotalkib));
+			gen.write("freemem", (freemem = sysinfo.memoryfreekib));
+			gen.write("usedmem", totalmem - freemem);
+
+			// Start CPUs
+			gen.writeStartArray("cpus");
+
+			List<SystemMeasurement.Cpu> cpus = sysinfo.cpus;
+			for (int i = 0, n = cpus.size(); i < n; i++)
+			{
+				SystemMeasurement.Cpu cpu = cpus.get(i);
+
+				gen.writeStartObject();
+				gen.writeStartObject("times");
+
+				gen.write("idle", cpu.idle);
+				gen.write("irq", cpu.irq);
+				gen.write("sys", cpu.sys);
+				gen.write("user", cpu.user);
+				gen.write("nice", cpu.nice);
+
+				gen.writeEnd();
+				gen.writeEnd();
+			}
+
+			// End CPUs
+			gen.writeEnd();
+
+			// Linux information
+			if (_IS_LINUX)
+			{
+				// Start Linux
+				gen.writeStartObject("linux");
+
+				// Start PID
+				gen.writeStartObject("pid");
+
+				// Start self
+				gen.writeStartObject("self");
+
+				gen.writeStartObject("stat");
+
+				SystemMeasurement.Times times = new SystemMeasurement.Times();
+				gen.write("utime", times.utime);
+				gen.write("stime", times.stime);
+				gen.write("cutime", times.cutime);
+				gen.write("cstime", times.cstime);
+
+				gen.writeEnd();
+
+				gen.writeStartObject("stat_start");
+
+				times = IOpipeService._STAT_START;
+				gen.write("utime", times.utime);
+				gen.write("stime", times.stime);
+				gen.write("cutime", times.cutime);
+				gen.write("cstime", times.cstime);
+
+				gen.writeEnd();
+
+				gen.writeStartObject("status");
+
+				gen.write("VmRSS", sysinfo.vmrsskib);
+				gen.write("Threads", sysinfo.threads);
+				gen.write("FDSize", sysinfo.fdsize);
+
+				gen.writeEnd();
+
+      			// End self
+      			gen.writeEnd();
+
+				// End PID
+				gen.writeEnd();
+
+				// End Linux
+				gen.writeEnd();
+			}
+
+			// Operating System end
+			gen.writeEnd();
+
+			// Environment end
+			gen.writeEnd();
+
+			Throwable thrown = measurement.getThrown();
+			if (thrown != null)
+			{
+				gen.writeStartObject("errors");
+
+				// Write the stack as if it were normally output on the console
+				StringWriter trace = new StringWriter();
+				try (PrintWriter pw = new PrintWriter(trace))
+				{
+					thrown.printStackTrace(pw);
+
+					pw.flush();
+				}
+
+				gen.write("stack", trace.toString());
+				gen.write("name", thrown.getClass().getName());
+				gen.write("message",
+					Objects.toString(thrown.getMessage(), ""));
+				// UNUSED: "stackHash": "s",
+				// UNUSED: "count": "n"
+
+				gen.writeEnd();
+			}
+
+			gen.write("coldstart", measurement.isColdStarted());
+			
+			// Add custom metrics, which multiple threads could be adding at
+			// once
+			CustomMetric[] custmetrics = measurement.getCustomMetrics();
+			for (int i = 0, n = custmetrics.length; i < n; i++)
+			{
+				// Start of metrics
+				if (i == 0)
+					gen.writeStartArray("custom_metrics");
+				
+				CustomMetric metric = custmetrics[i];
+				
+				gen.writeStartObject();
+				
+				gen.write("name", metric.name());
+				
+				if (metric.hasString())
+					gen.write("s", metric.stringValue());
+				if (metric.hasLong())
+					gen.write("n", metric.longValue());
+				
+				gen.writeEnd();
+				
+				// End of metrics
+				if (i == (n - 1))
+					gen.writeEnd();
+			}
+			
+			// Copy the performance entries which have been measured
+			PerformanceEntry[] perfs = measurement.getPerformanceEntries();
+			for (int i = 0, n = perfs.length; i < n; i++)
+			{
+				// Start of entries
+				if (i == 0)
+					gen.writeStartArray("performanceEntries");
+				
+				PerformanceEntry perf = perfs[i];
+				
+				gen.writeStartObject();
+				
+				gen.write("name",
+					Objects.toString(perf.name(), "unknown"));
+				gen.write("startTime",
+					(double)perf.startNanoTime() / 1_000_000.0D);
+				gen.write("duration",
+					(double)perf.durationNanoTime() / 1_000_000.0D);
+				gen.write("entryType",
+					Objects.toString(perf.type(), "unknown"));
+				gen.write("timestamp", nowtimestamp);
+				
+				gen.writeEnd();
+				
+				// End of entries
+				if (i == (n - 1))
+					gen.writeEnd();
+			}
+			
+			// Record plugins which are being used
+			__Plugins__.__Info__ plugins[] = this.service._plugins.__info();
+			if (plugins.length > 0)
+			{
+				gen.writeStartArray("plugins");
+				
+				for (__Plugins__.__Info__ i : plugins)
+				{
+					gen.writeStartObject();
+					
+					gen.write("name", i.name());
+					
+					String ve = i.version();
+					if (ve != null)
+						gen.write("version", ve);
+					
+					String hp = i.homepage();
+					if (hp != null)
+						gen.write("homepage", hp);
+					
+					gen.write("enabled", i.isEnabled());
+					
+					gen.writeEnd();
+				}
+				
+				gen.writeEnd();
+			}
+			
+			// Finished
+			gen.writeEnd();
+			gen.flush();
+		}
+		catch (JsonException e)
+		{
+			throw new RemoteException("Could not build request", e);
+		}
+
+		return new RemoteRequest(RemoteBody.MIMETYPE_JSON, out.toString());
 	}
 }
 

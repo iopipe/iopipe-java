@@ -1,31 +1,8 @@
 package com.iopipe;
 
-import com.amazonaws.services.lambda.runtime.Context;
-import com.iopipe.http.RemoteBody;
-import com.iopipe.http.RemoteException;
-import com.iopipe.http.RemoteRequest;
-import com.iopipe.plugin.IOpipePlugin;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.Collection;
 import java.util.Set;
 import java.util.TreeSet;
-import javax.json.Json;
-import javax.json.JsonException;
-import javax.json.JsonObject;
-import javax.json.JsonValue;
-import javax.json.stream.JsonGenerator;
 
 /**
  * This class is used to keep track of measurements during execution.
@@ -34,27 +11,6 @@ import javax.json.stream.JsonGenerator;
  */
 public final class IOpipeMeasurement
 {
-	/** Is this a Linux system? */
-	private static final boolean _IS_LINUX =
-		"linux".compareToIgnoreCase(
-			System.getProperty("os.name", "unknown")) == 0;
-
-	/** The configuration. */
-	@Deprecated
-	protected final IOpipeConfiguration config;
-
-	/** The context this is taking the measurement for. */
-	@Deprecated
-	protected final Context context;
-	
-	/** The service which initialized this class. */
-	@Deprecated
-	protected final IOpipeService service;
-	
-	/** The start execution time. */
-	@Deprecated
-	protected final long starttime;
-	
 	/**
 	 * Performance entries which have been added to the measurement, this
 	 * field is locked since multiple threads may be adding entries.
@@ -79,24 +35,10 @@ public final class IOpipeMeasurement
 	/**
 	 * Initializes the measurement holder.
 	 *
-	 * @param __config The configuration for the context.
-	 * @param __context The context this holds measurements for.
-	 * @param __now The start time of the measurement.
-	 * @throws NullPointerException On null arguments.
-	 * @since 2017/12/17
+	 * @since 2018/03/15
 	 */
-	@Deprecated
-	IOpipeMeasurement(IOpipeConfiguration __config, Context __context,
-		IOpipeService __sv, long __now)
-		throws NullPointerException
+	IOpipeMeasurement()
 	{
-		if (__config == null || __context == null || __sv == null)
-			throw new NullPointerException();
-
-		this.config = __config;
-		this.context = __context;
-		this.service = __sv;
-		this.starttime = __now;
 	}
 	
 	/**
@@ -174,311 +116,21 @@ public final class IOpipeMeasurement
 		
 		this.addCustomMetric(new CustomMetric(__name, __lv));
 	}
-
+	
 	/**
-	 * Builds the request which is sent to the remote service.
+	 * Returns a copy of the custom metrics which were measured.
 	 *
-	 * @return The remote request to send to the service.
-	 * @throws RemoteException If the request could not be built.
-	 * @since 2017/12/17
+	 * @return The custom metrics which were measured.
+	 * @since 2018/03/15
 	 */
-	@Deprecated
-	public RemoteRequest buildRequest()
-		throws RemoteException
+	public CustomMetric[] getCustomMetrics()
 	{
-		Context aws = this.context;
-		IOpipeConfiguration config = this.config;
-
-		// Snapshot system information
-		SystemMeasurement sysinfo = new SystemMeasurement();
-		
-		// The current timestamp
-		long nowtimestamp = System.currentTimeMillis();
-		
-		StringWriter out = new StringWriter();
-		try (JsonGenerator gen = Json.createGenerator(out))
+		Collection<CustomMetric> custmetrics = this._custmetrics;
+		synchronized (custmetrics)
 		{
-			gen.writeStartObject();
-
-			gen.write("client_id", config.getProjectToken());
-			// UNUSED: "projectId": "s"
-			gen.write("installMethod",
-				Objects.toString(config.getInstallMethod(), "unknown"));
-
-			long duration = this._duration;
-			if (duration >= 0)
-				gen.write("duration", duration);
-
-			gen.write("processId", sysinfo.pid);
-			gen.write("timestamp", this.starttime);
-			gen.write("timestampEnd", nowtimestamp);
-			
-			// AWS Context information
-			gen.writeStartObject("aws");
-
-			gen.write("functionName", aws.getFunctionName());
-			gen.write("functionVersion", aws.getFunctionVersion());
-			gen.write("awsRequestId", aws.getAwsRequestId());
-			gen.write("invokedFunctionArn", aws.getInvokedFunctionArn());
-			gen.write("logGroupName", aws.getLogGroupName());
-			gen.write("logStreamName", aws.getLogStreamName());
-			gen.write("memoryLimitInMB", aws.getMemoryLimitInMB());
-			gen.write("getRemainingTimeInMillis",
-				aws.getRemainingTimeInMillis());
-			gen.write("traceId", Objects.toString(
-				System.getenv("_X_AMZN_TRACE_ID"), "unknown"));
-
-			gen.writeEnd();
-
-			// Memory Usage -- UNUSED
-			/*gen.writeStartObject("memory");
-
-			gen.write("rssMiB", );
-			gen.write("totalMiB", );
-			gen.write("rssTotalPercentage", );
-
-			gen.writeEnd();*/
-
-			// Environment start
-			gen.writeStartObject("environment");
-
-			// Agent
-			gen.writeStartObject("agent");
-			gen.write("runtime", "java");
-			gen.write("version", IOpipeConstants.AGENT_VERSION);
-			gen.write("load_time", IOpipeConstants.LOAD_TIME);
-			gen.writeEnd();
-
-			// Runtime information
-			gen.writeStartObject("runtime");
-			gen.write("name", "java");
-			gen.write("version", System.getProperty("java.version", ""));
-			gen.write("vendor", System.getProperty("java.vendor", ""));
-			gen.write("vmVendor", System.getProperty("java.vm.vendor", ""));
-			gen.write("vmVersion", System.getProperty("java.vm.version", ""));
-			gen.writeEnd();
-
-			// Unique operating system boot identifier
-			gen.writeStartObject("host");
-
-			gen.write("boot_id", SystemMeasurement.BOOTID);
-
-			gen.writeEnd();
-
-			// Operating System Start
-			gen.writeStartObject("os");
-
-			long totalmem, freemem;
-			gen.write("hostname", SystemMeasurement.HOSTNAME);
-			gen.write("totalmem", (totalmem = sysinfo.memorytotalkib));
-			gen.write("freemem", (freemem = sysinfo.memoryfreekib));
-			gen.write("usedmem", totalmem - freemem);
-
-			// Start CPUs
-			gen.writeStartArray("cpus");
-
-			List<SystemMeasurement.Cpu> cpus = sysinfo.cpus;
-			for (int i = 0, n = cpus.size(); i < n; i++)
-			{
-				SystemMeasurement.Cpu cpu = cpus.get(i);
-
-				gen.writeStartObject();
-				gen.writeStartObject("times");
-
-				gen.write("idle", cpu.idle);
-				gen.write("irq", cpu.irq);
-				gen.write("sys", cpu.sys);
-				gen.write("user", cpu.user);
-				gen.write("nice", cpu.nice);
-
-				gen.writeEnd();
-				gen.writeEnd();
-			}
-
-			// End CPUs
-			gen.writeEnd();
-
-			// Linux information
-			if (_IS_LINUX)
-			{
-				// Start Linux
-				gen.writeStartObject("linux");
-
-				// Start PID
-				gen.writeStartObject("pid");
-
-				// Start self
-				gen.writeStartObject("self");
-
-				gen.writeStartObject("stat");
-
-				SystemMeasurement.Times times = new SystemMeasurement.Times();
-				gen.write("utime", times.utime);
-				gen.write("stime", times.stime);
-				gen.write("cutime", times.cutime);
-				gen.write("cstime", times.cstime);
-
-				gen.writeEnd();
-
-				gen.writeStartObject("stat_start");
-
-				times = IOpipeService._STAT_START;
-				gen.write("utime", times.utime);
-				gen.write("stime", times.stime);
-				gen.write("cutime", times.cutime);
-				gen.write("cstime", times.cstime);
-
-				gen.writeEnd();
-
-				gen.writeStartObject("status");
-
-				gen.write("VmRSS", sysinfo.vmrsskib);
-				gen.write("Threads", sysinfo.threads);
-				gen.write("FDSize", sysinfo.fdsize);
-
-				gen.writeEnd();
-
-      			// End self
-      			gen.writeEnd();
-
-				// End PID
-				gen.writeEnd();
-
-				// End Linux
-				gen.writeEnd();
-			}
-
-			// Operating System end
-			gen.writeEnd();
-
-			// Environment end
-			gen.writeEnd();
-
-			Throwable thrown = this._thrown;
-			if (thrown != null)
-			{
-				gen.writeStartObject("errors");
-
-				// Write the stack as if it were normally output on the console
-				StringWriter trace = new StringWriter();
-				try (PrintWriter pw = new PrintWriter(trace))
-				{
-					thrown.printStackTrace(pw);
-
-					pw.flush();
-				}
-
-				gen.write("stack", trace.toString());
-				gen.write("name", thrown.getClass().getName());
-				gen.write("message",
-					Objects.toString(thrown.getMessage(), ""));
-				// UNUSED: "stackHash": "s",
-				// UNUSED: "count": "n"
-
-				gen.writeEnd();
-			}
-
-			gen.write("coldstart", this._coldstart);
-			
-			// Add custom metrics, which multiple threads could be adding at
-			// once
-			Set<CustomMetric> custmetrics = this._custmetrics;
-			synchronized (custmetrics)
-			{
-				if (!custmetrics.isEmpty())
-				{
-					gen.writeStartArray("custom_metrics");
-					
-					for (CustomMetric cm : custmetrics)
-					{
-						gen.writeStartObject();
-						
-						gen.write("name", cm.name());
-						
-						if (cm.hasString())
-							gen.write("s", cm.stringValue());
-						if (cm.hasLong())
-							gen.write("n", cm.longValue());
-						
-						gen.writeEnd();
-					}
-					
-					gen.writeEnd();
-				}
-			}
-			
-			// Multiple threads may have stored performance entries, so it
-			// is possible that the list may be in a state where it is
-			// inconsistent due to cache differences
-			Set<PerformanceEntry> perfentries = this._perfentries;
-			synchronized (perfentries)
-			{
-				if (!perfentries.isEmpty())
-				{
-					// Entries are stored in an array
-					gen.writeStartArray("performanceEntries");
-					
-					// Write each entry
-					for (PerformanceEntry e : perfentries)
-					{
-						gen.writeStartObject();
-						
-						gen.write("name",
-							Objects.toString(e.name(), "unknown"));
-						gen.write("startTime",
-							(double)e.startNanoTime() / 1_000_000.0D);
-						gen.write("duration",
-							(double)e.durationNanoTime() / 1_000_000.0D);
-						gen.write("entryType",
-							Objects.toString(e.type(), "unknown"));
-						gen.write("timestamp", nowtimestamp);
-						
-						gen.writeEnd();
-					}
-					
-					// End of array
-					gen.writeEnd();
-				}
-			}
-			
-			// Record plugins which are being used
-			__Plugins__.__Info__ plugins[] = this.service._plugins.__info();
-			if (plugins.length > 0)
-			{
-				gen.writeStartArray("plugins");
-				
-				for (__Plugins__.__Info__ i : plugins)
-				{
-					gen.writeStartObject();
-					
-					gen.write("name", i.name());
-					
-					String ve = i.version();
-					if (ve != null)
-						gen.write("version", ve);
-					
-					String hp = i.homepage();
-					if (hp != null)
-						gen.write("homepage", hp);
-					
-					gen.write("enabled", i.isEnabled());
-					
-					gen.writeEnd();
-				}
-				
-				gen.writeEnd();
-			}
-			
-			// Finished
-			gen.writeEnd();
-			gen.flush();
+			return custmetrics.<CustomMetric>toArray(
+				new CustomMetric[custmetrics.size()]);
 		}
-		catch (JsonException e)
-		{
-			throw new RemoteException("Could not build request", e);
-		}
-
-		return new RemoteRequest(RemoteBody.MIMETYPE_JSON, out.toString());
 	}
 
 	/**
@@ -492,6 +144,22 @@ public final class IOpipeMeasurement
 	{
 		return this._duration;
 	}
+	
+	/**
+	 * Returns a copy of the performance entries which were measured.
+	 *
+	 * @return The performance entries which were measured.
+	 * @since 2018/03/15
+	 */
+	public PerformanceEntry[] getPerformanceEntries()
+	{
+		Collection<PerformanceEntry> perfentries = this._perfentries;
+		synchronized (perfentries)
+		{
+			return perfentries.<PerformanceEntry>toArray(
+				new PerformanceEntry[perfentries.size()]);
+		}
+	}
 
 	/**
 	 * Returns the thrown throwable.
@@ -503,6 +171,17 @@ public final class IOpipeMeasurement
 	public Throwable getThrown()
 	{
 		return this._thrown;
+	}
+	
+	/**
+	 * Is this a coldstarted execution?
+	 *
+	 * @return If this is a coldstarted execution.
+	 * @since 2018/03/15
+	 */
+	public boolean isColdStarted()
+	{
+		return this._coldstart;
 	}
 
 	/**
