@@ -21,6 +21,8 @@ import java.util.Objects;
 import java.util.Set;
 import javax.json.Json;
 import javax.json.JsonException;
+import javax.json.JsonObject;
+import javax.json.JsonValue;
 import javax.json.stream.JsonGenerator;
 
 /**
@@ -631,6 +633,8 @@ public final class IOpipeExecution
 			}
 			
 			// Record plugins which are being used
+			Map<Class<? extends IOpipePluginExecution>, IOpipePluginExecution>
+				active = this._active;
 			__Plugins__.__Info__ plugins[] = this.service._plugins.__info();
 			if (plugins.length > 0)
 			{
@@ -650,7 +654,32 @@ public final class IOpipeExecution
 					if (hp != null)
 						gen.write("homepage", hp);
 					
-					gen.write("enabled", i.isEnabled());
+					boolean pluginenabled;
+					gen.write("enabled", (pluginenabled = i.isEnabled()));
+					
+					// The plugin may specify some extra data to be added to
+					// properties in the plugin field, however only add that
+					// information if it was specified accordingly and the
+					// plugin was enabled
+					if (pluginenabled)
+					{
+						// If a plugin was executed then it will have a state
+						// to which to obtain information from
+						IOpipePluginExecution iope;
+						synchronized (active)
+						{
+							iope = active.get(i.executionClass());
+						}
+						
+						// If it does define an extra object then record all
+						// of the fields
+						JsonObject extraobject = (iope == null ? null :
+							iope.extraReport());
+						if (extraobject != null)
+							for (Map.Entry<String, JsonValue> e :
+								extraobject.entrySet())
+								gen.write(e.getKey(), e.getValue());
+					}
 					
 					gen.writeEnd();
 				}
