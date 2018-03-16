@@ -123,6 +123,25 @@ public class ProfilerExecution
 	}
 	
 	/**
+	 * {@inheritDoc}
+	 * @since 2018/03/15
+	 */
+	@Override
+	public JsonObject extraReport()
+	{
+		// If no access token was specified then just ignore it
+		String jwtaccesstoken = this._jwtaccesstoken;
+		if (jwtaccesstoken == null)
+			return null;
+		
+		// Otherwise build object
+		return Json.createObjectBuilder().add("uploads",
+			Json.createArrayBuilder().
+				add(jwtaccesstoken).
+			build()).build();
+	}
+	
+	/**
 	 * Post execution.
 	 *
 	 * @since 2018/02/09
@@ -291,6 +310,7 @@ public class ProfilerExecution
 				gen.write("arn", context.getInvokedFunctionArn());
 				gen.write("requestId", context.getAwsRequestId());
 				gen.write("timestamp", execution.startTimestamp());
+				gen.write("extension", ".zip");
 				
 				// Finished
 				gen.writeEnd();
