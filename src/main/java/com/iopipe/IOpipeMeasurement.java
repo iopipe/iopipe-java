@@ -23,6 +23,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import javax.json.Json;
 import javax.json.JsonException;
+import javax.json.JsonObject;
+import javax.json.JsonValue;
 import javax.json.stream.JsonGenerator;
 
 /**
