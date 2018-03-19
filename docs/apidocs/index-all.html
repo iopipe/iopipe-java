@@ -125,10 +125,6 @@
 <div class="block">This constructs an instance of the configuration settings from the
  requested configuration values.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/iopipe/IOpipeMeasurement.html#buildRequest--">buildRequest()</a></span> - Method in class com.iopipe.<a href="com/iopipe/IOpipeMeasurement.html" title="class in com.iopipe">IOpipeMeasurement</a></dt>
-<dd>
-<div class="block">Builds the request which is sent to the remote service.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/iopipe/IOpipeConfiguration.html#byDefault--">byDefault()</a></span> - Static method in class com.iopipe.<a href="com/iopipe/IOpipeConfiguration.html" title="class in com.iopipe">IOpipeConfiguration</a></dt>
 <dd>
 <div class="block">This returns a configuration which is initialized by values using the
@@ -205,10 +201,6 @@
 <dd>
 <div class="block">Returns the configuration used to initialize the service.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/iopipe/IOpipeMeasurement.html#config">config</a></span> - Variable in class com.iopipe.<a href="com/iopipe/IOpipeMeasurement.html" title="class in com.iopipe">IOpipeMeasurement</a></dt>
-<dd>
-<div class="block">The configuration.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/iopipe/IOpipeService.html#config">config</a></span> - Variable in class com.iopipe.<a href="com/iopipe/IOpipeService.html" title="class in com.iopipe">IOpipeService</a></dt>
 <dd>
 <div class="block">The configuration used to connect to the service.</div>
@@ -244,10 +236,6 @@
 <dt><span class="memberNameLink"><a href="com/iopipe/IOpipeExecution.html#context--">context()</a></span> - Method in class com.iopipe.<a href="com/iopipe/IOpipeExecution.html" title="class in com.iopipe">IOpipeExecution</a></dt>
 <dd>
 <div class="block">Returns the AWS context.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/iopipe/IOpipeMeasurement.html#context">context</a></span> - Variable in class com.iopipe.<a href="com/iopipe/IOpipeMeasurement.html" title="class in com.iopipe">IOpipeMeasurement</a></dt>
-<dd>
-<div class="block">The context this is taking the measurement for.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/iopipe/plugin/profiler/ThreadStat.Node.html#cpu">cpu</a></span> - Variable in class com.iopipe.plugin.profiler.<a href="com/iopipe/plugin/profiler/ThreadStat.Node.html" title="class in com.iopipe.plugin.profiler">ThreadStat.Node</a></dt>
 <dd>
@@ -420,6 +408,16 @@
  used to determine which state to obtain when a plugin state is
  requested.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/iopipe/plugin/IOpipePluginExecution.html#extraReport--">extraReport()</a></span> - Method in interface com.iopipe.plugin.<a href="com/iopipe/plugin/IOpipePluginExecution.html" title="interface in com.iopipe.plugin">IOpipePluginExecution</a></dt>
+<dd>
+<div class="block">Plugins may add additional details to be reported, this allows the
+ plugin to specify fields which will be added to the plugin information.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/iopipe/plugin/profiler/ProfilerExecution.html#extraReport--">extraReport()</a></span> - Method in class com.iopipe.plugin.profiler.<a href="com/iopipe/plugin/profiler/ProfilerExecution.html" title="class in com.iopipe.plugin.profiler">ProfilerExecution</a></dt>
+<dd>
+<div class="block">Plugins may add additional details to be reported, this allows the
+ plugin to specify fields which will be added to the plugin information.</div>
+</dd>
 </dl>
 <a name="I:F">
 <!--   -->
@@ -441,6 +439,10 @@
 <div class="block">Returns the number of requests which would have been accepted by the
  service if the configuration was correct and the service was enabled.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/iopipe/IOpipeMeasurement.html#getCustomMetrics--">getCustomMetrics()</a></span> - Method in class com.iopipe.<a href="com/iopipe/IOpipeMeasurement.html" title="class in com.iopipe">IOpipeMeasurement</a></dt>
+<dd>
+<div class="block">Returns a copy of the custom metrics which were measured.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/iopipe/IOpipeMeasurement.html#getDuration--">getDuration()</a></span> - Method in class com.iopipe.<a href="com/iopipe/IOpipeMeasurement.html" title="class in com.iopipe">IOpipeMeasurement</a></dt>
 <dd>
 <div class="block">Returns the execution duration.</div>
@@ -448,6 +450,10 @@
 <dt><span class="memberNameLink"><a href="com/iopipe/IOpipeConfiguration.html#getInstallMethod--">getInstallMethod()</a></span> - Method in class com.iopipe.<a href="com/iopipe/IOpipeConfiguration.html" title="class in com.iopipe">IOpipeConfiguration</a></dt>
 <dd>
 <div class="block">Returns the install method.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/iopipe/IOpipeMeasurement.html#getPerformanceEntries--">getPerformanceEntries()</a></span> - Method in class com.iopipe.<a href="com/iopipe/IOpipeMeasurement.html" title="class in com.iopipe">IOpipeMeasurement</a></dt>
+<dd>
+<div class="block">Returns a copy of the performance entries which were measured.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/iopipe/IOpipeConfiguration.html#getProfilerUrl--">getProfilerUrl()</a></span> - Method in class com.iopipe.<a href="com/iopipe/IOpipeConfiguration.html" title="class in com.iopipe">IOpipeConfiguration</a></dt>
 <dd>
@@ -638,6 +644,10 @@
 <dt><span class="memberNameLink"><a href="com/iopipe/SystemMeasurement.Cpu.html#irq">irq</a></span> - Variable in class com.iopipe.<a href="com/iopipe/SystemMeasurement.Cpu.html" title="class in com.iopipe">SystemMeasurement.Cpu</a></dt>
 <dd>
 <div class="block">IRQ time.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/iopipe/IOpipeMeasurement.html#isColdStarted--">isColdStarted()</a></span> - Method in class com.iopipe.<a href="com/iopipe/IOpipeMeasurement.html" title="class in com.iopipe">IOpipeMeasurement</a></dt>
+<dd>
+<div class="block">Is this a coldstarted execution?</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/iopipe/IOpipeConfiguration.html#isEnabled--">isEnabled()</a></span> - Method in class com.iopipe.<a href="com/iopipe/IOpipeConfiguration.html" title="class in com.iopipe">IOpipeConfiguration</a></dt>
 <dd>
@@ -1075,10 +1085,6 @@
 <dd>
 <div class="block">Returns the service which ran this execution.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/iopipe/IOpipeMeasurement.html#service">service</a></span> - Variable in class com.iopipe.<a href="com/iopipe/IOpipeMeasurement.html" title="class in com.iopipe">IOpipeMeasurement</a></dt>
-<dd>
-<div class="block">The service which initialized this class.</div>
-</dd>
 <dt><a href="com/iopipe/http/ServiceConnection.html" title="class in com.iopipe.http"><span class="typeNameLink">ServiceConnection</span></a> - Class in <a href="com/iopipe/http/package-summary.html">com.iopipe.http</a></dt>
 <dd>
 <div class="block">This class sends requests to the remote server.</div>
@@ -1160,10 +1166,6 @@
 <dt><span class="memberNameLink"><a href="com/iopipe/plugin/trace/TraceMeasurement.html#startns">startns</a></span> - Variable in class com.iopipe.plugin.trace.<a href="com/iopipe/plugin/trace/TraceMeasurement.html" title="class in com.iopipe.plugin.trace">TraceMeasurement</a></dt>
 <dd>
 <div class="block">The start time of this measurement, used to count duration.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/iopipe/IOpipeMeasurement.html#starttime">starttime</a></span> - Variable in class com.iopipe.<a href="com/iopipe/IOpipeMeasurement.html" title="class in com.iopipe">IOpipeMeasurement</a></dt>
-<dd>
-<div class="block">The start execution time.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/iopipe/IOpipeExecution.html#starttimemillis">starttimemillis</a></span> - Variable in class com.iopipe.<a href="com/iopipe/IOpipeExecution.html" title="class in com.iopipe">IOpipeExecution</a></dt>
 <dd>
