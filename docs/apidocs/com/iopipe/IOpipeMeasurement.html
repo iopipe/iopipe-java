@@ -18,7 +18,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -75,13 +75,13 @@ var activeTableTab = "activeTableTab";
 <ul class="subNavList">
 <li>Summary:&nbsp;</li>
 <li>Nested&nbsp;|&nbsp;</li>
-<li><a href="#field.summary">Field</a>&nbsp;|&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
 <li>Constr&nbsp;|&nbsp;</li>
 <li><a href="#method.summary">Method</a></li>
 </ul>
 <ul class="subNavList">
 <li>Detail:&nbsp;</li>
-<li><a href="#field.detail">Field</a>&nbsp;|&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
 <li>Constr&nbsp;|&nbsp;</li>
 <li><a href="#method.detail">Method</a></li>
 </ul>
@@ -122,45 +122,6 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <div class="summary">
 <ul class="blockList">
 <li class="blockList">
-<!-- =========== FIELD SUMMARY =========== -->
-<ul class="blockList">
-<li class="blockList"><a name="field.summary">
-<!--   -->
-</a>
-<h3>Field Summary</h3>
-<table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Field Summary table, listing fields, and an explanation">
-<caption><span>Fields</span><span class="tabEnd">&nbsp;</span></caption>
-<tr>
-<th class="colFirst" scope="col">Modifier and Type</th>
-<th class="colLast" scope="col">Field and Description</th>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>protected <a href="../../com/iopipe/IOpipeConfiguration.html" title="class in com.iopipe">IOpipeConfiguration</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../com/iopipe/IOpipeMeasurement.html#config">config</a></span></code>
-<div class="block">The configuration.</div>
-</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>protected com.amazonaws.services.lambda.runtime.Context</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../com/iopipe/IOpipeMeasurement.html#context">context</a></span></code>
-<div class="block">The context this is taking the measurement for.</div>
-</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>protected <a href="../../com/iopipe/IOpipeService.html" title="class in com.iopipe">IOpipeService</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../com/iopipe/IOpipeMeasurement.html#service">service</a></span></code>
-<div class="block">The service which initialized this class.</div>
-</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>protected long</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../com/iopipe/IOpipeMeasurement.html#starttime">starttime</a></span></code>
-<div class="block">The start execution time.</div>
-</td>
-</tr>
-</table>
-</li>
-</ul>
 <!-- ========== METHOD SUMMARY =========== -->
 <ul class="blockList">
 <li class="blockList"><a name="method.summary">
@@ -186,23 +147,23 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </td>
 </tr>
 <tr id="i2" class="altColor">
-<td class="colFirst"><code><a href="../../com/iopipe/http/RemoteRequest.html" title="class in com.iopipe.http">RemoteRequest</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../com/iopipe/IOpipeMeasurement.html#buildRequest--">buildRequest</a></span>()</code>
-<div class="block">Builds the request which is sent to the remote service.</div>
-</td>
-</tr>
-<tr id="i3" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../com/iopipe/IOpipeMeasurement.html#customMetric-java.lang.String-long-">customMetric</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;__name,
             long&nbsp;__lv)</code>
 <div class="block">Adds the specified custom metric with a long value.</div>
 </td>
 </tr>
-<tr id="i4" class="altColor">
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../com/iopipe/IOpipeMeasurement.html#customMetric-java.lang.String-java.lang.String-">customMetric</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;__name,
             <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;__sv)</code>
 <div class="block">Adds the specified custom metric with a string value.</div>
+</td>
+</tr>
+<tr id="i4" class="altColor">
+<td class="colFirst"><code><a href="../../com/iopipe/CustomMetric.html" title="class in com.iopipe">CustomMetric</a>[]</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../com/iopipe/IOpipeMeasurement.html#getCustomMetrics--">getCustomMetrics</a></span>()</code>
+<div class="block">Returns a copy of the custom metrics which were measured.</div>
 </td>
 </tr>
 <tr id="i5" class="rowColor">
@@ -212,9 +173,21 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </td>
 </tr>
 <tr id="i6" class="altColor">
+<td class="colFirst"><code><a href="../../com/iopipe/PerformanceEntry.html" title="class in com.iopipe">PerformanceEntry</a>[]</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../com/iopipe/IOpipeMeasurement.html#getPerformanceEntries--">getPerformanceEntries</a></span>()</code>
+<div class="block">Returns a copy of the performance entries which were measured.</div>
+</td>
+</tr>
+<tr id="i7" class="rowColor">
 <td class="colFirst"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Throwable.html?is-external=true" title="class or interface in java.lang">Throwable</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../com/iopipe/IOpipeMeasurement.html#getThrown--">getThrown</a></span>()</code>
 <div class="block">Returns the thrown throwable.</div>
+</td>
+</tr>
+<tr id="i8" class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../com/iopipe/IOpipeMeasurement.html#isColdStarted--">isColdStarted</a></span>()</code>
+<div class="block">Is this a coldstarted execution?</div>
 </td>
 </tr>
 </table>
@@ -233,54 +206,6 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <div class="details">
 <ul class="blockList">
 <li class="blockList">
-<!-- ============ FIELD DETAIL =========== -->
-<ul class="blockList">
-<li class="blockList"><a name="field.detail">
-<!--   -->
-</a>
-<h3>Field Detail</h3>
-<a name="config">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>config</h4>
-<pre>protected final&nbsp;<a href="../../com/iopipe/IOpipeConfiguration.html" title="class in com.iopipe">IOpipeConfiguration</a> config</pre>
-<div class="block">The configuration.</div>
-</li>
-</ul>
-<a name="context">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>context</h4>
-<pre>protected final&nbsp;com.amazonaws.services.lambda.runtime.Context context</pre>
-<div class="block">The context this is taking the measurement for.</div>
-</li>
-</ul>
-<a name="service">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>service</h4>
-<pre>protected final&nbsp;<a href="../../com/iopipe/IOpipeService.html" title="class in com.iopipe">IOpipeService</a> service</pre>
-<div class="block">The service which initialized this class.</div>
-</li>
-</ul>
-<a name="starttime">
-<!--   -->
-</a>
-<ul class="blockListLast">
-<li class="blockList">
-<h4>starttime</h4>
-<pre>protected final&nbsp;long starttime</pre>
-<div class="block">The start execution time.</div>
-</li>
-</ul>
-</li>
-</ul>
 <!-- ============ METHOD DETAIL ========== -->
 <ul class="blockList">
 <li class="blockList"><a name="method.detail">
@@ -367,22 +292,19 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </dl>
 </li>
 </ul>
-<a name="buildRequest--">
+<a name="getCustomMetrics--">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>buildRequest</h4>
-<pre>public&nbsp;<a href="../../com/iopipe/http/RemoteRequest.html" title="class in com.iopipe.http">RemoteRequest</a>&nbsp;buildRequest()
-                           throws <a href="../../com/iopipe/http/RemoteException.html" title="class in com.iopipe.http">RemoteException</a></pre>
-<div class="block">Builds the request which is sent to the remote service.</div>
+<h4>getCustomMetrics</h4>
+<pre>public&nbsp;<a href="../../com/iopipe/CustomMetric.html" title="class in com.iopipe">CustomMetric</a>[]&nbsp;getCustomMetrics()</pre>
+<div class="block">Returns a copy of the custom metrics which were measured.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>The remote request to send to the service.</dd>
-<dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="../../com/iopipe/http/RemoteException.html" title="class in com.iopipe.http">RemoteException</a></code> - If the request could not be built.</dd>
+<dd>The custom metrics which were measured.</dd>
 <dt><span class="simpleTagLabel">Since:</span></dt>
-<dd>2017/12/17</dd>
+<dd>2018/03/15</dd>
 </dl>
 </li>
 </ul>
@@ -403,10 +325,26 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </dl>
 </li>
 </ul>
+<a name="getPerformanceEntries--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getPerformanceEntries</h4>
+<pre>public&nbsp;<a href="../../com/iopipe/PerformanceEntry.html" title="class in com.iopipe">PerformanceEntry</a>[]&nbsp;getPerformanceEntries()</pre>
+<div class="block">Returns a copy of the performance entries which were measured.</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The performance entries which were measured.</dd>
+<dt><span class="simpleTagLabel">Since:</span></dt>
+<dd>2018/03/15</dd>
+</dl>
+</li>
+</ul>
 <a name="getThrown--">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>getThrown</h4>
 <pre>public&nbsp;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Throwable.html?is-external=true" title="class or interface in java.lang">Throwable</a>&nbsp;getThrown()</pre>
@@ -417,6 +355,22 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
  thrown.</dd>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>2017/12/15</dd>
+</dl>
+</li>
+</ul>
+<a name="isColdStarted--">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>isColdStarted</h4>
+<pre>public&nbsp;boolean&nbsp;isColdStarted()</pre>
+<div class="block">Is this a coldstarted execution?</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>If this is a coldstarted execution.</dd>
+<dt><span class="simpleTagLabel">Since:</span></dt>
+<dd>2018/03/15</dd>
 </dl>
 </li>
 </ul>
@@ -474,13 +428,13 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="subNavList">
 <li>Summary:&nbsp;</li>
 <li>Nested&nbsp;|&nbsp;</li>
-<li><a href="#field.summary">Field</a>&nbsp;|&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
 <li>Constr&nbsp;|&nbsp;</li>
 <li><a href="#method.summary">Method</a></li>
 </ul>
 <ul class="subNavList">
 <li>Detail:&nbsp;</li>
-<li><a href="#field.detail">Field</a>&nbsp;|&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
 <li>Constr&nbsp;|&nbsp;</li>
 <li><a href="#method.detail">Method</a></li>
 </ul>
