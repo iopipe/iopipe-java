@@ -83,7 +83,7 @@ public interface IOpipeConstants
 	public static String defaultProfilerUrl()
 	{
 		return "https://signer." + IOpipeConstants.chosenRegion() +
-			".iopipe.com/?extension=.zip";
+			".iopipe.com/";
 	}
 	
 	/**

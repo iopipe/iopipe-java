@@ -201,8 +201,7 @@ public final class IOpipeService
 		
 		// Setup execution information
 		long nowtime = System.currentTimeMillis();
-		IOpipeMeasurement measurement = new IOpipeMeasurement(config,
-			__context, this, nowtime);
+		IOpipeMeasurement measurement = new IOpipeMeasurement();
 		IOpipeExecution exec = new IOpipeExecution(this, config, __context,
 			measurement, threadgroup, nowtime);
 		
@@ -289,7 +288,7 @@ public final class IOpipeService
 		
 		// Generate and send result to server
 		if (watchdog == null || !watchdog._generated.getAndSet(true))
-			this.__sendRequest(measurement.buildRequest());
+			this.__sendRequest(exec.__buildRequest());
 		
 		// Throw the called exception as if the wrapper did not have any
 		// trouble
