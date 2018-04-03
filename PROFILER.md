@@ -9,21 +9,23 @@ which inspects the state of all threads to determine how long they have been
 running for. This does not require any code to be modified to support profiling
 so that any code which runs will be profiled automatically.
 
-The profiler can be enabled by setting the following:
+## Enabling Profiling
 
- * `com.iopipe.plugin.profiler` to `true`
- * `IOPIPE_PROFILER_ENABLE` to `true`
+Set the system property `com.iopipe.plugin.profiler` to `true`
 
-The profiler may be customed by setting the specified properties and/or
+### For Serverless Framework:
+
+In the `serverless.yml` file, under `functions:`, `(your_function_name_here):`, `environment:`, set the environwental variable `IOPIPE_PROFILER_ENABLE` to `true`
+
+The profiler may be customized by setting the specified properties and/or
 environment variables:
 
  * The duration of time between each sample, in microseconds:
    * The default is 1,000 microseconds (1ms).
-   * `com.iopipe.plugin.profiler.samplerate`
-   * `IOPIPE_PROFILER_SAMPLERATE`
+   * `IOPIPE_PROFILER_SAMPLERATE` in the environmental varibles of the `serverless.yml` file, or the environment variable `com.iopipe.plugin.profiler.samplerate`.
 
-When the profiler is enabled, they may be downloaded from the individual
-invocation information.
+When the profiler is enabled, .zip files containing the profiling data may be downloaded from the individual
+invocation information. Unzip it, then load them in VisualVM as a profile snapshot.
 
 # How To Use Sampling Only Profiler Data
 
