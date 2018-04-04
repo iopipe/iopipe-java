@@ -20,6 +20,16 @@ functions:
           rate: rate(5 minutes)
           input:
             name: "IOpipe"
+  HelloProfiling:
+    handler: com.iopipe.examples.Hello
+    environment:
+      IOPIPE_TOKEN: ${env:IOPIPE_TOKEN}
+      IOPIPE_PROFILER_ENABLE: true
+    events:
+      - schedule:
+          rate: rate(5 minutes)
+          input:
+            name: "IOpipe"
   ManualHello:
     handler: com.iopipe.examples.ManualHello
     environment:
