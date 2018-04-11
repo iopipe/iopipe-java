@@ -70,6 +70,9 @@ public final class IOpipeMeasurement
 	/**
 	 * Adds a single label which will be passed in the report.
 	 *
+	 * Labels are limited to the length specified in
+	 * {@link IOpipeConstants#NAME_CODEPOINT_LIMIT}.
+	 *
 	 * @param __s The label to add.
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/04/11
@@ -112,6 +115,9 @@ public final class IOpipeMeasurement
 	/**
 	 * Adds the specified custom metric with a string value.
 	 *
+	 * Custom metric names are limited to the length specified in
+	 * {@link IOpipeConstants#NAME_CODEPOINT_LIMIT}.
+	 *
 	 * @param __name The metric name.
 	 * @param __sv The string value.
 	 * @throws NullPointerException On null arguments.
@@ -128,6 +134,9 @@ public final class IOpipeMeasurement
 	
 	/**
 	 * Adds the specified custom metric with a long value.
+	 *
+	 * Custom metric names are limited to the length specified in
+	 * {@link IOpipeConstants#NAME_CODEPOINT_LIMIT}.
 	 *
 	 * @param __name The metric name.
 	 * @param __lv The long value.
