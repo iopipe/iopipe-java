@@ -603,16 +603,20 @@ public final class IOpipeExecution
 				
 				CustomMetric metric = custmetrics[i];
 				
-				gen.writeStartObject();
-				
-				gen.write("name", metric.name());
-				
-				if (metric.hasString())
-					gen.write("s", metric.stringValue());
-				if (metric.hasLong())
-					gen.write("n", metric.longValue());
-				
-				gen.writeEnd();
+				String xname = metric.name();
+				if (IOpipeExecution.__isNameInLimit(xname))
+				{
+					gen.writeStartObject();
+					
+					gen.write("name", xname);
+					
+					if (metric.hasString())
+						gen.write("s", metric.stringValue());
+					if (metric.hasLong())
+						gen.write("n", metric.longValue());
+					
+					gen.writeEnd();
+				}
 				
 				// End of metrics
 				if (i == (n - 1))
@@ -644,6 +648,23 @@ public final class IOpipeExecution
 				gen.writeEnd();
 				
 				// End of entries
+				if (i == (n - 1))
+					gen.writeEnd();
+			}
+			
+			// Are there any labels to be added?
+			String[] labels = measurement.getLabels();
+			for (int i = 0, n = labels.length; i < n; i++)
+			{
+				// Start of labels
+				if (i == 0)
+					gen.writeStartArray("labels");
+				
+				String label = labels[i];
+				if (IOpipeExecution.__isNameInLimit(label))
+					gen.write(label);
+				
+				// End of labels
 				if (i == (n - 1))
 					gen.writeEnd();
 			}
@@ -713,6 +734,25 @@ public final class IOpipeExecution
 		}
 
 		return new RemoteRequest(RemoteBody.MIMETYPE_JSON, out.toString());
+	}
+	
+	/**
+	 * Checks if the given string is within the name limit before it is
+	 * reported.
+	 *
+	 * @param __s The name to check.
+	 * @return If the name is short enough to be included.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/04/11
+	 */
+	private static final boolean __isNameInLimit(String __s)
+		throws NullPointerException
+	{
+		if (__s == null)
+			throw new NullPointerException();
+		
+		return __s.codePointCount(0, __s.length()) <
+			IOpipeConstants.NAME_CODEPOINT_LIMIT;
 	}
 }
 

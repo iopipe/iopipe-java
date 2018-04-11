@@ -80,6 +80,7 @@ public final class IOpipeMeasurement
 		if (__s == null)
 			throw new NullPointerException();
 		
+		// Add it
 		Set<String> labels = this._labels;
 		synchronized (labels)
 		{
