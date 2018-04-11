@@ -33,7 +33,9 @@ public abstract class Single
 			throw new NullPointerException();
 		
 		this.engine = __e;
-		this.basename = __n;
+		
+		// Do not let test names be really long
+		this.basename = (__n.length() > 24 ? __n.substring(0, 24) : __n);
 	}
 	
 	/**
