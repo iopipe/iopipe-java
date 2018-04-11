@@ -34,6 +34,9 @@ public abstract class Single
 		
 		this.engine = __e;
 		
+		// Make sure all names are valid ASCII
+		__n = __n.replaceAll("[^a-zA-Z0-9-_]", "X");
+		
 		// Do not let test names be really long
 		int cplen = __n.codePointCount(0, __n.length());
 		if (cplen > 24)
