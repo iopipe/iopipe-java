@@ -149,6 +149,22 @@ public final class IOpipeExecution
 	}
 	
 	/**
+	 * Adds a single label which will be passed in the report.
+	 *
+	 * @param __s The label to add.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/04/11
+	 */
+	public final void label(String __s)
+		throws NullPointerException
+	{
+		if (__s == null)
+			throw new NullPointerException();
+		
+		this.measurement.addLabel(__s);
+	}
+	
+	/**
 	 * Returns the measurement recorder.
 	 *
 	 * @return The measurement recorder.
