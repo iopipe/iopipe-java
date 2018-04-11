@@ -41,7 +41,7 @@ class __DoLongNameCustomMetric__
 	 */
 	__DoLongNameCustomMetric__(Engine __e)
 	{
-		super(__e, "custommetric");
+		super(__e, "longcustommetric");
 	}
 	
 	/**
