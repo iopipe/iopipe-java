@@ -58,6 +58,9 @@ public class ManualHello
 					__exec.customMetric("result", (long)result);
 				}
 				
+				// Test label
+				__exec.label("test");
+				
 				// Say hello to them!
 				return "Hello " + name + "!";
 			});

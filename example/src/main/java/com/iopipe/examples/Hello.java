@@ -56,6 +56,9 @@ public class Hello
 			// Store the result of the math
 			__exec.customMetric("result", (long)result);
 		}
+		
+		// Test label
+		__exec.label("test");
 
 		// Say hello to them!
 		return "Hello " + name + "!";
