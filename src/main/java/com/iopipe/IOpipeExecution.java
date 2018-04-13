@@ -603,13 +603,10 @@ public final class IOpipeExecution
 			
 			// Add custom metrics, which multiple threads could be adding at
 			// once
+			gen.writeStartArray("custom_metrics");
 			CustomMetric[] custmetrics = measurement.getCustomMetrics();
 			for (int i = 0, n = custmetrics.length; i < n; i++)
 			{
-				// Start of metrics
-				if (i == 0)
-					gen.writeStartArray("custom_metrics");
-				
 				CustomMetric metric = custmetrics[i];
 				
 				String xname = metric.name();
@@ -626,20 +623,16 @@ public final class IOpipeExecution
 					
 					gen.writeEnd();
 				}
-				
-				// End of metrics
-				if (i == (n - 1))
-					gen.writeEnd();
 			}
 			
+			// End of metrics
+			gen.writeEnd();
+			
 			// Copy the performance entries which have been measured
+			gen.writeStartArray("performanceEntries");
 			PerformanceEntry[] perfs = measurement.getPerformanceEntries();
 			for (int i = 0, n = perfs.length; i < n; i++)
 			{
-				// Start of entries
-				if (i == 0)
-					gen.writeStartArray("performanceEntries");
-				
 				PerformanceEntry perf = perfs[i];
 				
 				gen.writeStartObject();
@@ -655,28 +648,23 @@ public final class IOpipeExecution
 				gen.write("timestamp", nowtimestamp);
 				
 				gen.writeEnd();
-				
-				// End of entries
-				if (i == (n - 1))
-					gen.writeEnd();
 			}
 			
+			// End of entries
+			gen.writeEnd();
+			
 			// Are there any labels to be added?
+			gen.writeStartArray("labels");
 			String[] labels = measurement.getLabels();
 			for (int i = 0, n = labels.length; i < n; i++)
 			{
-				// Start of labels
-				if (i == 0)
-					gen.writeStartArray("labels");
-				
 				String label = labels[i];
 				if (IOpipeExecution.__isNameInLimit(label))
 					gen.write(label);
-				
-				// End of labels
-				if (i == (n - 1))
-					gen.writeEnd();
 			}
+			
+			// End of labels
+			gen.writeEnd();
 			
 			// Record plugins which are being used
 			Map<Class<? extends IOpipePluginExecution>, IOpipePluginExecution>
