@@ -186,6 +186,28 @@ public final class IOpipeService
 		Function<IOpipeExecution, R> __func)
 		throws Error, NullPointerException, RuntimeException
 	{
+		return this.<R>run(__context, __func, null);
+	}
+	
+	/**
+	 * Runs the specified function and generates a report.
+	 *
+	 * @param <R> The value to return.
+	 * @param __context The context provided by the AWS service.
+	 * @param __func The lambda function to execute, measure, and generate a
+	 * report for.
+	 * @param __input An object which should specify the object which was
+	 * input for the executed method, may be {@code null}.
+	 * @return The returned value.
+	 * @throws Error If the called function threw an error.
+	 * @throws NullPointerException If no function was specified.
+	 * @throws RuntimeException If the called function threw an exception.
+	 * @since 2018/05/16
+	 */
+	public final <R> R run(Context __context,
+		Function<IOpipeExecution, R> __func, Object __input)
+		throws Error, NullPointerException, RuntimeException
+	{
 		if (__context == null || __func == null)
 			throw new NullPointerException();
 		
@@ -203,7 +225,7 @@ public final class IOpipeService
 		long nowtime = System.currentTimeMillis();
 		IOpipeMeasurement measurement = new IOpipeMeasurement();
 		IOpipeExecution exec = new IOpipeExecution(this, config, __context,
-			measurement, threadgroup, nowtime);
+			measurement, threadgroup, nowtime, __input);
 		
 		// If disabled, just run the function
 		IOpipeConfiguration config = this.config;

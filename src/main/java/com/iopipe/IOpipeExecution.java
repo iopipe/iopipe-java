@@ -59,6 +59,12 @@ public final class IOpipeExecution
 	/** The starting time in milliseconds. */
 	protected final long starttimemillis;
 	
+	/**
+	 * The input object to the executing method, may be {@code null} if it
+	 * was passed or not used.
+	 */
+	protected final Object input;
+	
 	/** Plugins which currently have an active exection state. */
 	private final Map<Class<? extends IOpipePluginExecution>,
 		IOpipePluginExecution> _active =
@@ -73,11 +79,15 @@ public final class IOpipeExecution
 	 * @param __m Measurement which is used to provide access to tracing.
 	 * @param __tg The thread group which the execution runs under.
 	 * @param __st The start time in the system clock milliseconds.
-	 * @throws NullPointerException On null arguments.
+	 * @param __input The object which was passed to the method being
+	 * executed.
+	 * @throws NullPointerException On null arguments except for
+	 * {@code __passed}.
 	 * @since 2018/01/19
 	 */
 	IOpipeExecution(IOpipeService __sv, IOpipeConfiguration __conf,
-		Context __context, IOpipeMeasurement __m, ThreadGroup __tg, long __st)
+		Context __context, IOpipeMeasurement __m, ThreadGroup __tg, long __st,
+		Object __input)
 		throws NullPointerException
 	{
 		if (__sv == null || __conf == null || __context == null ||
@@ -90,6 +100,7 @@ public final class IOpipeExecution
 		this.measurement = __m;
 		this.threadgroup = __tg;
 		this.starttimemillis = __st;
+		this.input = __input;
 	}
 	
 	/**
@@ -146,6 +157,38 @@ public final class IOpipeExecution
 			throw new NullPointerException();
 		
 		this.measurement.customMetric(__name, __lv);
+	}
+	
+	/**
+	 * Returns the object which was used as input for the method being
+	 * executed.
+	 *
+	 * @return The extra object which was passed to the run method.
+	 * @since 2018/04/16
+	 */
+	public final Object input()
+	{
+		return this.input;
+	}
+	
+	/**
+	 * Returns the object which was used as input for the method being
+	 * executed.
+	 *
+	 * @param <T> The type of object to return.
+	 * @param __cl The type of object to return.
+	 * @return The extra object which was passed to the run method.
+	 * @throws ClassCastException If it is not of the passed class type.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/04/16
+	 */
+	public final <T> T input(Class<T> __cl)
+		throws ClassCastException, NullPointerException
+	{
+		if (__cl == null)
+			throw new NullPointerException();
+		
+		return __cl.cast(this.input);
 	}
 	
 	/**
