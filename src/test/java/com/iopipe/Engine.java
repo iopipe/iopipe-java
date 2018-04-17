@@ -41,6 +41,22 @@ public abstract class Engine
 			(__e) -> new __DoPluginTest__(__e, true),
 			(__e) -> new __DoPluginTest__(__e, false),
 			__DoProfilerPlugin__::new,
+			
+			// Event Info
+			(__e) -> new __DoEventInfoPlugin__(__e, "apiGateway",
+				__DoEventInfoPlugin__::makeAPIGatewayProxyRequestEvent),
+			(__e) -> new __DoEventInfoPlugin__(__e, "cloudFront",
+				__DoEventInfoPlugin__::makeCloudFrontEvent),
+			(__e) -> new __DoEventInfoPlugin__(__e, "kinesis",
+				__DoEventInfoPlugin__::makeKinesisEvent),
+			(__e) -> new __DoEventInfoPlugin__(__e, "firehose",
+				__DoEventInfoPlugin__::makeKinesisFirehoseEvent),
+			(__e) -> new __DoEventInfoPlugin__(__e, "s3",
+				__DoEventInfoPlugin__::makeS3Event),
+			(__e) -> new __DoEventInfoPlugin__(__e, "scheduled",
+				__DoEventInfoPlugin__::makeScheduledEvent),
+			(__e) -> new __DoEventInfoPlugin__(__e, "sns",
+				__DoEventInfoPlugin__::makeSNSEvent),
 		};
 	
 	/** The base name for this engine. */
