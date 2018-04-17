@@ -165,7 +165,7 @@ public abstract class Engine
 					}
 				
 					return null;
-				});
+				}, __s.input());
 		}
 		
 		// Ignore the mock exception

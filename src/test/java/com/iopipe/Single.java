@@ -2,6 +2,7 @@ package com.iopipe;
 
 import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RemoteResult;
+import java.util.function.Supplier;
 import javax.json.JsonObject;
 import org.junit.jupiter.api.Assertions;
 
@@ -18,6 +19,9 @@ public abstract class Single
 	/** The base name of the test. */
 	protected final String basename;
 	
+	/** The input for the function call. */
+	protected final Supplier<Object> input;
+	
 	/**
 	 * Initializes the base test.
 	 *
@@ -29,11 +33,28 @@ public abstract class Single
 	public Single(Engine __e, String __n)
 		throws NullPointerException
 	{
-		if (__e == null || __n == null)
+		this(__e, __n, () -> null);
+	}
+	
+	/**
+	 * Initializes the base test.
+	 *
+	 * @param __e The engine this is running under.
+	 * @param __n The base name of the test.
+	 * @param __input The object which will act as the input for the function
+	 * call.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/01/23
+	 */
+	public Single(Engine __e, String __n, Supplier<Object> __input)
+		throws NullPointerException
+	{
+		if (__e == null || __n == null || __input == null)
 			throw new NullPointerException();
 		
 		this.engine = __e;
 		this.basename = __n;
+		this.input = __input;
 	}
 	
 	/**
@@ -144,6 +165,17 @@ public abstract class Single
 	public final String fullName()
 	{
 		return this.engine.baseName() + "-" + this.basename;
+	}
+	
+	/**
+	 * Generates an input object.
+	 *
+	 * @return The object used for input, may be {@code null}.
+	 * @since 2018/04/16
+	 */
+	public final Object input()
+	{
+		return this.input.get();
 	}
 	
 	/**
