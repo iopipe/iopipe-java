@@ -36,7 +36,7 @@ public abstract class SimpleRequestHandlerWrapper<I, O>
 	public final O handleRequest(I __input, Context __context)
 	{
 		return IOpipeService.instance().<O>run(__context,
-			(__exec) -> this.wrappedHandleRequest(__exec, __input));
+			(__exec) -> this.wrappedHandleRequest(__exec, __input), __input);
 	}
 }
 
