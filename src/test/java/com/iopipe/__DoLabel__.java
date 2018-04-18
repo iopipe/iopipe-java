@@ -3,18 +3,17 @@ package com.iopipe;
 import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RemoteResult;
 import com.iopipe.IOpipeMeasurement;
-import java.util.Collections;
 import java.util.Map;
 import javax.json.JsonString;
 import javax.json.JsonNumber;
 import javax.json.JsonValue;
 
 /**
- * Tests that custom metrics are recorded properly.
+ * This performs the test of the labels which may be added to a report.
  *
- * @since 2018/01/26
+ * @since 2018/04/11
  */
-class __DoCustomMetric__
+class __DoLabel__
 	extends Single
 {
 	/** Sent with no exception? */
@@ -25,28 +24,35 @@ class __DoCustomMetric__
 	protected final BooleanValue remoterecvokay =
 		new BooleanValue("remoterecvokay");
 	
-	/** Is there a custom string? */
-	protected final BooleanValue hascustomstring =
-		new BooleanValue("hascustomstring");
-		
-	/** Is there a custom number? */
-	protected final BooleanValue hascustomnumber =
-		new BooleanValue("hascustomnumber");
+	/** Does the label exist? */
+	protected final BooleanValue haslabel =
+		new BooleanValue("haslabel");
+	
+	/** Is this label supposed to appear in the dashboard? */
+	protected final boolean doshow;
+	
+	/** The label to add. */
+	protected final String label;
 	
 	/**
 	 * Constructs the test.
 	 *
 	 * @param __e The owning engine.
-	 * @since 2018/01/26
+	 * @param __show Show this in the dashboard.
+	 * @param __label The label to add.
+	 * @since 2018/04/11
 	 */
-	__DoCustomMetric__(Engine __e)
+	__DoLabel__(Engine __e, boolean __show, String __label)
 	{
-		super(__e, "custommetric");
+		super(__e, "label-" + __show + "-" + __label);
+		
+		this.doshow = __show;
+		this.label = __label;
 	}
 	
 	/**
 	 * {@inheritDoc}
-	 * @since 2018/01/26
+	 * @since 2018/04/11
 	 */
 	@Override
 	public void end()
@@ -54,13 +60,12 @@ class __DoCustomMetric__
 		super.assertTrue(this.remoterecvokay);
 		super.assertTrue(this.noerror);
 		
-		super.assertTrue(this.hascustomstring);
-		super.assertTrue(this.hascustomnumber);
+		super.assertEquals(this.doshow, this.haslabel);
 	}
 	
 	/**
 	 * {@inheritDoc}
-	 * @since 2018/01/26
+	 * @since 2018/04/11
 	 */
 	@Override
 	public void remoteRequest(WrappedRequest __r)
@@ -71,22 +76,22 @@ class __DoCustomMetric__
 		if (null == __Utils__.hasError(expand))
 			this.noerror.set(true);
 		
-		for (int i = 0; i < 2; i++)
+		// The label must be added
+		for (int i = 0; i >= 0; i++)
 		{
-			JsonValue sv = expand.get(".custom_metrics[" + i + "].s");
-			JsonValue nv = expand.get(".custom_metrics[" + i + "].n");
+			JsonValue jv = expand.get(".labels[" + i + "]");
 			
-			if (sv != null)
-				this.hascustomstring.set(true);
+			if (jv == null)
+				break;
 			
-			if (nv != null)
-				this.hascustomnumber.set(true);
+			if (__Utils__.isEqual(jv, this.label))
+				this.haslabel.set(true);
 		}
 	}
 	
 	/**
 	 * {@inheritDoc}
-	 * @since 2018/01/26
+	 * @since 2018/04/11
 	 */
 	@Override
 	public void remoteResult(WrappedResult __r)
@@ -96,21 +101,14 @@ class __DoCustomMetric__
 	}
 	
 	/**
-	 * {@inheritDoc}
+	 * @since 2018/04/11
 	 * @since 2018/01/26
 	 */
 	@Override
 	public void run(IOpipeExecution __e)
 		throws Throwable
 	{
-		IOpipeMeasurement m = __e.measurement();
-		
-		m.customMetric("string", "Squirrels are cute!");
-		m.customMetric("number", 6012716073268438380L);
-		
-		// Add a metric with a very long name
-		m.customMetric(String.join("", Collections.nCopies(
-			IOpipeConstants.NAME_CODEPOINT_LIMIT + 32, "a")), "Very long!");
+		__e.label(this.label);
 	}
 }
 

@@ -8,6 +8,9 @@ import java.util.Objects;
  * This represents a custom metric which may have a string or long value,
  * these may be used to add extra data points that are normally not present.
  *
+ * Custom metric names are limited to the length specified in
+ * {@link IOpipeConstants#NAME_CODEPOINT_LIMIT}.
+ *
  * @since 2018/01/20
  */
 public final class CustomMetric

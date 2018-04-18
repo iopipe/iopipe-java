@@ -1,6 +1,7 @@
 package com.iopipe;
 
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -21,6 +22,10 @@ public final class IOpipeMeasurement
 	/** Custom metrics that have been added, locked for thread safety. */
 	private final Set<CustomMetric> _custmetrics =
 		new TreeSet<>();
+	
+	/** Labels which have been added, locked for threading. */
+	private final Set<String> _labels =
+		new LinkedHashSet<>();
 	
 	/** The exception which may have been thrown. */
 	private volatile Throwable _thrown;
@@ -63,6 +68,30 @@ public final class IOpipeMeasurement
 	}
 	
 	/**
+	 * Adds a single label which will be passed in the report.
+	 *
+	 * Labels are limited to the length specified in
+	 * {@link IOpipeConstants#NAME_CODEPOINT_LIMIT}.
+	 *
+	 * @param __s The label to add.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/04/11
+	 */
+	public void addLabel(String __s)
+		throws NullPointerException
+	{
+		if (__s == null)
+			throw new NullPointerException();
+		
+		// Add it
+		Set<String> labels = this._labels;
+		synchronized (labels)
+		{
+			labels.add(__s);
+		}
+	}
+	
+	/**
 	 * Adds a single performance entry to the report.
 	 *
 	 * @param __e The entry to add to the report.
@@ -86,6 +115,9 @@ public final class IOpipeMeasurement
 	/**
 	 * Adds the specified custom metric with a string value.
 	 *
+	 * Custom metric names are limited to the length specified in
+	 * {@link IOpipeConstants#NAME_CODEPOINT_LIMIT}.
+	 *
 	 * @param __name The metric name.
 	 * @param __sv The string value.
 	 * @throws NullPointerException On null arguments.
@@ -102,6 +134,9 @@ public final class IOpipeMeasurement
 	
 	/**
 	 * Adds the specified custom metric with a long value.
+	 *
+	 * Custom metric names are limited to the length specified in
+	 * {@link IOpipeConstants#NAME_CODEPOINT_LIMIT}.
 	 *
 	 * @param __name The metric name.
 	 * @param __lv The long value.
@@ -143,6 +178,22 @@ public final class IOpipeMeasurement
 	public long getDuration()
 	{
 		return this._duration;
+	}
+	
+	/**
+	 * Returns all of the labels which have been declared during the
+	 * execution.
+	 *
+	 * @return The labels which have been declared during execution.
+	 * @since 2018/04/11
+	 */
+	public String[] getLabels()
+	{
+		Set<String> labels = this._labels;
+		synchronized (labels)
+		{
+			return labels.<String>toArray(new String[labels.size()]);
+		}
 	}
 	
 	/**
