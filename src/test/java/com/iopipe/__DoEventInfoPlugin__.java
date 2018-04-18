@@ -144,7 +144,8 @@ class __DoEventInfoPlugin__
 	 */
 	public static Object makeAPIGatewayProxyRequestEvent()
 	{
-		throw new Error("TODO");
+		return __DoEventInfoPlugin__.<APIGatewayProxyRequestEvent>__convert(
+			APIGatewayProxyRequestEvent.class, "eventinfo_apigateway.json");
 	}
 	
 	/**
