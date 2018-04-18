@@ -3,14 +3,6 @@ machine:
     version: oraclejdk8
   environment:
     MAVEN_OPTS: -Xmx3200m
-    PATH: "${PATH}:${HOME}/${CIRCLE_PROJECT_REPONAME}/node_modules/.bin"
-  node:
-    version: 6.10.3
-
-dependencies:
-  pre:
-    - npm install serverless
-    - which serverless
 
 checkout:
   post:
@@ -22,4 +14,3 @@ deployment:
     branch: master
     commands:
       - build-support/handle-mvn-release.sh
-      - cd example; mvn clean; mvn install -U; mvn package; serverless deploy
