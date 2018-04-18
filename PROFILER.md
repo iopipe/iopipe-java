@@ -15,7 +15,9 @@ Set the system property `com.iopipe.plugin.profiler` to `true`
 
 ### For Serverless Framework:
 
-In the `serverless.yml` file, under `functions:`, `(your_function_name_here):`, `environment:`, set the environwental variable `IOPIPE_PROFILER_ENABLE` to `true`
+In the `serverless.yml` file, under `functions:`, `(your_function_name_here):`, `environment:`, set the environmental variable `IOPIPE_PROFILER_ENABLE` to `true`
+
+## Customizing Profiling
 
 The profiler may be customized by setting the specified properties and/or
 environment variables:
