@@ -11,7 +11,7 @@ so that any code which runs will be profiled automatically.
 
 ## Enabling Profiling
 
-Set the system property `com.iopipe.plugin.profiler` to `true`
+Set the environment variable IOPIPE_PROFILER_ENABLE to `true`
 
 ### For Serverless Framework:
 
@@ -24,7 +24,7 @@ environment variables:
 
  * The duration of time between each sample, in microseconds:
    * The default is 1,000 microseconds (1ms).
-   * `IOPIPE_PROFILER_SAMPLERATE` in the environmental varibles of the `serverless.yml` file, or the environment variable `com.iopipe.plugin.profiler.samplerate`.
+   * `IOPIPE_PROFILER_SAMPLERATE` as an environmental variable
 
 When the profiler is enabled, .zip files containing the profiling data may be downloaded from the individual
 invocation information. Unzip it, then load them in VisualVM as a profile snapshot.
