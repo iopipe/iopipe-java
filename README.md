@@ -212,7 +212,18 @@ customMetric(String name, long value)
 ```
 
 Calling either of these will add a custom metric with the specified name and
-the given value.
+the given value. Custom metric names are limited to 128 characters.
+
+## Labels
+
+Labels allow you to add tags to invocations at run-time as needed. They can be
+added by calling the following method in the `IOpipeExecution` instance:
+
+```java
+label(String name)
+```
+
+Label names are limited to 128 characters.
 
 ## Profiling
 
