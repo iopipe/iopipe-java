@@ -24,16 +24,16 @@ In the `serverless.yml` file, under `functions:`, `(your_function_name_here):`, 
 The profiler may be customized by setting the specified properties and/or
 environment variables:
 
- * Sample Rate: The duration of time between each sample, in microseconds
-   * The default is 1,000 microseconds (1ms).
-   * `IOPIPE_PROFILER_SAMPLERATE` as an environmental variable
+* Sample Rate: The duration of time between each sample, in microseconds
+  * The default is 1,000 microseconds (1ms).
+  * `IOPIPE_PROFILER_SAMPLERATE` as an environmental variable
 
-## Getting Profilig Data
+## Getting Profiling Data
 
 When the profiler is enabled, .zip files containing the profiling data may be downloaded from the individual
 invocation information page, under 'Profiling'. Unzip it, then load the file in VisualVM as a profile snapshot.
 
-# How To Use Sampling Only Profiler Data
+# How To Use Sampling-Only Profiler Data
 
 In this mode of the profiler, only methods which are currently executed will
 have execution time added when it is at the top of the stack trace, as that
