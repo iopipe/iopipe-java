@@ -53,7 +53,6 @@ public abstract class Single
 			throw new NullPointerException();
 		
 		this.engine = __e;
-		this.basename = __n;
 		this.input = __input;
 		
 		// Make sure all names are valid ASCII
