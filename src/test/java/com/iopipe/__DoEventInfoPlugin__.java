@@ -179,7 +179,8 @@ class __DoEventInfoPlugin__
 	 */
 	public static Object makeKinesisFirehoseEvent()
 	{
-		throw new Error("TODO");
+		return __DoEventInfoPlugin__.<KinesisFirehoseEvent>__convert(
+			KinesisFirehoseEvent.class, "eventinfo_firehose.json");
 	}
 	
 	/**
