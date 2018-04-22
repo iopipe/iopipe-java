@@ -121,6 +121,12 @@
       <version>1.11.22</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-joda</artifactId>
+      <version>2.9.5</version>
+      <scope>test</scope>
+    </dependency>
 
     <!-- Runtime -->
     <dependency>

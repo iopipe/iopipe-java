@@ -9,8 +9,12 @@ import com.amazonaws.services.lambda.runtime.events.ScheduledEvent;
 import com.amazonaws.services.lambda.runtime.events.SNSEvent;
 import com.amazonaws.services.s3.event.S3EventNotification;
 import com.amazonaws.services.simpleworkflow.flow.JsonDataConverter;
+import com.fasterxml.jackson.databind.cfg.MapperConfig;
+import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RemoteResult;
 import com.iopipe.IOpipeMeasurement;
@@ -20,8 +24,9 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.util.function.Supplier;
 import java.util.Map;
-import javax.json.JsonString;
+import java.util.regex.Pattern;
 import javax.json.JsonNumber;
+import javax.json.JsonString;
 import javax.json.JsonValue;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -205,7 +210,8 @@ class __DoEventInfoPlugin__
 	 */
 	public static Object makeScheduledEvent()
 	{
-		throw new Error("TODO");
+		return __DoEventInfoPlugin__.<ScheduledEvent>__convert(
+			ScheduledEvent.class, "eventinfo_scheduled.json");
 	}
 	
 	/**
@@ -240,6 +246,9 @@ class __DoEventInfoPlugin__
 		// keep them untouched
 		ObjectMapper map = new ObjectMapper();
 		map.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+		
+		// Need to handle JODA time events correctly
+		map.registerModule(new JodaModule());
 		
 		// Setup converter
 		JsonDataConverter jdc = new JsonDataConverter(map);
