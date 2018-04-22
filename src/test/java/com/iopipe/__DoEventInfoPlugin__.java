@@ -222,7 +222,8 @@ class __DoEventInfoPlugin__
 	 */
 	public static Object makeSNSEvent()
 	{
-		throw new Error("TODO");
+		return __DoEventInfoPlugin__.<SNSEvent>__convert(
+			SNSEvent.class, "eventinfo_sns.json");
 	}
 	
 	/**
