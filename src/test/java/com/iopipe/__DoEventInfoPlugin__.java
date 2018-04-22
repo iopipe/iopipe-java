@@ -168,7 +168,8 @@ class __DoEventInfoPlugin__
 	 */
 	public static Object makeKinesisEvent()
 	{
-		throw new Error("TODO");
+		return __DoEventInfoPlugin__.<KinesisEvent>__convert(
+			KinesisEvent.class, "eventinfo_kinesis.json");
 	}
 	
 	/**
