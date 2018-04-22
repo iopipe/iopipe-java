@@ -14,6 +14,10 @@ import com.iopipe.plugin.IOpipePluginExecution;
 public class EventInfoPlugin
 	implements IOpipePlugin
 {
+	/** Default set of decoders. */
+	protected final EventInfoDecoders decoders =
+		new EventInfoDecoders();
+	
 	/**
 	 * {@inheritDoc}
 	 * @since 2018/04/22
@@ -34,7 +38,7 @@ public class EventInfoPlugin
 		if (__e == null)
 			throw new NullPointerException();
 		
-		return new EventInfoExecution(__e);
+		return new EventInfoExecution(__e, this.decoders);
 	}
 	
 	/**
