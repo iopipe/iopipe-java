@@ -7,6 +7,7 @@ import com.amazonaws.services.lambda.runtime.events.KinesisFirehoseEvent;
 import com.amazonaws.services.lambda.runtime.events.S3Event;
 import com.amazonaws.services.lambda.runtime.events.ScheduledEvent;
 import com.amazonaws.services.lambda.runtime.events.SNSEvent;
+import com.amazonaws.services.s3.event.S3EventNotification;
 import com.amazonaws.services.simpleworkflow.flow.JsonDataConverter;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -192,7 +193,8 @@ class __DoEventInfoPlugin__
 	 */
 	public static Object makeS3Event()
 	{
-		throw new Error("TODO");
+		return __DoEventInfoPlugin__.<S3EventNotification>__convert(
+			S3EventNotification.class, "eventinfo_s3.json");
 	}
 	
 	/**
