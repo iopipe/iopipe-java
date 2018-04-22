@@ -10,11 +10,11 @@ import javax.json.JsonNumber;
 import javax.json.JsonValue;
 
 /**
- * Tests that custom metrics are recorded properly.
+ * Ensures that custom metrics which really long names are not added.
  *
- * @since 2018/01/26
+ * @since 2018/04/11
  */
-class __DoCustomMetric__
+class __DoLongNameCustomMetric__
 	extends Single
 {
 	/** Sent with no exception? */
@@ -37,16 +37,16 @@ class __DoCustomMetric__
 	 * Constructs the test.
 	 *
 	 * @param __e The owning engine.
-	 * @since 2018/01/26
+	 * @since 2018/04/11
 	 */
-	__DoCustomMetric__(Engine __e)
+	__DoLongNameCustomMetric__(Engine __e)
 	{
-		super(__e, "custommetric");
+		super(__e, "longcustommetric");
 	}
 	
 	/**
 	 * {@inheritDoc}
-	 * @since 2018/01/26
+	 * @since 2018/04/11
 	 */
 	@Override
 	public void end()
@@ -54,13 +54,13 @@ class __DoCustomMetric__
 		super.assertTrue(this.remoterecvokay);
 		super.assertTrue(this.noerror);
 		
-		super.assertTrue(this.hascustomstring);
-		super.assertTrue(this.hascustomnumber);
+		super.assertFalse(this.hascustomstring);
+		super.assertFalse(this.hascustomnumber);
 	}
 	
 	/**
 	 * {@inheritDoc}
-	 * @since 2018/01/26
+	 * @since 2018/04/11
 	 */
 	@Override
 	public void remoteRequest(WrappedRequest __r)
@@ -86,7 +86,7 @@ class __DoCustomMetric__
 	
 	/**
 	 * {@inheritDoc}
-	 * @since 2018/01/26
+	 * @since 2018/04/11
 	 */
 	@Override
 	public void remoteResult(WrappedResult __r)
@@ -97,7 +97,7 @@ class __DoCustomMetric__
 	
 	/**
 	 * {@inheritDoc}
-	 * @since 2018/01/26
+	 * @since 2018/04/11
 	 */
 	@Override
 	public void run(IOpipeExecution __e)
@@ -105,12 +105,10 @@ class __DoCustomMetric__
 	{
 		IOpipeMeasurement m = __e.measurement();
 		
-		m.customMetric("string", "Squirrels are cute!");
-		m.customMetric("number", 6012716073268438380L);
-		
-		// Add a metric with a very long name
 		m.customMetric(String.join("", Collections.nCopies(
 			IOpipeConstants.NAME_CODEPOINT_LIMIT + 32, "a")), "Very long!");
+		m.customMetric(String.join("", Collections.nCopies(
+			IOpipeConstants.NAME_CODEPOINT_LIMIT + 32, "b")), 12345678);
 	}
 }
 

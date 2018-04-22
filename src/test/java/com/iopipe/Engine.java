@@ -3,6 +3,7 @@ package com.iopipe;
 import com.iopipe.plugin.IOpipePlugin;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -41,6 +42,16 @@ public abstract class Engine
 			(__e) -> new __DoPluginTest__(__e, true),
 			(__e) -> new __DoPluginTest__(__e, false),
 			__DoProfilerPlugin__::new,
+			(__e) -> new __DoLabel__(__e, true, "squirrels"),
+			(__e) -> new __DoLabel__(__e, true, "\uD83C\uDF3A\uD83C\uDF3A" +
+				"\uD83C\uDF3A\uD83C\uDF3A\uD83C\uDF3A\uD83C\uDF3A" +
+				"\uD83C\uDF3A\uD83C\uDF3A\uD83C\uDF3A\uD83C\uDF3A" +
+				"\uD83C\uDF3A\uD83C\uDF3A\uD83C\uDF3A\uD83C\uDF3A" +
+				"\uD83C\uDF3A\uD83C\uDF3A\uD83C\uDF3A\uD83C\uDF3A"),
+			(__e) -> new __DoLabel__(__e, false, String.join("",
+				Collections.nCopies(IOpipeConstants.NAME_CODEPOINT_LIMIT + 32,
+				"a"))),
+			__DoLongNameCustomMetric__::new,
 			
 			// Event Info
 			(__e) -> new __DoEventInfoPlugin__(__e, "apiGateway",

@@ -24,6 +24,8 @@ import javax.json.JsonException;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
 import javax.json.stream.JsonGenerator;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * This class provides access to information and functionality which is
@@ -36,6 +38,10 @@ import javax.json.stream.JsonGenerator;
  */
 public final class IOpipeExecution
 {
+	/** Logging. */
+	private static final Logger _LOGGER =
+		LogManager.getLogger(IOpipeExecution.class);
+	
 	/** Is this a Linux system? */
 	private static final boolean _IS_LINUX =
 		"linux".compareToIgnoreCase(
@@ -128,6 +134,9 @@ public final class IOpipeExecution
 	/**
 	 * Adds the specified custom metric with a string value.
 	 *
+	 * Custom metric names are limited to the length specified in
+	 * {@link IOpipeConstants#NAME_CODEPOINT_LIMIT}.
+	 *
 	 * @param __name The metric name.
 	 * @param __sv The string value.
 	 * @throws NullPointerException On null arguments.
@@ -144,6 +153,9 @@ public final class IOpipeExecution
 	
 	/**
 	 * Adds the specified custom metric with a long value.
+	 *
+	 * Custom metric names are limited to the length specified in
+	 * {@link IOpipeConstants#NAME_CODEPOINT_LIMIT}.
 	 *
 	 * @param __name The metric name.
 	 * @param __lv The long value.
@@ -189,6 +201,25 @@ public final class IOpipeExecution
 			throw new NullPointerException();
 		
 		return __cl.cast(this.input);
+	}
+	
+	/*
+	 * Adds a single label which will be passed in the report.
+	 *
+	 * Labels are limited to the length specified in
+	 * {@link IOpipeConstants#NAME_CODEPOINT_LIMIT}.
+	 *
+	 * @param __s The label to add.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/04/11
+	 */
+	public final void label(String __s)
+		throws NullPointerException
+	{
+		if (__s == null)
+			throw new NullPointerException();
+		
+		this.measurement.addLabel(__s);
 	}
 	
 	/**
@@ -621,39 +652,42 @@ public final class IOpipeExecution
 			
 			// Add custom metrics, which multiple threads could be adding at
 			// once
+			gen.writeStartArray("custom_metrics");
 			CustomMetric[] custmetrics = measurement.getCustomMetrics();
 			for (int i = 0, n = custmetrics.length; i < n; i++)
 			{
-				// Start of metrics
-				if (i == 0)
-					gen.writeStartArray("custom_metrics");
-				
 				CustomMetric metric = custmetrics[i];
 				
-				gen.writeStartObject();
-				
-				gen.write("name", metric.name());
-				
-				if (metric.hasString())
-					gen.write("s", metric.stringValue());
-				if (metric.hasLong())
-					gen.write("n", metric.longValue());
-				
-				gen.writeEnd();
-				
-				// End of metrics
-				if (i == (n - 1))
+				String xname = metric.name();
+				if (IOpipeExecution.__isNameInLimit(xname))
+				{
+					gen.writeStartObject();
+					
+					gen.write("name", xname);
+					
+					if (metric.hasString())
+						gen.write("s", metric.stringValue());
+					if (metric.hasLong())
+						gen.write("n", metric.longValue());
+					
 					gen.writeEnd();
+				}
+				
+				// Emit warning
+				else
+					_LOGGER.warn("Metric exceeds the {} codepoint limit and " +
+						"will not be reported: {}",
+						IOpipeConstants.NAME_CODEPOINT_LIMIT, xname);
 			}
 			
+			// End of metrics
+			gen.writeEnd();
+			
 			// Copy the performance entries which have been measured
+			gen.writeStartArray("performanceEntries");
 			PerformanceEntry[] perfs = measurement.getPerformanceEntries();
 			for (int i = 0, n = perfs.length; i < n; i++)
 			{
-				// Start of entries
-				if (i == 0)
-					gen.writeStartArray("performanceEntries");
-				
 				PerformanceEntry perf = perfs[i];
 				
 				gen.writeStartObject();
@@ -669,11 +703,29 @@ public final class IOpipeExecution
 				gen.write("timestamp", nowtimestamp);
 				
 				gen.writeEnd();
-				
-				// End of entries
-				if (i == (n - 1))
-					gen.writeEnd();
 			}
+			
+			// End of entries
+			gen.writeEnd();
+			
+			// Are there any labels to be added?
+			gen.writeStartArray("labels");
+			String[] labels = measurement.getLabels();
+			for (int i = 0, n = labels.length; i < n; i++)
+			{
+				String label = labels[i];
+				if (IOpipeExecution.__isNameInLimit(label))
+					gen.write(label);
+				
+				// Emit warning
+				else
+					_LOGGER.warn("Label exceeds the {} codepoint limit and " +
+						"will not be reported: {}",
+						IOpipeConstants.NAME_CODEPOINT_LIMIT, label);
+			}
+			
+			// End of labels
+			gen.writeEnd();
 			
 			// Record plugins which are being used
 			Map<Class<? extends IOpipePluginExecution>, IOpipePluginExecution>
@@ -740,6 +792,25 @@ public final class IOpipeExecution
 		}
 
 		return new RemoteRequest(RemoteBody.MIMETYPE_JSON, out.toString());
+	}
+	
+	/**
+	 * Checks if the given string is within the name limit before it is
+	 * reported.
+	 *
+	 * @param __s The name to check.
+	 * @return If the name is short enough to be included.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/04/11
+	 */
+	private static final boolean __isNameInLimit(String __s)
+		throws NullPointerException
+	{
+		if (__s == null)
+			throw new NullPointerException();
+		
+		return __s.codePointCount(0, __s.length()) <
+			IOpipeConstants.NAME_CODEPOINT_LIMIT;
 	}
 }
 
