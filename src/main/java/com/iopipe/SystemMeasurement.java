@@ -28,8 +28,14 @@ public final class SystemMeasurement
 	/** The file descriptor count. */
 	public final int fdsize;
 	
+	/** Total amount of memory in bytes. */
+	public final long memorytotalbytes;
+	
 	/** Total amount of memory in KiB. */
 	public final int memorytotalkib;
+	
+	/** Free amount of memory in bytes. */
+	public final long memoryfreebytes;
 	
 	/** Free amount of memory in KiB. */
 	public final int memoryfreekib;
@@ -67,10 +73,15 @@ public final class SystemMeasurement
 	{
 		// Memory information
 		Map<String, String> meminfo = __readMap(Paths.get("/proc/meminfo"));
-		this.memorytotalkib = __readInt(
-			meminfo.getOrDefault("MemTotal", "0"));
-		this.memoryfreekib = __readInt(
-			meminfo.getOrDefault("MemFree", "0"));
+		int mtkib, mfkib;
+		this.memorytotalkib = (mtkib = __readInt(
+			meminfo.getOrDefault("MemTotal", "0")));
+		this.memoryfreekib = (mfkib = __readInt(
+			meminfo.getOrDefault("MemFree", "0")));
+		
+		// Memory information is in KiB, so just multiply the values for now
+		this.memorytotalbytes = mtkib * 1024L;
+		this.memoryfreebytes = mfkib * 1024L;
 		
 		// Obtain CPU information
 		List<Cpu> cpus = new ArrayList<>(
