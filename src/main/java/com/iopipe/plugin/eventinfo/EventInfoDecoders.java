@@ -16,6 +16,10 @@ public final class EventInfoDecoders
 	private final Map<Class<?>, EventInfoDecoder> _decoders =
 		new LinkedHashMap<>();
 	
+	/** Cache of classes that have been registered for type lookup. */
+	private volatile Class<?>[] _classes =
+		new Class<?>[0];
+	
 	/**
 	 * Initializes the event decoders with the default decoders.
 	 *
@@ -68,6 +72,10 @@ public final class EventInfoDecoders
 		synchronized (decoders)
 		{
 			decoders.put(decodes, __d);
+			
+			// Update class cache
+			this._classes = decoders.keySet().<Class<?>>toArray(
+				new Class<?>[decoders.size()]);
 		}
 	}
 }
