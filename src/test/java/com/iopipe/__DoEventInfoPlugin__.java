@@ -131,6 +131,7 @@ class __DoEventInfoPlugin__
 	@Override
 	public void remoteRequest(WrappedRequest __r)
 	{
+		EventInfoDecoder decoder = this.decoder;
 		Map<String, JsonValue> expand = __Utils__.expandObject(__r.request);
 		
 		// It is invalid if there is an error
@@ -141,8 +142,16 @@ class __DoEventInfoPlugin__
 		Set<String> keys = new LinkedHashSet<>();
 		for (JsonValue v : (JsonArray)(((JsonObject)__r.request.
 			bodyAsJsonStructure()).get("custom_metrics")))
-			for (String k : ((JsonObject)v).keySet())
-				keys.add(k);
+			for (Map.Entry<String, JsonValue> e : ((JsonObject)v).entrySet())
+			{
+				String k;
+				keys.add((k = e.getKey()));
+				
+				// Is this the expected event type
+				if (k.equals("@iopipe/event-info.eventType") &&
+					__Utils__.isEqual(e.getValue(), decoder.eventType()))
+					this.typegot.set(true);
+			}
 		
 		_LOGGER.debug("remoteRequest() " + keys);
 		//throw new Error("TODO");
