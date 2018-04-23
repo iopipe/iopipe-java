@@ -24,9 +24,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.util.function.Supplier;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.Set;
+import javax.json.JsonArray;
 import javax.json.JsonNumber;
+import javax.json.JsonObject;
 import javax.json.JsonString;
 import javax.json.JsonValue;
 import org.apache.logging.log4j.Logger;
@@ -53,8 +57,19 @@ class __DoEventInfoPlugin__
 	protected final BooleanValue remoterecvokay =
 		new BooleanValue("remoterecvokay");
 	
+	/** Got the event type? */
+	protected final BooleanValue typegot =
+		new BooleanValue("typegot");
+	
+	/** The number of metrics which were found. */
+	protected final IntegerValue gotmetrics =
+		new IntegerValue("gotmetrics");
+	
 	/** The decoder that is used. */
 	protected final EventInfoDecoder decoder;
+	
+	/** The number of expected number of metrics that must exist. */
+	protected final int totalmetrics;
 	
 	/**
 	 * Constructs the test.
@@ -75,6 +90,9 @@ class __DoEventInfoPlugin__
 			throw new NullPointerException();
 		
 		this.decoder = __decoder;
+		
+		System.err.println("TODO -- Initialize total metric count in test.");
+		this.totalmetrics = -1;
 	}
 	
 	/**
@@ -87,8 +105,9 @@ class __DoEventInfoPlugin__
 		super.assertTrue(this.remoterecvokay);
 		super.assertTrue(this.noerror);
 		
-		_LOGGER.debug("end()");
-		throw new Error("TODO");
+		// Must have read all metrics and the event type
+		super.assertTrue(this.typegot);
+		super.assertEquals(this.totalmetrics, this.gotmetrics);
 	}
 	
 	/**
@@ -118,7 +137,14 @@ class __DoEventInfoPlugin__
 		if (null == __Utils__.hasError(expand))
 			this.noerror.set(true);
 		
-		_LOGGER.debug("remoteRequest()");
+		// Build a set of custom metric names
+		Set<String> keys = new LinkedHashSet<>();
+		for (JsonValue v : (JsonArray)(((JsonObject)__r.request.
+			bodyAsJsonStructure()).get("custom_metrics")))
+			for (String k : ((JsonObject)v).keySet())
+				keys.add(k);
+		
+		_LOGGER.debug("remoteRequest() " + keys);
 		//throw new Error("TODO");
 	}
 	
