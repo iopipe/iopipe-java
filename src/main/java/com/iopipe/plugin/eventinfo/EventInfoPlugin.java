@@ -4,6 +4,8 @@ import com.iopipe.IOpipeConstants;
 import com.iopipe.IOpipeExecution;
 import com.iopipe.plugin.IOpipePlugin;
 import com.iopipe.plugin.IOpipePluginExecution;
+import com.iopipe.plugin.IOpipePluginPostExecutable;
+import com.iopipe.plugin.IOpipePluginPreExecutable;
 
 /**
  * This is the trace plugin which is used to track specific marks and measure
@@ -12,7 +14,8 @@ import com.iopipe.plugin.IOpipePluginExecution;
  * @since 2018/04/22
  */
 public class EventInfoPlugin
-	implements IOpipePlugin
+	implements IOpipePlugin, IOpipePluginPostExecutable,
+		IOpipePluginPreExecutable
 {
 	/** Default set of decoders, lazily initialized. */
 	private volatile EventInfoDecoders _decoders;
@@ -74,6 +77,34 @@ public class EventInfoPlugin
 	public String name()
 	{
 		return "event-info";
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @since 2018/04/23
+	 */
+	@Override
+	public void postExecute(IOpipePluginExecution __e)
+		throws NullPointerException
+	{
+		if (__e == null)
+			throw new NullPointerException();
+		
+		((EventInfoExecution)__e).__post();
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @since 2018/04/23
+	 */
+	@Override
+	public void preExecute(IOpipePluginExecution __e)
+		throws NullPointerException
+	{
+		if (__e == null)
+			throw new NullPointerException();
+		
+		((EventInfoExecution)__e).__pre();
 	}
 	
 	/**
