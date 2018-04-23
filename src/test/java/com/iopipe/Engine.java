@@ -1,5 +1,12 @@
 package com.iopipe;
 
+import com.iopipe.plugin.eventinfo.APIGatewayDecoder;
+import com.iopipe.plugin.eventinfo.CloudFrontDecoder;
+import com.iopipe.plugin.eventinfo.KinesisDecoder;
+import com.iopipe.plugin.eventinfo.FirehoseDecoder;
+import com.iopipe.plugin.eventinfo.S3Decoder;
+import com.iopipe.plugin.eventinfo.ScheduledDecoder;
+import com.iopipe.plugin.eventinfo.SNSDecoder;
 import com.iopipe.plugin.IOpipePlugin;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -54,20 +61,27 @@ public abstract class Engine
 			__DoLongNameCustomMetric__::new,
 			
 			// Event Info
-			(__e) -> new __DoEventInfoPlugin__(__e, "apiGateway",
-				__DoEventInfoPlugin__::makeAPIGatewayProxyRequestEvent),
-			(__e) -> new __DoEventInfoPlugin__(__e, "cloudFront",
-				__DoEventInfoPlugin__::makeCloudFrontEvent),
-			(__e) -> new __DoEventInfoPlugin__(__e, "kinesis",
-				__DoEventInfoPlugin__::makeKinesisEvent),
-			(__e) -> new __DoEventInfoPlugin__(__e, "firehose",
-				__DoEventInfoPlugin__::makeKinesisFirehoseEvent),
-			(__e) -> new __DoEventInfoPlugin__(__e, "s3",
-				__DoEventInfoPlugin__::makeS3Event),
-			(__e) -> new __DoEventInfoPlugin__(__e, "scheduled",
-				__DoEventInfoPlugin__::makeScheduledEvent),
-			(__e) -> new __DoEventInfoPlugin__(__e, "sns",
-				__DoEventInfoPlugin__::makeSNSEvent),
+			(__e) -> new __DoEventInfoPlugin__(__e,
+				__DoEventInfoPlugin__::makeAPIGatewayProxyRequestEvent,
+				new APIGatewayDecoder()),
+			(__e) -> new __DoEventInfoPlugin__(__e,
+				__DoEventInfoPlugin__::makeCloudFrontEvent,
+				new CloudFrontDecoder()),
+			(__e) -> new __DoEventInfoPlugin__(__e,
+				__DoEventInfoPlugin__::makeKinesisEvent,
+				new KinesisDecoder()),
+			(__e) -> new __DoEventInfoPlugin__(__e,
+				__DoEventInfoPlugin__::makeKinesisFirehoseEvent,
+				new FirehoseDecoder()),
+			(__e) -> new __DoEventInfoPlugin__(__e,
+				__DoEventInfoPlugin__::makeS3Event,
+				new S3Decoder()),
+			(__e) -> new __DoEventInfoPlugin__(__e,
+				__DoEventInfoPlugin__::makeScheduledEvent,
+				new ScheduledDecoder()),
+			(__e) -> new __DoEventInfoPlugin__(__e,
+				__DoEventInfoPlugin__::makeSNSEvent,
+				new SNSDecoder()),
 		};
 	
 	/** The base name for this engine. */

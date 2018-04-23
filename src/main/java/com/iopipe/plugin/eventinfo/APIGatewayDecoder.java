@@ -3,7 +3,7 @@ package com.iopipe.plugin.eventinfo;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 
 /**
- * This class implements the decoder for API Gateway events
+ * This class implements the decoder for API Gateway events.
  *
  * @since 2018/04/22
  */

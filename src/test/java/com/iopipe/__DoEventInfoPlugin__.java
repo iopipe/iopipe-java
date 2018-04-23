@@ -18,6 +18,7 @@ import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RemoteResult;
 import com.iopipe.IOpipeMeasurement;
+import com.iopipe.plugin.eventinfo.EventInfoDecoder;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -52,27 +53,28 @@ class __DoEventInfoPlugin__
 	protected final BooleanValue remoterecvokay =
 		new BooleanValue("remoterecvokay");
 	
-	/** The expected type. */
-	protected final String type;
+	/** The decoder that is used. */
+	protected final EventInfoDecoder decoder;
 	
 	/**
 	 * Constructs the test.
 	 *
 	 * @param __e The owning engine.
-	 * @param __type The expected type.
 	 * @param __input The input.
+	 * @param __decoder The decoder being used.
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/04/16
 	 */
-	__DoEventInfoPlugin__(Engine __e, String __type, Supplier<Object> __input)
+	__DoEventInfoPlugin__(Engine __e, Supplier<Object> __input,
+		EventInfoDecoder __decoder)
 		throws NullPointerException
 	{
-		super(__e, "eventinfo-" + __type, __input);
+		super(__e, "eventinfo-" + __decoder.eventType(), __input);
 		
-		if (__type == null)
+		if (__decoder == null)
 			throw new NullPointerException();
 		
-		this.type = __type;
+		this.decoder = __decoder;
 	}
 	
 	/**
