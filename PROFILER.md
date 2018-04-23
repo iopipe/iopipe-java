@@ -26,7 +26,7 @@ environment variables:
 
 * Sample Rate: The duration of time between each sample, in microseconds
   * The default is 1,000 microseconds (1ms).
-  * `IOPIPE_PROFILER_SAMPLERATE` as an environmental variable
+  * `IOPIPE_PROFILER_SAMPLERATE` as an environment variable
 
 ## Getting Profiling Data
 
