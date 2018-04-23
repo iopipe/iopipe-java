@@ -18,7 +18,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -142,49 +142,62 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../com/iopipe/IOpipeMeasurement.html#addLabel-java.lang.String-">addLabel</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;__s)</code>
+<div class="block">Adds a single label which will be passed in the report.</div>
+</td>
+</tr>
+<tr id="i2" class="altColor">
+<td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../com/iopipe/IOpipeMeasurement.html#addPerformanceEntry-com.iopipe.PerformanceEntry-">addPerformanceEntry</a></span>(<a href="../../com/iopipe/PerformanceEntry.html" title="class in com.iopipe">PerformanceEntry</a>&nbsp;__e)</code>
 <div class="block">Adds a single performance entry to the report.</div>
 </td>
 </tr>
-<tr id="i2" class="altColor">
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../com/iopipe/IOpipeMeasurement.html#customMetric-java.lang.String-long-">customMetric</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;__name,
             long&nbsp;__lv)</code>
 <div class="block">Adds the specified custom metric with a long value.</div>
 </td>
 </tr>
-<tr id="i3" class="rowColor">
+<tr id="i4" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../com/iopipe/IOpipeMeasurement.html#customMetric-java.lang.String-java.lang.String-">customMetric</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;__name,
             <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;__sv)</code>
 <div class="block">Adds the specified custom metric with a string value.</div>
 </td>
 </tr>
-<tr id="i4" class="altColor">
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code><a href="../../com/iopipe/CustomMetric.html" title="class in com.iopipe">CustomMetric</a>[]</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../com/iopipe/IOpipeMeasurement.html#getCustomMetrics--">getCustomMetrics</a></span>()</code>
 <div class="block">Returns a copy of the custom metrics which were measured.</div>
 </td>
 </tr>
-<tr id="i5" class="rowColor">
+<tr id="i6" class="altColor">
 <td class="colFirst"><code>long</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../com/iopipe/IOpipeMeasurement.html#getDuration--">getDuration</a></span>()</code>
 <div class="block">Returns the execution duration.</div>
 </td>
 </tr>
-<tr id="i6" class="altColor">
+<tr id="i7" class="rowColor">
+<td class="colFirst"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>[]</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../com/iopipe/IOpipeMeasurement.html#getLabels--">getLabels</a></span>()</code>
+<div class="block">Returns all of the labels which have been declared during the
+ execution.</div>
+</td>
+</tr>
+<tr id="i8" class="altColor">
 <td class="colFirst"><code><a href="../../com/iopipe/PerformanceEntry.html" title="class in com.iopipe">PerformanceEntry</a>[]</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../com/iopipe/IOpipeMeasurement.html#getPerformanceEntries--">getPerformanceEntries</a></span>()</code>
 <div class="block">Returns a copy of the performance entries which were measured.</div>
 </td>
 </tr>
-<tr id="i7" class="rowColor">
+<tr id="i9" class="rowColor">
 <td class="colFirst"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Throwable.html?is-external=true" title="class or interface in java.lang">Throwable</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../com/iopipe/IOpipeMeasurement.html#getThrown--">getThrown</a></span>()</code>
 <div class="block">Returns the thrown throwable.</div>
 </td>
 </tr>
-<tr id="i8" class="altColor">
+<tr id="i10" class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../com/iopipe/IOpipeMeasurement.html#isColdStarted--">isColdStarted</a></span>()</code>
 <div class="block">Is this a coldstarted execution?</div>
@@ -231,6 +244,28 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </dl>
 </li>
 </ul>
+<a name="addLabel-java.lang.String-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>addLabel</h4>
+<pre>public&nbsp;void&nbsp;addLabel(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;__s)
+              throws <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/NullPointerException.html?is-external=true" title="class or interface in java.lang">NullPointerException</a></pre>
+<div class="block">Adds a single label which will be passed in the report.
+
+ Labels are limited to the length specified in
+ <a href="../../com/iopipe/IOpipeConstants.html#NAME_CODEPOINT_LIMIT"><code>IOpipeConstants.NAME_CODEPOINT_LIMIT</code></a>.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>__s</code> - The label to add.</dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/NullPointerException.html?is-external=true" title="class or interface in java.lang">NullPointerException</a></code> - On null arguments.</dd>
+<dt><span class="simpleTagLabel">Since:</span></dt>
+<dd>2018/04/11</dd>
+</dl>
+</li>
+</ul>
 <a name="addPerformanceEntry-com.iopipe.PerformanceEntry-">
 <!--   -->
 </a>
@@ -259,7 +294,10 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <pre>public final&nbsp;void&nbsp;customMetric(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;__name,
                                <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;__sv)
                         throws <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/NullPointerException.html?is-external=true" title="class or interface in java.lang">NullPointerException</a></pre>
-<div class="block">Adds the specified custom metric with a string value.</div>
+<div class="block">Adds the specified custom metric with a string value.
+
+ Custom metric names are limited to the length specified in
+ <a href="../../com/iopipe/IOpipeConstants.html#NAME_CODEPOINT_LIMIT"><code>IOpipeConstants.NAME_CODEPOINT_LIMIT</code></a>.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>__name</code> - The metric name.</dd>
@@ -280,7 +318,10 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <pre>public final&nbsp;void&nbsp;customMetric(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;__name,
                                long&nbsp;__lv)
                         throws <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/NullPointerException.html?is-external=true" title="class or interface in java.lang">NullPointerException</a></pre>
-<div class="block">Adds the specified custom metric with a long value.</div>
+<div class="block">Adds the specified custom metric with a long value.
+
+ Custom metric names are limited to the length specified in
+ <a href="../../com/iopipe/IOpipeConstants.html#NAME_CODEPOINT_LIMIT"><code>IOpipeConstants.NAME_CODEPOINT_LIMIT</code></a>.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>__name</code> - The metric name.</dd>
@@ -322,6 +363,23 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
  valid.</dd>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>2017/12/15</dd>
+</dl>
+</li>
+</ul>
+<a name="getLabels--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getLabels</h4>
+<pre>public&nbsp;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>[]&nbsp;getLabels()</pre>
+<div class="block">Returns all of the labels which have been declared during the
+ execution.</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The labels which have been declared during execution.</dd>
+<dt><span class="simpleTagLabel">Since:</span></dt>
+<dd>2018/04/11</dd>
 </dl>
 </li>
 </ul>
