@@ -16,5 +16,13 @@ public interface EventInfoDecoder
 	 * @since 2018/04/22
 	 */
 	public abstract Class<?> decodes();
+	
+	/**
+	 * Returns the event type string this will be specified under.
+	 *
+	 * @return The string which specified the event type.
+	 * @since 2018/04/23
+	 */
+	public abstract String eventType();
 }
 

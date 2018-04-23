@@ -19,5 +19,15 @@ public final class APIGatewayDecoder
 	{
 		return APIGatewayProxyRequestEvent.class;
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @since 2018/04/23
+	 */
+	@Override
+	public final String eventType()
+	{
+		return "apiGateway";
+	}
 }
 

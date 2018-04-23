@@ -1,7 +1,9 @@
 package com.iopipe.plugin.eventinfo;
 
+import com.iopipe.CustomMetric;
 import com.iopipe.IOpipeExecution;
 import com.iopipe.plugin.IOpipePluginExecution;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * This is the trace plugin which is used to track specific marks and measure
@@ -17,6 +19,10 @@ public class EventInfoExecution
 	
 	/** Decoders to use for events. */
 	protected final EventInfoDecoders decoders;
+	
+	/** Custom metrics to add to the plugin. */
+	private final AtomicReference<CustomMetric[]> _result =
+		new AtomicReference<>();
 	
 	/**
 	 * Initializes the plugin state for a single execution.
@@ -45,7 +51,38 @@ public class EventInfoExecution
 	 */
 	final void __post()
 	{
-		throw new Error("TODO");
+		AtomicReference<CustomMetric[]> result = this._result;
+		
+		// Try to get the object before locking on it
+		CustomMetric[] post = result.get();
+		if (post == null)
+			synchronized (result)
+			{
+				// After lock, try to get it again
+				post = result.get();
+				if (post == null)
+				{
+					// Wait for a short duration and give the report thread
+					// a final chance to complete decoding
+					try
+					{
+						result.wait(20L);
+					}
+					catch (InterruptedException e)
+					{
+					}
+					
+					// Just implicitely get it
+					post = result.get();
+				}
+			}
+		
+		// No object was returned so do nothing
+		if (post == null)
+			return;
+		
+		// Add all custom metrics
+		this.execution.measurement().addCustomMetrics(post);
 	}
 	
 	/**
@@ -59,7 +96,78 @@ public class EventInfoExecution
 	 */
 	final void __pre()
 	{
-		throw new Error("TODO");
+		// Setup thread which runs in the background which decodes the object
+		// that was input
+		Thread worker = new Thread(new __Worker__(this.execution.input(),
+			this._result, this.decoders), "IOpipe-EventInfoWorker");
+		worker.setDaemon(true);
+		
+		// Start it
+		worker.start();
+	}
+	
+	/**
+	 * This class contains the worker which runs the decoder and reports
+	 *
+	 * @since 2018/04/23
+	 */
+	private static final class __Worker__
+		implements Runnable
+	{
+		/** The object to generate a report for. */
+		protected final Object object;
+		
+		/** Where the report will go. */
+		protected final AtomicReference<CustomMetric[]> result;
+		
+		/** Decoders to use to parse the object with. */
+		protected final EventInfoDecoders decoders;
+		
+		/**
+		 * Initializes the worker.
+		 *
+		 * @param __o The object to work with.
+		 * @param __r Where the result is stored, this will be locked on.
+		 * @param __d Decoders to use to parse objects.
+		 * @throws NullPointerException If no result destination or decoders
+		 * were specified.
+		 * @since 2018/04/24
+		 */
+		private __Worker__(Object __o, AtomicReference<CustomMetric[]> __r,
+			EventInfoDecoders __d)
+			throws NullPointerException
+		{
+			if (__r == null)
+				throw new NullPointerException();
+			
+			this.object = __o;
+			this.result = __r;
+			this.decoders = __d;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 * @since 2018/04/23
+		 */
+		@Override
+		public final void run()
+		{
+			// Determine the custom metrics to use for the event
+			CustomMetric[] metrics = this.decoders.decode(this.object);
+			if (metrics == null)
+				metrics = new CustomMetric[0];
+			
+			// Store result
+			AtomicReference<CustomMetric[]> result = this.result;
+			result.set(metrics);
+			
+			// Notify any threads that are waiting on this thread that a
+			// result was just made available
+			synchronized (result)
+			{
+				result.notify();
+			}
+		}
 	}
 }
 

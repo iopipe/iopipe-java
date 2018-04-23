@@ -2,6 +2,7 @@ package com.iopipe.plugin.eventinfo;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import com.iopipe.CustomMetric;
 
 /**
  * This class manages and initializes the decoders for event information
@@ -23,6 +24,24 @@ public final class EventInfoDecoders
 	public EventInfoDecoders()
 	{
 		this.register(new APIGatewayDecoder());
+	}
+	
+	/**
+	 * Decodes the specified object and returns an array containing custom
+	 * metrics to be added to the report.
+	 *
+	 * @param __o The object to report against.
+	 * @return The custom metrics which detail the object.
+	 * @since 2018/04/23
+	 */
+	public final CustomMetric[] decode(Object __o)
+	{
+		// If this is the null object then it is rather pointless to try and
+		// decode it
+		if (__o == null)
+			return new CustomMetric[0];
+		
+		throw new Error("TODO");
 	}
 	
 	/**
