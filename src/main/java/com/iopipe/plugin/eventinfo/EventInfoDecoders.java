@@ -1,8 +1,12 @@
 package com.iopipe.plugin.eventinfo;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import com.iopipe.CustomMetric;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * This class manages and initializes the decoders for event information
@@ -12,6 +16,10 @@ import com.iopipe.CustomMetric;
  */
 public final class EventInfoDecoders
 {
+	/** Logging. */
+	private static final Logger _LOGGER =
+		LogManager.getLogger(EventInfoDecoders.class);
+	
 	/** Decoders which have been registered. */
 	private final Map<Class<?>, EventInfoDecoder> _decoders =
 		new LinkedHashMap<>();
@@ -28,6 +36,12 @@ public final class EventInfoDecoders
 	public EventInfoDecoders()
 	{
 		this.register(new APIGatewayDecoder());
+		this.register(new CloudFrontDecoder());
+		this.register(new KinesisDecoder());
+		this.register(new FirehoseDecoder());
+		this.register(new S3Decoder());
+		this.register(new ScheduledDecoder());
+		this.register(new SNSDecoder());
 	}
 	
 	/**
@@ -45,7 +59,30 @@ public final class EventInfoDecoders
 		if (__o == null)
 			return new CustomMetric[0];
 		
-		throw new Error("TODO");
+		Class<?> oftype = __o.getClass();
+		
+		// Go through
+		Class<?> match = null;
+		for (Class<?> maybe : this._classes)
+		{
+			if (oftype.isAssignableFrom(maybe))
+			{
+				match = maybe;
+				break;
+			}
+		}
+		
+		// Unmatched, do nothing
+		if (match == null)
+			return new CustomMetric[0];
+		
+		// Custom metrics to return
+		List<CustomMetric> rv = new ArrayList<>();
+		
+		if (true)
+			throw new Error("TODO");
+		
+		return rv.<CustomMetric>toArray(new CustomMetric[rv.size()]);
 	}
 	
 	/**
