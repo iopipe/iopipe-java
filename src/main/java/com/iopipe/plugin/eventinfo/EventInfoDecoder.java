@@ -24,5 +24,13 @@ public interface EventInfoDecoder
 	 * @since 2018/04/23
 	 */
 	public abstract String eventType();
+	
+	/**
+	 * Returns the rules for the event.
+	 *
+	 * @return The event rules.
+	 * @since 2018/04/29
+	 */
+	public abstract Rule[] rules();
 }
 

@@ -29,5 +29,15 @@ public final class APIGatewayDecoder
 	{
 		return "apiGateway";
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @since 2018/04/29
+	 */
+	@Override
+	public final Rule[] rules()
+	{
+		throw new Error("TODO");
+	}
 }
 
