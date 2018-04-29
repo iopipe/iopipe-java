@@ -18,7 +18,7 @@ public final class Rule
 	protected final String key;
 	
 	/** The getter for the value. */
-	protected final Function<Object, Optional<Object>> getter;
+	protected final Function<Object, Object> getter;
 	
 	/**
 	 * Initializes the rule.
@@ -29,7 +29,7 @@ public final class Rule
 	 * @throws NullPointerException On null arguments.
 	 */
 	public Rule(boolean __req, String __key,
-		Function<Object, Optional<Object>> __get)
+		Function<Object, Object> __get)
 		throws NullPointerException
 	{
 		if (__key == null || __get == null)
@@ -46,7 +46,7 @@ public final class Rule
 	 * @return The function to obtain the value.
 	 * @since 2018/04/29
 	 */
-	public final Function<Object, Optional<Object>> getter()
+	public final Function<Object, Object> getter()
 	{
 		return this.getter;
 	}
@@ -71,6 +71,18 @@ public final class Rule
 	public final String key()
 	{
 		return this.key;
+	}
+	
+	/**
+	 * Returns the input array.
+	 *
+	 * @param __r The input rule set.
+	 * @return {@code __r}.
+	 * @since 2018/04/29
+	 */
+	public static Rule[] rules(Rule... __r)
+	{
+		return (__r == null ? new Rule[0] : __r);
 	}
 }
 

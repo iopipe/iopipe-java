@@ -90,9 +90,7 @@ class __DoEventInfoPlugin__
 			throw new NullPointerException();
 		
 		this.decoder = __decoder;
-		
-		System.err.println("TODO -- Initialize total metric count in test.");
-		this.totalmetrics = -1;
+		this.totalmetrics = __decoder.rules().length;
 	}
 	
 	/**
@@ -142,16 +140,20 @@ class __DoEventInfoPlugin__
 		Set<String> keys = new LinkedHashSet<>();
 		for (JsonValue v : (JsonArray)(((JsonObject)__r.request.
 			bodyAsJsonStructure()).get("custom_metrics")))
-			for (Map.Entry<String, JsonValue> e : ((JsonObject)v).entrySet())
-			{
-				String k;
-				keys.add((k = e.getKey()));
-				
-				// Is this the expected event type
-				if (k.equals("@iopipe/event-info.eventType") &&
-					__Utils__.isEqual(e.getValue(), decoder.eventType()))
-					this.typegot.set(true);
-			}
+		{
+			// Convert to object
+			JsonObject obj = (JsonObject)v;
+			
+			// Is this the event type?
+			if (__Utils__.isEqual(obj.get("name"),
+				"@iopipe/event-info.eventType"))
+				this.typegot.set(true);
+			
+			// Is one of the keys?
+			else if (((JsonString)obj.get("name")).getString().startsWith(
+				"@iopipe/event-info." + decoder.eventType() + "."))
+				this.gotmetrics.incrementAndGet();
+		}
 		
 		_LOGGER.debug("remoteRequest() " + keys);
 		//throw new Error("TODO");

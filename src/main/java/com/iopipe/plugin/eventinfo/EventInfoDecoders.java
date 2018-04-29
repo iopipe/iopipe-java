@@ -1,11 +1,25 @@
 package com.iopipe.plugin.eventinfo;
 
+import com.iopipe.CustomMetric;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
-import com.iopipe.CustomMetric;
+import java.util.Set;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonNumber;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonStructure;
+import javax.json.JsonString;
+import javax.json.JsonValue;
+import javax.json.JsonWriter;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -104,11 +118,9 @@ public final class EventInfoDecoders
 				reqsaw++;
 			
 			// Perform function on the value
-			Optional<Object> opt = rule.getter().apply(__o);
-			if (opt.isPresent())
+			Object val = rule.getter().apply(__o);
+			if (val != null)
 			{
-				Object val = opt.get();
-				
 				// Determine key name to use
 				String name = "@iopipe/event-info." + eventtype + "." +
 					rule.key();
@@ -117,6 +129,23 @@ public final class EventInfoDecoders
 				CustomMetric cm;
 				if (val instanceof Number)
 					cm = new CustomMetric(name, ((Number)val).longValue());
+				else if (val instanceof Map || val instanceof List ||
+					val instanceof Set)
+					try (StringWriter w = new StringWriter())
+					{
+						// Convert value
+						try (JsonWriter j = Json.createWriter(w))
+						{
+							j.write((JsonStructure)__convert(val));
+						}
+						
+						// Build
+						cm = new CustomMetric(name, w.toString());
+					}
+					catch (IOException e)
+					{
+						continue;
+					}
 				else
 					cm = new CustomMetric(name, val.toString());
 				rv.add(cm);
@@ -169,6 +198,66 @@ public final class EventInfoDecoders
 			this._classes = decoders.keySet().<Class<?>>toArray(
 				new Class<?>[decoders.size()]);
 		}
+	}
+	
+	/**
+	 * Converts an object to a JSON type recursively so that.
+	 *
+	 * @param __v The value to convert.
+	 * @return The converted value.
+	 * @since 2018/04/29
+	 */
+	private static JsonValue __convert(Object __v)
+	{
+		// Map null
+		if (__v == null)
+			return JsonValue.NULL;
+		
+		// Already translated
+		else if (__v instanceof JsonValue)
+			return (JsonValue)__v;
+		
+		// Is true
+		else if (Boolean.TRUE.equals(__v))
+			return JsonValue.TRUE;
+		
+		// Is false
+		else if (Boolean.FALSE.equals(__v))
+			return JsonValue.FALSE;
+		
+		// Is a number
+		else if (__v instanceof Number)
+			return Json.createArrayBuilder().add(((Number)__v).doubleValue()).
+				build().get(0);
+		
+		// Lists and sets
+		else if (__v instanceof List || __v instanceof Set)
+		{
+			JsonArrayBuilder jab = Json.createArrayBuilder();
+			
+			for (Object s : (Iterable)__v)
+				jab.add(__convert(s));
+			
+			return jab.build();
+		}
+		
+		// Map
+		else if (__v instanceof Map)
+		{
+			JsonObjectBuilder job = Json.createObjectBuilder();
+			
+			for (Map.Entry<Object, Object> e :
+				((Map<Object, Object>)__v).entrySet())
+				job.add(Objects.toString(e.getKey(), ""),
+					__convert(e.getValue()));
+			
+			return job.build();
+		}
+		
+		// Unknown, just treat it as a string
+		else
+			return Json.createArrayBuilder().add(__v.toString()).build().
+				get(0);
 	}
 }
 

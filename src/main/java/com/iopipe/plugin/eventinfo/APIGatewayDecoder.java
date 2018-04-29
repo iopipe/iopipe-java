@@ -37,7 +37,9 @@ public final class APIGatewayDecoder
 	@Override
 	public final Rule[] rules()
 	{
-		throw new Error("TODO");
+		return Rule.rules(
+			new Rule(true, "headers", (__o) ->
+				((APIGatewayProxyRequestEvent)__o).getHeaders()));
 	}
 }
 

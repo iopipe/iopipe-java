@@ -37,7 +37,8 @@ public final class SNSDecoder
 	@Override
 	public final Rule[] rules()
 	{
-		throw new Error("TODO");
+		return new Rule[]{
+			};
 	}
 }
 
