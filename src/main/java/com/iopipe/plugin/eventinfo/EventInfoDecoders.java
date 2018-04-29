@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import com.iopipe.CustomMetric;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -76,13 +77,67 @@ public final class EventInfoDecoders
 		if (match == null)
 			return new CustomMetric[0];
 		
+		// Obtain the decoder that should be used
+		EventInfoDecoder decoder;
+		Map<Class<?>, EventInfoDecoder> decoders = this._decoders;
+		synchronized (decoders)
+		{
+			decoder = decoders.get(match);
+		}
+		
 		// Custom metrics to return
 		List<CustomMetric> rv = new ArrayList<>();
 		
-		if (true)
-			throw new Error("TODO");
+		// Used to name values
+		String eventtype = decoder.eventType();
 		
-		return rv.<CustomMetric>toArray(new CustomMetric[rv.size()]);
+		// Keep track of required keys and which ones have values
+		int reqsaw = 0,
+			reqgot = 0;
+				
+		// Handle each rule
+		for (Rule rule : decoder.rules())
+		{
+			// Mark a required rule as being seen
+			boolean isrequired;
+			if ((isrequired = rule.isRequired()))
+				reqsaw++;
+			
+			// Perform function on the value
+			Optional<Object> opt = rule.getter().apply(__o);
+			if (opt.isPresent())
+			{
+				Object val = opt.get();
+				
+				// Determine key name to use
+				String name = "@iopipe/event-info." + eventtype + "." +
+					rule.key();
+				
+				// Add value
+				CustomMetric cm;
+				if (val instanceof Number)
+					cm = new CustomMetric(name, ((Number)val).longValue());
+				else
+					cm = new CustomMetric(name, val.toString());
+				rv.add(cm);
+				
+				// Mark required keys as gotten
+				if (isrequired)
+					reqgot++;
+			}
+		}
+		
+		// All of the required values were obtained, record the event type
+		// used
+		if (reqgot >= reqsaw)
+		{
+			rv.add(new CustomMetric("@iopipe/event-info.eventType",
+				eventtype));
+			return rv.<CustomMetric>toArray(new CustomMetric[rv.size()]);
+		}
+		
+		// Some required values are missing, so do not use
+		return new CustomMetric[0];
 	}
 	
 	/**
