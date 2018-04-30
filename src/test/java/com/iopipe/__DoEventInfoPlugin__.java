@@ -154,9 +154,6 @@ class __DoEventInfoPlugin__
 				"@iopipe/event-info." + decoder.eventType() + "."))
 				this.gotmetrics.incrementAndGet();
 		}
-		
-		_LOGGER.debug("remoteRequest() " + keys);
-		//throw new Error("TODO");
 	}
 	
 	/**

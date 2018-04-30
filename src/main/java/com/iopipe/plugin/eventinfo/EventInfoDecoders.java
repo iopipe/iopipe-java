@@ -105,20 +105,16 @@ public final class EventInfoDecoders
 		// Used to name values
 		String eventtype = decoder.eventType();
 		
-		// Keep track of required keys and which ones have values
-		int reqsaw = 0,
-			reqgot = 0;
-				
 		// Handle each rule
 		for (Rule rule : decoder.rules())
 		{
-			// Mark a required rule as being seen
-			boolean isrequired;
-			if ((isrequired = rule.isRequired()))
-				reqsaw++;
+			// If the value is wrapped in an optional then get the value it
+			// contains
+			Object val = rule.getter().apply(__o);
+			if (val instanceof Optional)
+				val = ((Optional<?>)val).orElse(null);
 			
 			// Perform function on the value
-			Object val = rule.getter().apply(__o);
 			if (val != null)
 			{
 				// Determine key name to use
@@ -149,24 +145,12 @@ public final class EventInfoDecoders
 				else
 					cm = new CustomMetric(name, val.toString());
 				rv.add(cm);
-				
-				// Mark required keys as gotten
-				if (isrequired)
-					reqgot++;
 			}
 		}
 		
-		// All of the required values were obtained, record the event type
-		// used
-		if (reqgot >= reqsaw)
-		{
-			rv.add(new CustomMetric("@iopipe/event-info.eventType",
-				eventtype));
-			return rv.<CustomMetric>toArray(new CustomMetric[rv.size()]);
-		}
-		
-		// Some required values are missing, so do not use
-		return new CustomMetric[0];
+		// Add type and records
+		rv.add(new CustomMetric("@iopipe/event-info.eventType", eventtype));
+		return rv.<CustomMetric>toArray(new CustomMetric[rv.size()]);
 	}
 	
 	/**

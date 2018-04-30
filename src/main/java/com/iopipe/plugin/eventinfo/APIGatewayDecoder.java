@@ -38,8 +38,24 @@ public final class APIGatewayDecoder
 	public final Rule[] rules()
 	{
 		return Rule.rules(
-			new Rule(true, "headers", (__o) ->
-				((APIGatewayProxyRequestEvent)__o).getHeaders()));
+			new Rule<APIGatewayProxyRequestEvent>("httpMethod",
+				APIGatewayProxyRequestEvent::getHttpMethod),
+			new Rule<APIGatewayProxyRequestEvent>("path",
+				APIGatewayProxyRequestEvent::getPath),
+			new Rule<APIGatewayProxyRequestEvent>("requestContext.accountId",
+				(__o) -> __o.getRequestContext().getAccountId()),
+			new Rule<APIGatewayProxyRequestEvent>("requestContext.httpMethod",
+				(__o) -> __o.getRequestContext().getHttpMethod()),
+			new Rule<APIGatewayProxyRequestEvent>("requestContext.identity.userAgent",
+				(__o) -> __o.getRequestContext().getIdentity().getUserAgent()),
+			new Rule<APIGatewayProxyRequestEvent>("requestContext.requestId",
+				(__o) -> __o.getRequestContext().getRequestId()),
+			new Rule<APIGatewayProxyRequestEvent>("requestContext.resourcePath",
+				(__o) -> __o.getRequestContext().getResourcePath()),
+			new Rule<APIGatewayProxyRequestEvent>("requestContext.stage",
+				(__o) -> __o.getRequestContext().getStage()),
+			new Rule<APIGatewayProxyRequestEvent>("resource",
+				APIGatewayProxyRequestEvent::getResource));
 	}
 }
 
