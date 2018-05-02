@@ -10,6 +10,17 @@ package com.iopipe.plugin.eventinfo;
 public interface EventInfoDecoder
 {
 	/**
+	 * Accepts the given value to decode events from.
+	 *
+	 * @param __a Where to store values.
+	 * @param __v The value to decode.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/05/02
+	 */
+	public abstract void accept(ValueAcceptor __a, Object __v)
+		throws NullPointerException;
+	
+	/**
 	 * Returns the class this implements a decoder for.
 	 *
 	 * @return The class this provides a decoder for.
@@ -24,13 +35,5 @@ public interface EventInfoDecoder
 	 * @since 2018/04/23
 	 */
 	public abstract String eventType();
-	
-	/**
-	 * Returns the rules for the event.
-	 *
-	 * @return The event rules.
-	 * @since 2018/04/29
-	 */
-	public abstract Rule[] rules();
 }
 

@@ -99,58 +99,11 @@ public final class EventInfoDecoders
 			decoder = decoders.get(match);
 		}
 		
-		// Custom metrics to return
-		List<CustomMetric> rv = new ArrayList<>();
+		// Handle all input values
+		ValueAcceptor a = new ValueAcceptor(decoder.eventType());
+		decoder.accept(a, __o);
 		
-		// Used to name values
-		String eventtype = decoder.eventType();
-		
-		// Handle each rule
-		for (Rule rule : decoder.rules())
-		{
-			// If the value is wrapped in an optional then get the value it
-			// contains
-			Object val = rule.getter().apply(__o);
-			if (val instanceof Optional)
-				val = ((Optional<?>)val).orElse(null);
-			
-			// Perform function on the value
-			if (val != null)
-			{
-				// Determine key name to use
-				String name = "@iopipe/event-info." + eventtype + "." +
-					rule.key();
-				
-				// Add value
-				CustomMetric cm;
-				if (val instanceof Number)
-					cm = new CustomMetric(name, ((Number)val).longValue());
-				else if (val instanceof Map || val instanceof List ||
-					val instanceof Set)
-					try (StringWriter w = new StringWriter())
-					{
-						// Convert value
-						try (JsonWriter j = Json.createWriter(w))
-						{
-							j.write((JsonStructure)__convert(val));
-						}
-						
-						// Build
-						cm = new CustomMetric(name, w.toString());
-					}
-					catch (IOException e)
-					{
-						continue;
-					}
-				else
-					cm = new CustomMetric(name, val.toString());
-				rv.add(cm);
-			}
-		}
-		
-		// Add type and records
-		rv.add(new CustomMetric("@iopipe/event-info.eventType", eventtype));
-		return rv.<CustomMetric>toArray(new CustomMetric[rv.size()]);
+		return a.get();
 	}
 	
 	/**
@@ -182,66 +135,6 @@ public final class EventInfoDecoders
 			this._classes = decoders.keySet().<Class<?>>toArray(
 				new Class<?>[decoders.size()]);
 		}
-	}
-	
-	/**
-	 * Converts an object to a JSON type recursively so that.
-	 *
-	 * @param __v The value to convert.
-	 * @return The converted value.
-	 * @since 2018/04/29
-	 */
-	private static JsonValue __convert(Object __v)
-	{
-		// Map null
-		if (__v == null)
-			return JsonValue.NULL;
-		
-		// Already translated
-		else if (__v instanceof JsonValue)
-			return (JsonValue)__v;
-		
-		// Is true
-		else if (Boolean.TRUE.equals(__v))
-			return JsonValue.TRUE;
-		
-		// Is false
-		else if (Boolean.FALSE.equals(__v))
-			return JsonValue.FALSE;
-		
-		// Is a number
-		else if (__v instanceof Number)
-			return Json.createArrayBuilder().add(((Number)__v).doubleValue()).
-				build().get(0);
-		
-		// Lists and sets
-		else if (__v instanceof List || __v instanceof Set)
-		{
-			JsonArrayBuilder jab = Json.createArrayBuilder();
-			
-			for (Object s : (Iterable)__v)
-				jab.add(__convert(s));
-			
-			return jab.build();
-		}
-		
-		// Map
-		else if (__v instanceof Map)
-		{
-			JsonObjectBuilder job = Json.createObjectBuilder();
-			
-			for (Map.Entry<Object, Object> e :
-				((Map<Object, Object>)__v).entrySet())
-				job.add(Objects.toString(e.getKey(), ""),
-					__convert(e.getValue()));
-			
-			return job.build();
-		}
-		
-		// Unknown, just treat it as a string
-		else
-			return Json.createArrayBuilder().add(__v.toString()).build().
-				get(0);
 	}
 }
 

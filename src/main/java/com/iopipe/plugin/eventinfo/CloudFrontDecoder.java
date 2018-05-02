@@ -12,6 +12,20 @@ public final class CloudFrontDecoder
 {
 	/**
 	 * {@inheritDoc}
+	 * @since 2018/05/02
+	 */
+	@Override
+	public void accept(ValueAcceptor __a, Object __v)
+		throws NullPointerException
+	{
+		if (__a == null || __v == null)
+			throw new NullPointerException();
+		
+		throw new Error("TODO");
+	}
+	
+	/**
+	 * {@inheritDoc}
 	 * @since 2018/04/23
 	 */
 	@Override
@@ -28,17 +42,6 @@ public final class CloudFrontDecoder
 	public final String eventType()
 	{
 		return "cloudFront";
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * @since 2018/04/29
-	 */
-	@Override
-	public final Rule[] rules()
-	{
-		return new Rule[]{
-			};
 	}
 }
 

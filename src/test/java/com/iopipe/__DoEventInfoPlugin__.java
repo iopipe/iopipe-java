@@ -61,15 +61,12 @@ class __DoEventInfoPlugin__
 	protected final BooleanValue typegot =
 		new BooleanValue("typegot");
 	
-	/** The number of metrics which were found. */
-	protected final IntegerValue gotmetrics =
-		new IntegerValue("gotmetrics");
+	/** Metrics were found */
+	protected final BooleanValue gotmetrics =
+		new BooleanValue("gotmetrics");
 	
 	/** The decoder that is used. */
 	protected final EventInfoDecoder decoder;
-	
-	/** The number of expected number of metrics that must exist. */
-	protected final int totalmetrics;
 	
 	/**
 	 * Constructs the test.
@@ -90,7 +87,6 @@ class __DoEventInfoPlugin__
 			throw new NullPointerException();
 		
 		this.decoder = __decoder;
-		this.totalmetrics = __decoder.rules().length;
 	}
 	
 	/**
@@ -105,7 +101,7 @@ class __DoEventInfoPlugin__
 		
 		// Must have read all metrics and the event type
 		super.assertTrue(this.typegot);
-		super.assertEquals(this.totalmetrics, this.gotmetrics);
+		super.assertTrue(this.gotmetrics);
 	}
 	
 	/**
@@ -152,7 +148,7 @@ class __DoEventInfoPlugin__
 			// Is one of the keys?
 			else if (((JsonString)obj.get("name")).getString().startsWith(
 				"@iopipe/event-info." + decoder.eventType() + "."))
-				this.gotmetrics.incrementAndGet();
+				this.gotmetrics.set(true);
 		}
 	}
 	
