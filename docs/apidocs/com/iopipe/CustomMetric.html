@@ -117,7 +117,10 @@ var activeTableTab = "activeTableTab";
 extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>
 implements <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Comparable.html?is-external=true" title="class or interface in java.lang">Comparable</a>&lt;<a href="../../com/iopipe/CustomMetric.html" title="class in com.iopipe">CustomMetric</a>&gt;</pre>
 <div class="block">This represents a custom metric which may have a string or long value,
- these may be used to add extra data points that are normally not present.</div>
+ these may be used to add extra data points that are normally not present.
+
+ Custom metric names are limited to the length specified in
+ <a href="../../com/iopipe/IOpipeConstants.html#NAME_CODEPOINT_LIMIT"><code>IOpipeConstants.NAME_CODEPOINT_LIMIT</code></a>.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>2018/01/20</dd>

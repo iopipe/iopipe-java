@@ -82,6 +82,10 @@
 <dd>
 <div class="block">Adds a single custom metric to the report.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/iopipe/IOpipeMeasurement.html#addLabel-java.lang.String-">addLabel(String)</a></span> - Method in class com.iopipe.<a href="com/iopipe/IOpipeMeasurement.html" title="class in com.iopipe">IOpipeMeasurement</a></dt>
+<dd>
+<div class="block">Adds a single label which will be passed in the report.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/iopipe/IOpipeMeasurement.html#addPerformanceEntry-com.iopipe.PerformanceEntry-">addPerformanceEntry(PerformanceEntry)</a></span> - Method in class com.iopipe.<a href="com/iopipe/IOpipeMeasurement.html" title="class in com.iopipe">IOpipeMeasurement</a></dt>
 <dd>
 <div class="block">Adds a single performance entry to the report.</div>
@@ -451,6 +455,11 @@
 <dd>
 <div class="block">Returns the install method.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/iopipe/IOpipeMeasurement.html#getLabels--">getLabels()</a></span> - Method in class com.iopipe.<a href="com/iopipe/IOpipeMeasurement.html" title="class in com.iopipe">IOpipeMeasurement</a></dt>
+<dd>
+<div class="block">Returns all of the labels which have been declared during the
+ execution.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/iopipe/IOpipeMeasurement.html#getPerformanceEntries--">getPerformanceEntries()</a></span> - Method in class com.iopipe.<a href="com/iopipe/IOpipeMeasurement.html" title="class in com.iopipe">IOpipeMeasurement</a></dt>
 <dd>
 <div class="block">Returns a copy of the performance entries which were measured.</div>
@@ -668,6 +677,10 @@
 </a>
 <h2 class="title">L</h2>
 <dl>
+<dt><span class="memberNameLink"><a href="com/iopipe/IOpipeExecution.html#label-java.lang.String-">label(String)</a></span> - Method in class com.iopipe.<a href="com/iopipe/IOpipeExecution.html" title="class in com.iopipe">IOpipeExecution</a></dt>
+<dd>
+<div class="block">Adds a single label which will be passed in the report.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/iopipe/IOpipeConstants.html#LOAD_TIME">LOAD_TIME</a></span> - Static variable in interface com.iopipe.<a href="com/iopipe/IOpipeConstants.html" title="interface in com.iopipe">IOpipeConstants</a></dt>
 <dd>
 <div class="block">This is used to determine the load time of the service.</div>
@@ -724,9 +737,17 @@
 <dd>
 <div class="block">The measurement to record to.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/iopipe/SystemMeasurement.html#memoryfreebytes">memoryfreebytes</a></span> - Variable in class com.iopipe.<a href="com/iopipe/SystemMeasurement.html" title="class in com.iopipe">SystemMeasurement</a></dt>
+<dd>
+<div class="block">Free amount of memory in bytes.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/iopipe/SystemMeasurement.html#memoryfreekib">memoryfreekib</a></span> - Variable in class com.iopipe.<a href="com/iopipe/SystemMeasurement.html" title="class in com.iopipe">SystemMeasurement</a></dt>
 <dd>
 <div class="block">Free amount of memory in KiB.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/iopipe/SystemMeasurement.html#memorytotalbytes">memorytotalbytes</a></span> - Variable in class com.iopipe.<a href="com/iopipe/SystemMeasurement.html" title="class in com.iopipe">SystemMeasurement</a></dt>
+<dd>
+<div class="block">Total amount of memory in bytes.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/iopipe/SystemMeasurement.html#memorytotalkib">memorytotalkib</a></span> - Variable in class com.iopipe.<a href="com/iopipe/SystemMeasurement.html" title="class in com.iopipe">SystemMeasurement</a></dt>
 <dd>
@@ -844,6 +865,10 @@
 <dt><span class="memberNameLink"><a href="com/iopipe/plugin/trace/TracePlugin.html#name--">name()</a></span> - Method in class com.iopipe.plugin.trace.<a href="com/iopipe/plugin/trace/TracePlugin.html" title="class in com.iopipe.plugin.trace">TracePlugin</a></dt>
 <dd>
 <div class="block">Return the name of this plugin.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/iopipe/IOpipeConstants.html#NAME_CODEPOINT_LIMIT">NAME_CODEPOINT_LIMIT</a></span> - Static variable in interface com.iopipe.<a href="com/iopipe/IOpipeConstants.html" title="interface in com.iopipe">IOpipeConstants</a></dt>
+<dd>
+<div class="block">The length limit for how long custom metric names and labels.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/iopipe/SystemMeasurement.Cpu.html#nice">nice</a></span> - Variable in class com.iopipe.<a href="com/iopipe/SystemMeasurement.Cpu.html" title="class in com.iopipe">SystemMeasurement.Cpu</a></dt>
 <dd>

@@ -18,7 +18,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10,"i11":10,"i12":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10,"i11":10,"i12":10,"i13":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -216,26 +216,32 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </td>
 </tr>
 <tr id="i4" class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../com/iopipe/IOpipeExecution.html#label-java.lang.String-">label</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;__s)</code>
+<div class="block">Adds a single label which will be passed in the report.</div>
+</td>
+</tr>
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code><a href="../../com/iopipe/IOpipeMeasurement.html" title="class in com.iopipe">IOpipeMeasurement</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../com/iopipe/IOpipeExecution.html#measurement--">measurement</a></span>()</code>
 <div class="block">Returns the measurement recorder.</div>
 </td>
 </tr>
-<tr id="i5" class="rowColor">
+<tr id="i6" class="altColor">
 <td class="colFirst"><code>&lt;C extends <a href="../../com/iopipe/plugin/IOpipePluginExecution.html" title="interface in com.iopipe.plugin">IOpipePluginExecution</a>&gt;<br>C</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../com/iopipe/IOpipeExecution.html#optionalPlugin-java.lang.Class-">optionalPlugin</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;C&gt;&nbsp;__cl)</code>
 <div class="block">This returns an instance of a plugin based on the class type of its
  interface, if the plugin does not exist then <code>null</code> is returned.</div>
 </td>
 </tr>
-<tr id="i6" class="altColor">
+<tr id="i7" class="rowColor">
 <td class="colFirst"><code>&lt;C extends <a href="../../com/iopipe/plugin/IOpipePluginExecution.html" title="interface in com.iopipe.plugin">IOpipePluginExecution</a>&gt;<br>C</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../com/iopipe/IOpipeExecution.html#plugin-java.lang.Class-">plugin</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;C&gt;&nbsp;__cl)</code>
 <div class="block">This returns an instance of a plugin based on the class type of its
  interface.</div>
 </td>
 </tr>
-<tr id="i7" class="rowColor">
+<tr id="i8" class="altColor">
 <td class="colFirst"><code>&lt;C extends <a href="../../com/iopipe/plugin/IOpipePluginExecution.html" title="interface in com.iopipe.plugin">IOpipePluginExecution</a>,R extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/AutoCloseable.html?is-external=true" title="class or interface in java.lang">AutoCloseable</a>,V&gt;<br>R</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../com/iopipe/IOpipeExecution.html#plugin-java.lang.Class-java.util.function.BiFunction-V-">plugin</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;C&gt;&nbsp;__cl,
       <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/BiFunction.html?is-external=true" title="class or interface in java.util.function">BiFunction</a>&lt;C,V,R&gt;&nbsp;__func,
@@ -245,7 +251,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
  try-with-resources.</div>
 </td>
 </tr>
-<tr id="i8" class="altColor">
+<tr id="i9" class="rowColor">
 <td class="colFirst"><code>&lt;C extends <a href="../../com/iopipe/plugin/IOpipePluginExecution.html" title="interface in com.iopipe.plugin">IOpipePluginExecution</a>&gt;<br>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../com/iopipe/IOpipeExecution.html#plugin-java.lang.Class-java.util.function.Consumer-">plugin</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;C&gt;&nbsp;__cl,
       <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Consumer.html?is-external=true" title="class or interface in java.util.function">Consumer</a>&lt;C&gt;&nbsp;__func)</code>
@@ -253,7 +259,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
  not exist then it will not be executed.</div>
 </td>
 </tr>
-<tr id="i9" class="rowColor">
+<tr id="i10" class="altColor">
 <td class="colFirst"><code>&lt;C extends <a href="../../com/iopipe/plugin/IOpipePluginExecution.html" title="interface in com.iopipe.plugin">IOpipePluginExecution</a>,R extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/AutoCloseable.html?is-external=true" title="class or interface in java.lang">AutoCloseable</a>&gt;<br>R</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../com/iopipe/IOpipeExecution.html#plugin-java.lang.Class-java.util.function.Function-">plugin</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;C&gt;&nbsp;__cl,
       <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Function.html?is-external=true" title="class or interface in java.util.function">Function</a>&lt;C,R&gt;&nbsp;__func)</code>
@@ -262,19 +268,19 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
  try-with-resources.</div>
 </td>
 </tr>
-<tr id="i10" class="altColor">
+<tr id="i11" class="rowColor">
 <td class="colFirst"><code><a href="../../com/iopipe/IOpipeService.html" title="class in com.iopipe">IOpipeService</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../com/iopipe/IOpipeExecution.html#service--">service</a></span>()</code>
 <div class="block">Returns the service which ran this execution.</div>
 </td>
 </tr>
-<tr id="i11" class="rowColor">
+<tr id="i12" class="altColor">
 <td class="colFirst"><code>long</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../com/iopipe/IOpipeExecution.html#startTimestamp--">startTimestamp</a></span>()</code>
 <div class="block">Returns the starting time of the execution on the wall clock.</div>
 </td>
 </tr>
-<tr id="i12" class="altColor">
+<tr id="i13" class="rowColor">
 <td class="colFirst"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/ThreadGroup.html?is-external=true" title="class or interface in java.lang">ThreadGroup</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../com/iopipe/IOpipeExecution.html#threadGroup--">threadGroup</a></span>()</code>
 <div class="block">Returns the thread group which this execution is running under.</div>
@@ -411,7 +417,10 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <pre>public final&nbsp;void&nbsp;customMetric(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;__name,
                                <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;__sv)
                         throws <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/NullPointerException.html?is-external=true" title="class or interface in java.lang">NullPointerException</a></pre>
-<div class="block">Adds the specified custom metric with a string value.</div>
+<div class="block">Adds the specified custom metric with a string value.
+
+ Custom metric names are limited to the length specified in
+ <a href="../../com/iopipe/IOpipeConstants.html#NAME_CODEPOINT_LIMIT"><code>IOpipeConstants.NAME_CODEPOINT_LIMIT</code></a>.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>__name</code> - The metric name.</dd>
@@ -432,7 +441,10 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <pre>public final&nbsp;void&nbsp;customMetric(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;__name,
                                long&nbsp;__lv)
                         throws <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/NullPointerException.html?is-external=true" title="class or interface in java.lang">NullPointerException</a></pre>
-<div class="block">Adds the specified custom metric with a long value.</div>
+<div class="block">Adds the specified custom metric with a long value.
+
+ Custom metric names are limited to the length specified in
+ <a href="../../com/iopipe/IOpipeConstants.html#NAME_CODEPOINT_LIMIT"><code>IOpipeConstants.NAME_CODEPOINT_LIMIT</code></a>.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>__name</code> - The metric name.</dd>
@@ -441,6 +453,28 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/NullPointerException.html?is-external=true" title="class or interface in java.lang">NullPointerException</a></code> - On null arguments.</dd>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>2018/01/30</dd>
+</dl>
+</li>
+</ul>
+<a name="label-java.lang.String-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>label</h4>
+<pre>public final&nbsp;void&nbsp;label(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;__s)
+                 throws <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/NullPointerException.html?is-external=true" title="class or interface in java.lang">NullPointerException</a></pre>
+<div class="block">Adds a single label which will be passed in the report.
+
+ Labels are limited to the length specified in
+ <a href="../../com/iopipe/IOpipeConstants.html#NAME_CODEPOINT_LIMIT"><code>IOpipeConstants.NAME_CODEPOINT_LIMIT</code></a>.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>__s</code> - The label to add.</dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/NullPointerException.html?is-external=true" title="class or interface in java.lang">NullPointerException</a></code> - On null arguments.</dd>
+<dt><span class="simpleTagLabel">Since:</span></dt>
+<dd>2018/04/11</dd>
 </dl>
 </li>
 </ul>

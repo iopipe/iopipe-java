@@ -540,8 +540,8 @@ public final class IOpipeExecution
 
 			long totalmem, freemem;
 			gen.write("hostname", SystemMeasurement.HOSTNAME);
-			gen.write("totalmem", (totalmem = sysinfo.memorytotalkib));
-			gen.write("freemem", (freemem = sysinfo.memoryfreekib));
+			gen.write("totalmem", (totalmem = sysinfo.memorytotalbytes));
+			gen.write("freemem", (freemem = sysinfo.memoryfreebytes));
 			gen.write("usedmem", totalmem - freemem);
 
 			// Start CPUs
