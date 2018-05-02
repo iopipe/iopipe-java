@@ -64,7 +64,6 @@ public final class CloudFrontDecoder
 					__a.accept("Records[0].cf.request.headers." +
 						"[\"user-agent\"][0].value",
 						useragents.get(0).getValue());
-						
 			}
 			
 			__a.accept("Records[0].cf.request.method",

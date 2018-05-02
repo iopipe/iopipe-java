@@ -21,7 +21,12 @@ public final class FirehoseDecoder
 		if (__a == null || __v == null)
 			throw new NullPointerException();
 		
-		throw new Error("TODO");
+		KinesisFirehoseEvent v = (KinesisFirehoseEvent)__v;
+		
+		__a.accept("deliveryStreamArn",
+			v.getDeliveryStreamArn());
+		__a.accept("region",
+			v.getRegion());
 	}
 	
 	/**
