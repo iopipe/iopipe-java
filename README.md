@@ -157,10 +157,12 @@ IOpipeService service = IOpipeService.instance();
 ```
 
 Run by passing a lambda or a class which implements the functional interface
-`Function<IOpipeExecution, R>`:
+`Function<IOpipeExecution, R>`, an input object may be specified which is
+usable by plugins that require it:
 
 ```java
 service.<String>run(context, (exec) -> "Hello World!");
+service.<String>run(context, (exec) -> "Hello World!", input);
 ```
 
 ### Setting system properties and environment variables
@@ -213,6 +215,32 @@ customMetric(String name, long value)
 
 Calling either of these will add a custom metric with the specified name and
 the given value. Custom metric names are limited to 128 characters.
+
+## Event Info
+
+This plugin records input event types and includes in the report the origin
+of certain events.
+
+It operates on the given input classes:
+
+ * `com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent`
+ * `com.amazonaws.services.lambda.runtime.events.CloudFrontEvent`
+ * `com.amazonaws.services.lambda.runtime.events.KinesisEvent`
+ * `com.amazonaws.services.lambda.runtime.events.KinesisFirehoseEvent`
+ * `com.amazonaws.services.lambda.runtime.events.S3Event`
+ * `com.amazonaws.services.lambda.runtime.events.ScheduledEvent`
+ * `com.amazonaws.services.lambda.runtime.events.SNSEvent`
+ * `com.amazonaws.services.s3.event.S3EventNotification`
+
+By default this plugin is enabled and requires no changes to your code unless
+you are using IOpipe via the manual method.
+
+If you are manually using IOpipe via the `IOpipeService` instance then you will
+need to pass the input object for the plugin to see that object:
+
+```java
+service.<String>run(context, (exec) -> "Hello World!", input);
+```
 
 ## Labels
 
