@@ -49,17 +49,19 @@ public final class ValueAcceptor
 	 * Accepts the given key and value.
 	 *
 	 * @param __key The key.
-	 * @param __val The value.
-	 * @throws NullPointerException On null arguments.
+	 * @param __val The value, if this is {@code null} then nothing will be
+	 * reported.
+	 * @throws NullPointerException If no key was specified.
 	 * @since 2018/05/02
 	 */
 	public final void accept(String __key, String __val)
 		throws NullPointerException
 	{
-		if (__key == null || __val == null)
+		if (__key == null)
 			throw new NullPointerException();
 		
-		this._metrics.add(new CustomMetric(this.prefix + __key, __val));
+		if (__val != null)
+			this._metrics.add(new CustomMetric(this.prefix + __key, __val));
 	}
 	
 	/**
@@ -67,7 +69,7 @@ public final class ValueAcceptor
 	 *
 	 * @param __key The key.
 	 * @param __val The value.
-	 * @throws NullPointerException On null arguments.
+	 * @throws NullPointerException If no key was specified.
 	 * @since 2018/05/02
 	 */
 	public final void accept(String __key, long __val)
