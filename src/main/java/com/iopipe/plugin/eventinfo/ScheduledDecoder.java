@@ -1,6 +1,8 @@
 package com.iopipe.plugin.eventinfo;
 
 import com.amazonaws.services.lambda.runtime.events.ScheduledEvent;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * This class implements the decoder for Scheduled events.
@@ -21,7 +23,24 @@ public final class ScheduledDecoder
 		if (__a == null || __v == null)
 			throw new NullPointerException();
 		
-		throw new Error("TODO");
+		ScheduledEvent v = (ScheduledEvent)__v;
+		
+		__a.accept("account",
+			v.getAccount());
+		__a.accept("id",
+			v.getId());
+		__a.accept("region",
+			v.getRegion());
+		
+		List<String> resources = v.getResources();
+		if (resources != null && resources.size() >= 1)
+		{
+			__a.accept("resources[0]",
+				resources.get(0));
+		}
+		
+		__a.accept("time",
+			Objects.toString(v.getTime(), null));
 	}
 	
 	/**
