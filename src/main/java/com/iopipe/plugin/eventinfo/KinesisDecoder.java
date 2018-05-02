@@ -1,6 +1,7 @@
 package com.iopipe.plugin.eventinfo;
 
 import com.amazonaws.services.lambda.runtime.events.KinesisEvent;
+import java.util.List;
 
 /**
  * This class implements the decoder for Kinesis events.
@@ -21,7 +22,25 @@ public final class KinesisDecoder
 		if (__a == null || __v == null)
 			throw new NullPointerException();
 		
-		throw new Error("TODO");
+		KinesisEvent v = (KinesisEvent)__v;
+		
+		List<KinesisEvent.KinesisEventRecord> records = v.getRecords();
+		if (records == null)
+			return;
+		
+		int n = records.size();
+		__a.accept("Records.length", n);
+		
+		// Report the first one
+		if (n >= 1)
+		{
+			KinesisEvent.KinesisEventRecord record = records.get(0);
+			
+			__a.accept("Records[0].awsRegion",
+				record.getAwsRegion());
+			__a.accept("Records[0].eventSourceARN",
+				record.getEventSourceARN());
+		}
 	}
 	
 	/**
