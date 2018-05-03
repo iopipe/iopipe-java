@@ -233,7 +233,8 @@ It operates on the given input classes:
  * `com.amazonaws.services.s3.event.S3EventNotification`
 
 By default this plugin is enabled and requires no changes to your code unless
-you are using IOpipe via the manual method.
+you are using IOpipe via the manual method. To disable the plugin you may set
+the environment variable `IOPIPE_EVENT_INFO_ENABLE` to `false`.
 
 If you are manually using IOpipe via the `IOpipeService` instance then you will
 need to pass the input object for the plugin to see that object:
