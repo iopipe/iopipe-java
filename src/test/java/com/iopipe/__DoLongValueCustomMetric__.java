@@ -12,7 +12,7 @@ import javax.json.JsonValue;
 /**
  * Ensures that custom metrics which really long values are not added.
  *
- * @since 2018/04/11
+ * @since 2018/05/03
  */
 class __DoLongValueCustomMetric__
 	extends Single
@@ -33,7 +33,7 @@ class __DoLongValueCustomMetric__
 	 * Constructs the test.
 	 *
 	 * @param __e The owning engine.
-	 * @since 2018/04/11
+	 * @since 2018/05/03
 	 */
 	__DoLongValueCustomMetric__(Engine __e)
 	{
@@ -42,7 +42,7 @@ class __DoLongValueCustomMetric__
 	
 	/**
 	 * {@inheritDoc}
-	 * @since 2018/04/11
+	 * @since 2018/05/03
 	 */
 	@Override
 	public void end()
@@ -55,7 +55,7 @@ class __DoLongValueCustomMetric__
 	
 	/**
 	 * {@inheritDoc}
-	 * @since 2018/04/11
+	 * @since 2018/05/03
 	 */
 	@Override
 	public void remoteRequest(WrappedRequest __r)
@@ -77,7 +77,7 @@ class __DoLongValueCustomMetric__
 	
 	/**
 	 * {@inheritDoc}
-	 * @since 2018/04/11
+	 * @since 2018/05/03
 	 */
 	@Override
 	public void remoteResult(WrappedResult __r)
@@ -88,7 +88,7 @@ class __DoLongValueCustomMetric__
 	
 	/**
 	 * {@inheritDoc}
-	 * @since 2018/04/11
+	 * @since 2018/05/03
 	 */
 	@Override
 	public void run(IOpipeExecution __e)
