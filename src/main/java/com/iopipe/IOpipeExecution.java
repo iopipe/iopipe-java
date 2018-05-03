@@ -619,8 +619,8 @@ public final class IOpipeExecution
 				String xname = metric.name();
 				if (!IOpipeExecution.__isNameInLimit(xname))
 				{
-					_LOGGER.warn("Metric exceeds the {} codepoint limit and " +
-						"will not be reported: {}",
+					_LOGGER.warn("Metric name exceeds the {} codepoint " +
+						"length limit and will not be reported: {}",
 						IOpipeConstants.NAME_CODEPOINT_LIMIT, xname);
 					continue;
 				}
@@ -634,7 +634,7 @@ public final class IOpipeExecution
 					if (!IOpipeExecution.__isValueInLimit(svalue))
 					{
 						_LOGGER.warn("Metric value exceeds the {} codepoint " +
-							"limit and will not be reported: {}",
+							"length limit and will not be reported: {}",
 							IOpipeConstants.VALUE_CODEPOINT_LIMIT, xname);
 						continue;
 					}	
