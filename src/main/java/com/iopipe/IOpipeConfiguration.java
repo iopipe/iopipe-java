@@ -5,6 +5,7 @@ import com.iopipe.http.RemoteConnectionFactory;
 import com.iopipe.http.ServiceConnectionFactory;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -28,6 +29,55 @@ public final class IOpipeConfiguration
 	/** Used for logging. */
 	private static final Logger _LOGGER =
 		LogManager.getLogger(IOpipeConfiguration.class);
+	
+	/** Used to compare plugin names. */
+	private static final Comparator<String> _PLUGIN_COMPARATOR =
+		new Comparator<String>()
+		{
+			/**
+			 * {@inheritDoc}
+			 * @since 2018/05/03
+			 */
+			@Override
+			public int compare(String __a, String __b)
+			{
+				// null A is before B
+				if ((__a == null) != (__b == null))
+					return (__a == null ? -1 : 1);
+				
+				// Both are null
+				else if (__a == null)
+					return 0;
+				
+				// Differing length
+				int lena = __a.length(),
+					lenb = __b.length();
+				int rv = (lena - lenb);
+				if (rv != 0)
+					return rv;
+				
+				// Compare, ignore case
+				for (int i = 0; i < lena; i++)
+				{
+					char a = Character.toLowerCase(__a.charAt(i)),
+						b = Character.toLowerCase(__b.charAt(i));
+					
+					// Map hyphens to underscores
+					if (a == '-')
+						a = '_';
+					if (b == '-')
+						b = '_';
+					
+					// Different character?
+					rv = (a - b);
+					if (rv != 0)
+						return rv;
+				}
+				
+				// Same
+				return 0;
+			}
+		};
 	
 	/** The prefix for plugin enabled in system properties. */
 	private static final String _PROPERTY_PLUGIN_PREFIX =
@@ -70,7 +120,7 @@ public final class IOpipeConfiguration
 	
 	/** The state of plugins. */
 	private final Map<String, Boolean> _pluginstate =
-		new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+		new TreeMap<>(_PLUGIN_COMPARATOR);
 	
 	/** String representation. */
 	private volatile Reference<String> _string;
