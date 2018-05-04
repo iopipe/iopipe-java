@@ -51,6 +51,7 @@ public abstract class Engine
 			(__e) -> new __DoLabel__(__e, false, String.join("",
 				Collections.nCopies(IOpipeConstants.NAME_CODEPOINT_LIMIT + 32,
 				"a"))),
+			__DoLongValueCustomMetric__::new,
 			__DoLongNameCustomMetric__::new,
 		};
 	
