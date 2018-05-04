@@ -50,14 +50,14 @@ public final class IOpipeConfiguration
 					return 0;
 				
 				// Differing length
-				int na = __a.length(),
-					nb = __b.length();
-				int rv = (na - nb);
+				int lena = __a.length(),
+					lenb = __b.length();
+				int rv = (lena - lenb);
 				if (rv != 0)
 					return rv;
 				
 				// Compare, ignore case
-				for (int i = 0; i < na; i++)
+				for (int i = 0; i < lena; i++)
 				{
 					char a = Character.toLowerCase(__a.charAt(i)),
 						b = Character.toLowerCase(__b.charAt(i));
