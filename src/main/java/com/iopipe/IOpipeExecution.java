@@ -615,26 +615,44 @@ public final class IOpipeExecution
 			{
 				CustomMetric metric = custmetrics[i];
 				
+				// Check that the name is in the limit
 				String xname = metric.name();
-				if (IOpipeExecution.__isNameInLimit(xname))
+				if (!IOpipeExecution.__isNameInLimit(xname))
 				{
-					gen.writeStartObject();
-					
-					gen.write("name", xname);
-					
-					if (metric.hasString())
-						gen.write("s", metric.stringValue());
-					if (metric.hasLong())
-						gen.write("n", metric.longValue());
-					
-					gen.writeEnd();
+					_LOGGER.warn("Metric name exceeds the {} codepoint " +
+						"length limit and will not be reported: {}",
+						IOpipeConstants.NAME_CODEPOINT_LIMIT, xname);
+					continue;
 				}
 				
-				// Emit warning
+				// Check if the value is in range
+				String svalue;
+				if (metric.hasString())
+				{
+					svalue = metric.stringValue();
+					
+					if (!IOpipeExecution.__isValueInLimit(svalue))
+					{
+						_LOGGER.warn("Metric value exceeds the {} codepoint " +
+							"length limit and will not be reported: {}",
+							IOpipeConstants.VALUE_CODEPOINT_LIMIT, xname);
+						continue;
+					}	
+				}
 				else
-					_LOGGER.warn("Metric exceeds the {} codepoint limit and " +
-						"will not be reported: {}",
-						IOpipeConstants.NAME_CODEPOINT_LIMIT, xname);
+					svalue = null;
+				
+				// Write data
+				gen.writeStartObject();
+				
+				gen.write("name", xname);
+				
+				if (svalue != null)
+					gen.write("s", svalue);
+				if (metric.hasLong())
+					gen.write("n", metric.longValue());
+				
+				gen.writeEnd();
 			}
 			
 			// End of metrics
@@ -768,6 +786,25 @@ public final class IOpipeExecution
 		
 		return __s.codePointCount(0, __s.length()) <
 			IOpipeConstants.NAME_CODEPOINT_LIMIT;
+	}
+	
+	/**
+	 * Checks if the given string is within the value limit before it is
+	 * reported.
+	 *
+	 * @param __s The name to check.
+	 * @return If the name is short enough to be included.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/05/03
+	 */
+	private static final boolean __isValueInLimit(String __s)
+		throws NullPointerException
+	{
+		if (__s == null)
+			throw new NullPointerException();
+		
+		return __s.codePointCount(0, __s.length()) <
+			IOpipeConstants.VALUE_CODEPOINT_LIMIT;
 	}
 }
 
