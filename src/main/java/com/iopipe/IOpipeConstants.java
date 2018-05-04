@@ -48,9 +48,13 @@ public interface IOpipeConstants
 	public static final String DEFAULT_PROFILER_URL =
 		IOpipeConstants.defaultProfilerUrl();
 	
-	/** The length limit for how long custom metric names and labels. */
+	/** The length limit for how long custom metric and label names may be. */
 	public static final int NAME_CODEPOINT_LIMIT =
 		128;
+	
+	/** The length limit for how long custom metric values may be. */
+	public static final int VALUE_CODEPOINT_LIMIT =
+		1024;
 	
 	/**
 	 * Returns the default region which has been chosen to send events and
