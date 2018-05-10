@@ -13,11 +13,11 @@ long as the profiler is enabled.
 
 ## Enabling Profiling
 
-Set the environment variable IOPIPE_PROFILER_ENABLE to `true`
+Set the environment variable IOPIPE_PROFILER_ENABLED to `true`
 
 ### For Serverless Framework:
 
-In the `serverless.yml` file, under `functions:`, `(your_function_name_here):`, `environment:`, set the environment variable `IOPIPE_PROFILER_ENABLE` to `true`
+In the `serverless.yml` file, under `functions:`, `(your_function_name_here):`, `environment:`, set the environment variable `IOPIPE_PROFILER_ENABLED` to `true`
 
 ## Customizing Profiling
 
