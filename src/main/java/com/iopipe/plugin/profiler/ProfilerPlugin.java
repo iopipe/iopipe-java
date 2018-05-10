@@ -103,7 +103,7 @@ public class ProfilerPlugin
 	@Override
 	public String version()
 	{
-		return IOpipeConstants.AGENT_VERSION;
+		return "1.2.0";
 	}
 }
 
