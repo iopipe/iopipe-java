@@ -189,7 +189,7 @@ take precedence when available.
     the client.
   * If you need help looking for your token you can visit:
     [Find your project token](https://dashboard.iopipe.com/install).
- * `com.iopipe.plugin.<name>` or `IOPIPE_<NAME>_ENABLE`
+ * `com.iopipe.plugin.<name>` or `IOPIPE_<NAME>_ENABLED`
    * If set to `true` then the specified plugin will be enabled.
    * If set to `false` then the plugin will be disabled.
    * If this is not set for a plugin then it will use the setting from the
@@ -297,7 +297,7 @@ If the plugin is not enabled then the measurement will not record anything.
 Disabling the plugin can be done as followed:
 
  * Setting the system property `com.iopipe.plugin.trace` to `false`.
- * Setting the environment variable `IOPIPE_TRACE_ENABLE` to `false`.
+ * Setting the environment variable `IOPIPE_TRACE_ENABLED` to `false`.
 
 # Building and Installing the Project Locally
 

@@ -89,7 +89,7 @@ public final class IOpipeConfiguration
 	
 	/** Environment variable suffix for plugin state. */
 	private static final String _ENVIRONMENT_PLUGIN_SUFFIX =
-		"_ENABLE";
+		"_ENABLED";
 	
 	/** The disabled configuration. */
 	public static final IOpipeConfiguration DISABLED_CONFIG;
