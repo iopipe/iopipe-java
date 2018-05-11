@@ -75,7 +75,7 @@ public class TracePlugin
 	@Override
 	public String version()
 	{
-		return IOpipeConstants.AGENT_VERSION;
+		return "1.2.0";
 	}
 }
 
