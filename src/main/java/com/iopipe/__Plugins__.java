@@ -1,5 +1,6 @@
 package com.iopipe;
 
+import com.iopipe.plugin.eventinfo.EventInfoPlugin;
 import com.iopipe.plugin.IOpipePlugin;
 import com.iopipe.plugin.IOpipePluginExecution;
 import com.iopipe.plugin.IOpipePluginPostExecutable;
@@ -114,6 +115,7 @@ final class __Plugins__
 		// what happens
 		rv.add(new TracePlugin());
 		rv.add(new ProfilerPlugin());
+		rv.add(new EventInfoPlugin());
 		
 		// Use plugins provided by the service loader
 		try

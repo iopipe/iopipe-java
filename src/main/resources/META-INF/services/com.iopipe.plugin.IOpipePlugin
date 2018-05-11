@@ -1,3 +1,4 @@
 com.iopipe.plugin.trace.TracePlugin
 com.iopipe.plugin.profiler.ProfilerPlugin
+com.iopipe.plugin.eventinfo.EventInfoPlugin
 

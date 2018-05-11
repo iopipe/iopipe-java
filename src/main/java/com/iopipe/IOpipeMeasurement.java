@@ -68,6 +68,30 @@ public final class IOpipeMeasurement
 	}
 	
 	/**
+	 * Adds multiple custom metrics in a single bulk operation.
+	 *
+	 * Parameters which are {@code null} are ignored.
+	 *
+	 * @param __cms The custom metrics to add.
+	 * @since 2018/04/24
+	 */
+	public void addCustomMetrics(CustomMetric... __cms)
+	{
+		// Do nothing
+		if (__cms == null)
+			return;
+		
+		// Bulk add all the custom metrics under a single lock
+		Set<CustomMetric> custmetrics = this._custmetrics;
+		synchronized (custmetrics)
+		{
+			for (CustomMetric cm : __cms)
+				if (cm != null)
+					custmetrics.add(cm);
+		}
+	}
+	
+	/**
 	 * Adds a single label which will be passed in the report.
 	 *
 	 * Labels are limited to the length specified in
