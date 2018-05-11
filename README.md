@@ -6,6 +6,8 @@ IOpipe Telemetry Agent for Java
 This project provides analytics and distributed tracing for event-driven
 applications running on AWS Lambda using [IOpipe](https://www.iopipe.com).
 
+The JavaDocs for this library is available on [GitHub Pages](https://iopipe.github.io/iopipe-java/apidocs/index.html).
+
 # Installation & usage
 
 Using the IOpipe service with your pre-existing and newly created classes is
