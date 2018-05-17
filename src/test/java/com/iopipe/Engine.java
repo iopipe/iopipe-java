@@ -60,6 +60,7 @@ public abstract class Engine
 				"a"))),
 			__DoLongValueCustomMetric__::new,
 			__DoLongNameCustomMetric__::new,
+			__DoDiskReportCheck__::new,
 			
 			// Event Info
 			(__e) -> new __DoEventInfoPlugin__(__e,
