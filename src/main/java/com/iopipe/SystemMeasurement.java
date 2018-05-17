@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -19,38 +20,27 @@ import java.util.Map;
  */
 public final class SystemMeasurement
 {
+	/** Indicates the self process. */
+	public static final int SELF_PROCESS =
+		Integer.MIN_VALUE;
+	
 	/** The boot ID. */
 	public static final String BOOTID;
 	
 	/** The hostname. */
 	public static final String HOSTNAME;
 	
-	/** The file descriptor count. */
-	public final int fdsize;
+	/** Memory information. */
+	public final Memory memory;
 	
-	/** Total amount of memory in bytes. */
-	public final long memorytotalbytes;
-	
-	/** Total amount of memory in KiB. */
-	public final int memorytotalkib;
-	
-	/** Free amount of memory in bytes. */
-	public final long memoryfreebytes;
-	
-	/** Free amount of memory in KiB. */
-	public final int memoryfreekib;
-	
-	/** The current process ID. */
-	public final int pid;
-	
-	/** The number of threads that exist. */
-	public final int threads;
-	
-	/** The resident set size in KiB. */
-	public final int vmrsskib;
-	
-	/** CPU information. */
+	/** CPUs. */
 	public final List<Cpu> cpus;
+	
+	/** The process stat. */
+	public final Stat stat;
+	
+	/** Proces times. */
+	public final Times times;
 	
 	/**
 	 * This caches information which will always be the same regardless.
@@ -65,24 +55,45 @@ public final class SystemMeasurement
 	}
 	
 	/**
-	 * Creates a snapshot of the system information.
+	 * Initializes the measurement snapshot information.
 	 *
+	 * @param __mem The memory information.
+	 * @param __cpus CPU information,
+	 * @param __times The process time information.
+	 * @param __stat The prcoess stat information.
 	 * @since 2017/12/19
 	 */
-	public SystemMeasurement()
+	public SystemMeasurement(Memory __mem, Collection<Cpu> __cpus,
+		Times __times, Stat __stat)
 	{
-		// Memory information
-		Map<String, String> meminfo = __readMap(Paths.get("/proc/meminfo"));
-		int mtkib, mfkib;
-		this.memorytotalkib = (mtkib = __readInt(
-			meminfo.getOrDefault("MemTotal", "0")));
-		this.memoryfreekib = (mfkib = __readInt(
-			meminfo.getOrDefault("MemFree", "0")));
-		
-		// Memory information is in KiB, so just multiply the values for now
-		this.memorytotalbytes = mtkib * 1024L;
-		this.memoryfreebytes = mfkib * 1024L;
-		
+		this.memory = (__mem == null ? new Memory(0, 0) : __mem);
+		this.cpus = Collections.<Cpu>unmodifiableList(Arrays.<Cpu>asList(
+			(__cpus == null ? new Cpu[0] :
+			__cpus.<Cpu>toArray(new Cpu[__cpus.size()]))));
+		this.times = (__times == null ? new Times(0, 0, 0, 0) : __times);
+		this.stat = (__stat == null ? new Stat(0, 0, 0, 0) : __stat);
+	}
+	
+	/**
+	 * Performs all measurements.
+	 *
+	 * @return The measurements performed.
+	 * @since 2018/05/17
+	 */
+	public static SystemMeasurement measure()
+	{
+		return new SystemMeasurement(measureMemory(), measureCPUs(),
+			measureTimes(SELF_PROCESS), measureStat(SELF_PROCESS));
+	}
+	
+	/**
+	 * Measures CPU information.
+	 *
+	 * @return The CPU information.
+	 * @since 2018/05/17
+	 */
+	public static List<Cpu> measureCPUs()
+	{
 		// Obtain CPU information
 		List<Cpu> cpus = new ArrayList<>(
 			Runtime.getRuntime().availableProcessors());
@@ -91,19 +102,77 @@ public final class SystemMeasurement
 		{
 			String val = kernelstat.get("cpu" + i);
 			if (val != null)
-				cpus.add(new Cpu(val));
+			{
+				List<String> fields = __readValues(val);
+				int user = __readInt(fields, 1),
+					nice = __readInt(fields, 2),
+					sys = __readInt(fields, 3),
+					idle = __readInt(fields, 4),
+					irq = __readInt(fields, 6);
+				
+				cpus.add(new Cpu(user, nice, sys, idle, irq));
+			}
 			else
 				break;
 		}
-		this.cpus = Collections.<Cpu>unmodifiableList(cpus);
 		
+		return cpus;
+	}
+	
+	/**
+	 * Measures the memory information on the system.
+	 *
+	 * @return The memory measurement.
+	 * @since 2018/05/17
+	 */
+	public static Memory measureMemory()
+	{
+		// Memory information
+		Map<String, String> meminfo = __readMap(Paths.get("/proc/meminfo"));
+		long mtkib = (mtkib = __readInt(
+			meminfo.getOrDefault("MemTotal", "0")));
+		long mfkib = (mfkib = __readInt(
+			meminfo.getOrDefault("MemFree", "0")));
+		
+		// Memory information is in KiB, so just multiply the values for now
+		return new Memory(mtkib * 1024L, mfkib * 1024L);
+	}
+	
+	/**
+	 * Measures stat for the given process.
+	 *
+	 * @param __id The process ID, {@code SELF_PROCESS} means the current
+	 * process.
+	 * @return The stat for the given process.
+	 * @since 2018/05/17
+	 */
+	public static Stat measureStat(int __id)
+	{
 		// Parse current process info
 		Map<String, String> pidstatus = __readMap(
-			Paths.get("/proc/self/status"));
-		this.pid = __readInt(pidstatus.getOrDefault("Pid", "0"));
-		this.vmrsskib = __readInt(pidstatus.getOrDefault("VmRSS", "0"));
-		this.threads = __readInt(pidstatus.getOrDefault("Threads", "0"));
-		this.fdsize = __readInt(pidstatus.getOrDefault("FDSize", "0"));
+			Paths.get("/proc/" + (__id == SELF_PROCESS ? "self" : __id) +
+			"/status"));
+		return new Stat(__readInt(pidstatus.getOrDefault("Pid", "0")),
+			__readInt(pidstatus.getOrDefault("FDSize", "0")),
+			__readInt(pidstatus.getOrDefault("Threads", "0")),
+			__readInt(pidstatus.getOrDefault("VmRSS", "0")));
+	}
+	
+	/**
+	 * Measures the given process times.
+	 *
+	 * @param __id The process ID, {@code SELF_PROCESS} means the current
+	 * process.
+	 * @return The process times for the given process.
+	 * @since 2018/05/17
+	 */
+	public static Times measureTimes(int __id)
+	{
+		List<String> pidstat = __readValuesFromFile(
+			Paths.get("/proc/" + (__id == SELF_PROCESS ? "self" : __id) +
+			"/stat"));
+		return new Times(__readInt(pidstat, 13), __readInt(pidstat, 14),
+			__readInt(pidstat, 15), __readInt(pidstat, 16));
 	}
 	
 	/**
@@ -311,24 +380,104 @@ public final class SystemMeasurement
 		public final int user;
 		
 		/**
-		 * Initializes the CPU information, decoded from the given string.
+		 * Initializes the CPU information.
 		 *
-		 * @param __s The string to decode from.
-		 * @throws NullPointerException On null arguments.
+		 * @param __user The user usage.
+		 * @param __nice The nice usage.
+		 * @param __sys The system usage.
+		 * @param __idle The idle usage.
+		 * @param __irq The IRQ usage.
 		 * @since 2017/12/19
 		 */
-		Cpu(String __s)
-			throws NullPointerException
+		public Cpu(int __user, int __nice, int __sys, int __idle, int __irq)
 		{
-			if (__s == null)
-				throw new NullPointerException();
+			this.user = __user;
+			this.nice = __nice;
+			this.sys = __sys;
+			this.idle = __idle;
+			this.irq = __irq;
+		}
+	}
+	
+	/**
+	 * This contains the memory information.
+	 *
+	 * @since 2018/05/17
+	 */
+	public static final class Memory
+	{
+		/** Total amount of memory in bytes. */
+		public final long totalbytes;
+		
+		/** Total amount of memory in KiB. */
+		public final int totalkib;
+		
+		/** Free amount of memory in bytes. */
+		public final long freebytes;
+		
+		/** Free amount of memory in KiB. */
+		public final int freekib;
+		
+		/** The number of used bytes. */
+		public final long usedbytes;
+		
+		/** The number of used KiB. */
+		public final int usedkib;
+		
+		/**
+		 * Initializes the memory information.
+		 *
+		 * @param __total The total number of bytes.
+		 * @param __free The free number of bytes.
+		 * @since 2018/05/17
+		 */
+		public Memory(long __total, long __free)
+		{
+			this.totalbytes = __total;
+			this.freebytes = __free;
+			this.usedbytes = __total - __free;
 			
-			List<String> fields = __readValues(__s);
-			this.user = __readInt(fields, 1);
-			this.nice = __readInt(fields, 2);
-			this.sys = __readInt(fields, 3);
-			this.idle = __readInt(fields, 4);
-			this.irq = __readInt(fields, 6);
+			this.totalkib = (int)Long.min(Integer.MAX_VALUE, __total / 1024);
+			this.freekib = (int)Long.min(Integer.MAX_VALUE, __free / 1024);
+			this.usedkib = (int)Long.min(Integer.MAX_VALUE,
+				(__total - __free) / 1024);
+		}
+	}
+	
+	/**
+	 * Process stat information.
+	 *
+	 * @since 2018/05/17
+	 */
+	public static final class Stat
+	{
+		/** The current process ID. */
+		public final int pid;
+		
+		/** The file descriptor count. */
+		public final int fdsize;
+		
+		/** The number of threads that exist. */
+		public final int threads;
+		
+		/** The resident set size in KiB. */
+		public final int vmrsskib;
+		
+		/**
+		 * Initializes the stat information.
+		 *
+		 * @param __pid The current process ID.
+		 * @param __fdsize The file descriptor count.
+		 * @param __threads The number of threads that exist.
+		 * @param __vmrsskib The resident set size in KiB.
+		 * @since 2018/05/17
+		 */
+		public Stat(int __pid, int __fdsize, int __threads, int __vmrsskib)
+		{
+			this.pid = __pid;
+			this.fdsize = __fdsize;
+			this.threads = __threads;
+			this.vmrsskib = __vmrsskib;
 		}
 	}
 	
@@ -354,16 +503,18 @@ public final class SystemMeasurement
 		/**
 		 * Initializes the snapshot of the process times.
 		 *
+		 * @param __cstime Kernel time with children.
+		 * @param __cutime User time with children.
+		 * @param __stime Kernel time.
+		 * @param __utime User time.
 		 * @since 2017/12/19
 		 */
-		public Times()
+		public Times(int __cstime, int __cutime, int __stime, int __utime)
 		{
-			List<String> pidstat = __readValuesFromFile(
-				Paths.get("/proc/self/stat"));
-			this.cstime = __readInt(pidstat, 13);
-			this.cutime = __readInt(pidstat, 14);
-			this.stime = __readInt(pidstat, 15);
-			this.utime = __readInt(pidstat, 16);
+			this.cstime = __cstime;
+			this.cutime = __cutime;
+			this.stime = __stime;
+			this.utime = __utime;
 		}
 	}
 }

@@ -460,7 +460,7 @@ public final class IOpipeExecution
 		IOpipeMeasurement measurement = this.measurement;
 
 		// Snapshot system information
-		SystemMeasurement sysinfo = new SystemMeasurement();
+		SystemMeasurement sysinfo = SystemMeasurement.measure();
 		
 		// The current timestamp
 		long nowtimestamp = System.currentTimeMillis();
@@ -478,8 +478,10 @@ public final class IOpipeExecution
 			long duration = measurement.getDuration();
 			if (duration >= 0)
 				gen.write("duration", duration);
-
-			gen.write("processId", sysinfo.pid);
+			
+			SystemMeasurement.Stat stat = sysinfo.stat;
+			
+			gen.write("processId", stat.pid);
 			gen.write("timestamp", this.starttimemillis);
 			gen.write("timestampEnd", nowtimestamp);
 			
@@ -537,12 +539,13 @@ public final class IOpipeExecution
 
 			// Operating System Start
 			gen.writeStartObject("os");
-
-			long totalmem, freemem;
+			
 			gen.write("hostname", SystemMeasurement.HOSTNAME);
-			gen.write("totalmem", (totalmem = sysinfo.memorytotalbytes));
-			gen.write("freemem", (freemem = sysinfo.memoryfreebytes));
-			gen.write("usedmem", totalmem - freemem);
+
+			SystemMeasurement.Memory memory = sysinfo.memory;
+			gen.write("totalmem", memory.totalbytes);
+			gen.write("freemem", memory.freebytes);
+			gen.write("usedmem", memory.usedbytes);
 
 			// Start CPUs
 			gen.writeStartArray("cpus");
@@ -582,7 +585,7 @@ public final class IOpipeExecution
 
 				gen.writeStartObject("stat");
 
-				SystemMeasurement.Times times = new SystemMeasurement.Times();
+				SystemMeasurement.Times times = sysinfo.times;
 				gen.write("utime", times.utime);
 				gen.write("stime", times.stime);
 				gen.write("cutime", times.cutime);
@@ -602,9 +605,9 @@ public final class IOpipeExecution
 
 				gen.writeStartObject("status");
 
-				gen.write("VmRSS", sysinfo.vmrsskib);
-				gen.write("Threads", sysinfo.threads);
-				gen.write("FDSize", sysinfo.fdsize);
+				gen.write("VmRSS", stat.vmrsskib);
+				gen.write("Threads", stat.threads);
+				gen.write("FDSize", stat.fdsize);
 
 				gen.writeEnd();
 
