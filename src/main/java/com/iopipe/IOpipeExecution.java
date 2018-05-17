@@ -510,6 +510,15 @@ public final class IOpipeExecution
 			gen.write("rssTotalPercentage", );
 
 			gen.writeEnd();*/
+			
+			// Disk usage
+			
+			SystemMeasurement.Disk tempdir = sysinfo.tempdir;
+			gen.writeStartObject("disk");
+			gen.write("totalMiB", tempdir.totalmib);
+			gen.write("usedMiB", tempdir.usedmib);
+			gen.write("usedPercentage", tempdir.usedpercent * 100.0);
+			gen.writeEnd();
 
 			// Environment start
 			gen.writeStartObject("environment");

@@ -2,6 +2,7 @@ package com.iopipe;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.FileStore;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -42,6 +43,9 @@ public final class SystemMeasurement
 	/** Proces times. */
 	public final Times times;
 	
+	/** Temporary path disk usage. */
+	public final Disk tempdir;
+	
 	/**
 	 * This caches information which will always be the same regardless.
 	 *
@@ -60,11 +64,12 @@ public final class SystemMeasurement
 	 * @param __mem The memory information.
 	 * @param __cpus CPU information,
 	 * @param __times The process time information.
-	 * @param __stat The prcoess stat information.
+	 * @param __stat The process stat information.
+	 * @param __tempdir Temporary directory usage information.
 	 * @since 2017/12/19
 	 */
 	public SystemMeasurement(Memory __mem, Collection<Cpu> __cpus,
-		Times __times, Stat __stat)
+		Times __times, Stat __stat, Disk __tempdir)
 	{
 		this.memory = (__mem == null ? new Memory(0, 0) : __mem);
 		this.cpus = Collections.<Cpu>unmodifiableList(Arrays.<Cpu>asList(
@@ -72,6 +77,8 @@ public final class SystemMeasurement
 			__cpus.<Cpu>toArray(new Cpu[__cpus.size()]))));
 		this.times = (__times == null ? new Times(0, 0, 0, 0) : __times);
 		this.stat = (__stat == null ? new Stat(0, 0, 0, 0) : __stat);
+		this.tempdir = (__tempdir == null ? new Disk(Paths.get(""), 0, 0) :
+			__tempdir);
 	}
 	
 	/**
@@ -83,7 +90,40 @@ public final class SystemMeasurement
 	public static SystemMeasurement measure()
 	{
 		return new SystemMeasurement(measureMemory(), measureCPUs(),
-			measureTimes(SELF_PROCESS), measureStat(SELF_PROCESS));
+			measureTimes(SELF_PROCESS), measureStat(SELF_PROCESS),
+			measureDisk(Paths.get("/tmp")));
+	}
+	
+	/**
+	 * Measures disk usage at the given path.
+	 *
+	 * @param __p The path to measure.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/05/17
+	 */
+	public static Disk measureDisk(Path __p)
+		throws NullPointerException
+	{
+		if (__p == null)
+			throw new NullPointerException();
+		
+		try
+		{
+			FileStore store = Files.getFileStore(__p);
+			
+			// Usable space is the amount of space that can be used by the virtual
+			// machine, which may include quotas and any other kind of limit
+			long total = store.getTotalSpace(),
+				useable = store.getUsableSpace();
+			
+			return new Disk(__p, total, total - useable);
+		}
+		
+		// Failed to read, just use a dummy object
+		catch (IOException e)
+		{
+			return new Disk(__p, 0, 0);
+		}
 	}
 	
 	/**
@@ -396,6 +436,67 @@ public final class SystemMeasurement
 			this.sys = __sys;
 			this.idle = __idle;
 			this.irq = __irq;
+		}
+	}
+	
+	/**
+	 * This contains the information on disk usage for a given path.
+	 *
+	 * @since 2018/05/17
+	 */
+	public static final class Disk
+	{
+		/** The path this represents. */
+		public final Path path;
+		
+		/** The total number of bytes. */
+		public final long totalbytes;
+		
+		/** The used number of bytes. */
+		public final long usedbytes;
+		
+		/** The free number of bytes. */
+		public final long freebytes;
+		
+		/** The total number of MiB. */
+		public final double totalmib;
+		
+		/** The used number of MiB. */
+		public final double usedmib;
+		
+		/** The free number of MiB. */
+		public final double freemib;
+		
+		/** The percentage of used space against total space. */
+		public final double usedpercent;
+		
+		/**
+		 * Initializes the disk usage information.
+		 *
+		 * @param __p The disk path.
+		 * @param __totalbytes The number of used bytes.
+		 * @param __usedbytes The number of used bytes.
+		 * @throws NullPointerException On null arguments.
+		 * @since 2018/05/17
+		 */
+		public Disk(Path __p, long __totalbytes, long __usedbytes)
+			throws NullPointerException
+		{
+			if (__p == null)
+				throw new NullPointerException();
+			
+			this.path = __p;
+			
+			this.totalbytes = __totalbytes;
+			this.usedbytes = __usedbytes;
+			this.freebytes = (__totalbytes - __usedbytes);
+			
+			this.totalmib = (double)__totalbytes / 1048576.0;
+			this.usedmib = (double)__usedbytes / 1048576.0;
+			this.freemib = (__totalbytes - __usedbytes) / 1048576.0;
+			
+			this.usedpercent = Double.min(1.0, Double.max(0.0,
+				(double)__usedbytes / (double)__totalbytes));
 		}
 	}
 	
