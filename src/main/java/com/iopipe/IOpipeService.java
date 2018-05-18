@@ -58,7 +58,7 @@ public final class IOpipeService
 	
 	/** The process stat when the process started. */
 	static final SystemMeasurement.Times _STAT_START =
-		new SystemMeasurement.Times();
+		SystemMeasurement.measureTimes(SystemMeasurement.SELF_PROCESS);
 	
 	/** If an instance was created then this will be that one instance. */
 	private static volatile IOpipeService _INSTANCE;
