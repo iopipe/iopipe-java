@@ -10,6 +10,10 @@ The JavaDocs for this library are available on [GitHub Pages](https://iopipe.git
 
 # Installation & usage
 
+This documentation mostly refers to using Maven for your project, if you
+are using Gradle then you can use the example located at:
+<https://github.com/iopipe/examples/blob/master/java/build.gradle>.
+
 Using the IOpipe service with your pre-existing and newly created classes is
 quite simple. If you are using Maven it requires modification of your `pom.xml`
 file, otherwise you may include the JAR file of the library to your project.
