@@ -80,6 +80,9 @@ public class ProfilerExecution
 	/** The poller for execution. */
 	private volatile __Poller__ _poller;
 	
+	/** Initial statistics when the plugin is initialized. */
+	private volatile ManagementStatistics _beginstats;
+	
 	/**
 	 * Determine the sample rate.
 	 *
@@ -155,6 +158,11 @@ public class ProfilerExecution
 		// sleep state
 		this._poller._stop = true;
 		this._pollthread.interrupt();
+		
+		// Get statistics at the end of execution after the method has ended
+		// so that way it can be seen how much they changed
+		ManagementStatistics beginstats = this._beginstats,
+			endstats = ManagementStatistics.snapshot(0);
 		
 		// Date prefix used for file export
 		LocalDateTime now = LocalDateTime.ofInstant(Instant.ofEpochMilli(
@@ -375,6 +383,9 @@ public class ProfilerExecution
 		Thread getter = new Thread(this::__getRemote, "ProfilerGetURL");
 		getter.setDaemon(true);
 		getter.start();
+		
+		// Statistics at the start of method execution
+		this._beginstats = ManagementStatistics.snapshot(0);
 		
 		// Setup poller which will constantly read thread state
 		__Poller__ poller = new __Poller__(this._tracker,
