@@ -162,7 +162,8 @@ public class ProfilerExecution
 		// Get statistics at the end of execution after the method has ended
 		// so that way it can be seen how much they changed
 		ManagementStatistics beginstats = this._beginstats,
-			endstats = ManagementStatistics.snapshot(0);
+			endstats = ManagementStatistics.snapshot(System.nanoTime() -
+				beginstats.abstime);
 		
 		// Date prefix used for file export
 		LocalDateTime now = LocalDateTime.ofInstant(Instant.ofEpochMilli(
@@ -184,12 +185,18 @@ public class ProfilerExecution
 				// compressed anyway. The header and footer could be compressed
 				// but that would probably save only a dozen bytes so the
 				// loss of speed compressing compressed data is pointless
+				// Just put no effort into it.
 				zos.setMethod(ZipOutputStream.DEFLATED);
 				zos.setLevel(0);
 				
 				// Export CPU data
 				zos.putNextEntry(new ZipEntry(prefix + "_cpu.nps"));
 				new __CPUExport__(tracker, execution, SAMPLE_RATE).run(zos);
+				zos.closeEntry();
+				
+				// Export statistics
+				zos.putNextEntry(new ZipEntry(prefix + "_stat.csv"));
+				new __StatExport__(beginstats, endstats).run(zos);
 				zos.closeEntry();
 				
 				// Finish the ZIP
