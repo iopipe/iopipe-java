@@ -17,21 +17,27 @@ public final class ManagementStatistics
 	/** Class loader statistics. */
 	public final ClassLoaderStatistics classloader;
 	
+	/** Compilation statistics. */
+	public final CompilerStatistics compiler;
+	
 	/**
 	 * Initializes the management statistics.
 	 *
 	 * @param __abs Absolute time.
 	 * @param __rel Relative time.
 	 * @param __cl The class loader statistics.
+	 * @param __jit Compiler statistics.
 	 * @since 2018/05/22
 	 */
 	public ManagementStatistics(long __abs, long __rel,
-		ClassLoaderStatistics __cl)
+		ClassLoaderStatistics __cl, CompilerStatistics __jit)
 	{
 		this.abstime = __abs;
 		this.reltime = __rel;
 		this.classloader = (__cl != null ? __cl :
 			new ClassLoaderStatistics(0, 0, 0));
+		this.compiler = (__jit != null ? __jit :
+			new CompilerStatistics(-1));
 	}
 	
 	/**
@@ -45,7 +51,8 @@ public final class ManagementStatistics
 	{
 		return new ManagementStatistics(
 			System.nanoTime(), __rel,
-			ClassLoaderStatistics.snapshot());
+			ClassLoaderStatistics.snapshot(),
+			CompilerStatistics.snapshot());
 	}
 }
 

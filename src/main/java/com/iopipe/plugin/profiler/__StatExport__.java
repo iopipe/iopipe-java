@@ -79,6 +79,7 @@ final class __StatExport__
 		long[] xabs = new long[nsnaps],
 			xrel = new long[nsnaps];
 		ClassLoaderStatistics[] xcl = new ClassLoaderStatistics[nsnaps];
+		CompilerStatistics[] xjit = new CompilerStatistics[nsnaps];
 		
 		// Go through all of the statistics and explode them into the single
 		// array. It would be faster to write out all the columns with their
@@ -93,6 +94,7 @@ final class __StatExport__
 			xabs[i] = from.abstime;
 			xrel[i] = from.reltime;
 			xcl[i] = from.classloader;
+			xjit[i] = from.compiler;
 		}
 		
 		// Absolute time
@@ -118,6 +120,10 @@ final class __StatExport__
 		// Class loader counts
 		__classLoader(xcl, nsnaps, ps);
 		xcl = null;
+		
+		// Compiler counts
+		__compiler(xjit, nsnaps, ps);
+		xjit = null;
 		
 		// Before terminating, flush it so that all the data is written
 		ps.flush();
@@ -184,6 +190,44 @@ final class __StatExport__
 		}
 		__ps.println();
 		xunl = null;
+	}
+	
+	/**
+	 * Dumps compiler information.
+	 *
+	 * @param __xjit Compiler information.
+	 * @param __nsnaps The number of snapshots.
+	 * @param __ps The output stream.
+	 * @throws IOException On write errors.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/05/22
+	 */
+	private final void __compiler(CompilerStatistics[] __xjit,
+		int __nsnaps, PrintStream __ps)
+		throws IOException, NullPointerException
+	{
+		if (__xjit == null || __ps == null)
+			throw new NullPointerException();
+		
+		long[] xctime = new long[__nsnaps];
+		
+		// Explode statistics
+		for (int i = 0; i < __nsnaps; i++)
+		{
+			CompilerStatistics from = __xjit[i];
+			
+			xctime[i] = from.compilems;
+		}
+		
+		// Total compilation time
+		__ps.print("TotalCompilationTime (ms)");
+		for (int i = 0; i < __nsnaps; i++)
+		{
+			__ps.print(',');
+			__ps.print(xctime[i]);
+		}
+		__ps.println();
+		xctime = null;
 	}
 }
 

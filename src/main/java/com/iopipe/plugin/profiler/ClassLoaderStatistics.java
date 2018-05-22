@@ -54,11 +54,9 @@ public final class ClassLoaderStatistics
 	 * @param __bean The bean to get information from.
 	 * @return The generated statistics or {@code null} if no statistics were
 	 * generated.
-	 * @throws NullPointerException On null arguments.
 	 * @since 2018/05/22
 	 */
 	public static ClassLoaderStatistics snapshot(ClassLoadingMXBean __bean)
-		throws NullPointerException
 	{
 		if (__bean == null)
 			return null;
