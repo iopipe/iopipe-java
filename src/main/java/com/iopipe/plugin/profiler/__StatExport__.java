@@ -96,7 +96,7 @@ final class __StatExport__
 		}
 		
 		// Absolute time
-		ps.print("AbsoluteTime");
+		ps.print("AbsoluteTime (ns)");
 		for (int i = 0; i < nsnaps; i++)
 		{
 			ps.print(',');
@@ -106,7 +106,7 @@ final class __StatExport__
 		xabs = null;
 		
 		// Relative time
-		ps.print("RelativeTime");
+		ps.print("RelativeTime (ns)");
 		for (int i = 0; i < nsnaps; i++)
 		{
 			ps.print(',');
@@ -156,7 +156,7 @@ final class __StatExport__
 		}
 		
 		// Currently loaded classes
-		__ps.print("CurrentLoadedClasses");
+		__ps.print("CurrentLoadedClasses (classes)");
 		for (int i = 0; i < __nsnaps; i++)
 		{
 			__ps.print(',');
@@ -166,7 +166,7 @@ final class __StatExport__
 		xcur = null;
 		
 		// Total loaded classes
-		__ps.print("TotalLoadedClasses");
+		__ps.print("TotalLoadedClasses (classes)");
 		for (int i = 0; i < __nsnaps; i++)
 		{
 			__ps.print(',');
@@ -176,7 +176,7 @@ final class __StatExport__
 		xlod = null;
 		
 		// Total unloaded classes
-		__ps.print("TotalUnloadedClasses");
+		__ps.print("TotalUnloadedClasses (classes)");
 		for (int i = 0; i < __nsnaps; i++)
 		{
 			__ps.print(',');
