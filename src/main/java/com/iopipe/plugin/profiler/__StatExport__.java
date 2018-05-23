@@ -180,6 +180,7 @@ final class __StatExport__
 			xlod[i] = from.loaded;
 			xunl[i] = from.unloaded;
 		}
+		__xcl = null;
 		
 		// Currently loaded classes
 		__ps.print("CurrentLoadedClasses (classes)");
@@ -238,6 +239,7 @@ final class __StatExport__
 			
 			xctime[i] = from.compilems;
 		}
+		__xjit = null;
 		
 		// Total compilation time
 		__ps.print("TotalCompilationTime (ms)");
@@ -300,6 +302,7 @@ final class __StatExport__
 				data._durationms[i] = gcs.durationms;
 			}
 		}
+		__xgc = null;
 		
 		// Print for each key
 		for (Map.Entry<String, __GCData__> e : gcses.entrySet())
@@ -308,7 +311,7 @@ final class __StatExport__
 			__GCData__ v = e.getValue();
 			
 			// Garbage collection count
-			__ps.printf("GCCount@%s (collections)", k);
+			__ps.printf("GCCount.%s (collections)", k);
 			long[] count = v._count;
 			for (int i = 0; i < __nsnaps; i++)
 			{
@@ -318,7 +321,7 @@ final class __StatExport__
 			__ps.println();
 			
 			// Garbage collection time
-			__ps.printf("GCTime@%s (ms)", k);
+			__ps.printf("GCTime.%s (ms)", k);
 			long[] durationms = v._durationms;
 			for (int i = 0; i < __nsnaps; i++)
 			{
@@ -327,6 +330,82 @@ final class __StatExport__
 			}
 			__ps.println();
 		}
+	}
+	
+	/**
+	 * Prints memory usage statistics.
+	 *
+	 * @param __xmus The input memory usages.
+	 * @param __nsnaps The number of snapshots.
+	 * @param __ps The stream to write to.
+	 * @param __prefix The prefix to use for printing.
+	 * @throws IOException On write errors.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/05/23
+	 */
+	private final void __memoryUsage(MemoryUsageStatistic[] __xmus,
+		int __nsnaps, PrintStream __ps, String __prefix)
+		throws IOException, NullPointerException
+	{
+		if (__xmus == null || __ps == null)
+			throw new NullPointerException();
+		
+		long[] xinit = new long[__nsnaps],
+			xused = new long[__nsnaps],
+			xcomm = new long[__nsnaps],
+			xmaxx = new long[__nsnaps];
+		
+		// Explode
+		for (int i = 0; i < __nsnaps; i++)
+		{
+			MemoryUsageStatistic from = __xmus[i];
+			
+			xinit[i] = from.initbytes;
+			xused[i] = from.usedbytes;
+			xcomm[i] = from.committedbytes;
+			xmaxx[i] = from.maxbytes;
+		}
+		__xmus = null;
+		
+		// Initial bytes
+		__ps.print(".init (byte)");
+		for (int i = 0; i < __nsnaps; i++)
+		{
+			__ps.print(',');
+			__ps.print(xinit[i]);
+		}
+		__ps.println();
+		xinit = null;
+		
+		// Used bytes
+		__ps.print(".used (byte)");
+		for (int i = 0; i < __nsnaps; i++)
+		{
+			__ps.print(',');
+			__ps.print(xused[i]);
+		}
+		__ps.println();
+		xused = null;
+		
+		// Committed bytes
+		__ps.print(".committed (byte)");
+		for (int i = 0; i < __nsnaps; i++)
+		{
+			__ps.print(',');
+			__ps.print(xcomm[i]);
+		}
+		__ps.println();
+		xcomm = null;
+		
+		// Committed bytes
+		__ps.print(".max (byte)");
+		for (int i = 0; i < __nsnaps; i++)
+		{
+			__ps.print(',');
+			__ps.print(xmaxx[i]);
+		}
+		__ps.println();
+		xmaxx = null;
 	}
 	
 	/**
@@ -357,6 +436,7 @@ final class __StatExport__
 			xboot[i] = from.startms;
 			xup[i] = from.uptimems;
 		}
+		__xup = null;
 		
 		// Start time of the VM
 		__ps.print("StartTime (utc ms)");
