@@ -5,7 +5,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * This class is used to export statistics that were measured into a basic
@@ -80,6 +84,8 @@ final class __StatExport__
 			xrel = new long[nsnaps];
 		ClassLoaderStatistics[] xcl = new ClassLoaderStatistics[nsnaps];
 		CompilerStatistics[] xjit = new CompilerStatistics[nsnaps];
+		GarbageCollectorStatistics[][] xgc =
+			new GarbageCollectorStatistics[nsnaps][];
 		
 		// Go through all of the statistics and explode them into the single
 		// array. It would be faster to write out all the columns with their
@@ -95,6 +101,10 @@ final class __StatExport__
 			xrel[i] = from.reltime;
 			xcl[i] = from.classloader;
 			xjit[i] = from.compiler;
+			
+			List<GarbageCollectorStatistics> gc = from.gc;
+			xgc[i] = gc.<GarbageCollectorStatistics>toArray(
+				new GarbageCollectorStatistics[gc.size()]);
 		}
 		
 		// Absolute time
@@ -124,6 +134,10 @@ final class __StatExport__
 		// Compiler counts
 		__compiler(xjit, nsnaps, ps);
 		xjit = null;
+		
+		// Garbage collection counts
+		__garbage(xgc, nsnaps, ps);
+		xgc = null;
 		
 		// Before terminating, flush it so that all the data is written
 		ps.flush();
@@ -227,7 +241,86 @@ final class __StatExport__
 			__ps.print(xctime[i]);
 		}
 		__ps.println();
-		xctime = null;
+	}
+	
+	/**
+	 * Dumps garbage collector information.
+	 *
+	 * @param __xgc Garbage collector information.
+	 * @param __nsnaps The number of snapshots.
+	 * @param __ps The output stream.
+	 * @throws IOException On write errors.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/05/22
+	 */
+	private final void __garbage(GarbageCollectorStatistics[][] __xgc,
+		final int __nsnaps, PrintStream __ps)
+		throws IOException, NullPointerException
+	{
+		if (__xgc == null || __ps == null)
+			throw new NullPointerException();
+		
+		// Stores individual garbage collector data
+		class __GCData__
+		{
+			/** Count. */
+			final long[] _count =
+				new long[__nsnaps];
+			
+			/** Duration. */
+			final long[] _durationms =
+				new long[__nsnaps];
+		};
+		
+		// There can be multiple garbage collectors available at once so
+		// this copies the information for each one linearly
+		Map<String, __GCData__> gcses = new LinkedHashMap<>();
+		for (int i = 0; i < __nsnaps; i++)
+		{
+			GarbageCollectorStatistics[] from = __xgc[i];
+			
+			// For each state
+			for (GarbageCollectorStatistics gcs : from)
+			{
+				String key = gcs.name;
+				
+				// Initialize data if missing
+				__GCData__ data = gcses.get(key);
+				if (data == null)
+					gcses.put(key, (data = new __GCData__()));
+				
+				// Store it at the index
+				data._count[i] = gcs.count;
+				data._durationms[i] = gcs.durationms;
+			}
+		}
+		
+		// Print for each key
+		for (Map.Entry<String, __GCData__> e : gcses.entrySet())
+		{
+			String k = e.getKey();
+			__GCData__ v = e.getValue();
+			
+			// Garbage collection count
+			__ps.printf("GCCount@%s (collections)", k);
+			long[] count = v._count;
+			for (int i = 0; i < __nsnaps; i++)
+			{
+				__ps.print(',');
+				__ps.print(count[i]);
+			}
+			__ps.println();
+			
+			// Garbage collection time
+			__ps.printf("GCTime@%s (ms)", k);
+			long[] durationms = v._durationms;
+			for (int i = 0; i < __nsnaps; i++)
+			{
+				__ps.print(',');
+				__ps.print(durationms[i]);
+			}
+			__ps.println();
+		}
 	}
 }
 

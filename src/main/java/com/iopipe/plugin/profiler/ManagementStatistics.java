@@ -1,5 +1,10 @@
 package com.iopipe.plugin.profiler;
 
+import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * This class contains the information on all of the management statistics
  * which have been measured.
@@ -20,6 +25,9 @@ public final class ManagementStatistics
 	/** Compilation statistics. */
 	public final CompilerStatistics compiler;
 	
+	/** Garbage collection statistics. */
+	public final List<GarbageCollectorStatistics> gc;
+	
 	/**
 	 * Initializes the management statistics.
 	 *
@@ -27,10 +35,12 @@ public final class ManagementStatistics
 	 * @param __rel Relative time.
 	 * @param __cl The class loader statistics.
 	 * @param __jit Compiler statistics.
+	 * @param __gc Garbage collection statistics.
 	 * @since 2018/05/22
 	 */
 	public ManagementStatistics(long __abs, long __rel,
-		ClassLoaderStatistics __cl, CompilerStatistics __jit)
+		ClassLoaderStatistics __cl, CompilerStatistics __jit,
+		GarbageCollectorStatistics[] __gc)
 	{
 		this.abstime = __abs;
 		this.reltime = __rel;
@@ -38,6 +48,15 @@ public final class ManagementStatistics
 			new ClassLoaderStatistics(0, 0, 0));
 		this.compiler = (__jit != null ? __jit :
 			new CompilerStatistics(-1));
+		this.gc = Collections.<GarbageCollectorStatistics>unmodifiableList(
+			Arrays.<GarbageCollectorStatistics>asList(
+			(__gc == null ? new GarbageCollectorStatistics[0] :
+			(__gc = __gc.clone()))));
+		
+		// Initialize values in the event they are null
+		for (int i = 0, n = __gc.length; i < n; i++)
+			if (__gc[i] == null)
+				__gc[i] = new GarbageCollectorStatistics("Invalid", -1, -1);
 	}
 	
 	/**
@@ -52,7 +71,8 @@ public final class ManagementStatistics
 		return new ManagementStatistics(
 			System.nanoTime(), __rel,
 			ClassLoaderStatistics.snapshot(),
-			CompilerStatistics.snapshot());
+			CompilerStatistics.snapshot(),
+			GarbageCollectorStatistics.snapshots());
 	}
 }
 
