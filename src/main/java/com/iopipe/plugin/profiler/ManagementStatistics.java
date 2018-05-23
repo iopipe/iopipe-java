@@ -28,6 +28,9 @@ public final class ManagementStatistics
 	/** Garbage collection statistics. */
 	public final List<GarbageCollectorStatistics> gc;
 	
+	/** Uptime of the virtual machine. */
+	public final UptimeStatistics uptime;
+	
 	/**
 	 * Initializes the management statistics.
 	 *
@@ -36,11 +39,12 @@ public final class ManagementStatistics
 	 * @param __cl The class loader statistics.
 	 * @param __jit Compiler statistics.
 	 * @param __gc Garbage collection statistics.
+	 * @param __up Virtual machine uptime.
 	 * @since 2018/05/22
 	 */
 	public ManagementStatistics(long __abs, long __rel,
 		ClassLoaderStatistics __cl, CompilerStatistics __jit,
-		GarbageCollectorStatistics[] __gc)
+		GarbageCollectorStatistics[] __gc, UptimeStatistics __up)
 	{
 		this.abstime = __abs;
 		this.reltime = __rel;
@@ -52,6 +56,8 @@ public final class ManagementStatistics
 			Arrays.<GarbageCollectorStatistics>asList(
 			(__gc == null ? new GarbageCollectorStatistics[0] :
 			(__gc = __gc.clone()))));
+		this.uptime = (__up != null ? __up :
+			new UptimeStatistics(0, -1));
 		
 		// Initialize values in the event they are null
 		for (int i = 0, n = __gc.length; i < n; i++)
@@ -72,7 +78,8 @@ public final class ManagementStatistics
 			System.nanoTime(), __rel,
 			ClassLoaderStatistics.snapshot(),
 			CompilerStatistics.snapshot(),
-			GarbageCollectorStatistics.snapshots());
+			GarbageCollectorStatistics.snapshots(),
+			UptimeStatistics.snapshot());
 	}
 }
 

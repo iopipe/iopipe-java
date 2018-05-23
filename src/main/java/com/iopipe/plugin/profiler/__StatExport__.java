@@ -86,6 +86,7 @@ final class __StatExport__
 		CompilerStatistics[] xjit = new CompilerStatistics[nsnaps];
 		GarbageCollectorStatistics[][] xgc =
 			new GarbageCollectorStatistics[nsnaps][];
+		UptimeStatistics[] xup = new UptimeStatistics[nsnaps];
 		
 		// Go through all of the statistics and explode them into the single
 		// array. It would be faster to write out all the columns with their
@@ -101,6 +102,7 @@ final class __StatExport__
 			xrel[i] = from.reltime;
 			xcl[i] = from.classloader;
 			xjit[i] = from.compiler;
+			xup[i] = from.uptime;
 			
 			List<GarbageCollectorStatistics> gc = from.gc;
 			xgc[i] = gc.<GarbageCollectorStatistics>toArray(
@@ -126,6 +128,10 @@ final class __StatExport__
 		}
 		ps.println();
 		xrel = null;
+		
+		// Uptime
+		__uptime(xup, nsnaps, ps);
+		xup = null;
 		
 		// Class loader counts
 		__classLoader(xcl, nsnaps, ps);
@@ -321,6 +327,56 @@ final class __StatExport__
 			}
 			__ps.println();
 		}
+	}
+	
+	/**
+	 * Dumps uptime information.
+	 *
+	 * @param __xup Uptime information.
+	 * @param __nsnaps The number of snapshots.
+	 * @param __ps The output stream.
+	 * @throws IOException On write errors.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/05/22
+	 */
+	private final void __uptime(UptimeStatistics[] __xup,
+		int __nsnaps, PrintStream __ps)
+		throws IOException, NullPointerException
+	{
+		if (__xup == null || __ps == null)
+			throw new NullPointerException();
+		
+		long[] xboot = new long[__nsnaps],
+			xup = new long[__nsnaps];
+		
+		// Explode all the stats
+		for (int i = 0; i < __nsnaps; i++)
+		{
+			UptimeStatistics from = __xup[i];
+			
+			xboot[i] = from.startms;
+			xup[i] = from.uptimems;
+		}
+		
+		// Start time of the VM
+		__ps.print("StartTime (utc ms)");
+		for (int i = 0; i < __nsnaps; i++)
+		{
+			__ps.print(',');
+			__ps.print(xboot[i]);
+		}
+		__ps.println();
+		xboot = null;
+		
+		// Total loaded classes
+		__ps.print("UpTime (ms)");
+		for (int i = 0; i < __nsnaps; i++)
+		{
+			__ps.print(',');
+			__ps.print(xup[i]);
+		}
+		__ps.println();
+		xup = null;
 	}
 }
 

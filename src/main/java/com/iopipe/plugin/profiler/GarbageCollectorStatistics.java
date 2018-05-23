@@ -1,7 +1,7 @@
 package com.iopipe.plugin.profiler;
 
-import java.lang.management.ManagementFactory;
 import java.lang.management.GarbageCollectorMXBean;
+import java.lang.management.ManagementFactory;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collections;
