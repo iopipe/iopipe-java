@@ -14,7 +14,12 @@ import com.iopipe.IOpipeExecution;
 import com.iopipe.plugin.IOpipePluginExecution;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.time.format.DateTimeFormatter;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -54,6 +59,12 @@ public class ProfilerExecution
 	/** The number of nanoseconds between each polling period. */
 	public static final int SAMPLE_RATE;
 	
+	/** Debug: The path to dump a local copy of the profiler information to. */
+	public static final Path LOCAL_SNAPSHOT_DUMP_PATH;
+	
+	/** Debug: Prefix to use for filenames in the snapshot. */
+	public static final String ALTERNATIVE_PREFIX;
+	
 	/** The execution state. */
 	protected final IOpipeExecution execution;
 	
@@ -81,7 +92,7 @@ public class ProfilerExecution
 	private volatile __Poller__ _poller;
 	
 	/** Initial statistics when the plugin is initialized. */
-	private volatile ManagementStatistics _beginstats;
+	private ManagementStatistics _beginstats;
 	
 	/**
 	 * Determine the sample rate.
@@ -107,6 +118,13 @@ public class ProfilerExecution
 		
 		SAMPLE_RATE = Math.max(1,
 			(int)Math.min(Integer.MAX_VALUE, sr));
+		
+		// Path where snapshots will be stored, optional
+		String lsndp = System.getenv("IOPIPE_PROFILER_LOCAL_DUMP_PATH");
+		LOCAL_SNAPSHOT_DUMP_PATH = (lsndp != null ? Paths.get(lsndp) : null);
+		
+		// Alternative prefix for ZIP entries
+		ALTERNATIVE_PREFIX = System.getenv("IOPIPE_PROFILER_ALTERNATIVE_PREFIX");
 	}
 	
 	/**
@@ -168,10 +186,11 @@ public class ProfilerExecution
 		// Date prefix used for file export
 		LocalDateTime now = LocalDateTime.ofInstant(Instant.ofEpochMilli(
 			execution.startTimestamp()), ZoneId.of("UTC"));
-		String prefix = DateTimeFormatter.BASIC_ISO_DATE.format(
+		String prefix = (ALTERNATIVE_PREFIX != null ? ALTERNATIVE_PREFIX :
+			DateTimeFormatter.BASIC_ISO_DATE.format(
 			now.toLocalDate()) + '_' + DateTimeFormatter.ISO_LOCAL_TIME.
 			format(now.toLocalTime()).replaceAll(Pattern.quote(":"), "").
-			replaceAll(Pattern.quote("."), "_");
+			replaceAll(Pattern.quote("."), "_"));
 		
 		// Export tracker data to a ZIP file
 		byte[] exported = null;
@@ -223,6 +242,21 @@ public class ProfilerExecution
 			_LOGGER.debug(() -> "\nbegin-base64 644 " + prefix + ".zip\n" +
 				Base64.getMimeEncoder().encodeToString(fexported) +
 				"\n====\n");
+			
+			// Dump a local copy? This is used for debugging snapshots
+			Path localdump = LOCAL_SNAPSHOT_DUMP_PATH;
+			if (localdump != null)
+				try (OutputStream os = Files.newOutputStream(localdump,
+					StandardOpenOption.WRITE,
+					StandardOpenOption.TRUNCATE_EXISTING,
+					StandardOpenOption.CREATE))
+				{
+					os.write(fexported);
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
 			
 			// Await remote URL to send to
 			String remote = __awaitRemote();
