@@ -6,7 +6,7 @@ package com.iopipe.plugin.profiler;
  *
  * @since 2018/02/19
  */
-public interface ThreadStatNodeTraversal
+public interface TrackedThreadNodeTraversal
 {
 	/** 
 	 * Obtains the specified sub-node.
@@ -16,7 +16,7 @@ public interface ThreadStatNodeTraversal
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/02/19
 	 */
-	public abstract ThreadStat.Node subNode(MethodTracker.TrackedMethod __m)
+	public abstract TrackedThread.Node subNode(MethodTracker.TrackedMethod __m)
 		throws NullPointerException;
 	
 	/**
@@ -25,6 +25,6 @@ public interface ThreadStatNodeTraversal
 	 * @return An array containing all of the nodes.
 	 * @since 2018/02/19
 	 */
-	public abstract ThreadStat.Node[] subNodes();
+	public abstract TrackedThread.Node[] subNodes();
 }
 

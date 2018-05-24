@@ -17,7 +17,7 @@ public final class Tracker
 		new MethodTracker();
 	
 	/** Thread recordings. */
-	private final Map<Thread, ThreadStat> _threads =
+	private final Map<Thread, TrackedThread> _threads =
 		new HashMap<>();
 	
 	/**
@@ -47,15 +47,15 @@ public final class Tracker
 		if (__thread == null)
 			throw new NullPointerException();
 		
-		ThreadStat stat;
+		TrackedThread stat;
 		
 		// In the future recording traces could be done in multiple threads
-		Map<Thread, ThreadStat> threads = this._threads;
+		Map<Thread, TrackedThread> threads = this._threads;
 		synchronized (threads)
 		{
 			stat = threads.get(__thread);
 			if (stat == null)
-				threads.put(__thread, (stat = new ThreadStat(__thread,
+				threads.put(__thread, (stat = new TrackedThread(__thread,
 					threads.size(), this.methods)));
 		}
 		
@@ -69,13 +69,13 @@ public final class Tracker
 	 * @return The thread information.
 	 * @since 2018/02/19
 	 */
-	public final ThreadStat[] threads()
+	public final TrackedThread[] threads()
 	{
-		Map<Thread, ThreadStat> threads = this._threads;
+		Map<Thread, TrackedThread> threads = this._threads;
 		synchronized (threads)
 		{
-			Collection<ThreadStat> values = threads.values();
-			return values.<ThreadStat>toArray(new ThreadStat[values.size()]);
+			Collection<TrackedThread> values = threads.values();
+			return values.<TrackedThread>toArray(new TrackedThread[values.size()]);
 		}
 	}
 }
