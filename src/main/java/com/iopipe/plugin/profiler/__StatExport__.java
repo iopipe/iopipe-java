@@ -87,6 +87,8 @@ final class __StatExport__
 		GarbageCollectorStatistics[][] xgc =
 			new GarbageCollectorStatistics[nsnaps][];
 		UptimeStatistics[] xup = new UptimeStatistics[nsnaps];
+		MemoryPoolStatistics[][] xpool =
+			new MemoryPoolStatistics[nsnaps][];
 		
 		// Go through all of the statistics and explode them into the single
 		// array. It would be faster to write out all the columns with their
@@ -107,6 +109,10 @@ final class __StatExport__
 			List<GarbageCollectorStatistics> gc = from.gc;
 			xgc[i] = gc.<GarbageCollectorStatistics>toArray(
 				new GarbageCollectorStatistics[gc.size()]);
+			
+			List<MemoryPoolStatistics> mpool = from.mempools;
+			xpool[i] = mpool.<MemoryPoolStatistics>toArray(
+				new MemoryPoolStatistics[mpool.size()]);
 		}
 		
 		// Absolute time
@@ -130,20 +136,24 @@ final class __StatExport__
 		xrel = null;
 		
 		// Uptime
-		__uptime(xup, nsnaps, ps);
+		this.__uptime(xup, nsnaps, ps);
 		xup = null;
 		
 		// Class loader counts
-		__classLoader(xcl, nsnaps, ps);
+		this.__classLoader(xcl, nsnaps, ps);
 		xcl = null;
 		
 		// Compiler counts
-		__compiler(xjit, nsnaps, ps);
+		this.__compiler(xjit, nsnaps, ps);
 		xjit = null;
 		
 		// Garbage collection counts
-		__garbage(xgc, nsnaps, ps);
+		this.__garbage(xgc, nsnaps, ps);
 		xgc = null;
+		
+		// Memory pools
+		this.__memPool(xpool, nsnaps, ps);
+		xpool = null;
 		
 		// Before terminating, flush it so that all the data is written
 		ps.flush();
@@ -368,6 +378,7 @@ final class __StatExport__
 		__xmus = null;
 		
 		// Initial bytes
+		__ps.print(__prefix);
 		__ps.print(".init (byte)");
 		for (int i = 0; i < __nsnaps; i++)
 		{
@@ -378,6 +389,7 @@ final class __StatExport__
 		xinit = null;
 		
 		// Used bytes
+		__ps.print(__prefix);
 		__ps.print(".used (byte)");
 		for (int i = 0; i < __nsnaps; i++)
 		{
@@ -388,6 +400,7 @@ final class __StatExport__
 		xused = null;
 		
 		// Committed bytes
+		__ps.print(__prefix);
 		__ps.print(".committed (byte)");
 		for (int i = 0; i < __nsnaps; i++)
 		{
@@ -398,6 +411,7 @@ final class __StatExport__
 		xcomm = null;
 		
 		// Committed bytes
+		__ps.print(__prefix);
 		__ps.print(".max (byte)");
 		for (int i = 0; i < __nsnaps; i++)
 		{
@@ -406,6 +420,148 @@ final class __StatExport__
 		}
 		__ps.println();
 		xmaxx = null;
+	}
+	
+	/**
+	 * Dumps memory pool information.
+	 *
+	 * @param __xpool The input memory pools.
+	 * @param __nsnaps The number of snapshots.
+	 * @param __ps The output stream.
+	 * @throws IOException On write errors.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/05/23
+	 */
+	private final void __memPool(MemoryPoolStatistics[][] __xpool,
+		final int __nsnaps, PrintStream __ps)
+		throws IOException, NullPointerException
+	{
+		if (__xpool == null || __ps == null)
+			throw new NullPointerException();
+		
+		// Pool data storage
+		class __PoolData__
+		{
+			/** Collection usage, the time the VM spent in recycling. */
+			final MemoryUsageStatistic[] _collectionusage =
+				new MemoryUsageStatistic[__nsnaps];
+			
+			/** The threshold in bytes of the collection usage. */
+			final long[] _collectionusagethresholdbytes =
+				new long[__nsnaps];
+			
+			/** The number of times the collection threshold was reached. */
+			final long[] _collectionusagethresholdcount =
+				new long[__nsnaps];
+			
+			/** Peak memory usage. */
+			final MemoryUsageStatistic[] _peakusage =
+				new MemoryUsageStatistic[__nsnaps];
+			
+			/** Memory usage. */
+			final MemoryUsageStatistic[] _usage =
+				new MemoryUsageStatistic[__nsnaps];
+			
+			/** Memory usage threshold in bytes. */
+			final long[] _usagethresholdbytes =
+				new long[__nsnaps];
+			
+			/** The number of times the threshold was exceeded. */
+			final long[] _usagethresholdcount =
+				new long[__nsnaps];
+		};
+		
+		// Multiple pools can exist and they might not all exist at the
+		// same time, so correctly handle that
+		Map<String, __PoolData__> mapped = new LinkedHashMap<>();
+		for (int i = 0; i < __nsnaps; i++)
+		{
+			MemoryPoolStatistics[] from = __xpool[i];
+			
+			// For each state
+			for (MemoryPoolStatistics pool : from)
+			{
+				String key = pool.name;
+				
+				// Initialize data if missing
+				__PoolData__ data = mapped.get(key);
+				if (data == null)
+					mapped.put(key, (data = new __PoolData__()));
+				
+				// Store it at the index
+				data._collectionusage[i] = pool.collectionusage;
+				data._collectionusagethresholdbytes[i] =
+					pool.collectionusagethresholdbytes;
+				data._collectionusagethresholdcount[i] =
+					pool.collectionusagethresholdcount;
+				data._peakusage[i] = pool.peakusage;
+				data._usage[i] = pool.usage;
+				data._usagethresholdbytes[i] = pool.usagethresholdbytes;
+				data._usagethresholdcount[i] = pool.usagethresholdcount;
+			}
+		}
+		__xpool = null;
+		
+		// Print for each key
+		for (Map.Entry<String, __PoolData__> e : mapped.entrySet())
+		{
+			String k = e.getKey();
+			__PoolData__ v = e.getValue();
+			
+			// Collection Usage
+			this.__memoryUsage(v._collectionusage, __nsnaps, __ps,
+				String.format("MemPool.%s.CollectionUsage", k));
+			
+			// Garbage collection count
+			__ps.printf("MemPool.%s.CollectionUsageThreshold (bytes)", k);
+			long[] collectionusagethresholdbytes =
+				v._collectionusagethresholdbytes;
+			for (int i = 0; i < __nsnaps; i++)
+			{
+				__ps.print(',');
+				__ps.print(collectionusagethresholdbytes[i]);
+			}
+			__ps.println();
+			
+			// Garbage collection count exceeded
+			__ps.printf("MemPool.%s.CollectionUsageThresholdHit (count)", k);
+			long[] collectionusagethresholdcount =
+				v._collectionusagethresholdcount;
+			for (int i = 0; i < __nsnaps; i++)
+			{
+				__ps.print(',');
+				__ps.print(collectionusagethresholdcount[i]);
+			}
+			__ps.println();
+			
+			// Peak Usage
+			this.__memoryUsage(v._peakusage, __nsnaps, __ps,
+				String.format("MemPool.%s.PeakUsage", k));
+			
+			// Current Usage
+			this.__memoryUsage(v._usage, __nsnaps, __ps,
+				String.format("MemPool.%s.Usage", k));
+			
+			// Usage threshold limit
+			__ps.printf("MemPool.%s.UsageThreshold (bytes)", k);
+			long[] usagethresholdbytes = v._usagethresholdbytes;
+			for (int i = 0; i < __nsnaps; i++)
+			{
+				__ps.print(',');
+				__ps.print(usagethresholdbytes[i]);
+			}
+			__ps.println();
+			
+			// Times usage threshold was hit
+			__ps.printf("MemPool.%s.UsageThresholdHit (count)", k);
+			long[] usagethresholdcount = v._usagethresholdcount;
+			for (int i = 0; i < __nsnaps; i++)
+			{
+				__ps.print(',');
+				__ps.print(usagethresholdcount[i]);
+			}
+			__ps.println();
+		}
 	}
 	
 	/**

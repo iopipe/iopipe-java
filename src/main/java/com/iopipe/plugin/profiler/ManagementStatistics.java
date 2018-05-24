@@ -31,6 +31,9 @@ public final class ManagementStatistics
 	/** Uptime of the virtual machine. */
 	public final UptimeStatistics uptime;
 	
+	/** Memory pools. */
+	public final List<MemoryPoolStatistics> mempools;
+	
 	/**
 	 * Initializes the management statistics.
 	 *
@@ -40,11 +43,13 @@ public final class ManagementStatistics
 	 * @param __jit Compiler statistics.
 	 * @param __gc Garbage collection statistics.
 	 * @param __up Virtual machine uptime.
+	 * @param __mpools Memory pool snapshots.
 	 * @since 2018/05/22
 	 */
 	public ManagementStatistics(long __abs, long __rel,
 		ClassLoaderStatistics __cl, CompilerStatistics __jit,
-		GarbageCollectorStatistics[] __gc, UptimeStatistics __up)
+		GarbageCollectorStatistics[] __gc, UptimeStatistics __up,
+		MemoryPoolStatistics[] __mpools)
 	{
 		this.abstime = __abs;
 		this.reltime = __rel;
@@ -54,15 +59,24 @@ public final class ManagementStatistics
 			new CompilerStatistics(-1));
 		this.gc = Collections.<GarbageCollectorStatistics>unmodifiableList(
 			Arrays.<GarbageCollectorStatistics>asList(
-			(__gc == null ? new GarbageCollectorStatistics[0] :
+			(__gc == null ? (__gc = new GarbageCollectorStatistics[0]) :
 			(__gc = __gc.clone()))));
 		this.uptime = (__up != null ? __up :
 			new UptimeStatistics(0, -1));
+		this.mempools = Collections.<MemoryPoolStatistics>unmodifiableList(
+			Arrays.<MemoryPoolStatistics>asList(
+			(__mpools == null ? (__mpools = new MemoryPoolStatistics[0]) :
+			(__mpools = __mpools.clone()))));
 		
 		// Initialize values in the event they are null
 		for (int i = 0, n = __gc.length; i < n; i++)
 			if (__gc[i] == null)
 				__gc[i] = new GarbageCollectorStatistics("Invalid", -1, -1);
+		
+		for (int i = 0, n = __mpools.length; i < n; i++)
+			if (__mpools[i] == null)
+				__mpools[i] = new MemoryPoolStatistics("Invalid", null,
+					-1, -1, null, null, -1, -1);
 	}
 	
 	/**
@@ -79,7 +93,8 @@ public final class ManagementStatistics
 			ClassLoaderStatistics.snapshot(),
 			CompilerStatistics.snapshot(),
 			GarbageCollectorStatistics.snapshots(),
-			UptimeStatistics.snapshot());
+			UptimeStatistics.snapshot(),
+			MemoryPoolStatistics.snapshots());
 	}
 }
 
