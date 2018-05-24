@@ -24,6 +24,16 @@ public final class GarbageCollectorStatistics
 	public final long durationms;
 	
 	/**
+	 * Initializes invalid garbage collector statistics.
+	 *
+	 * @since 2018/05/24
+	 */
+	public GarbageCollectorStatistics()
+	{
+		this(null, -1, -1);
+	}
+	
+	/**
 	 * Initializes the garbage collector statistics.
 	 *
 	 * @param __n The name of the collector.

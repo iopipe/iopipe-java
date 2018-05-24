@@ -39,6 +39,16 @@ public final class MemoryPoolStatistics
 	public final long usagethresholdcount;
 	
 	/**
+	 * Initializes invalid memory statistics.
+	 *
+	 * @since 2018/05/24
+	 */
+	public MemoryPoolStatistics()
+	{
+		this(null, null, -1, -1, null, null, -1, -1);
+	}
+	
+	/**
 	 * Initializes the memory usage statistics.
 	 *
 	 * @param __name The name of the memory pool.

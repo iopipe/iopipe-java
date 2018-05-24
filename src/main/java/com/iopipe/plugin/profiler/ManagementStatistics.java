@@ -37,6 +37,9 @@ public final class ManagementStatistics
 	/** Memory statistics. */
 	public final MemoryStatistics memory;
 	
+	/** Information on threads. */
+	public final List<ThreadStatistics> threads;
+	
 	/**
 	 * Initializes the management statistics.
 	 *
@@ -48,12 +51,14 @@ public final class ManagementStatistics
 	 * @param __up Virtual machine uptime.
 	 * @param __mpools Memory pool snapshots.
 	 * @param __mem Memory statistics.
+	 * @param __threads Thread information.
 	 * @since 2018/05/22
 	 */
 	public ManagementStatistics(long __abs, long __rel,
 		ClassLoaderStatistics __cl, CompilerStatistics __jit,
 		GarbageCollectorStatistics[] __gc, UptimeStatistics __up,
-		MemoryPoolStatistics[] __mpools, MemoryStatistics __mem)
+		MemoryPoolStatistics[] __mpools, MemoryStatistics __mem,
+		ThreadStatistics[] __threads)
 	{
 		this.abstime = __abs;
 		this.reltime = __rel;
@@ -73,16 +78,23 @@ public final class ManagementStatistics
 			(__mpools = __mpools.clone()))));
 		this.memory = (__mem != null ? __mem :
 			new MemoryStatistics(null, null, -1));
+		this.threads = Collections.<ThreadStatistics>unmodifiableList(
+			Arrays.<ThreadStatistics>asList(
+			(__threads != null ? (__threads = __threads.clone()) :
+			(__threads = new ThreadStatistics[0]))));
 		
 		// Initialize values in the event they are null
 		for (int i = 0, n = __gc.length; i < n; i++)
 			if (__gc[i] == null)
-				__gc[i] = new GarbageCollectorStatistics("Invalid", -1, -1);
+				__gc[i] = new GarbageCollectorStatistics();
 		
 		for (int i = 0, n = __mpools.length; i < n; i++)
 			if (__mpools[i] == null)
-				__mpools[i] = new MemoryPoolStatistics("Invalid", null,
-					-1, -1, null, null, -1, -1);
+				__mpools[i] = new MemoryPoolStatistics();
+		
+		for (int i = 0, n = __threads.length; i < n; i++)
+			if (__threads[i] == null)
+				__threads[i] = new ThreadStatistics();
 	}
 	
 	/**
@@ -101,7 +113,8 @@ public final class ManagementStatistics
 			GarbageCollectorStatistics.snapshots(),
 			UptimeStatistics.snapshot(),
 			MemoryPoolStatistics.snapshots(),
-			MemoryStatistics.snapshot());
+			MemoryStatistics.snapshot(),
+			ThreadStatistics.snapshots());
 	}
 }
 

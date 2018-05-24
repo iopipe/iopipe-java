@@ -90,6 +90,7 @@ final class __StatExport__
 		MemoryPoolStatistics[][] xpool =
 			new MemoryPoolStatistics[nsnaps][];
 		MemoryStatistics[] xmem = new MemoryStatistics[nsnaps];
+		ThreadStatistics[][] xthr = new ThreadStatistics[nsnaps][];
 		
 		// Go through all of the statistics and explode them into the single
 		// array. It would be faster to write out all the columns with their
@@ -115,26 +116,18 @@ final class __StatExport__
 			List<MemoryPoolStatistics> mpool = from.mempools;
 			xpool[i] = mpool.<MemoryPoolStatistics>toArray(
 				new MemoryPoolStatistics[mpool.size()]);
+				
+			List<ThreadStatistics> threads = from.threads;
+			xthr[i] = threads.<ThreadStatistics>toArray(
+				new ThreadStatistics[threads.size()]);
 		}
 		
 		// Absolute time
-		ps.print("AbsoluteTime (ns)");
-		for (int i = 0; i < nsnaps; i++)
-		{
-			ps.print(',');
-			ps.print(xabs[i]);
-		}
-		ps.println();
+		__StatExport__.__printRow(ps, "AbsoluteTime (ns)", xabs);
 		xabs = null;
 		
 		// Relative time
-		ps.print("RelativeTime (ns)");
-		for (int i = 0; i < nsnaps; i++)
-		{
-			ps.print(',');
-			ps.print(xrel[i]);
-		}
-		ps.println();
+		__StatExport__.__printRow(ps, "RelativeTime (ns)", xrel);
 		xrel = null;
 		
 		// Uptime
@@ -160,6 +153,10 @@ final class __StatExport__
 		// Memory
 		this.__memory(xmem, nsnaps, ps);
 		xmem = null;
+		
+		// Threads
+		this.__threads(xthr, nsnaps, ps);
+		xthr = null;
 		
 		// Before terminating, flush it so that all the data is written
 		ps.flush();
@@ -198,34 +195,15 @@ final class __StatExport__
 		}
 		__xcl = null;
 		
-		// Currently loaded classes
-		__ps.print("CurrentLoadedClasses (classes)");
-		for (int i = 0; i < __nsnaps; i++)
-		{
-			__ps.print(',');
-			__ps.print(xcur[i]);
-		}
-		__ps.println();
+		__StatExport__.__printRow(__ps, "CurrentLoadedClasses (classes)",
+			xcur);
 		xcur = null;
 		
-		// Total loaded classes
-		__ps.print("TotalLoadedClasses (classes)");
-		for (int i = 0; i < __nsnaps; i++)
-		{
-			__ps.print(',');
-			__ps.print(xlod[i]);
-		}
-		__ps.println();
+		__StatExport__.__printRow(__ps, "TotalLoadedClasses (classes)", xlod);
 		xlod = null;
 		
-		// Total unloaded classes
-		__ps.print("TotalUnloadedClasses (classes)");
-		for (int i = 0; i < __nsnaps; i++)
-		{
-			__ps.print(',');
-			__ps.print(xunl[i]);
-		}
-		__ps.println();
+		__StatExport__.__printRow(__ps, "TotalUnloadedClasses (classes)",
+			xunl);
 		xunl = null;
 	}
 	
@@ -257,14 +235,8 @@ final class __StatExport__
 		}
 		__xjit = null;
 		
-		// Total compilation time
-		__ps.print("TotalCompilationTime (ms)");
-		for (int i = 0; i < __nsnaps; i++)
-		{
-			__ps.print(',');
-			__ps.print(xctime[i]);
-		}
-		__ps.println();
+		__StatExport__.__printRow(__ps, "TotalCompilationTime (ms)", xctime);
+		xctime = null;
 	}
 	
 	/**
@@ -326,25 +298,11 @@ final class __StatExport__
 			String k = e.getKey();
 			__GCData__ v = e.getValue();
 			
-			// Garbage collection count
-			__ps.printf("GCCount.%s (collections)", k);
-			long[] count = v._count;
-			for (int i = 0; i < __nsnaps; i++)
-			{
-				__ps.print(',');
-				__ps.print(count[i]);
-			}
-			__ps.println();
+			__StatExport__.__printRow(__ps, "GCCount.%s (collections)", k,
+				v._count);
 			
-			// Garbage collection time
-			__ps.printf("GCTime.%s (ms)", k);
-			long[] durationms = v._durationms;
-			for (int i = 0; i < __nsnaps; i++)
-			{
-				__ps.print(',');
-				__ps.print(durationms[i]);
-			}
-			__ps.println();
+			__StatExport__.__printRow(__ps, "GCTime.%s (ms)", k,
+				v._durationms);
 		}
 	}
 	
@@ -380,22 +338,13 @@ final class __StatExport__
 		}
 		__xmem = null;
 		
-		// Heap usage
 		this.__memoryUsage(xheap, __nsnaps, __ps, "MemoryHeap");
 		xheap = null;
 		
-		// Non-heap usage
 		this.__memoryUsage(xnonheap, __nsnaps, __ps, "MemoryNonHeap");
 		xnonheap = null;
 		
-		// Finalizers to be ran
-		__ps.print("PendingFinalizers (count)");
-		for (int i = 0; i < __nsnaps; i++)
-		{
-			__ps.print(',');
-			__ps.print(xfin[i]);
-		}
-		__ps.println();
+		__StatExport__.__printRow(__ps, "PendingFinalizers (count)", xfin);
 		xfin = null;
 	}
 	
@@ -434,48 +383,17 @@ final class __StatExport__
 		}
 		__xmus = null;
 		
-		// Initial bytes
-		__ps.print(__prefix);
-		__ps.print(".init (byte)");
-		for (int i = 0; i < __nsnaps; i++)
-		{
-			__ps.print(',');
-			__ps.print(xinit[i]);
-		}
-		__ps.println();
+		__StatExport__.__printRow(__ps, "%s.init (byte)", __prefix, xinit);
 		xinit = null;
 		
-		// Used bytes
-		__ps.print(__prefix);
-		__ps.print(".used (byte)");
-		for (int i = 0; i < __nsnaps; i++)
-		{
-			__ps.print(',');
-			__ps.print(xused[i]);
-		}
-		__ps.println();
+		__StatExport__.__printRow(__ps, "%s.used (byte)", __prefix, xused);
 		xused = null;
 		
-		// Committed bytes
-		__ps.print(__prefix);
-		__ps.print(".committed (byte)");
-		for (int i = 0; i < __nsnaps; i++)
-		{
-			__ps.print(',');
-			__ps.print(xcomm[i]);
-		}
-		__ps.println();
+		__StatExport__.__printRow(__ps, "%s.committed (byte)", __prefix,
+			xcomm);
 		xcomm = null;
 		
-		// Committed bytes
-		__ps.print(__prefix);
-		__ps.print(".max (byte)");
-		for (int i = 0; i < __nsnaps; i++)
-		{
-			__ps.print(',');
-			__ps.print(xmaxx[i]);
-		}
-		__ps.println();
+		__StatExport__.__printRow(__ps, "%s.max (byte)", __prefix, xmaxx);
 		xmaxx = null;
 	}
 	
@@ -565,59 +483,152 @@ final class __StatExport__
 			String k = e.getKey();
 			__PoolData__ v = e.getValue();
 			
-			// Collection Usage
 			this.__memoryUsage(v._collectionusage, __nsnaps, __ps,
 				String.format("MemPool.%s.CollectionUsage", k));
 			
-			// Garbage collection count
-			__ps.printf("MemPool.%s.CollectionUsageThreshold (byte)", k);
-			long[] collectionusagethresholdbytes =
-				v._collectionusagethresholdbytes;
-			for (int i = 0; i < __nsnaps; i++)
-			{
-				__ps.print(',');
-				__ps.print(collectionusagethresholdbytes[i]);
-			}
-			__ps.println();
+			__StatExport__.__printRow(__ps,
+				"MemPool.%s.CollectionUsageThreshold (byte)", k,
+				v._collectionusagethresholdbytes);
 			
-			// Garbage collection count exceeded
-			__ps.printf("MemPool.%s.CollectionUsageThresholdHit (count)", k);
-			long[] collectionusagethresholdcount =
-				v._collectionusagethresholdcount;
-			for (int i = 0; i < __nsnaps; i++)
-			{
-				__ps.print(',');
-				__ps.print(collectionusagethresholdcount[i]);
-			}
-			__ps.println();
+			__StatExport__.__printRow(__ps,
+				"MemPool.%s.CollectionUsageThresholdHit (count)", k,
+				v._collectionusagethresholdcount);
 			
-			// Peak Usage
 			this.__memoryUsage(v._peakusage, __nsnaps, __ps,
 				String.format("MemPool.%s.PeakUsage", k));
 			
-			// Current Usage
 			this.__memoryUsage(v._usage, __nsnaps, __ps,
 				String.format("MemPool.%s.Usage", k));
 			
-			// Usage threshold limit
-			__ps.printf("MemPool.%s.UsageThreshold (byte)", k);
-			long[] usagethresholdbytes = v._usagethresholdbytes;
-			for (int i = 0; i < __nsnaps; i++)
-			{
-				__ps.print(',');
-				__ps.print(usagethresholdbytes[i]);
-			}
-			__ps.println();
+			__StatExport__.__printRow(__ps,
+				"MemPool.%s.UsageThreshold (byte)", k,
+				v._usagethresholdbytes);
 			
-			// Times usage threshold was hit
-			__ps.printf("MemPool.%s.UsageThresholdHit (count)", k);
-			long[] usagethresholdcount = v._usagethresholdcount;
-			for (int i = 0; i < __nsnaps; i++)
+			__StatExport__.__printRow(__ps,
+				"MemPool.%s.UsageThresholdHit (count)", k,
+				v._usagethresholdcount);
+		}
+	}
+	
+	/**
+	 * Dumps thread information.
+	 *
+	 * @param __xthr The threads to dump.
+	 * @param __nsnaps The number of snapshots.
+	 * @param __ps The output stream.
+	 * @throws IOException On write errors.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/05/24
+	 */
+	private final void __threads(ThreadStatistics[][] __xthr,
+		final int __nsnaps, PrintStream __ps)
+	{
+		if (__xthr == null || __ps == null)
+			throw new NullPointerException();
+		
+		// Thread data
+		class __ThreadData__
+		{
+			/** The CPU time of the thread. */
+			final long[] _cputime =
+				new long[__nsnaps];
+
+			/** The user time of the thread. */
+			final long[] _usertime =
+				new long[__nsnaps];
+
+			/** How many times the thread blocked synching on a monitor. */
+			final long[] _blockedcount =
+				new long[__nsnaps];
+
+			/** The duration of time spent being blocked. */
+			final long[] _blockedtime =
+				new long[__nsnaps];
+
+			/** Gets the name of the object being locked. */
+			final String[] _lockedname =
+				new String[__nsnaps];
+
+			/** The ID number of the thread which owns the lock. */
+			final long[] _lockedownerid =
+				new long[__nsnaps];
+
+			/** The current state of the thread. */
+			final Thread.State[] _state =
+				new Thread.State[__nsnaps];
+
+			/** How many times the thread waited on a monitor. */
+			final long[] _waitedcount =
+				new long[__nsnaps];
+
+			/** How long the thread spent waiting for a monitor. */
+			final long[] _waitedtime =
+				new long[__nsnaps];
+		};
+		
+		// Multiple threads can exist at once and might disappear through
+		// execution
+		Map<String, __ThreadData__> mapped = new LinkedHashMap<>();
+		for (int i = 0; i < __nsnaps; i++)
+		{
+			ThreadStatistics[] from = __xthr[i];
+			
+			// For each state
+			for (ThreadStatistics thread : from)
 			{
-				__ps.print(',');
-				__ps.print(usagethresholdcount[i]);
+				String key = thread.id + "#" + thread.name;
+				
+				// Initialize data if missing
+				__ThreadData__ data = mapped.get(key);
+				if (data == null)
+					mapped.put(key, (data = new __ThreadData__()));
+				
+				// Store it at the index
+				data._cputime[i] = thread.cputime;
+				data._usertime[i] = thread.usertime;
+				data._blockedcount[i] = thread.blockedcount;
+				data._blockedtime[i] = thread.blockedtime;
+				data._lockedname[i] = thread.lockedname;
+				data._lockedownerid[i] = thread.lockedownerid;
+				data._state[i] = thread.state;
+				data._waitedcount[i] = thread.waitedcount;
+				data._waitedtime[i] = thread.waitedtime;
 			}
-			__ps.println();
+		}
+		__xthr = null;
+		
+		// Print for each key
+		for (Map.Entry<String, __ThreadData__> e : mapped.entrySet())
+		{
+			String k = e.getKey();
+			__ThreadData__ v = e.getValue();
+			
+			__StatExport__.__printRow(__ps, "Thread.%s.CPUTime (ns)", k,
+				v._cputime);
+			
+			__StatExport__.__printRow(__ps, "Thread.%s.UserTime (ns)", k,
+				v._usertime);
+			
+			__StatExport__.__printRow(__ps, "Thread.%s.Blocked (count)", k,
+				v._blockedcount);
+			
+			__StatExport__.__printRow(__ps, "Thread.%s.BlockedTime (ns)", k,
+				v._blockedtime);
+			
+			__StatExport__.__printRow(__ps, "Thread.%s.LockedName (object)", k,
+				v._lockedname);
+			
+			__StatExport__.__printRow(__ps, "Thread.%s.LockedOwner (threadid)",
+				k, v._lockedownerid);
+			
+			__StatExport__.__printRow(__ps, "Thread.%s.State (state)", k,
+				v._state);
+			
+			__StatExport__.__printRow(__ps, "Thread.%s.Waited (count)", k,
+				v._waitedcount);
+			
+			__StatExport__.__printRow(__ps, "Thread.%s.WaitedTime (ns)", k,
+				v._waitedtime);
 		}
 	}
 	
@@ -651,25 +662,116 @@ final class __StatExport__
 		}
 		__xup = null;
 		
-		// Start time of the VM
-		__ps.print("StartTime (utc ms)");
-		for (int i = 0; i < __nsnaps; i++)
-		{
-			__ps.print(',');
-			__ps.print(xboot[i]);
-		}
-		__ps.println();
+		__StatExport__.__printRow(__ps, "StartTime (utc ms)", xboot);
 		xboot = null;
 		
-		// Total loaded classes
-		__ps.print("UpTime (ms)");
-		for (int i = 0; i < __nsnaps; i++)
+		__StatExport__.__printRow(__ps, "UpTime (ms)", xup);
+		xup = null;
+	}
+	
+	/**
+	 * Prints a row of values.
+	 *
+	 * @param __ps The stream to write to.
+	 * @param __key The key to write.
+	 * @param __v The values to write.
+	 * @since 2018/05/24
+	 */
+	private static void __printRow(PrintStream __ps, String __key, int[] __v)
+	{
+		__ps.print(__key);
+		for (int i = 0, n = __v.length; i < n; i++)
 		{
 			__ps.print(',');
-			__ps.print(xup[i]);
+			__ps.print(__v[i]);
 		}
 		__ps.println();
-		xup = null;
+	}
+	
+	/**
+	 * Prints a row of values.
+	 *
+	 * @param __ps The stream to write to.
+	 * @param __key The key to write.
+	 * @param __v The values to write.
+	 * @since 2018/05/24
+	 */
+	private static void __printRow(PrintStream __ps, String __key, long[] __v)
+	{
+		__ps.print(__key);
+		for (int i = 0, n = __v.length; i < n; i++)
+		{
+			__ps.print(',');
+			__ps.print(__v[i]);
+		}
+		__ps.println();
+	}
+	
+	/**
+	 * Prints a row of values.
+	 *
+	 * @param __ps The stream to write to.
+	 * @param __key The key to write.
+	 * @param __v The values to write.
+	 * @since 2018/05/24
+	 */
+	private static void __printRow(PrintStream __ps, String __key,
+		Object[] __v)
+	{
+		__ps.print(__key);
+		for (int i = 0, n = __v.length; i < n; i++)
+		{
+			__ps.print(',');
+			
+			Object v = __v[i];
+			__ps.print((v == null ? "null" : v.toString()));
+		}
+		__ps.println();
+	}
+	
+	/**
+	 * Prints a row of values with an extra key specifier.
+	 *
+	 * @param __ps The stream to write to.
+	 * @param __key The key to write.
+	 * @param __spec Extra key specifier.
+	 * @param __v The values to write.
+	 * @since 2018/05/24
+	 */
+	private static void __printRow(PrintStream __ps, String __key,
+		String __spec, int[] __v)
+	{
+		__StatExport__.__printRow(__ps, String.format(__key, __spec), __v);
+	}
+	
+	/**
+	 * Prints a row of values with an extra key specifier.
+	 *
+	 * @param __ps The stream to write to.
+	 * @param __key The key to write.
+	 * @param __spec Extra key specifier.
+	 * @param __v The values to write.
+	 * @since 2018/05/24
+	 */
+	private static void __printRow(PrintStream __ps, String __key,
+		String __spec, long[] __v)
+	{
+		__StatExport__.__printRow(__ps, String.format(__key, __spec), __v);
+	}
+	
+	/**
+	 * Prints a row of values with an extra key specifier.
+	 *
+	 * @param __ps The stream to write to.
+	 * @param __key The key to write.
+	 * @param __spec Extra key specifier.
+	 * @param __v The values to write.
+	 * @since 2018/05/24
+	 */
+	private static void __printRow(PrintStream __ps, String __key,
+		String __spec, Object[] __v)
+	{
+		__StatExport__.__printRow(__ps, String.format(__key, __spec), __v);
 	}
 }
 
