@@ -89,6 +89,7 @@ final class __StatExport__
 		UptimeStatistics[] xup = new UptimeStatistics[nsnaps];
 		MemoryPoolStatistics[][] xpool =
 			new MemoryPoolStatistics[nsnaps][];
+		MemoryStatistics[] xmem = new MemoryStatistics[nsnaps];
 		
 		// Go through all of the statistics and explode them into the single
 		// array. It would be faster to write out all the columns with their
@@ -105,6 +106,7 @@ final class __StatExport__
 			xcl[i] = from.classloader;
 			xjit[i] = from.compiler;
 			xup[i] = from.uptime;
+			xmem[i] = from.memory;
 			
 			List<GarbageCollectorStatistics> gc = from.gc;
 			xgc[i] = gc.<GarbageCollectorStatistics>toArray(
@@ -154,6 +156,10 @@ final class __StatExport__
 		// Memory pools
 		this.__memPool(xpool, nsnaps, ps);
 		xpool = null;
+		
+		// Memory
+		this.__memory(xmem, nsnaps, ps);
+		xmem = null;
 		
 		// Before terminating, flush it so that all the data is written
 		ps.flush();
@@ -343,6 +349,57 @@ final class __StatExport__
 	}
 	
 	/**
+	 * Prints memory statistics.
+	 *
+	 * @param __xmem The input memory usages.
+	 * @param __nsnaps The number of snapshots.
+	 * @param __ps The stream to write to.
+	 * @throws IOException On write errors.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/05/24
+	 */
+	private final void __memory(MemoryStatistics[] __xmem,
+		int __nsnaps, PrintStream __ps)
+		throws IOException, NullPointerException
+	{
+		if (__xmem == null || __ps == null)
+			throw new NullPointerException();
+		
+		MemoryUsageStatistic[] xheap = new MemoryUsageStatistic[__nsnaps],
+			xnonheap = new MemoryUsageStatistic[__nsnaps];
+		int[] xfin = new int[__nsnaps];
+		
+		// Explode
+		for (int i = 0; i < __nsnaps; i++)
+		{
+			MemoryStatistics from = __xmem[i];
+			
+			xheap[i] = from.heap;
+			xnonheap[i] = from.nonheap;
+			xfin[i] = from.pendingfinalizers;
+		}
+		__xmem = null;
+		
+		// Heap usage
+		this.__memoryUsage(xheap, __nsnaps, __ps, "MemoryHeap");
+		xheap = null;
+		
+		// Non-heap usage
+		this.__memoryUsage(xnonheap, __nsnaps, __ps, "MemoryNonHeap");
+		xnonheap = null;
+		
+		// Finalizers to be ran
+		__ps.print("PendingFinalizers (count)");
+		for (int i = 0; i < __nsnaps; i++)
+		{
+			__ps.print(',');
+			__ps.print(xfin[i]);
+		}
+		__ps.println();
+		xfin = null;
+	}
+	
+	/**
 	 * Prints memory usage statistics.
 	 *
 	 * @param __xmus The input memory usages.
@@ -513,7 +570,7 @@ final class __StatExport__
 				String.format("MemPool.%s.CollectionUsage", k));
 			
 			// Garbage collection count
-			__ps.printf("MemPool.%s.CollectionUsageThreshold (bytes)", k);
+			__ps.printf("MemPool.%s.CollectionUsageThreshold (byte)", k);
 			long[] collectionusagethresholdbytes =
 				v._collectionusagethresholdbytes;
 			for (int i = 0; i < __nsnaps; i++)
@@ -543,7 +600,7 @@ final class __StatExport__
 				String.format("MemPool.%s.Usage", k));
 			
 			// Usage threshold limit
-			__ps.printf("MemPool.%s.UsageThreshold (bytes)", k);
+			__ps.printf("MemPool.%s.UsageThreshold (byte)", k);
 			long[] usagethresholdbytes = v._usagethresholdbytes;
 			for (int i = 0; i < __nsnaps; i++)
 			{

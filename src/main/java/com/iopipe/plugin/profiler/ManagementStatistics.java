@@ -34,6 +34,9 @@ public final class ManagementStatistics
 	/** Memory pools. */
 	public final List<MemoryPoolStatistics> mempools;
 	
+	/** Memory statistics. */
+	public final MemoryStatistics memory;
+	
 	/**
 	 * Initializes the management statistics.
 	 *
@@ -44,12 +47,13 @@ public final class ManagementStatistics
 	 * @param __gc Garbage collection statistics.
 	 * @param __up Virtual machine uptime.
 	 * @param __mpools Memory pool snapshots.
+	 * @param __mem Memory statistics.
 	 * @since 2018/05/22
 	 */
 	public ManagementStatistics(long __abs, long __rel,
 		ClassLoaderStatistics __cl, CompilerStatistics __jit,
 		GarbageCollectorStatistics[] __gc, UptimeStatistics __up,
-		MemoryPoolStatistics[] __mpools)
+		MemoryPoolStatistics[] __mpools, MemoryStatistics __mem)
 	{
 		this.abstime = __abs;
 		this.reltime = __rel;
@@ -67,6 +71,8 @@ public final class ManagementStatistics
 			Arrays.<MemoryPoolStatistics>asList(
 			(__mpools == null ? (__mpools = new MemoryPoolStatistics[0]) :
 			(__mpools = __mpools.clone()))));
+		this.memory = (__mem != null ? __mem :
+			new MemoryStatistics(null, null, -1));
 		
 		// Initialize values in the event they are null
 		for (int i = 0, n = __gc.length; i < n; i++)
@@ -94,7 +100,8 @@ public final class ManagementStatistics
 			CompilerStatistics.snapshot(),
 			GarbageCollectorStatistics.snapshots(),
 			UptimeStatistics.snapshot(),
-			MemoryPoolStatistics.snapshots());
+			MemoryPoolStatistics.snapshots(),
+			MemoryStatistics.snapshot());
 	}
 }
 
