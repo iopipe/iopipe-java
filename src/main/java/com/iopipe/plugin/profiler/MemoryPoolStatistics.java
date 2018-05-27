@@ -18,7 +18,7 @@ public final class MemoryPoolStatistics
 	public final String name;
 	
 	/** Collection usage, the time the VM spent in recycling unused objects. */
-	public final MemoryUsageStatistic collectionusage;
+	public final MemoryUsageStatistics collectionusage;
 	
 	/** The threshold in bytes of the collection usage. */
 	public final long collectionusagethresholdbytes;
@@ -27,10 +27,10 @@ public final class MemoryPoolStatistics
 	public final long collectionusagethresholdcount;
 	
 	/** Peak memory usage. */
-	public final MemoryUsageStatistic peakusage;
+	public final MemoryUsageStatistics peakusage;
 	
 	/** Memory usage. */
-	public final MemoryUsageStatistic usage;
+	public final MemoryUsageStatistics usage;
 	
 	/** Memory usage threshold in bytes. */
 	public final long usagethresholdbytes;
@@ -61,19 +61,19 @@ public final class MemoryPoolStatistics
 	 * @param __utc The number of times the threshold was exceeded.
 	 * @since 2018/05/23
 	 */
-	public MemoryPoolStatistics(String __name, MemoryUsageStatistic __cu,
-		long __cutb, long __cutc, MemoryUsageStatistic __peak,
-		MemoryUsageStatistic __use, long __utb, long __utc)
+	public MemoryPoolStatistics(String __name, MemoryUsageStatistics __cu,
+		long __cutb, long __cutc, MemoryUsageStatistics __peak,
+		MemoryUsageStatistics __use, long __utb, long __utc)
 	{
 		this.name = (__name != null ? __name : "Unknown");
 		this.collectionusage = (__cu != null ? __cu :
-			new MemoryUsageStatistic(-1, -1, -1, -1));
+			new MemoryUsageStatistics(-1, -1, -1, -1));
 		this.collectionusagethresholdbytes = Math.max(-1, __cutb);
 		this.collectionusagethresholdcount = Math.max(-1, __cutc);
 		this.peakusage = (__peak != null ? __peak :
-			new MemoryUsageStatistic(-1, -1, -1, -1));
+			new MemoryUsageStatistics(-1, -1, -1, -1));
 		this.usage = (__use != null ? __use :
-			new MemoryUsageStatistic(-1, -1, -1, -1));
+			new MemoryUsageStatistics(-1, -1, -1, -1));
 		this.usagethresholdbytes = Math.max(-1, __utb);
 		this.usagethresholdcount = Math.max(-1, __utc);
 	}
@@ -153,11 +153,11 @@ public final class MemoryPoolStatistics
 			
 			rv.add(new MemoryPoolStatistics(
 				bean.getName(),
-				MemoryUsageStatistic.from(bean.getCollectionUsage()),
+				MemoryUsageStatistics.from(bean.getCollectionUsage()),
 				collthreshbytes,
 				collthreshcount,
-				MemoryUsageStatistic.from(bean.getPeakUsage()),
-				MemoryUsageStatistic.from(bean.getUsage()),
+				MemoryUsageStatistics.from(bean.getPeakUsage()),
+				MemoryUsageStatistics.from(bean.getUsage()),
 				usagethreshbytes,
 				usagethreshcount));
 		}

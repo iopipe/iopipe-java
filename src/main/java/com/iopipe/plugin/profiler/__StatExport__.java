@@ -323,8 +323,8 @@ final class __StatExport__
 		if (__xmem == null || __ps == null)
 			throw new NullPointerException();
 		
-		MemoryUsageStatistic[] xheap = new MemoryUsageStatistic[__nsnaps],
-			xnonheap = new MemoryUsageStatistic[__nsnaps];
+		MemoryUsageStatistics[] xheap = new MemoryUsageStatistics[__nsnaps],
+			xnonheap = new MemoryUsageStatistics[__nsnaps];
 		int[] xfin = new int[__nsnaps];
 		
 		// Explode
@@ -359,7 +359,7 @@ final class __StatExport__
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/05/23
 	 */
-	private final void __memoryUsage(MemoryUsageStatistic[] __xmus,
+	private final void __memoryUsage(MemoryUsageStatistics[] __xmus,
 		int __nsnaps, PrintStream __ps, String __prefix)
 		throws IOException, NullPointerException
 	{
@@ -374,7 +374,7 @@ final class __StatExport__
 		// Explode
 		for (int i = 0; i < __nsnaps; i++)
 		{
-			MemoryUsageStatistic from = __xmus[i];
+			MemoryUsageStatistics from = __xmus[i];
 			
 			xinit[i] = from.initbytes;
 			xused[i] = from.usedbytes;
@@ -418,8 +418,8 @@ final class __StatExport__
 		class __PoolData__
 		{
 			/** Collection usage, the time the VM spent in recycling. */
-			final MemoryUsageStatistic[] _collectionusage =
-				new MemoryUsageStatistic[__nsnaps];
+			final MemoryUsageStatistics[] _collectionusage =
+				new MemoryUsageStatistics[__nsnaps];
 			
 			/** The threshold in bytes of the collection usage. */
 			final long[] _collectionusagethresholdbytes =
@@ -430,12 +430,12 @@ final class __StatExport__
 				new long[__nsnaps];
 			
 			/** Peak memory usage. */
-			final MemoryUsageStatistic[] _peakusage =
-				new MemoryUsageStatistic[__nsnaps];
+			final MemoryUsageStatistics[] _peakusage =
+				new MemoryUsageStatistics[__nsnaps];
 			
 			/** Memory usage. */
-			final MemoryUsageStatistic[] _usage =
-				new MemoryUsageStatistic[__nsnaps];
+			final MemoryUsageStatistics[] _usage =
+				new MemoryUsageStatistics[__nsnaps];
 			
 			/** Memory usage threshold in bytes. */
 			final long[] _usagethresholdbytes =

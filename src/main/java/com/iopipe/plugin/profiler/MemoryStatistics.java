@@ -11,10 +11,10 @@ import java.lang.management.MemoryMXBean;
 public final class MemoryStatistics
 {
 	/** Heap memory usage. */
-	public final MemoryUsageStatistic heap;
+	public final MemoryUsageStatistics heap;
 	
 	/** Non-heap memory usage. */
-	public final MemoryUsageStatistic nonheap;
+	public final MemoryUsageStatistics nonheap;
 	
 	/** Pending finalization count. */
 	public final int pendingfinalizers;
@@ -27,13 +27,13 @@ public final class MemoryStatistics
 	 * @param __f Pending finalizers.
 	 * @since 2018/05/24
 	 */
-	public MemoryStatistics(MemoryUsageStatistic __h, MemoryUsageStatistic __n,
+	public MemoryStatistics(MemoryUsageStatistics __h, MemoryUsageStatistics __n,
 		int __f)
 	{
 		this.heap = (__h != null ? __h :
-			new MemoryUsageStatistic(-1, -1, -1, -1));
+			new MemoryUsageStatistics(-1, -1, -1, -1));
 		this.nonheap = (__n != null ? __n :
-			new MemoryUsageStatistic(-1, -1, -1, -1));
+			new MemoryUsageStatistics(-1, -1, -1, -1));
 		this.pendingfinalizers = Math.max(-1, __f);
 	}
 	
@@ -63,8 +63,8 @@ public final class MemoryStatistics
 			return null;
 		
 		return new MemoryStatistics(
-			MemoryUsageStatistic.from(__bean.getHeapMemoryUsage()),
-			MemoryUsageStatistic.from(__bean.getNonHeapMemoryUsage()),
+			MemoryUsageStatistics.from(__bean.getHeapMemoryUsage()),
+			MemoryUsageStatistics.from(__bean.getNonHeapMemoryUsage()),
 			__bean.getObjectPendingFinalizationCount());
 	}
 }

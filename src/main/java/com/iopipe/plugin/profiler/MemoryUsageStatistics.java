@@ -7,7 +7,7 @@ import java.lang.management.MemoryUsage;
  *
  * @since 2018/05/23
  */
-public final class MemoryUsageStatistic
+public final class MemoryUsageStatistics
 {
 	/** Initial memory amount. */
 	public final long initbytes;
@@ -30,7 +30,7 @@ public final class MemoryUsageStatistic
 	 * @param __m The maximum number of bytes.
 	 * @since 2018/05/23
 	 */
-	public MemoryUsageStatistic(long __i, long __u, long __c, long __m)
+	public MemoryUsageStatistics(long __i, long __u, long __c, long __m)
 	{
 		this.initbytes = Math.max(-1, __i);
 		this.usedbytes = Math.max(-1, __u);
@@ -45,12 +45,12 @@ public final class MemoryUsageStatistic
 	 * @return Statistic for that usage or {@code null} if it is not valid.
 	 * @since 2018/05/23
 	 */
-	public static MemoryUsageStatistic from(MemoryUsage __m)
+	public static MemoryUsageStatistics from(MemoryUsage __m)
 	{
 		if (__m == null)
 			return null;
 		
-		return new MemoryUsageStatistic(__m.getInit(),
+		return new MemoryUsageStatistics(__m.getInit(),
 			__m.getUsed(),
 			__m.getCommitted(),
 			__m.getMax());
