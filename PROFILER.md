@@ -232,12 +232,15 @@ information are optional and may not actually have any defined value.
    * The amount of time the thread spent executing code on the CPU which may
      or may not additionally include kernel mode.
  * _Thread.?.?.UserTime (ns)_
+   * **LOWER IS BETTER**
    * The amount of time the thread spent execution code in user mode.
  * _Thread.?.?.Blocked (count)_
+   * **LOWER IS BETTER**
    * The number of times the thread was blocked waiting for a synchronization
      event to occur.
    * This is increased by performing `synchronized` and `Object.wait()`.
  * _Thread.?.?.BlockedTime (ns)_
+   * **LOWER IS BETTER**
    * The amount of time the thread was blocked for.
    * This is increased by performing `synchronized` and `Object.wait()`.
  * _Thread.?.?.LockedName (object)_
@@ -251,9 +254,11 @@ information are optional and may not actually have any defined value.
  * _Thread.?.?.State (state)_
    * The current thread of the state, matches `Thread.State`.
  * _Thread.?.?.Waited (count)_
+   * **LOWER IS BETTER**
    * The number of times the thread waiting on another object's monitor.
    * This is increased by performing `Object.wait()`.
  * _Thread.?.?.WaitedTime (ns)_
+   * **LOWER IS BETTER**
    * The amount of time the thread spent waiting for a notification on the
      object monitor.
    * This is increased by performing `Object.wait()`.
