@@ -59,42 +59,75 @@ This section documents the meanings of the statistics data.
 
 ## Timing
 
-### AbsoluteTime (ns)
-
-The time the snapshot was created.
-
-### RelativeTime (ns)
-
-The time since the start of execution the snapshot was created.
-
-### StartTime (utc ms)
-
-The number of milliseconds since the UNIX Epoch when the virtual machine was
-created.
-
-### UpTime (ms)
-
-The number of milliseconds the virtual machine has been online for.
+ * _AbsoluteTime (ns)_
+   * The time the snapshot was created.
+ * _RelativeTime (ns)_
+   * The time since the start of execution the snapshot was created.
+ * _StartTime (utc ms)_
+   * The number of milliseconds since the UNIX Epoch when the virtual machine
+    was created.
+ * _UpTime (ms)_
+   * The number of milliseconds the virtual machine has been online for.
 
 ## Class Loading
 
-This contains class loading statistics.
+This contains class loading statistics, for all counts the lower the number
+the better. Higher numbers are indicative of more classes being loaded which
+slows down initial execution time. Reducing the number of classes loaded will
+reduce the time it takes for coldstarts to execute.
 
-## CurrentLoadedClasses (classes)
+ * _CurrentLoadedClasses (classes)_
+   * **LOWER IS BETTER**
+   * The current number of loaded classes, the higher this number the more
+     classes are currently loaded. Classes may require loading, initializing,
+     and compilation which can increase cold start times. It is recommended to
+     keep this value lower.
+ * _TotalLoadedClasses (classes)_
+   * **LOWER IS BETTER**
+   * The number number of classes which were loaded in the virtual machine,
+     unlike the current count this also includes classes which were unloaded. 
+ * _TotalUnloadedClasses (classes)_
+   * **LOWER IS BETTER**
+   * The number of classes which have been unloaded since they were not
+     required to be used at all.
 
-The current number of loaded classes, the higher this number the more classes
-are currently loaded. Classes may require loading, initializing, and
-compilation which can increase cold start times. It is recommended to keep this
-value lower.
+## Garbage Collection
 
-## TotalLoadedClasses (classes)
+These represent garbage collection counts and may vary across virtual machines.
+Generally for garbage collectors, they will require time to cleanup objects
+and additionally this means that if the garbage collector is running that there
+is not enough memory available, it likely has been exhausted.
+Since there are various garbage collectors there are different groups of them.
 
-The number number of classes which were loaded in the virtual machine, unlike
-the current count this also includes classes which were unloaded.
+ * _Copy_ ^
+   * **STOP THE WORLD**
+   * Single threaded garbage collector which copies objects from the Eden to
+     the survivor spaces.
+ * _MarkSweepCompact_ ^
+   * **STOP THE WORLD**
+   * Single threaded garbage collector which goes through all objects to find
+     objects with no strong references to them.
+ * _PS Scavenge_
+   * **STOP THE WORLD**
+   * Similar to _Copy_ except that multiple threads are used instead.
+ * _PS MarkSweep_
+   * **STOP THE WORLD**
+   * Parallel mark and sweep which goes through all objects to find objects
+     with no strong references to them.
 
-## TotalUnloadedClasses (classes)
+ * _GC.?.Count (collections)_
+   * **LOWER IS BETTER**
+   * The number of times this garbage collector has been ran.
+ * _GC.PS MarkSweep.Time (ms)_
+   * **LOWER IS BETTER**
+   * The amount of time the garbage collector spent cleaning up garbage
 
-The number of classes which have been unloaded since they were not required to
-be used at all.
+^ As of this writing Amazon uses the serial garbage collectors (_Copy_ and
+_MarkSweepCompact_).
 
+Regardless of which garbage collector is used, circular references between
+objects should be avoided where possible. If a circular reference is to be
+used then `Reference` should be used such as `WeakReference` (garbage collected
+as soon as nothing points to it) or `SoftReference` (kept as a cache but is
+garbage collected when not enough memory is available).
 
