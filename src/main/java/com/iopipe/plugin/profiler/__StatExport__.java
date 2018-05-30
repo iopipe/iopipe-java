@@ -661,7 +661,7 @@ final class __StatExport__
 			// For each state
 			for (ThreadStatistics thread : from)
 			{
-				String key = thread.id + "#" + thread.name;
+				String key = thread.name + "." + thread.id;
 				
 				// Initialize data if missing
 				__ThreadData__ data = mapped.get(key);
