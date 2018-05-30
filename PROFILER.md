@@ -28,6 +28,19 @@ environment variables:
   * The default is 1,000 microseconds (1ms).
   * `IOPIPE_PROFILER_SAMPLERATE` as an environment variable
 
+Additionally the following are advanced environment variables which the
+profiler uses to slightly change its behavior, these are not intended for
+normal users to use unless in specific cases.
+
+ * `IOPIPE_PROFILER_LOCAL_DUMP_PATH`
+   * A path which to where the ZIP which is uploaded to IOpipe will be stored
+     additionally on the file system.
+   * Note that the file will be stored on the file systems which are local
+     to the lambda.
+ * `IOPIPE_PROFILER_ALTERNATIVE_PREFIX`
+   * Instead of using a timestamp as the prefix for profiler snapshots, the
+     following prefix will be used instead.
+
 ## Getting Profiling Data
 
 When the profiler is enabled, .zip files containing the profiling data may be downloaded from the individual
