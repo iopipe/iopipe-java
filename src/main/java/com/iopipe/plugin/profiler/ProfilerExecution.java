@@ -421,7 +421,7 @@ public class ProfilerExecution
 	{
 		// Need to determine which server to send to, can be done in another
 		// thread
-		Thread getter = new Thread(this::__getRemote, "ProfilerGetURL");
+		Thread getter = new Thread(this::__getRemote, "IOpipe-ProfilerGetURL");
 		getter.setDaemon(true);
 		getter.start();
 		
@@ -434,7 +434,7 @@ public class ProfilerExecution
 		this._poller = poller;
 		
 		// Initialize the polling thread
-		Thread pollthread = new Thread(poller);
+		Thread pollthread = new Thread(poller, "IOpipe-ProfilerWorker");
 		pollthread.setDaemon(true);
 		
 		// Set a higher priority if that is possible so that way the traces
