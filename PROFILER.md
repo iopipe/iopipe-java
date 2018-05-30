@@ -97,7 +97,8 @@ These represent garbage collection counts and may vary across virtual machines.
 Generally for garbage collectors, they will require time to cleanup objects
 and additionally this means that if the garbage collector is running that there
 is not enough memory available, it likely has been exhausted.
-Since there are various garbage collectors there are different groups of them.
+
+Since there are various garbage collectors there are different groups of them:
 
  * _Copy_ ^
    * **STOP THE WORLD**
@@ -115,6 +116,11 @@ Since there are various garbage collectors there are different groups of them.
    * Parallel mark and sweep which goes through all objects to find objects
      with no strong references to them.
 
+^ As of this writing Amazon uses the serial garbage collectors (_Copy_ and
+_MarkSweepCompact_).
+
+The following are statistics measured from garbage collectors:
+
  * _GC.?.Count (collections)_
    * **LOWER IS BETTER**
    * The number of times this garbage collector has been ran.
@@ -122,12 +128,10 @@ Since there are various garbage collectors there are different groups of them.
    * **LOWER IS BETTER**
    * The amount of time the garbage collector spent cleaning up garbage
 
-^ As of this writing Amazon uses the serial garbage collectors (_Copy_ and
-_MarkSweepCompact_).
-
 Regardless of which garbage collector is used, circular references between
 objects should be avoided where possible. If a circular reference is to be
 used then `Reference` should be used such as `WeakReference` (garbage collected
 as soon as nothing points to it) or `SoftReference` (kept as a cache but is
 garbage collected when not enough memory is available).
+
 

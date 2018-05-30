@@ -423,10 +423,10 @@ final class __StatExport__
 		}
 		__xmem = null;
 		
-		this.__memoryUsage(xheap, __nsnaps, __ps, "MemoryHeap");
+		this.__memoryUsage(xheap, __nsnaps, __ps, "Memory.Heap");
 		xheap = null;
 		
-		this.__memoryUsage(xnonheap, __nsnaps, __ps, "MemoryNonHeap");
+		this.__memoryUsage(xnonheap, __nsnaps, __ps, "Memory.NonHeap");
 		xnonheap = null;
 		
 		__StatExport__.__printRow(__ps, "PendingFinalizers (count)", xfin);
