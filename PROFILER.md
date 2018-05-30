@@ -53,3 +53,48 @@ The invocation count in this mode is always `1` because it is unknown how many
 times a method has actually executed in a thread. The self time reflects the
 time the sampler has seen the method.
 
+# Statistics Data Meanings
+
+This section documents the meanings of the statistics data.
+
+## Timing
+
+### AbsoluteTime (ns)
+
+The time the snapshot was created.
+
+### RelativeTime (ns)
+
+The time since the start of execution the snapshot was created.
+
+### StartTime (utc ms)
+
+The number of milliseconds since the UNIX Epoch when the virtual machine was
+created.
+
+### UpTime (ms)
+
+The number of milliseconds the virtual machine has been online for.
+
+## Class Loading
+
+This contains class loading statistics.
+
+## CurrentLoadedClasses (classes)
+
+The current number of loaded classes, the higher this number the more classes
+are currently loaded. Classes may require loading, initializing, and
+compilation which can increase cold start times. It is recommended to keep this
+value lower.
+
+## TotalLoadedClasses (classes)
+
+The number number of classes which were loaded in the virtual machine, unlike
+the current count this also includes classes which were unloaded.
+
+## TotalUnloadedClasses (classes)
+
+The number of classes which have been unloaded since they were not required to
+be used at all.
+
+
