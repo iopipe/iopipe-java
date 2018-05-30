@@ -53,9 +53,13 @@ The invocation count in this mode is always `1` because it is unknown how many
 times a method has actually executed in a thread. The self time reflects the
 time the sampler has seen the method.
 
-# Statistics Data Meanings
+# Statistics Data
 
-This section documents the meanings of the statistics data.
+When the profiler is enabled, snapshots of the statistics of the virtual
+machine are obtained and stored in the profiler information. It is stored in
+comma separated values and may be read by a spreadsheet or other utilities.
+
+The following sections document the meanings of the statistics data.
 
 ## Timing
 
@@ -217,4 +221,62 @@ Then each pool has individual statistics:
  * _MemPool.?.UsageThresholdHit (count)_
    * This represents the number of times the usage has exceeded the threshold.
 
+## Threads
+
+This contains the information on the threads which were seen executing at the
+time the snapshot was created. Note that most of the fields in the thread
+information are optional and may not actually have any defined value.
+
+ * _Thread.?.?.CPUTime (ns)_
+   * **LOWER IS BETTER**
+   * The amount of time the thread spent executing code on the CPU which may
+     or may not additionally include kernel mode.
+ * _Thread.?.?.UserTime (ns)_
+   * The amount of time the thread spent execution code in user mode.
+ * _Thread.?.?.Blocked (count)_
+   * The number of times the thread was blocked waiting for a synchronization
+     event to occur.
+   * This is increased by performing `synchronized` and `Object.wait()`.
+ * _Thread.?.?.BlockedTime (ns)_
+   * The amount of time the thread was blocked for.
+   * This is increased by performing `synchronized` and `Object.wait()`.
+ * _Thread.?.?.LockedName (object)_
+   * This represents the class name and the hashcode of the object that the
+     thread has performed `Object.wait()` on.
+   * This will be `null` if the thread is not waiting for a notification.
+ * _Thread.?.?.LockedOwner (threadid)_
+   * This represents the ID number of the thread which currently has the
+     lock on the object monitor this thread is waiting on.
+   * This will be `-1` if the thread is not waiting for a notification.
+ * _Thread.?.?.State (state)_
+   * The current thread of the state, matches `Thread.State`.
+ * _Thread.?.?.Waited (count)_
+   * The number of times the thread waiting on another object's monitor.
+   * This is increased by performing `Object.wait()`.
+ * _Thread.?.?.WaitedTime (ns)_
+   * The amount of time the thread spent waiting for a notification on the
+     object monitor.
+   * This is increased by performing `Object.wait()`.
+
+## Buffer Pools
+
+These are pools which are used as buffers related to file input and output.
+
+The following pools exist:
+
+ * _direct_
+   * Represents the number of direct buffers that are used.
+   * Direct buffers are those created by `ByteBuffer.allocateDirect()` and
+     similar related classes.
+ * _mapped_
+   * Represents memory mapped files.
+
+Each pool has the specified statistics:
+
+ * _BufferPool.?.Count (objects)_
+   * The number of objects which are currently in the given pool.
+ * _BufferPool.?.Used (byte)_
+   * The approximate number of bytes which is used to store data in the pool.
+ * _BufferPool.?.Capacity (byte)_
+   * The approximate maximum capacity in bytes that the pool may contain.
 
