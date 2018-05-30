@@ -100,11 +100,11 @@ is not enough memory available, it likely has been exhausted.
 
 Since there are various garbage collectors there are different groups of them:
 
- * _Copy_ ^
+ * _Copy_ `^`
    * **STOP THE WORLD**
    * Single threaded garbage collector which copies objects from the Eden to
      the survivor spaces.
- * _MarkSweepCompact_ ^
+ * _MarkSweepCompact_ `^`
    * **STOP THE WORLD**
    * Single threaded garbage collector which goes through all objects to find
      objects with no strong references to them.
@@ -116,7 +116,7 @@ Since there are various garbage collectors there are different groups of them:
    * Parallel mark and sweep which goes through all objects to find objects
      with no strong references to them.
 
-^ As of this writing Amazon uses the serial garbage collectors (_Copy_ and
+`^` As of this writing Amazon uses the serial garbage collectors (_Copy_ and
 _MarkSweepCompact_).
 
 The following are statistics measured from garbage collectors:
@@ -133,5 +133,88 @@ objects should be avoided where possible. If a circular reference is to be
 used then `Reference` should be used such as `WeakReference` (garbage collected
 as soon as nothing points to it) or `SoftReference` (kept as a cache but is
 garbage collected when not enough memory is available).
+
+Other statistics which may be affected by garbage collection:
+
+ * _PendingFinalizers (count)_
+   * The number of objects which are waiting to have their finalizers called.
+
+## Memory
+
+Most of the memory statistics will use the following memory usage statistics,
+which will be indicated by a caret `^`.
+
+ * _?.init (byte)_
+   * **GENERALLY HIGHER IS BETTER**
+   * The number of bytes which were initially allocated for the given purpose.
+   * This generally will start as a lower number.
+   * This value might not be defined and may be any arbitrary value.
+ * _?.used (byte)_
+   * **GENERALLY LOWER IS BETTER**
+   * This is the number of bytes which are currently being used.
+ * _?.committed (byte)_
+   * **GENERALLY HIGHER IS BETTER**
+   * The number of bytes that are presently available to the virtual machine,
+     this will be memory which has actually be allocated rather than reserved.
+   * This usually will indicate the amount of memory the virtual machine has
+     claimed from the operating system for its own use.
+ * _?.max (byte)_
+   * The maximum number of bytes which can be used by the virtual machine.
+   * This value is not defined and may be any arbitrary value.
+   * This may indicate the amount of memory which has been reserved.
+
+There are two global memory spaces, heap and non-heap. These places are
+generally where objects and other structures will be stored.
+
+ * _Memory.Heap_ `^`
+   * This is where all of the storage for objects and data exists within the
+     virtual machine.
+ * _Memory.NonHeap_ `^`
+   * This is any other memory which is considered part of the heap, this can
+     include space reserved for natively compiled classes and the stack.
+
+Additionally beyond basic memory usage the virtual machine has a number of
+memory pools which are used for given purposes. Most of the pools are dedicated
+to the garbage collector and are used to track the amount of objects and
+memory that is within them. The following information on pools are:
+
+ * _Code Cache_
+   * This contains the memory storage for the JIT compiler and native code.
+ * _Metaspace_
+   * This contains all of the metadata which is used for classes and their
+     representation.
+   * Generally the more classes that are loaded the larger the metaspace will
+     be.
+ * _Compressed Class Space_
+   * This represents the compressed class space which is used to store
+     representations of classes uses compacted structures and pointers.
+ * _Eden Space_ or _PS Eden Space_
+   * Most objects will be initially allocated with memory within this space.
+   * This represents objects which have recently been created.
+ * _Survivor Space_ or _PS Survivor Space_
+   * Objects which have survived in the Eden space are placed in this space.
+ * _Tenured Gen_ or _PS Old Gen_
+   * Objects which have survived in the Survivor space are placed in this
+     space.
+   * This represents the longest lived objects.
+
+Then each pool has individual statistics:
+
+ * _MemPool.?.CollectionUsage_ `^`
+   * This contains information on the number of bytes that the virtual machine
+     has expended to perform garbage collection.
+ * _MemPool.?.CollectionUsageThreshold (byte)_
+   * This is optional and represents a limit before the hit count is increased.
+ * _MemPool.?.CollectionUsageThresholdHit (count)_
+   * This represents the number of times the usage has exceeded the threshold.
+ * _MemPool.?.PeakUsage_ `^`
+   * This represents the peak amount of memory that has been used by the given
+     pool.
+ * _MemPool.?.Usage_ `^`
+   * The amount of memory that is being used by this given pool.
+ * _MemPool.?.UsageThreshold (byte)_
+   * This is optional and represents a limit before the hit count is increased.
+ * _MemPool.?.UsageThresholdHit (count)_
+   * This represents the number of times the usage has exceeded the threshold.
 
 
