@@ -40,6 +40,9 @@ public final class ManagementStatistics
 	/** Information on threads. */
 	public final List<ThreadStatistics> threads;
 	
+	/** Buffer pools. */
+	public final List<BufferPoolStatistics> buffers;
+	
 	/**
 	 * Initializes the management statistics.
 	 *
@@ -52,13 +55,14 @@ public final class ManagementStatistics
 	 * @param __mpools Memory pool snapshots.
 	 * @param __mem Memory statistics.
 	 * @param __threads Thread information.
+	 * @param __bufs Buffer information.
 	 * @since 2018/05/22
 	 */
 	public ManagementStatistics(long __abs, long __rel,
 		ClassLoaderStatistics __cl, CompilerStatistics __jit,
 		GarbageCollectorStatistics[] __gc, UptimeStatistics __up,
 		MemoryPoolStatistics[] __mpools, MemoryStatistics __mem,
-		ThreadStatistics[] __threads)
+		ThreadStatistics[] __threads, BufferPoolStatistics[] __bufs)
 	{
 		this.abstime = __abs;
 		this.reltime = __rel;
@@ -82,6 +86,10 @@ public final class ManagementStatistics
 			Arrays.<ThreadStatistics>asList(
 			(__threads != null ? (__threads = __threads.clone()) :
 			(__threads = new ThreadStatistics[0]))));
+		this.buffers = Collections.<BufferPoolStatistics>unmodifiableList(
+			Arrays.<BufferPoolStatistics>asList(
+			(__bufs != null ? (__bufs = __bufs.clone()) :
+			(__bufs = new BufferPoolStatistics[0]))));
 		
 		// Initialize values in the event they are null
 		for (int i = 0, n = __gc.length; i < n; i++)
@@ -95,6 +103,10 @@ public final class ManagementStatistics
 		for (int i = 0, n = __threads.length; i < n; i++)
 			if (__threads[i] == null)
 				__threads[i] = new ThreadStatistics();
+		
+		for (int i = 0, n = __bufs.length; i < n; i++)
+			if (__bufs[i] == null)
+				__bufs[i] = new BufferPoolStatistics();
 	}
 	
 	/**
@@ -114,7 +126,8 @@ public final class ManagementStatistics
 			UptimeStatistics.snapshot(),
 			MemoryPoolStatistics.snapshots(),
 			MemoryStatistics.snapshot(),
-			ThreadStatistics.snapshots());
+			ThreadStatistics.snapshots(),
+			BufferPoolStatistics.snapshots());
 	}
 }
 

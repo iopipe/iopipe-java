@@ -91,6 +91,7 @@ final class __StatExport__
 			new MemoryPoolStatistics[nsnaps][];
 		MemoryStatistics[] xmem = new MemoryStatistics[nsnaps];
 		ThreadStatistics[][] xthr = new ThreadStatistics[nsnaps][];
+		BufferPoolStatistics[][] xbuf = new BufferPoolStatistics[nsnaps][];
 		
 		// Go through all of the statistics and explode them into the single
 		// array. It would be faster to write out all the columns with their
@@ -120,6 +121,10 @@ final class __StatExport__
 			List<ThreadStatistics> threads = from.threads;
 			xthr[i] = threads.<ThreadStatistics>toArray(
 				new ThreadStatistics[threads.size()]);
+			
+			List<BufferPoolStatistics> buffers = from.buffers;
+			xbuf[i] = buffers.<BufferPoolStatistics>toArray(
+				new BufferPoolStatistics[buffers.size()]);
 		}
 		
 		// Absolute time
@@ -158,8 +163,88 @@ final class __StatExport__
 		this.__threads(xthr, nsnaps, ps);
 		xthr = null;
 		
+		// Buffers
+		this.__buffers(xbuf, nsnaps, ps);
+		xbuf = null;
+		
 		// Before terminating, flush it so that all the data is written
 		ps.flush();
+	}
+	
+	/**
+	 * Dumps buffer information.
+	 *
+	 * @param __buf Buffers to dump.
+	 * @param __nsnaps The number of snapshots.
+	 * @param __ps The output stream.
+	 * @throws IOException On write errors.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/05/30
+	 */
+	private final void __buffers(BufferPoolStatistics[][] __xbuf,
+		final int __nsnaps, PrintStream __ps)
+		throws IOException, NullPointerException
+	{
+		if (__xbuf == null || __ps == null)
+			throw new NullPointerException();
+		
+		// Buffer data storage
+		class __BufferData__
+		{
+			/** The number of objects in the pool. */
+			public final long[] _count =
+				new long[__nsnaps];
+				
+			/** The memory used in the pool. */
+			public final long[] _usedbytes =
+				new long[__nsnaps];
+				
+			/** The capacity of the pool in bytes. */
+			public final long[] _capacitybytes =
+				new long[__nsnaps];
+		};
+		
+		// Multiple buffers may exist then not exist
+		Map<String, __BufferData__> mapped = new LinkedHashMap<>();
+		for (int i = 0; i < __nsnaps; i++)
+		{
+			BufferPoolStatistics[] from = __xbuf[i];
+			
+			// For each state
+			for (BufferPoolStatistics pool : from)
+			{
+				String key = pool.name;
+				
+				// Initialize data if missing
+				__BufferData__ data = mapped.get(key);
+				if (data == null)
+					mapped.put(key, (data = new __BufferData__()));
+				
+				data._count[i] = pool.count;
+				data._usedbytes[i] = pool.usedbytes;
+				data._capacitybytes[i] = pool.capacitybytes;
+			}
+		}
+		__xbuf = null;
+		
+		// Print for each key
+		for (Map.Entry<String, __BufferData__> e : mapped.entrySet())
+		{
+			String k = e.getKey();
+			__BufferData__ v = e.getValue();
+			
+			__StatExport__.__printRow(__ps,
+				"BufferPool.%s.Count (objects)", k,
+				v._count);
+			
+			__StatExport__.__printRow(__ps,
+				"BufferPool.%s.Used (byte)", k,
+				v._usedbytes);
+			
+			__StatExport__.__printRow(__ps,
+				"BufferPool.%s.Capacity (byte)", k,
+				v._capacitybytes);
+		}
 	}
 	
 	/**
