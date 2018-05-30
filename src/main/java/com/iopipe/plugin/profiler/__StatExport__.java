@@ -383,10 +383,10 @@ final class __StatExport__
 			String k = e.getKey();
 			__GCData__ v = e.getValue();
 			
-			__StatExport__.__printRow(__ps, "GCCount.%s (collections)", k,
+			__StatExport__.__printRow(__ps, "GC.%s.Count (collections)", k,
 				v._count);
 			
-			__StatExport__.__printRow(__ps, "GCTime.%s (ms)", k,
+			__StatExport__.__printRow(__ps, "GC.%s.Time (ms)", k,
 				v._durationms);
 		}
 	}
