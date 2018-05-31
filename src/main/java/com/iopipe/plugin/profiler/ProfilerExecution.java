@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -121,7 +122,16 @@ public class ProfilerExecution
 		
 		// Path where snapshots will be stored, optional
 		String lsndp = System.getenv("IOPIPE_PROFILER_LOCAL_DUMP_PATH");
-		LOCAL_SNAPSHOT_DUMP_PATH = (lsndp != null ? Paths.get(lsndp) : null);
+		Path pathlsndp;
+		try
+		{
+			pathlsndp = (lsndp != null ? Paths.get(lsndp) : null);
+		}
+		catch (InvalidPathException e)
+		{
+			pathlsndp = null;
+		}
+		LOCAL_SNAPSHOT_DUMP_PATH = pathlsndp;
 		
 		// Alternative prefix for ZIP entries
 		ALTERNATIVE_PREFIX = System.getenv("IOPIPE_PROFILER_ALTERNATIVE_PREFIX");
