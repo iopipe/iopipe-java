@@ -37,18 +37,19 @@ public final class BufferPoolStatistics
 	/**
 	 * Initializes the buffer pool statistics.
 	 *
-	 * @param __n The name of the pool.
-	 * @param __c The objects in the pool.
-	 * @param __u The number of used bytes.
-	 * @param __p The capacity of the pool.
+	 * @param __name The name of the pool.
+	 * @param __count The objects in the pool.
+	 * @param __usedbytes The number of used bytes.
+	 * @param __capacitybytes The capacity of the pool.
 	 * @since 2018/05/27
 	 */
-	public BufferPoolStatistics(String __n, long __c, long __u, long __p)
+	public BufferPoolStatistics(String __name, long __count, long __usedbytes,
+		long __capacitybytes)
 	{
-		this.name = (__n != null ? __n : "Unknown");
-		this.count = Long.max(-1, __c);
-		this.usedbytes = Long.max(-1, __u);
-		this.capacitybytes = Long.max(-1, __p);
+		this.name = (__name != null ? __name : "Unknown");
+		this.count = Long.max(-1, __count);
+		this.usedbytes = Long.max(-1, __usedbytes);
+		this.capacitybytes = Long.max(-1, __capacitybytes);
 	}
 	
 	/**
