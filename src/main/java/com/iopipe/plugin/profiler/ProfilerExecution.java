@@ -222,6 +222,13 @@ public class ProfilerExecution
 				new __CPUExport__(tracker, execution, SAMPLE_RATE).run(zos);
 				zos.closeEntry();
 				
+				// Any entry after this point should be compressed and should
+				// easily be compressed using a fast compression algorithm.
+				// This is so the size of the ZIP is reduced which will
+				// additionally reduce the bandwidth cost of uploading it to
+				// the server.
+				zos.setLevel(3);
+				
 				// Export statistics
 				zos.putNextEntry(new ZipEntry(prefix + "_stat.csv"));
 				new __StatExport__(beginstats, endstats).run(zos);
