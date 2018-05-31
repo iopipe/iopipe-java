@@ -30,16 +30,27 @@ environment variables:
 
 Additionally the following are advanced environment variables which the
 profiler uses to slightly change its behavior, these are not intended for
-normal users to use unless in specific cases.
+normal users to use unless in specific cases. These are intended for use in
+debugging the profiler.
 
  * `IOPIPE_PROFILER_LOCAL_DUMP_PATH`
    * A path which to where the ZIP which is uploaded to IOpipe will be stored
-     additionally on the file system.
+     additionally on the file system, this is for debugging purposes
    * Note that the file will be stored on the file systems which are local
      to the lambda.
+   * An absolute path should be used because the working directory may be
+     undefined.
+   * The default value is not set, setting a value will cause the file to be
+     created if it is able to be created.
+   * Any file that already exists will be truncated and replaced.
+   * The string should be a valid filename.
  * `IOPIPE_PROFILER_ALTERNATIVE_PREFIX`
    * Instead of using a timestamp as the prefix for profiler snapshots, the
      following prefix will be used instead.
+   * The default value is not set in which case it will the default prefix
+     generated from a timestamp, if it is set then that prefix will be used
+     instead.
+   * The prefix should consist of characters which make up valid filenames.
 
 ## Getting Profiling Data
 
