@@ -214,7 +214,6 @@ public class ProfilerExecution
 				// compressed anyway. The header and footer could be compressed
 				// but that would probably save only a dozen bytes so the
 				// loss of speed compressing compressed data is pointless
-				// Just put no effort into it.
 				zos.setMethod(ZipOutputStream.DEFLATED);
 				zos.setLevel(0);
 				
