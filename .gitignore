@@ -38,6 +38,7 @@ hs_err_pid*
 
 # Local testing script, it should never be added
 .test.sh
+.profile.sh
 
 # Serverless
 .serverless

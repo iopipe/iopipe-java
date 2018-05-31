@@ -92,7 +92,7 @@ final class __CPUExport__
 		}
 		
 		// Dump thread information
-		ThreadStat[] threads = tracker.threads();
+		TrackedThread[] threads = tracker.threads();
 		n = threads.length;
 		__dos.writeInt(n);
 		for (int i = 0; i < n; i++)
@@ -107,7 +107,7 @@ final class __CPUExport__
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/02/20
 	 */
-	private final byte[] __writeCompact(ThreadStat __t)
+	private final byte[] __writeCompact(TrackedThread __t)
 		throws IOException, NullPointerException
 	{
 		if (__t == null)
@@ -115,14 +115,14 @@ final class __CPUExport__
 		
 		// Determine the position of each node in the thread
 		__Compact__ compact = new __Compact__();
-		for (ThreadStat.Node sub : __t.subNodes())
+		for (TrackedThread.Node sub : __t.subNodes())
 			compact.recurse(sub);
 			
 		// The list makes it easier to write nodes since it can be done
 		// linearly
 		boolean iswide = compact.isWide();
-		List<ThreadStat.Node> byindex = compact._byindex;
-		Map<ThreadStat.Node, __Pointer__> offsets = compact._offsets;
+		List<TrackedThread.Node> byindex = compact._byindex;
+		Map<TrackedThread.Node, __Pointer__> offsets = compact._offsets;
 		
 		// Write compacted node data
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(
@@ -130,7 +130,7 @@ final class __CPUExport__
 			DataOutputStream dos = new DataOutputStream(baos))
 		{
 			// Write every node
-			for (ThreadStat.Node node : byindex)
+			for (TrackedThread.Node node : byindex)
 			{
 				MethodTracker.TrackedMethod method = node.method();
 				
@@ -148,12 +148,12 @@ final class __CPUExport__
 				__writeFive(dos, cpu.self());
 				
 				// Write sub-node offsets
-				ThreadStat.Node[] subs = node.subNodes();
+				TrackedThread.Node[] subs = node.subNodes();
 				int n = subs.length;
 				dos.writeShort(n);
 				for (int i = 0; i < n; i++)
 				{
-					ThreadStat.Node sub = subs[i];
+					TrackedThread.Node sub = subs[i];
 					int p = offsets.get(sub).pointer(iswide);
 					
 					if (iswide)
@@ -178,7 +178,7 @@ final class __CPUExport__
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/02/19
 	 */
-	private final void __writeThread(DataOutputStream __dos, ThreadStat __t)
+	private final void __writeThread(DataOutputStream __dos, TrackedThread __t)
 		throws IOException, NullPointerException
 	{
 		if (__dos == null || __t == null)
@@ -271,11 +271,11 @@ final class __CPUExport__
 	private static final class __Compact__
 	{
 		/** Nodes in index order. */
-		final List<ThreadStat.Node> _byindex =
+		final List<TrackedThread.Node> _byindex =
 			new ArrayList<>();
 		
 		/** Offsets for every node. */
-		final Map<ThreadStat.Node, __Pointer__> _offsets =
+		final Map<TrackedThread.Node, __Pointer__> _offsets =
 			new HashMap<>();
 		
 		/** Current write pointer (for narrow compact data). */
@@ -314,7 +314,7 @@ final class __CPUExport__
 		 * @throws NullPointerException On null arguments.
 		 * @since 2018/02/20
 		 */
-		public final void recurse(ThreadStat.Node __n)
+		public final void recurse(TrackedThread.Node __n)
 			throws NullPointerException
 		{
 			if (__n == null)
@@ -331,7 +331,7 @@ final class __CPUExport__
 		 * @throws NullPointerException On null arguments.
 		 * @since 2018/02/20
 		 */
-		private final void __recurse(ThreadStat.Node __n)
+		private final void __recurse(TrackedThread.Node __n)
 			throws NullPointerException
 		{
 			if (__n == null)
@@ -346,7 +346,7 @@ final class __CPUExport__
 			this._offsets.put(__n, new __Pointer__(narrowp, widep));
 			
 			// Determine the next positions for the following pointers
-			ThreadStat.Node[] subs = __n.subNodes();
+			TrackedThread.Node[] subs = __n.subNodes();
 			int n = subs.length;
 			narrowp += 28 + (n * 3);
 			widep += 28 + (n * 4);
@@ -356,7 +356,7 @@ final class __CPUExport__
 			this._widep = widep;
 			
 			// Recurse through subnodes to calculation their positions
-			for (ThreadStat.Node sub : subs)
+			for (TrackedThread.Node sub : subs)
 				this.recurse(sub);
 		}
 	}

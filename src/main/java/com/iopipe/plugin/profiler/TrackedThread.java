@@ -11,8 +11,8 @@ import java.util.Objects;
  *
  * @since 2018/02/19
  */
-public final class ThreadStat
-	implements ThreadStatNodeTraversal
+public final class TrackedThread
+	implements TrackedThreadNodeTraversal
 {
 	/** The thread to monitor. */
 	protected final Thread thread;
@@ -57,7 +57,7 @@ public final class ThreadStat
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/02/19
 	 */
-	public ThreadStat(Thread __thread, int __ldx, MethodTracker __m)
+	public TrackedThread(Thread __thread, int __ldx, MethodTracker __m)
 		throws NullPointerException
 	{
 		if (__thread == null || __m ==null)
@@ -172,7 +172,7 @@ public final class ThreadStat
 		long grosswgtimeabs = this._grosswgtimeabs;
 		
 		// Node traversal starts at the root node
-		ThreadStatNodeTraversal traversal = this;
+		TrackedThreadNodeTraversal traversal = this;
 		
 		// Generate stack trace, since each sub-node based on the origin point
 		// of call is unique per stack trace, methods which call other methods
@@ -216,7 +216,7 @@ public final class ThreadStat
 	 * @since 2018/02/19
 	 */
 	@Override
-	public final ThreadStat.Node subNode(MethodTracker.TrackedMethod __m)
+	public final TrackedThread.Node subNode(MethodTracker.TrackedMethod __m)
 		throws NullPointerException
 	{
 		if (__m == null)
@@ -237,7 +237,7 @@ public final class ThreadStat
 	 * @since 2018/02/19
 	 */
 	@Override
-	public final ThreadStat.Node[] subNodes()
+	public final TrackedThread.Node[] subNodes()
 	{
 		Map<MethodTracker.TrackedMethod, Node> nodes = this._nodes;
 		synchronized (nodes)
@@ -286,7 +286,7 @@ public final class ThreadStat
 	 * @since 2018/02/19
 	 */
 	public static final class Node
-		implements ThreadStatNodeTraversal
+		implements TrackedThreadNodeTraversal
 	{
 		/** The method being tracked. */
 		protected final MethodTracker.TrackedMethod method;
@@ -370,7 +370,7 @@ public final class ThreadStat
 		 * @since 2018/02/19
 		 */
 		@Override
-		public final ThreadStat.Node subNode(MethodTracker.TrackedMethod __m)
+		public final TrackedThread.Node subNode(MethodTracker.TrackedMethod __m)
 			throws NullPointerException
 		{
 			if (__m == null)
@@ -391,7 +391,7 @@ public final class ThreadStat
 		 * @since 2018/02/19
 		 */
 		@Override
-		public final ThreadStat.Node[] subNodes()
+		public final TrackedThread.Node[] subNodes()
 		{
 			Map<MethodTracker.TrackedMethod, Node> nodes = this._nodes;
 			synchronized (nodes)

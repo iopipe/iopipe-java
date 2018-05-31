@@ -103,7 +103,7 @@ public class ProfilerPlugin
 	@Override
 	public String version()
 	{
-		return "1.2.0";
+		return "1.2.1";
 	}
 }
 
