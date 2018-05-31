@@ -252,7 +252,9 @@ public class ProfilerExecution
 				Base64.getMimeEncoder().encodeToString(fexported) +
 				"\n====\n");
 			
-			// Dump a local copy? This is used for debugging snapshots
+			// This is optional but when the debugging environment variable is
+			// set then this will write the file which is to be sent to IOpipe
+			// to the specified path.
 			Path localdump = LOCAL_SNAPSHOT_DUMP_PATH;
 			if (localdump != null)
 				try (OutputStream os = Files.newOutputStream(localdump,
