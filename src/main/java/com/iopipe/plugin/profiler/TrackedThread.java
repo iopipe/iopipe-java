@@ -54,6 +54,7 @@ public final class TrackedThread
 	 *
 	 * @param __thread The thread to record information for.
 	 * @param __ldx Logical thread index.
+	 * @param __m The owning method tracker.
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/02/19
 	 */
