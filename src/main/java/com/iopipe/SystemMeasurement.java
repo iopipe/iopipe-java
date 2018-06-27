@@ -98,6 +98,7 @@ public final class SystemMeasurement
 	 * Measures disk usage at the given path.
 	 *
 	 * @param __p The path to measure.
+	 * @return The disk usage for the given path.
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/05/17
 	 */

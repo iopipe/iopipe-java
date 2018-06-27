@@ -92,7 +92,7 @@ public final class ThreadStatistics
 	 * Creates snapshots of all the threads which exist.
 	 *
 	 * @return The statistics on all running threads.
-	 * @sincd 2018/05/24
+	 * @since 2018/05/24
 	 */
 	public static ThreadStatistics[] snapshots()
 	{
@@ -105,7 +105,7 @@ public final class ThreadStatistics
 	 *
 	 * @param __bean The bean to get thread information from.
 	 * @return The statistics on all running threads.
-	 * @sincd 2018/05/24
+	 * @since 2018/05/24
 	 */
 	public static ThreadStatistics[] snapshots(ThreadMXBean __bean)
 	{
