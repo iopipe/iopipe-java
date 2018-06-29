@@ -1,3 +1,0 @@
-[submodule "build-support"]
-	path = build-support
-	url = https://github.com/moorkop/build-support.git
