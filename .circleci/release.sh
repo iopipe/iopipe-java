@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -x
 # This script handles the release process and is able to mock the current
 # revision as a release
 
@@ -34,15 +34,14 @@ run_release()
 	# Get the version from the POM
 	# This should extract the version although it could also break in
 	# another locale, so hopefully it is not too troublesome
-	__pom_ver="`MAVEN_OPTS="-Dorg.slf4j.simpleLogger.defaultLogLevel=OFF
-		-Dorg.slf4j.simpleLogger.log.org.apache.maven.plugins.help=INFO"
+	__pom_ver="`MAVEN_OPTS="-Dorg.slf4j.simpleLogger.defaultLogLevel=OFF \
+		-Dorg.slf4j.simpleLogger.log.org.apache.maven.plugins.help=INFO" \
 		mvn help:evaluate --batch-mode -Dexpression=project.version 2>&1 |
 		grep -v '^\[INFO' | grep -v '^[dD]ownload' |
 		grep '^[0-9]\{1,\}\.[0-9]\{1,\}\.[0-9]\{1,\}' |
-		tail -n 1 | sed 's/[ \t]*//g'`"
+		tail -n 1 | sed 's/[ \t]*//g' | sed 's/-SNAPSHOT//'`"
 	
-	# Remove snapshot at the end of the version
-	__pom_ver="$(echo "$__pom_ver" | sed 's/-SNAPSHOT$//')"
+	# Note it
 	echo "POM version: $__pom_ver" 1>&2
 	
 	# Sanity check the POM version
