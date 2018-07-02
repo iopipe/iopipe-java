@@ -34,7 +34,7 @@ jobs:
           
       - run:
           name: Mocking release
-          command: .circleci/release.sh
+          command: .circleci/docirclescript.sh
 
   release:
     docker:
@@ -48,7 +48,7 @@ jobs:
       - run: git submodule update --init
       - run:
           name: Maven release
-          command: .circleci/release.sh
+          command: .circleci/docirclescript.sh
 
 workflows:
   version: 2

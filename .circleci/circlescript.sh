@@ -6,7 +6,7 @@
 __tempdir="/tmp/iopipe-temp-$$"
 
 # Call seld
-"$(dirname -- "$0")/.dorelease.sh" "$__tempdir"
+"$(dirname -- "$0")/.docirclescript.sh" "$__tempdir"
 __eval="$?"
 
 # Note the return value
