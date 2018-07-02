@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 # This script handles the release process and is able to mock the current
 # revision as a release
 
