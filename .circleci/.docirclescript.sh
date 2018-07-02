@@ -27,6 +27,9 @@ fi
 # Go there
 cd "$__tempdir"
 
+# Check the branch
+git branch
+
 # Get the version from the POM
 # This should extract the version although it could also break in
 # another locale, so hopefully it is not too troublesome
@@ -183,11 +186,13 @@ echo "*** GIT TAGS ***" 1>&2
 git --no-pager tag -l
 
 # Used to see what was done commit wise
-seq 1 3 | sort -r | while read __i
+seq 0 3 | sort -r | while read __i
 do
 	echo "*** BACKWARDS ~$__i ***" 1>&2
+	echo "" 1>&2
+	
 	git --no-pager log -n 1 "HEAD~$__i"
-	git --no-pager diff "HEAD~$__i" "HEAD~$(($__i + 1))"
+	git --no-pager diff "HEAD~$(($__i + 1))" "HEAD~$__i"
 done
 
 # TODO
