@@ -130,7 +130,33 @@ run_release()
 		echo "Development <= POM" 1>&2
 		exit 106
 	fi
-		
+	
+	# Make sure a dry run of the release will work!
+	if ! mvn --batch-mode -DdryRun=true release:prepare -Dtag="v$__release_ver" \
+		-DreleaseVersion="$__release_ver" \
+		-DdevelopmentVersion="$__development_ver-SNAPSHOT"
+	then
+		echo "Failed to dry run the release prepare!" 1>&2
+		exit 108
+	fi
+	
+	# Git debug dumps
+	git --no-pager diff
+	git status
+	
+	# This updates for the next development version
+	#if ! mvn --batch-mode release:update-versions \
+	#	-DreleaseVersion="$__release_ver" \
+	#	-DdevelopmentVersion="$__development_ver-SNAPSHOT"
+	#then
+	#	echo "Failed to update the POM version numbers!" 1>&2
+	#	exit 107
+	#fi
+	#
+	## Git debug dumps
+	#git --no-pager diff
+	#git status
+	
 	# TODO
 	exit 63
 
@@ -149,6 +175,7 @@ __eval="$?"
 echo "Sub-function returned with exit status $__eval" 1>&2
 
 # Do not leave files sitting around in the temporary directory at all
+echo "Cleaning up..." 1>&2
 if ! rm -rf "$__tempdir"
 then
 	echo "FATAL: Failed to cleanup!" 1>&2
