@@ -35,7 +35,7 @@ __pom_ver="`MAVEN_OPTS="-Dorg.slf4j.simpleLogger.defaultLogLevel=OFF
 	mvn help:evaluate --batch-mode -Dexpression=project.version 2>&1 | \
 	grep -v '^\[INFO' | grep -v '^[dD]ownload' | \
 	grep '^[0-9]\{1,\}\.[0-9]\{1,\}\.[0-9]\{1,\}' | \
-	tail -n 1 | sed 's/[ \t]*//g' | sed 's/-SNAPSHOT//'`"
+	tail -n 1 | sed 's/[ \t]*//g' | sed 's/-SNAPSHOT//g'`"
 
 # Note it
 echo "POM version: $__pom_ver" 1>&2
@@ -126,18 +126,16 @@ then
 	exit 106
 fi
 
-# Make sure a dry run of the release will work!
-if ! mvn --batch-mode -DdryRun=true release:prepare -Dtag="v$__release_ver" \
+# Perform the release and such, creating new versions accordingly BUT
+# do not push it to the remote repository!!
+if ! mvn --batch-mode release:prepare -Dtag="v$__release_ver" \
+	-DpushChanges=false \
 	-DreleaseVersion="$__release_ver" \
 	-DdevelopmentVersion="$__development_ver-SNAPSHOT"
 then
 	echo "Failed to dry run the release prepare!" 1>&2
 	exit 108
 fi
-
-# Git debug dumps
-git --no-pager diff
-git status
 
 # This updates for the next development version
 #if ! mvn --batch-mode release:update-versions \
@@ -147,10 +145,16 @@ git status
 #	echo "Failed to update the POM version numbers!" 1>&2
 #	exit 107
 #fi
-#
-## Git debug dumps
-#git --no-pager diff
-#git status
+
+# Git debug dumps
+echo "*** GIT LOG ***" 1>&2
+git --no-pager log -n 6
+
+echo "*** GIT DIFF ~2 ***" 1>&2
+git --no-pager diff HEAD~2 HEAD~1
+
+echo "*** GIT DIFF ~1 ***" 1>&2
+git --no-pager diff HEAD~1 HEAD
 
 # TODO
 exit 63
