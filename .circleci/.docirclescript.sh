@@ -126,6 +126,14 @@ then
 	exit 106
 fi
 
+# Default to these if these are not set!
+: ${MVN_RELEASE_USER_EMAIL:="dev@iopipe.com"}
+: ${MVN_RELEASE_USER_NAME:="Via CircleCI"}
+
+# Set git configuration
+git config user.email "${MVN_RELEASE_USER_EMAIL}"
+git config user.name "${MVN_RELEASE_USER_NAME}"
+
 # Perform the release and such, creating new versions accordingly BUT
 # do not push it to the remote repository!!
 if ! mvn --batch-mode release:prepare -Dtag="v$__release_ver" \
