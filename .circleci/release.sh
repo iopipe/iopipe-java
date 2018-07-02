@@ -43,7 +43,7 @@ run_release()
 	
 	# Remove snapshot at the end of the version
 	__pom_ver="$(echo "$__pom_ver" | sed 's/-SNAPSHOT$//')"
-	echo "POM version: '$__pom_ver'" 1>&2
+	echo "POM version: $__pom_ver" 1>&2
 	
 	# Sanity check the POM version
 	if ! echo "$__pom_ver" | grep '^[0-9]\{1,\}\.[0-9]\{1,\}\.[0-9]\{1,\}$' > /dev/null
