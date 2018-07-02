@@ -147,6 +147,9 @@ fi
 #fi
 
 # Git debug dumps
+echo "*** GIT TAGS ***" 1>&2
+git --no-pager tag -l
+
 echo "*** GIT LOG ***" 1>&2
 git --no-pager log -n 6
 
