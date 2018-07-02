@@ -134,12 +134,36 @@ fi
 git config user.email "${MVN_RELEASE_USER_EMAIL}"
 git config user.name "${MVN_RELEASE_USER_NAME}"
 
+# This is used because for now there is no key	
+git config commit.gpgsign false
+
+# Prefix for comments
+__comment_prefix="[RELEASE $__release_ver] "
+
+# Update the constants file
+tr '\n' '\v' < src/main/java/com/iopipe/IOpipeConstants.java | \
+	sed 's/\(AGENT_VERSION[ \t\v]*=[ \t\v]*"\)[0-9.]\{1,\}\(";\)/\1'"$__release_ver"'\2/g' | \
+	tr '\v' '\n' > /tmp/$$
+if [ ! -s /tmp/$$ ]
+then
+	echo "Failed to update constants file." 1>&2
+	exit 109
+fi
+
+# Move it
+mv -vf /tmp/$$ src/main/java/com/iopipe/IOpipeConstants.java
+git add src/main/java/com/iopipe/IOpipeConstants.java
+
+# Record the update
+git commit -m "${__comment_prefix}Update IOpipeConstants"
+
 # Perform the release and such, creating new versions accordingly BUT
 # do not push it to the remote repository!!
 if ! mvn --batch-mode release:prepare -Dtag="v$__release_ver" \
+	-DscmCommentPrefix="$__comment_prefix" \
 	-DpushChanges=false \
 	-DreleaseVersion="$__release_ver" \
-	-DdevelopmentVersion="$__development_ver-SNAPSHOT"
+	-DdevelopmentVersion="$__development_ver"
 then
 	echo "Failed to dry run the release prepare!" 1>&2
 	exit 108
@@ -158,14 +182,13 @@ fi
 echo "*** GIT TAGS ***" 1>&2
 git --no-pager tag -l
 
-echo "*** GIT LOG ***" 1>&2
-git --no-pager log -n 6
-
-echo "*** GIT DIFF ~2 ***" 1>&2
-git --no-pager diff HEAD~2 HEAD~1
-
-echo "*** GIT DIFF ~1 ***" 1>&2
-git --no-pager diff HEAD~1 HEAD
+# Used to see what was done commit wise
+seq 1 3 | sort -r | while read __i
+do
+	echo "*** BACKWARDS ~$__i ***" 1>&2
+	git --no-pager log -n 1 "HEAD~$__i"
+	git --no-pager diff "HEAD~$__i" "HEAD~$(($__i + 1))"
+done
 
 # TODO
 exit 63
