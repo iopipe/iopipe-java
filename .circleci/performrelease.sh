@@ -77,7 +77,7 @@ fi
 # Perform the API call
 curl -v -X POST -H 'Content-Type: application/json' -d "{
     \"build_parameters\": {
-        \"DO_JAVA_RELEASE\": \"true\",
+        \"DO_JAVA_RELEASE\": \"pleaseperformarelease\",
         \"JAVA_TAG\": \"$JAVA_TAG\",
         \"JAVA_TAG_NEXT\": \"$JAVA_TAG_NEXT\",
         \"MVN_RELEASE_TAG\": \"v$JAVA_TAG\",

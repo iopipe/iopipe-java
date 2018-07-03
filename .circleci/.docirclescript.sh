@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 
 # Temporary must be specified!
 if [ "$#" -lt "1" ]
@@ -222,8 +222,28 @@ do
 	git --no-pager diff "HEAD~$(($__i + 1))" "HEAD~$__i"
 done
 
-# TODO
-exit 63
+# Want to really perform a release?
+if [ "$DO_JAVA_RELEASE" = "pleaseperformarelease" ]
+then
+	# A nice big banner
+	echo "******************************************************************" 1>&2
+	echo "******************************************************************" 1>&2
+	echo "*** WARNING A RELEASE IS ABOUT TO BE PERFORMED, THIS OPERATION ***" 1>&2
+	echo "*** MIGHT NOT BE REVERSABLE. IF YOU WISH TO CANCEL THE RELEASE ***" 1>&2
+	echo "*** THEN YOU HAVE THIRTY SECONDS TO CANCEL THE BUILD!          ***" 1>&2
+	echo "******************************************************************" 1>&2
+	echo "******************************************************************" 1>&2
+	
+	# Perform the countdown where the build can be stopped
+	seq 0 30 | sort -g -r | while read __i
+	do
+		echo "Building release in $__i second(s)..." 1>&2
+		sleep 1
+	done
+	
+	# TODO
+	exit 63
+fi
 
 # Success!!!
 exit 0
