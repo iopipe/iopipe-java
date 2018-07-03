@@ -24,6 +24,11 @@ then
 	exit 101
 fi
 
+# Get the original push URL so we push to that instead
+#__origurl="$(git config --get remote.origin.url)"
+__origurl="$(git ls-remote --get-url)"
+echo "Our remote is at: $__origurl" 1>&2
+
 # Go there
 cd "$__tempdir"
 
