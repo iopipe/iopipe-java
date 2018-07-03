@@ -35,6 +35,11 @@ cd "$__tempdir"
 # Check the branch
 git branch
 
+# Set our remote to use the remote repository
+echo "Temporary remote was: $(git ls-remote --get-url)" 1>&2
+git remote set-url "$(git rev-parse --abbrev-ref --symbolic-full-name @{push} | cut -d '/' -f 1)" "$__origurl"
+echo "Temporary remote is now: $(git ls-remote --get-url)" 1>&2
+
 # Get the version from the POM
 # This should extract the version although it could also break in
 # another locale, so hopefully it is not too troublesome
@@ -204,15 +209,6 @@ then
 	exit 108
 fi
 
-# This updates for the next development version
-#if ! mvn --batch-mode release:update-versions \
-#	-DreleaseVersion="$__release_ver" \
-#	-DdevelopmentVersion="$__development_ver-SNAPSHOT"
-#then
-#	echo "Failed to update the POM version numbers!" 1>&2
-#	exit 107
-#fi
-
 # Git debug dumps
 echo "*** GIT TAGS ***" 1>&2
 git --no-pager tag -l
@@ -246,8 +242,19 @@ then
 		sleep 1
 	done
 	
-	# TODO
-	exit 63
+	# Perform the actual release
+	if ! mvn --batch-mode -s settings.xml release:perform
+	then
+		echo "Failed to perform the release!" 1>&2
+		exit 115
+	fi
+	
+	# Push to remote
+	if ! git -v push
+	then
+		echo "Failed to push changes to GIT!" 1>&2
+		exit 116
+	fi
 fi
 
 # Success!!!
