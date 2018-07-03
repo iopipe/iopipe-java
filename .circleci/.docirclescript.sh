@@ -174,6 +174,19 @@ git add README.md
 # Record the update
 git commit -m "${__comment_prefix}Update IOpipeConstants and README.md"
 
+# Build the site and JavaDoc to make sure it works
+if ! mvn site
+then
+	echo "Failed to build the Maven site!" 1>&2
+	exit 111
+fi
+
+# Add everything in the docs directory
+git add docs
+
+# Commit that
+git commit -m "${__comment_prefix}Update Maven Site and JavaDocs"
+
 # Perform the release and such, creating new versions accordingly BUT
 # do not push it to the remote repository!!
 if ! mvn --batch-mode release:prepare -Dtag="v$__release_ver" \
