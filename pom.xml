@@ -85,6 +85,8 @@
           <reportOutputDirectory>${project.reporting.outputDirectory}</reportOutputDirectory>
           <notimestamp>true</notimestamp>
           <failOnWarnings>true</failOnWarnings>
+          <version>false</version>
+          <windowtitle>IOpipe Java Agent</windowtitle>
         </configuration>
       </plugin>
     </plugins>
