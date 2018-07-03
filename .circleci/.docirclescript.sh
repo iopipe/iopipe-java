@@ -175,7 +175,7 @@ git add README.md
 git commit -m "${__comment_prefix}Update IOpipeConstants and README.md"
 
 # Build the site and JavaDoc to make sure it works
-if ! mvn site
+if ! mvn --batch-mode site
 then
 	echo "Failed to build the Maven site!" 1>&2
 	exit 111
