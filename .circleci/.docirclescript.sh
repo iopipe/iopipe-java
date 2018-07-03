@@ -238,22 +238,22 @@ then
 	# Perform the countdown where the build can be stopped
 	seq 0 30 | sort -g -r | while read __i
 	do
-		echo "Building release in $__i second(s)..." 1>&2
+		echo "Release in $__i second(s)..." 1>&2
 		sleep 1
 	done
-	
-	# Perform the actual release
-	if ! mvn --batch-mode -s settings.xml release:perform
-	then
-		echo "Failed to perform the release!" 1>&2
-		exit 115
-	fi
 	
 	# Push to remote
 	if ! git -v push
 	then
 		echo "Failed to push changes to GIT!" 1>&2
 		exit 116
+	fi
+	
+	# Perform the actual release
+	if ! mvn --batch-mode -s settings.xml release:perform
+	then
+		echo "Failed to perform the release!" 1>&2
+		exit 115
 	fi
 fi
 
