@@ -18,7 +18,7 @@ __baserepo="$(pwd)"
 #                 not interact.
 # --no-hardlinks: Similar to above, do not use hardlines, treat as backup
 echo "Cloning into temporary directory..." 1>&2
-if ! git clone -v --no-local --no-hardlinks "$__baserepo" "$__tempdir"
+if ! git clone --no-local --no-hardlinks "$__baserepo" "$__tempdir"
 then
 	echo "Failed to clone!" 1>&2
 	exit 101
