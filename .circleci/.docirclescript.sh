@@ -243,7 +243,7 @@ then
 	done
 	
 	# Push to remote
-	if ! git push --follow-tags
+	if ! git push --tags
 	then
 		echo "Failed to push changes to GIT!" 1>&2
 		exit 116
