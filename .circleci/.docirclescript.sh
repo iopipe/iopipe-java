@@ -243,7 +243,7 @@ then
 	done
 	
 	# Push to remote
-	if ! git -v push
+	if ! git push
 	then
 		echo "Failed to push changes to GIT!" 1>&2
 		exit 116
