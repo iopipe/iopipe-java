@@ -224,7 +224,7 @@ do
 	echo "" 1>&2
 	
 	git --no-pager log -n 1 "HEAD~$__i"
-	git --no-pager diff "HEAD~$(($__i + 1))" "HEAD~$__i"
+	git --no-pager diff "HEAD~$(($__i + 1))" "HEAD~$__i" | head -n 100
 done
 
 # Want to really perform a release?
