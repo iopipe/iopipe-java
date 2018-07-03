@@ -157,8 +157,22 @@ fi
 mv -vf /tmp/$$ src/main/java/com/iopipe/IOpipeConstants.java
 git add src/main/java/com/iopipe/IOpipeConstants.java
 
+# Update the README too
+tr '\n' '\v' < README.md | \
+	sed 's/\(<[ \t\v]*dependency[ \t\v]*>[ \t\v]*<[ \t\v]*groupId[ \t\v]*>com\.iopipe<\/[ \t\v]*groupId[ \t\v]*>[ \t\v]*<[ \t\v]*artifactId[ \t\v]*>iopipe<\/[ \t\v]*artifactId[ \t\v]*>[ \t\v]*<[ \t\v]*version[ \t\v]*>\)[0-9]\{1,\}\.[0-9]\{1,\}\.[0-9]\{1,\}\(<\/version>[ \t\v]*<\/[ \t\v]*dependency[ \t\v]*>\)/\1'"$__release_ver"'\2/' | \
+	tr '\v' '\n' > /tmp/$$
+if [ ! -s /tmp/$$ ]
+then
+	echo "Failed to update the README." 1>&2
+	exit 110
+fi
+
+# Move it
+mv -vf /tmp/$$ README.md
+git add README.md
+
 # Record the update
-git commit -m "${__comment_prefix}Update IOpipeConstants"
+git commit -m "${__comment_prefix}Update IOpipeConstants and README.md"
 
 # Perform the release and such, creating new versions accordingly BUT
 # do not push it to the remote repository!!
@@ -186,7 +200,7 @@ echo "*** GIT TAGS ***" 1>&2
 git --no-pager tag -l
 
 # Used to see what was done commit wise
-seq 0 3 | sort -r | while read __i
+seq 0 4 | sort -r | while read __i
 do
 	echo "*** BACKWARDS ~$__i ***" 1>&2
 	echo "" 1>&2
