@@ -82,9 +82,13 @@
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>3.0.0</version>
         <configuration>
-          <reportOutputDirectory>${project.reporting.outputDirectory}</reportOutputDirectory>
-          <notimestamp>true</notimestamp>
+          <doctitle>IOpipe Java Agent</doctitle>
           <failOnWarnings>true</failOnWarnings>
+          <notimestamp>true</notimestamp>
+          <reportOutputDirectory>${project.reporting.outputDirectory}</reportOutputDirectory>
+          <show>public</show>
+          <testDoctitle>IOpipe Java Agent Tests</testDoctitle>
+          <testWindowtitle>IOpipe Java Agent Tests</testWindowtitle>
           <version>false</version>
           <windowtitle>IOpipe Java Agent</windowtitle>
         </configuration>
