@@ -1,13 +1,12 @@
 #!/bin/sh
 
-# Temporary must be specified!
+# The temporary directory where we want to clone to is the first argument
+# to this script
 if [ "$#" -lt "1" ]
 then
 	echo "FATAL: Temporary directory not specified!" 1>&2
 	exit 100
 fi
-
-# Always the first argument
 __tempdir="$1"
 
 # The repository lives here
