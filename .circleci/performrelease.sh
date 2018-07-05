@@ -86,5 +86,5 @@ curl -v -X POST -H 'Content-Type: application/json' -d "{
         \"MVN_RELEASE_USER_EMAIL\": \"dev@iopipe.com\",
         \"MVN_RELEASE_USER_NAME\": \"Via CircleCI\"
     }
-}" "https://circleci.com/api/v1/project/iopipe/iopipe-java/tree/master?circle-token=$__tok"
+}" "https://circleci.com/api/v1.1/project/github/iopipe/iopipe-java?circle-token=$__tok"
 
