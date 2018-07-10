@@ -6,6 +6,7 @@ import com.iopipe.http.RemoteException;
 import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RemoteResult;
 import com.iopipe.http.RequestType;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * This is a connection factory which allows results to be monitored.
@@ -20,6 +21,10 @@ final class __WrappedConnectionFactory__
 	
 	/** The connection factory to wrap. */
 	protected final RemoteConnectionFactory factory;
+	
+	/** The number of sent requests. */
+	private final AtomicInteger _requestcount =
+		new AtomicInteger();
 	
 	/**
 	 * Initializes the wrapped connection factory.
@@ -48,7 +53,7 @@ final class __WrappedConnectionFactory__
 		throws NullPointerException, RemoteException
 	{
 		return new __Connection__(this.single, __url, __auth,
-			this.factory.connect(__url, __auth));
+			this.factory.connect(__url, __auth), this._requestcount);
 	}
 	
 	/**
@@ -70,6 +75,9 @@ final class __WrappedConnectionFactory__
 		
 		/** The authorization token. */
 		protected final String authtoken;
+		
+		/** The number of sent requests. */
+		private final AtomicInteger _requestcount;
 	
 		/**
 		 * Initializes the wrapped connection.
@@ -78,21 +86,23 @@ final class __WrappedConnectionFactory__
 		 * @param __url The remote URL.
 		 * @param __auth The authorization token.
 		 * @param __c The connection to wrap.
+		 * @param __rc The request counter.
 		 * @throws NullPointerException On null arguments except for
 		 * {@code __auth}.
 		 * @since 2018/01/23
 		 */
 		__Connection__(Single __s, String __url, String __auth,
-			RemoteConnection __c)
+			RemoteConnection __c, AtomicInteger __rc)
 			throws NullPointerException
 		{
-			if (__s == null || __url == null || __c == null)
+			if (__s == null || __url == null || __c == null || __rc == null)
 				throw new NullPointerException();
 		
 			this.single = __s;
 			this.url = __url;
 			this.authtoken = __auth;
 			this.connection = __c;
+			this._requestcount = __rc;
 		}
 		
 		/**
@@ -107,7 +117,8 @@ final class __WrappedConnectionFactory__
 			// being formed correctly
 			Single single = this.single;
 			single.remoteRequest(new WrappedRequest(
-				this.url, this.authtoken, __t, __r));
+				this.url, this.authtoken, __t, __r,
+				this._requestcount.incrementAndGet()));
 			
 			// Send result to remote server, which generates some things
 			RemoteResult rv = this.connection.send(__t, __r);
