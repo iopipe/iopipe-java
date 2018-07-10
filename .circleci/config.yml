@@ -12,8 +12,6 @@ jobs:
       MAVEN_OPTS: -Xmx3200m
     steps:
       - checkout
-      - run: git submodule sync
-      - run: git submodule update --init
 
       - restore_cache:
           keys:
@@ -44,8 +42,6 @@ jobs:
       MAVEN_OPTS: -Xmx3200m
     steps:
       - checkout
-      - run: git submodule sync
-      - run: git submodule update --init
       - run:
           name: Maven release
           command: .circleci/circlescript.sh
