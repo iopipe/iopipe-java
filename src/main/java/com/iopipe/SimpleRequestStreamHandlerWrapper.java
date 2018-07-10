@@ -21,7 +21,10 @@ public abstract class SimpleRequestStreamHandlerWrapper
 	 * This method is implemented by sub-classes and is used as the actual
 	 * entry point for lambdas.
 	 *
-	 * @param __exec Execution information.
+	 * @param __exec The instance for the current lambda execution. The
+	 * {@link com.amazonaws.services.lambda.runtime.Context} object can be
+	 * obtained by invoking the {@link IOpipeExecution#context()} method on
+	 * the {@code __exec} parameter.
 	 * @param __in The input stream.
 	 * @param __out The output stream.
 	 * @throws IOException On read/write errors.
