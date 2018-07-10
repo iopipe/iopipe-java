@@ -25,6 +25,9 @@ public final class WrappedRequest
 	/** The count of this request. */
 	public final int count;
 	
+	/** Decoded event data. */
+	public final DecodedEvent event;
+	
 	/**
 	 * Initializes the wrapped request.
 	 *
@@ -43,6 +46,7 @@ public final class WrappedRequest
 		this.type = __t;
 		this.request = __r;
 		this.count = __c;
+		this.event = DecodedEvent.decode(__r.bodyAsString());
 	}
 }
 
