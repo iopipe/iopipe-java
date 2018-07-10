@@ -170,6 +170,22 @@ service.<String>run(context, (exec) -> "Hello World!");
 service.<String>run(context, (exec) -> "Hello World!", input);
 ```
 
+### Accessing the AWS `Context` Object
+
+The AWS `Context` object may be obtained by invoking `context()` on the
+method parameter that is the `IOpipeExecution` instance. For example:
+
+```java
+protected final String wrappedHandleRequest(IOpipeExecution __exec, String __n)
+{
+    // Code here...
+    
+    Context context = __exec.context();
+    
+    // Code here...
+}
+```
+
 ### Setting system properties and environment variables
 
 Set up IOpipe using system properties or environment variables. N.B., it is necessary
