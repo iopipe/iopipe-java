@@ -11,6 +11,74 @@ import javax.json.JsonObject;
 public final class DecodedEvent
 {
 	/**
+	 * Returns the custom metric identified by the given key.
+	 *
+	 * @param __k The key to obtain.
+	 * @return The custom metric by the given key or {@code null} if there is
+	 * no metric.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/07/10
+	 */
+	public final CustomMetric customMetric(String __k)
+		throws NullPointerException
+	{
+		if (__k == null)
+			throw new NullPointerException();
+		
+		throw new Error("TODO");
+	}
+	
+	/**
+	 * Does this event have an error?
+	 *
+	 * @return If there is an error.
+	 * @since 2018/07/10
+	 */
+	public final boolean hasError()
+	{
+		throw new Error("TODO");
+	}
+	
+	/**
+	 * Does the specified label exist?
+	 *
+	 * @param __k The label to check.
+	 * @return If the given label exists.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/07/10
+	 */
+	public final boolean hasLabel(String __k)
+		throws NullPointerException
+	{
+		if (__k == null)
+			throw new NullPointerException();
+		
+		throw new Error("TODO");
+	}
+	
+	/**
+	 * Is this a coldstart?
+	 *
+	 * @return If this is a cold start.
+	 * @since 2018/07/10
+	 */
+	public final boolean isColdStart()
+	{
+		throw new Error("TODO");
+	}
+	
+	/**
+	 * Is the token valid?
+	 *
+	 * @return If the token is valid.
+	 * @since 2018/07/10
+	 */
+	public final boolean isTokenValid()
+	{
+		throw new Error("TODO");
+	}
+	
+	/**
 	 * Decodes the specified event.
 	 *
 	 * @param __data The event to decode.
@@ -21,6 +89,9 @@ public final class DecodedEvent
 	public static DecodedEvent decode(String __data)
 		throws NullPointerException
 	{
+		if (__data == null)
+			throw new NullPointerException();
+		
 		throw new Error("TODO");
 	}
 	
@@ -35,7 +106,29 @@ public final class DecodedEvent
 	public static DecodedEvent decode(JsonObject __data)
 		throws NullPointerException
 	{
+		if (__data == null)
+			throw new NullPointerException();
+		
 		throw new Error("TODO");
+	}
+	
+	/**
+	 * This represents information about a plugin.
+	 *
+	 * @since 2018/07/10
+	 */
+	public static final class Plugin
+	{
+		/**
+		 * Is this plugin enabled?
+		 *
+		 * @return If the plugin is enabled.
+		 * @since 2018/07/10
+		 */
+		public final boolean isEnabled()
+		{
+			throw new Error("TODO");
+		}
 	}
 }
 
