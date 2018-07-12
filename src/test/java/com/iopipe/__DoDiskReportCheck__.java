@@ -77,24 +77,21 @@ class __DoDiskReportCheck__
 		Map<String, JsonValue> expand = __Utils__.expandObject(__r.request);
 		
 		// It is invalid if there is an error
-		if (null == __Utils__.hasError(expand))
+		if (!__r.event.hasError())
 			this.noerror.set(true);
 		
-		JsonValue total = expand.get(".disk.totalMiB"),
-			used = expand.get(".disk.usedMiB"),
-			percent = expand.get(".disk.usedPercentage");
+		DecodedEvent.DiskUsage usage = __r.event.diskUsage();
 		
-		if (total != null)
+		if (!Double.isNaN(usage.total))
 			this.hastotal.set(true);
 		
-		if (used != null)
+		if (!Double.isNaN(usage.used))
 			this.hasused.set(true);
 		
-		if (percent != null)
+		if (!Double.isNaN(usage.percent))
 			this.haspercent.set(true);
 		
-		if ((total instanceof JsonNumber) &&
-			((JsonNumber)total).longValue() > 0)
+		if (Math.signum(usage.percent) > 0)
 			this.nonzeropositivetotal.set(true);
 	}
 	

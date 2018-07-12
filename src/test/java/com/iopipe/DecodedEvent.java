@@ -40,6 +40,17 @@ public final class DecodedEvent
 	}
 	
 	/**
+	 * Returns the disk space that is being used.
+	 *
+	 * @return The disk space information.
+	 * @since 2018/07/12
+	 */
+	public final DiskUsage diskUsage()
+	{
+		throw new Error("TODO");
+	}
+	
+	/**
 	 * Does this event have an error?
 	 *
 	 * @return If there is an error.
@@ -121,6 +132,38 @@ public final class DecodedEvent
 			throw new NullPointerException();
 		
 		throw new Error("TODO");
+	}
+	
+	/**
+	 * Represents and stores disk usage information.
+	 *
+	 * @since 2018/07/12
+	 */
+	public static final class DiskUsage
+	{
+		/** Total space. */
+		public final double total;
+		
+		/** Used disk space. */
+		public final double used;
+		
+		/** Percentage of disk space. */
+		public final double percent;
+		
+		/**
+		 * Initializes disk usage information.
+		 *
+		 * @param __t The total disk space available.
+		 * @param __u The used disk space.
+		 * @param __p The percent of disk space used.
+		 * @since 2018/07/12
+		 */
+		public DiskUsage(double __t, double __u, double __p)
+		{
+			this.total = __t;
+			this.used = __u;
+			this.percent = __p;
+		}
 	}
 	
 	/**
