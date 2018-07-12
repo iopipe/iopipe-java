@@ -106,22 +106,14 @@ class __DoProfilerPlugin__
 			return;
 		}
 		
-		Map<String, JsonValue> expand = __Utils__.expandObject(__r.request);
-		
 		// It is invalid if there is an error
-		if (null == __Utils__.hasError(expand))
+		if (!__r.event.hasError())
 			this.noerror.set(true);
 		
 		// See if the trace plugin was specified
-		for (int i = 0; i >= 0; i++)
-		{
-			JsonValue v = expand.get(".plugins[" + i + "].name");
-			if (v == null)
-				break;
-			
-			if (__Utils__.isEqual(v, "profiler"))
-				this.profilerpluginspecified.set(true);
-		}
+		DecodedEvent.Plugin plugin = __r.event.plugin("profiler");
+		if (plugin != null)
+			this.profilerpluginspecified.set(true);
 	}
 	
 	/**
