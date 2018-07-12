@@ -34,6 +34,9 @@ import org.apache.logging.log4j.LogManager;
  * Each execution will have a unique instance of this object and as such will
  * be initialized when it is first used.
  *
+ * The {@link com.amazonaws.services.lambda.runtime.Context} object can be
+ * obtained by invoking the {@link #context()} method.
+ *
  * @since 2018/01/19
  */
 public final class IOpipeExecution
@@ -121,7 +124,8 @@ public final class IOpipeExecution
 	}
 	
 	/**
-	 * Returns the AWS context.
+	 * Returns the context for the Amazon Web Service Lambda execution that
+	 * is currently running.
 	 *
 	 * @return The AWS context.
 	 * @since 2018/01/19
