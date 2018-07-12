@@ -70,7 +70,7 @@ class __DoInvalidToken__
 	{
 		// Even though the request will fail, it still must be sent without
 		// error
-		if (null == __Utils__.hasError(__r.request))
+		if (!__r.event.hasError())
 			this.noerror.set(true);
 	}
 	
