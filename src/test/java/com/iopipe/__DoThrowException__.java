@@ -48,7 +48,7 @@ class __DoThrowException__
 	@Override
 	public void remoteRequest(WrappedRequest __r)
 	{
-		if (null != __Utils__.hasError(__r.request))
+		if (__r.event.hasError())
 			this.errorwassent.set(true);
 	}
 	
