@@ -101,6 +101,17 @@ public final class DecodedEvent
 	}
 	
 	/**
+	 * Returns all of the labels which exist in the event.
+	 *
+	 * @return All of the event labels.
+	 * @since 2018/07/12 
+	 */
+	public final String[] labels()
+	{
+		throw new Error("TODO");
+	}
+	
+	/**
 	 * Decodes the specified event.
 	 *
 	 * @param __data The event to decode.
