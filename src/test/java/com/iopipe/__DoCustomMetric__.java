@@ -65,21 +65,16 @@ class __DoCustomMetric__
 	@Override
 	public void remoteRequest(WrappedRequest __r)
 	{
-		Map<String, JsonValue> expand = __Utils__.expandObject(__r.request);
-		
 		// It is invalid if there is an error
-		if (null == __Utils__.hasError(expand))
+		if (!__r.event.hasError())
 			this.noerror.set(true);
 		
-		for (int i = 0; i < 2; i++)
+		for (CustomMetric m : __r.event.customMetrics())
 		{
-			JsonValue sv = expand.get(".custom_metrics[" + i + "].s");
-			JsonValue nv = expand.get(".custom_metrics[" + i + "].n");
-			
-			if (sv != null)
+			if (m.hasString())
 				this.hascustomstring.set(true);
 			
-			if (nv != null)
+			if (m.hasLong())
 				this.hascustomnumber.set(true);
 		}
 	}

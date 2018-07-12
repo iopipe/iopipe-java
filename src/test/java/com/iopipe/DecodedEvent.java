@@ -29,6 +29,17 @@ public final class DecodedEvent
 	}
 	
 	/**
+	 * Returns all of the custom metrics that are available.
+	 *
+	 * @return All of the available and used custom metrics.
+	 * @since 2018/07/12
+	 */
+	public final CustomMetric[] customMetrics()
+	{
+		throw new Error("TODO");
+	}
+	
+	/**
 	 * Does this event have an error?
 	 *
 	 * @return If there is an error.
