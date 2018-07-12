@@ -112,6 +112,23 @@ public final class DecodedEvent
 	}
 	
 	/**
+	 * Returns information on the given plugin.
+	 *
+	 * @param __n The plugin to check.
+	 * @return The plugin information or {@code null} if it is unknown.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/07/12
+	 */
+	public final Plugin plugin(String __n)
+		throws NullPointerException
+	{
+		if (__n == null)
+			throw new NullPointerException();
+		
+		throw new Error("TODO");
+	}
+	
+	/**
 	 * Decodes the specified event.
 	 *
 	 * @param __data The event to decode.

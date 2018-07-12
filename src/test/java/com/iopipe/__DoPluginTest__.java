@@ -1,5 +1,6 @@
 package com.iopipe;
 
+import com.iopipe.CustomMetric;
 import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RemoteResult;
 import java.util.Map;
@@ -91,38 +92,21 @@ class __DoPluginTest__
 	@Override
 	public void remoteRequest(WrappedRequest __r)
 	{
-		Map<String, JsonValue> expand = __Utils__.expandObject(__r.request);
-		
 		// It is invalid if there is an error
-		if (null == __Utils__.hasError(expand))
+		if (!__r.event.hasError())
 			this.noerror.set(true);
 		
 		// See if the test plugin was specified
-		for (int i = 0; i >= 0; i++)
-		{
-			JsonValue v = expand.get(".plugins[" + i + "].name");
-			if (v == null)
-				break;
-			
-			if (__Utils__.isEqual(v, "test"))
-				this.pluginspecified.set(true);
-		}
+		DecodedEvent.Plugin plugin = __r.event.plugin("test");
+		if (plugin != null)
+			this.pluginspecified.set(true);
 		
-		for (int i = 0; i < 2; i++)
-		{
-			JsonValue v = expand.get(".custom_metrics[" + i + "].name");
-			
-			if (v instanceof JsonString)
-			{
-				String s = ((JsonString)v).getString();
-				
-				if ("pre".equals(s))
-					this.madepre.set(true);
-				
-				else if ("post".equals(s))
-					this.madepost.set(true);
-			}
-		}
+		// Check if pre and post calls were made
+		if (__r.event.customMetric("pre") != null)
+			this.madepre.set(true);
+		
+		if (__r.event.customMetric("post") != null)
+			this.madepost.set(true);
 	}
 	
 	/**
