@@ -1,12 +1,12 @@
 IOpipe Telemetry Agent for Java
 --------------------------------------------
 [![Download](https://api.bintray.com/packages/iopipe/iopipe/iopipe/images/download.svg) ](https://bintray.com/iopipe/iopipe/iopipe/_latestVersion)[![Build status](https://circleci.com/gh/iopipe/iopipe-java.svg?style=shield&circle-token=b9a08049964f555f38ab316ba535369aa5fe8252
-)](https://circleci.com/gh/iopipe/iopipe-java)
+)](https://circleci.com/gh/iopipe/iopipe-java)[![Javadocs](https://www.javadoc.io/badge/com.iopipe/iopipe.svg)](https://www.javadoc.io/doc/com.iopipe/iopipe)
 
 This project provides analytics and distributed tracing for event-driven
 applications running on AWS Lambda using [IOpipe](https://www.iopipe.com).
 
-The JavaDocs for this library are available on [GitHub Pages](https://iopipe.github.io/iopipe-java/apidocs/index.html).
+The JavaDocs for this library are available on [JavaDoc.io](https://www.javadoc.io/doc/com.iopipe/iopipe).
 
 # Installation & usage
 
