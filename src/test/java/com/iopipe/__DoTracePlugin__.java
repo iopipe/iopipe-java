@@ -7,6 +7,7 @@ import com.iopipe.plugin.trace.TraceMeasurement;
 import com.iopipe.plugin.trace.TracePlugin;
 import com.iopipe.plugin.trace.TraceUtils;
 import java.util.Map;
+import java.util.Objects;
 import javax.json.JsonObject;
 import javax.json.JsonString;
 import javax.json.JsonValue;
@@ -109,39 +110,27 @@ class __DoTracePlugin__
 	@Override
 	public void remoteRequest(WrappedRequest __r)
 	{
-		Map<String, JsonValue> expand = __Utils__.expandObject(__r.request);
-		
 		// It is invalid if there is an error
-		if (null == __Utils__.hasError(expand))
+		if (!__r.event.hasError())
 			this.noerror.set(true);
 		
 		// See if the trace plugin was specified
-		for (int i = 0; i >= 0; i++)
-		{
-			JsonValue v = expand.get(".plugins[" + i + "].name");
-			if (v == null)
-				break;
-			
-			if (__Utils__.isEqual(v, "trace"))
-				this.tracepluginspecified.set(true);
-		}
+		DecodedEvent.Plugin plugin = __r.event.plugin("trace");
 		
 		// Check all entries that they are in the right order
 		IntegerValue orderdepth = this.orderdepth;
-		for (int i = 0; i >= 0; i++)
+		PerformanceEntry[] es = __r.event.performanceEntries();
+		for (int i = 0, n = es.length; i < n; i++)
 		{
-			JsonValue nv = expand.get(".performanceEntries[" + i + "].name"),
-				tv = expand.get(".performanceEntries[" + i + "].entryType");
-			if (nv == null)
-				break;
+			PerformanceEntry e = es[i];
 			
 			// What is wanted?
 			int dx = i * 2, mdx = _ORDER.length;
 			String wv = (dx < mdx ? _ORDER[dx] : null),
 				wt = (dx + 1 < mdx ? _ORDER[dx + 1] : null);
 			
-			if (__Utils__.isEqual(nv, wv) &&
-				__Utils__.isEqual(tv, wt))
+			if (Objects.equals(e.name(), wv) &&
+				Objects.equals(e.type(), wt))
 				orderdepth.incrementAndGet();
 		}
 	}

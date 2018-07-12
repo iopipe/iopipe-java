@@ -112,6 +112,17 @@ public final class DecodedEvent
 	}
 	
 	/**
+	 * Returns the performance entries which were recorded.
+	 *
+	 * @return The recorded performance entries.
+	 * @since 2018/07/12
+	 */
+	public final PerformanceEntry[] performanceEntries()
+	{
+		throw new Error("TODO");
+	}
+	
+	/**
 	 * Returns information on the given plugin.
 	 *
 	 * @param __n The plugin to check.
