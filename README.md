@@ -172,8 +172,8 @@ service.<String>run(context, (exec) -> "Hello World!", input);
 
 ### Accessing the AWS `Context` Object
 
-The AWS `Context` object may be obtained by invoking `context()` on the
-method parameter that is the `IOpipeExecution` instance. For example:
+The AWS `Context` object may be obtained by invoking `context()` on
+the `IOpipeExecution` instance. For example:
 
 ```java
 protected final String wrappedHandleRequest(IOpipeExecution __exec, String __n)
