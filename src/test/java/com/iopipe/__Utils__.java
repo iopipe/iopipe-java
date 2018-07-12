@@ -38,6 +38,7 @@ final class __Utils__
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/01/23
 	 */
+	@Deprecated
 	public static Map<String, JsonValue> expandObject(JsonStructure __s)
 		throws NullPointerException
 	{
@@ -105,6 +106,7 @@ final class __Utils__
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/01/23
 	 */
+	@Deprecated
 	public static Map<String, JsonValue> expandObject(RemoteRequest __o)
 		throws NullPointerException
 	{
@@ -124,6 +126,7 @@ final class __Utils__
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/01/23
 	 */
+	@Deprecated
 	public static JsonObject hasError(RemoteRequest __r)
 		throws NullPointerException
 	{
@@ -144,6 +147,7 @@ final class __Utils__
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/01/23
 	 */
+	@Deprecated
 	public static JsonObject hasError(Map<String, JsonValue> __e)
 		throws NullPointerException
 	{
@@ -161,6 +165,7 @@ final class __Utils__
 	 * @return {@code true} if they are equal.
 	 * @since 2018/01/24
 	 */
+	@Deprecated
 	public static boolean isEqual(JsonValue __v, String __s)
 	{
 		// Compare null
