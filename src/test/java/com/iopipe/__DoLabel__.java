@@ -75,7 +75,7 @@ class __DoLabel__
 			this.noerror.set(true);
 		
 		// The label must be added
-		if (__r.event.hasLabel(this.label))
+		if (__r.event.labels.contains(this.label))
 			this.haslabel.set(true);
 	}
 	

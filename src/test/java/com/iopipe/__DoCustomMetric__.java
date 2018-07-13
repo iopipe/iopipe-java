@@ -69,7 +69,7 @@ class __DoCustomMetric__
 		if (!__r.event.hasError())
 			this.noerror.set(true);
 		
-		for (CustomMetric m : __r.event.customMetrics())
+		for (CustomMetric m : __r.event.custommetrics.values())
 		{
 			if (m.hasString())
 				this.hascustomstring.set(true);

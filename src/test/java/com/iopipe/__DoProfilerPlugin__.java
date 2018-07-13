@@ -111,7 +111,7 @@ class __DoProfilerPlugin__
 			this.noerror.set(true);
 		
 		// See if the trace plugin was specified
-		DecodedEvent.Plugin plugin = __r.event.plugin("profiler");
+		DecodedEvent.Plugin plugin = __r.event.plugins.get("profiler");
 		if (plugin != null)
 			this.profilerpluginspecified.set(true);
 	}

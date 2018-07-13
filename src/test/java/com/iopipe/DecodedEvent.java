@@ -1,6 +1,14 @@
 package com.iopipe;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.json.JsonString;
+import javax.json.JsonStructure;
+import javax.json.JsonValue;
 
 /**
  * This class contains a representation of the event that was sent to the
@@ -10,42 +18,60 @@ import javax.json.JsonObject;
  */
 public final class DecodedEvent
 {
-	/**
-	 * Returns the custom metric identified by the given key.
-	 *
-	 * @param __k The key to obtain.
-	 * @return The custom metric by the given key or {@code null} if there is
-	 * no metric.
-	 * @throws NullPointerException On null arguments.
-	 * @since 2018/07/10
-	 */
-	public final CustomMetric customMetric(String __k)
-		throws NullPointerException
-	{
-		if (__k == null)
-			throw new NullPointerException();
-		
-		throw new Error("TODO");
-	}
+	/** Project token. */
+	public final String token;
+	
+	/** Install method. */
+	public final String installmethod;
+	
+	/** Duration. */
+	public final long duration;
+	
+	/** System information stat. */
+	public final Stat stat;
+	
+	/** Process ID. */
+	public final int processid;
+	
+	/** Timestamp start. */
+	public final long timestamp;
+	
+	/** Timestamp end. */
+	public final long timestampend;
+	
+	/** AWS information. */
+	public final AWS aws;
+	
+	/** Disk usage information. */
+	public final Disk disk;
+	
+	/** Environment. */
+	public final Environment environment;
+	
+	/** Errors. */
+	public final Errors errors;
+	
+	/** Is this a cold start? */
+	public final boolean coldstart;
+	
+	/** Custom metrics. */
+	public final Map<String, CustomMetric> custommetrics;
+	
+	/** Performance entries. */
+	public final Map<String, PerformanceEntry> performanceentries;
+	
+	/** Labels. */
+	public final Set<String> labels;
+	
+	/** Plugins. */
+	public final Map<String, Plugin> plugins;
 	
 	/**
-	 * Returns all of the custom metrics that are available.
+	 * Intializes the event.
 	 *
-	 * @return All of the available and used custom metrics.
-	 * @since 2018/07/12
+	 * @since 2018/07/13
 	 */
-	public final CustomMetric[] customMetrics()
-	{
-		throw new Error("TODO");
-	}
-	
-	/**
-	 * Returns the disk space that is being used.
-	 *
-	 * @return The disk space information.
-	 * @since 2018/07/12
-	 */
-	public final DiskUsage diskUsage()
+	public DecodedEvent()
 	{
 		throw new Error("TODO");
 	}
@@ -58,84 +84,6 @@ public final class DecodedEvent
 	 */
 	public final boolean hasError()
 	{
-		throw new Error("TODO");
-	}
-	
-	/**
-	 * Does the specified label exist?
-	 *
-	 * @param __k The label to check.
-	 * @return If the given label exists.
-	 * @throws NullPointerException On null arguments.
-	 * @since 2018/07/10
-	 */
-	public final boolean hasLabel(String __k)
-		throws NullPointerException
-	{
-		if (__k == null)
-			throw new NullPointerException();
-		
-		throw new Error("TODO");
-	}
-	
-	/**
-	 * Is this a coldstart?
-	 *
-	 * @return If this is a cold start.
-	 * @since 2018/07/10
-	 */
-	public final boolean isColdStart()
-	{
-		throw new Error("TODO");
-	}
-	
-	/**
-	 * Is the token valid?
-	 *
-	 * @return If the token is valid.
-	 * @since 2018/07/10
-	 */
-	public final boolean isTokenValid()
-	{
-		throw new Error("TODO");
-	}
-	
-	/**
-	 * Returns all of the labels which exist in the event.
-	 *
-	 * @return All of the event labels.
-	 * @since 2018/07/12 
-	 */
-	public final String[] labels()
-	{
-		throw new Error("TODO");
-	}
-	
-	/**
-	 * Returns the performance entries which were recorded.
-	 *
-	 * @return The recorded performance entries.
-	 * @since 2018/07/12
-	 */
-	public final PerformanceEntry[] performanceEntries()
-	{
-		throw new Error("TODO");
-	}
-	
-	/**
-	 * Returns information on the given plugin.
-	 *
-	 * @param __n The plugin to check.
-	 * @return The plugin information or {@code null} if it is unknown.
-	 * @throws NullPointerException On null arguments.
-	 * @since 2018/07/12
-	 */
-	public final Plugin plugin(String __n)
-		throws NullPointerException
-	{
-		if (__n == null)
-			throw new NullPointerException();
-		
 		throw new Error("TODO");
 	}
 	
@@ -174,34 +122,338 @@ public final class DecodedEvent
 	}
 	
 	/**
-	 * Represents and stores disk usage information.
+	 * Agent information.
 	 *
-	 * @since 2018/07/12
+	 * @since 2018/07/13
 	 */
-	public static final class DiskUsage
+	public static final class Agent
 	{
-		/** Total space. */
-		public final double total;
+		/** Runtime. */
+		public final String runtime;
 		
-		/** Used disk space. */
-		public final double used;
+		/** Version. */
+		public final String version;
 		
-		/** Percentage of disk space. */
-		public final double percent;
+		/** Load time. */
+		public final long loadtime;
 		
 		/**
-		 * Initializes disk usage information.
+		 * Initializes the agent information.
 		 *
-		 * @param __t The total disk space available.
-		 * @param __u The used disk space.
-		 * @param __p The percent of disk space used.
-		 * @since 2018/07/12
+		 * @since 2018/07/13
 		 */
-		public DiskUsage(double __t, double __u, double __p)
+		public Agent()
 		{
-			this.total = __t;
-			this.used = __u;
-			this.percent = __p;
+			throw new Error("TODO");
+		}
+	}
+	
+	/**
+	 * AWS Information.
+	 *
+	 * @since 2018/07/13
+	 */
+	public static final class AWS
+	{
+		/** Function name. */
+		public final String functionname;
+		
+		/** Function version. */
+		public final String functionversion;
+		
+		/** Request ID. */
+		public final String requestid;
+		
+		/** Invoked function ARN. */
+		public final String invokedfunctionarn;
+		
+		/** Log group name. */
+		public final String loggroupname;
+		
+		/** Log stream name. */
+		public final String logstreamname;
+		
+		/** Memory limit in mibs. */
+		public final long memorylimitmib;
+		
+		/** Remaining time in milliseconds. */
+		public final long remainingtime;
+		
+		/** Trace ID. */
+		public final String traceid;
+		
+		/**
+		 * Initializes the AWS information.
+		 *
+		 * @since 2018/07/13 
+		 */
+		public AWS()
+		{
+			throw new Error("TODO");
+		}
+	}
+	
+	/**
+	 * CPU information.
+	 *
+	 * @since 2018/07/13
+	 */
+	public static final class CPU
+	{
+		/** Times for this CPU. */
+		public final Times times;
+		
+		/**
+		 * Initializes the CPU information.
+		 *
+		 * @since 2018/07/13
+		 */
+		public CPU()
+		{
+			throw new Error("TODO");
+		}
+	}
+	
+	/**
+	 * Disk information.
+	 *
+	 * @since 2018/07/13
+	 */
+	public static final class Disk
+	{
+		/** Total MiB. */
+		public final long totalmib;
+		
+		/** Used MiB. */
+		public final long usedmib;
+		
+		/** Used percentage. */
+		public final double usedpercentage;
+		
+		/**
+		 * Initializes the disk information.
+		 *
+		 * @since 2018/07/13
+		 */
+		public Disk()
+		{
+			throw new Error("TODO");
+		}
+	}
+	
+	/**
+	 * Contains the environment information.
+	 *
+	 * @since 2018/07/13
+	 */
+	public static final class Environment
+	{
+		/** Agent information. */
+		public final Agent agent;
+		
+		/** Runtime information. */
+		public final Runtime runtime;
+		
+		/** Host information. */
+		public final Host host;
+		
+		/** OS information. */
+		public final OS os;
+		
+		/**
+		 * Initializes the environment information.
+		 *
+		 * @since 2018/07/13
+		 */
+		public Environment()
+		{
+			throw new Error("TODO");
+		}
+	}
+	
+	/**
+	 * Contains error information.
+	 *
+	 * @since 2018/07/13
+	 */
+	public static final class Errors
+	{
+		/** Stack trace. */
+		public final String stack;
+		
+		/** Name of the error. */
+		public final String name;
+		
+		/** Message of the error. */
+		public final String message;
+		
+		/**
+		 * Initializes error information.
+		 *
+		 * @since 2018/07/13
+		 */
+		public Errors()
+		{
+			throw new Error("TODO");
+		}
+	}
+	
+	/**
+	 * Host information.
+	 *
+	 * @since 2018/07/13
+	 */
+	public static final class Host
+	{
+		/** Boot ID. */
+		public final String bootid;
+		
+		/**
+		 * Initializes the host information.
+		 *
+		 * @since 2018/07/13
+		 */
+		public Host()
+		{
+			throw new Error("TODO");
+		}
+	}
+	
+	/**
+	 * Linux information.
+	 *
+	 * @since 2018/07/13
+	 */
+	public static final class Linux
+	{
+		/** PID. */
+		public final Map<String, Pid> pids;
+		
+		/**
+		 * Initializes the Linux information.
+		 *
+		 * @since 2018/07/13
+		 */
+		public Linux()
+		{
+			throw new Error("TODO");
+		}
+	}
+	
+	/**
+	 * Memory information.
+	 *
+	 * @since 2018/07/13
+	 */
+	public static final class Memory
+	{
+		/** Total memory. */
+		public final long totalbytes;
+		
+		/** Free memory. */
+		public final long freebytes;
+		
+		/** Used memory. */
+		public final long usedbytes;
+		
+		/**
+		 * Initializes memory information.
+		 *
+		 * @since 2018/07/13
+		 */
+		public Memory()
+		{
+			throw new Error("TODO");
+		}
+	}
+	
+	/**
+	 * OS information.
+	 *
+	 * @since 2018/07/13
+	 */
+	public static final class OS
+	{
+		/** Hostname. */
+		public final String hostname;
+		
+		/** Memory information. */
+		public final Memory memory;
+		
+		/** CPU information. */
+		public final List<CPU> cpus;
+		
+		/** Linux information. */
+		public final Linux linux;
+		
+		/**
+		 * Initializes the OS information.
+		 *
+		 * @since 2018/07/13
+		 */
+		public OS()
+		{
+			throw new Error("TODO");
+		}
+	}
+	
+	/**
+	 * Pid information.
+	 *
+	 * @since 2018/07/13
+	 */
+	public static final class Pid
+	{
+		/** End stat information. */
+		public final Stat stat;
+		
+		/** Start stat information. */
+		public final Stat statstart;
+		
+		/** Status information. */
+		public final Status status;
+		
+		/**
+		 * Initializes the PID information.
+		 *
+		 * @since 2018/07/13
+		 */
+		public Pid()
+		{
+			throw new Error("TODO");
+		}
+	}
+	
+	/**
+	 * The runtime used.
+	 *
+	 * @since 2018/07/13
+	 */
+	public static final class Runtime
+	{
+		/** Name. */
+		public final String name;
+		
+		/** Version. */
+		public final String version;
+		
+		/** Vendor. */
+		public final String vendor;
+		
+		/** VM Vendor. */
+		public final String vmvendor;
+		
+		/** VM Version. */
+		public final String vmversion;
+		
+		/**
+		 * Initializes the runtime.
+		 *
+		 * @since 2018/07/13
+		 */
+		public Runtime()
+		{
+			throw new Error("TODO");
 		}
 	}
 	
@@ -212,13 +464,114 @@ public final class DecodedEvent
 	 */
 	public static final class Plugin
 	{
+		/** Name. */
+		public final String name;
+		
+		/** Version. */
+		public final String version;
+		
+		/** Homepage. */
+		public final String homepage;
+		
+		/** Is the plugin enabled? */
+		public final boolean enabled;
+		
 		/**
-		 * Is this plugin enabled?
+		 * Initializes the plugin information.
 		 *
-		 * @return If the plugin is enabled.
-		 * @since 2018/07/10
+		 * @since 2018/07/13
 		 */
-		public final boolean isEnabled()
+		public Plugin()
+		{
+			throw new Error("TODO");
+		}
+	}
+	
+	/**
+	 * Stat information.
+	 *
+	 * @since 2018/07/13
+	 */
+	public static final class Stat
+	{
+		/** User time. */
+		public final long utime;
+		
+		/** System time. */
+		public final long stime;
+		
+		/** User time with children. */
+		public final long cutime;
+		
+		/** System time with children. */
+		public final long cstime;
+		
+		/**
+		 * Initializes stat information.
+		 *
+		 * @since 2018/07/13
+		 */
+		public Stat()
+		{
+			throw new Error("TODO");
+		}
+	}
+	
+	/**
+	 * Status information.
+	 *
+	 * @since 2018/07/13
+	 */
+	public static final class Status
+	{
+		/** VmRSS. */
+		public final long vmrss;
+		
+		/** Threads. */
+		public final int threads;
+		
+		/** FDSize. */
+		public final int fdsize;
+		
+		/**
+		 * Initialize status information.
+		 *
+		 * @since 2108/07/13
+		 */
+		public Status()
+		{
+			throw new Error("TODO");
+		}
+	}
+	
+	/**
+	 * CPU time information.
+	 *
+	 * @since 2018/07/13
+	 */
+	public static final class Times
+	{
+		/** Idle. */
+		public final long idle;
+		
+		/** IRQ. */
+		public final long irq;
+		
+		/** System. */
+		public final long sys;
+		
+		/** User. */
+		public final long user;
+		
+		/** Nice. */
+		public final long nice;
+		
+		/**
+		 * Initializes the times information.
+		 *
+		 * @since 2108/07/13
+		 */
+		public Times()
 		{
 			throw new Error("TODO");
 		}

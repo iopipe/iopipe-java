@@ -6,6 +6,8 @@ import com.iopipe.plugin.trace.TraceExecution;
 import com.iopipe.plugin.trace.TraceMeasurement;
 import com.iopipe.plugin.trace.TracePlugin;
 import com.iopipe.plugin.trace.TraceUtils;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import javax.json.JsonObject;
@@ -115,14 +117,17 @@ class __DoTracePlugin__
 			this.noerror.set(true);
 		
 		// See if the trace plugin was specified
-		DecodedEvent.Plugin plugin = __r.event.plugin("trace");
+		DecodedEvent.Plugin plugin = __r.event.plugins.get("trace");
+		if (plugin != null)
+			this.tracepluginspecified.set(true);
 		
 		// Check all entries that they are in the right order
 		IntegerValue orderdepth = this.orderdepth;
-		PerformanceEntry[] es = __r.event.performanceEntries();
-		for (int i = 0, n = es.length; i < n; i++)
+		List<PerformanceEntry> es = new ArrayList<>(
+			__r.event.performanceentries.values());
+		for (int i = 0, n = es.size(); i < n; i++)
 		{
-			PerformanceEntry e = es[i];
+			PerformanceEntry e = es.get(i);
 			
 			// What is wanted?
 			int dx = i * 2, mdx = _ORDER.length;

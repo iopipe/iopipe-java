@@ -80,18 +80,20 @@ class __DoDiskReportCheck__
 		if (!__r.event.hasError())
 			this.noerror.set(true);
 		
-		DecodedEvent.DiskUsage usage = __r.event.diskUsage();
+		DecodedEvent.Disk usage = __r.event.disk;
+		if (usage == null)
+			return;
 		
-		if (!Double.isNaN(usage.total))
+		if (usage.totalmib > 0)
 			this.hastotal.set(true);
 		
-		if (!Double.isNaN(usage.used))
+		if (usage.usedmib > 0)
 			this.hasused.set(true);
 		
-		if (!Double.isNaN(usage.percent))
+		if (Double.isNaN(usage.usedpercentage))
 			this.haspercent.set(true);
 		
-		if (Math.signum(usage.percent) > 0)
+		if (Math.signum(usage.usedpercentage) > 0)
 			this.nonzeropositivetotal.set(true);
 	}
 	

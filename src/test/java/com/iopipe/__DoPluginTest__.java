@@ -97,15 +97,15 @@ class __DoPluginTest__
 			this.noerror.set(true);
 		
 		// See if the test plugin was specified
-		DecodedEvent.Plugin plugin = __r.event.plugin("test");
+		DecodedEvent.Plugin plugin = __r.event.plugins.get("test");
 		if (plugin != null)
 			this.pluginspecified.set(true);
 		
 		// Check if pre and post calls were made
-		if (__r.event.customMetric("pre") != null)
+		if (__r.event.custommetrics.get("pre") != null)
 			this.madepre.set(true);
 		
-		if (__r.event.customMetric("post") != null)
+		if (__r.event.custommetrics.get("post") != null)
 			this.madepost.set(true);
 	}
 	

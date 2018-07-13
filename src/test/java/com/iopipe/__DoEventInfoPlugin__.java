@@ -133,7 +133,7 @@ class __DoEventInfoPlugin__
 			this.noerror.set(true);
 		
 		// Go through custom metrics and check values
-		for (CustomMetric m : __r.event.customMetrics())
+		for (CustomMetric m : __r.event.custommetrics.values())
 		{
 			if ("@iopipe/event-info.eventType".equals(m.name()))
 				this.typegot.set(true);
