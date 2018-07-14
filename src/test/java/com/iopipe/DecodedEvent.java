@@ -3,6 +3,8 @@ package com.iopipe;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -72,11 +74,58 @@ public final class DecodedEvent
 	/**
 	 * Intializes the event.
 	 *
+	 * @param __token Token.
+	 * @param __installmethod Installation method.
+	 * @param __duration Duration spen in invocation.
+	 * @param __stat System Stat.
+	 * @param __processid Process ID.
+	 * @param __timestamp Starting timestamp,
+	 * @param __timestampend Ending timestamp.
+	 * @param __aws AWS information.
+	 * @param __disk Disk usage.
+	 * @param __environment Environment of the invocation.
+	 * @param __errors Error recorded.
+	 * @param __coldstart Is this a cold start?
+	 * @param __custommetrics Custom metrics recorded.
+	 * @param __performanceentries Performance entries measured.
+	 * @param __labels Labels recorded.
+	 * @param __plugins Plugins used.
 	 * @since 2018/07/13
 	 */
-	public DecodedEvent()
+	public DecodedEvent(String __token, String __installmethod,
+		long __duration, Stat __stat, int __processid, long __timestamp,
+		long __timestampend, AWS __aws, Disk __disk, Environment __environment,
+		Errors __errors, boolean __coldstart,
+		Map<String, CustomMetric> __custommetrics,
+		Map<String, PerformanceEntry> __performanceentries,
+		Set<String> __labels, Map<String, Plugin> __plugins)
 	{
-		throw new Error("TODO");
+		this.token = __token;
+		this.installmethod = __installmethod;
+		this.duration = __duration;
+		this.stat = __stat;
+		this.processid = __processid;
+		this.timestamp = __timestamp;
+		this.timestampend = __timestampend;
+		this.aws = __aws;
+		this.disk = __disk;
+		this.environment = __environment;
+		this.errors = __errors;
+		this.coldstart = __coldstart;
+		
+		this.custommetrics = Collections.<String, CustomMetric>unmodifiableMap(
+			(__custommetrics == null ? new LinkedHashMap<>() :
+			new LinkedHashMap<>(__custommetrics)));
+		this.performanceentries = Collections.<String, PerformanceEntry>
+			unmodifiableMap((__performanceentries == null ?
+			new LinkedHashMap<String, PerformanceEntry>() :
+			new LinkedHashMap<>(__performanceentries)));
+		this.labels = Collections.<String>unmodifiableSet(
+			(__labels == null ? new LinkedHashSet<String>() :
+			new LinkedHashSet<>(__labels)));
+		this.plugins = Collections.<String, Plugin>unmodifiableMap(
+			(__plugins == null ? new LinkedHashMap<String, Plugin>() :
+			new LinkedHashMap<>(__plugins)));
 	}
 	
 	/**
@@ -125,7 +174,46 @@ public final class DecodedEvent
 		if (__data == null)
 			throw new NullPointerException();
 		
-		throw new Error("TODO");
+		String token = null;
+		String installmethod = null;
+		long duration = Long.MIN_VALUE;
+		Stat stat = null;
+		int processid = Integer.MIN_VALUE;
+		long timestamp = Long.MIN_VALUE;
+		long timestampend = Long.MIN_VALUE;
+		AWS aws = null;
+		Disk disk = null;
+		Environment environment = null;
+		Errors errors = null;
+		boolean coldstart = false;
+		Map<String, CustomMetric> custommetrics = new LinkedHashMap<>();
+		Map<String, PerformanceEntry> performanceentries =
+			new LinkedHashMap<>();
+		Set<String> labels = new LinkedHashSet<>();
+		Map<String, Plugin> plugins = new LinkedHashMap<>();
+		
+		System.err.println("DEBUG -- " + __data);
+		
+		for (Map.Entry<String, JsonValue> e : __data.entrySet())
+		{
+			JsonValue v = e.getValue();
+			
+			// Check and only use valid keys
+			String k;
+			switch ((k = e.getKey()))
+			{
+				case "client_id":
+					
+				
+					// Unknown
+				default:
+					throw new RuntimeException("Invalid key in event: " + k);
+			}
+		}
+		
+		return new DecodedEvent(token, installmethod, duration, stat,
+			processid, timestamp, timestampend, aws, disk, environment, errors,
+			coldstart, custommetrics, performanceentries, labels, plugins);
 	}
 	
 	/**
