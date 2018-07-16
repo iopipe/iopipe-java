@@ -138,7 +138,7 @@ public final class DecodedEvent
 	 */
 	public final boolean hasError()
 	{
-		throw new Error("TODO");
+		return this.errors != null;
 	}
 	
 	/**
@@ -160,30 +160,6 @@ public final class DecodedEvent
 			return DecodedEvent.decode(
 				((JsonObject)(Json.createReader(r).read())));
 		}
-	}
-	
-	/**
-	 * Decodes a custom metric.
-	 *
-	 * @param __data The data to decode.
-	 * @return The decoded custom metric.
-	 * @throws NullPointerException On null arguments.
-	 * @since 2018/07/16
-	 */
-	public static CustomMetric decodeCustomMetric(JsonObject __data)
-		throws NullPointerException
-	{
-		if (__data == null)
-			throw new NullPointerException();
-		
-		String name = ((JsonString)__data.get("name")).getString();
-		
-		JsonString sval = (JsonString)__data.get("s");
-		JsonNumber nval = (JsonNumber)__data.get("n");
-		
-		if (sval != null)
-			return new CustomMetric(name, sval.getString());
-		return new CustomMetric(name, nval.longValue());
 	}
 	
 	/**
@@ -217,8 +193,6 @@ public final class DecodedEvent
 			new LinkedHashMap<>();
 		Set<String> labels = new LinkedHashSet<>();
 		Map<String, Plugin> plugins = new LinkedHashMap<>();
-		
-		System.err.println("DEBUG -- " + __data);
 		
 		for (Map.Entry<String, JsonValue> e : __data.entrySet())
 		{
@@ -265,7 +239,8 @@ public final class DecodedEvent
 					break;
 				
 				case "errors":
-					throw new Error("TODO errors");
+					errors = Errors.decodeEvent((JsonObject)v);
+					break;
 				
 				case "coldstart":
 					coldstart = JsonValue.TRUE.equals(v);
@@ -281,10 +256,17 @@ public final class DecodedEvent
 					break;
 				
 				case "performanceEntries":
-					throw new Error("TODO performanceEntries");
+					for (JsonValue w : (JsonArray)v)
+					{
+						PerformanceEntry p = DecodedEvent.
+							decodePerformanceEntry((JsonObject)w);
+						performanceentries.put(p.name(), p);
+					}
 				
 				case "labels":
-					throw new Error("TODO labels");
+					for (JsonValue w : (JsonArray)v)
+						labels.add(((JsonString)w).getString());
+					break;
 				
 				case "plugins":
 					for (JsonValue w : (JsonArray)v)
@@ -303,6 +285,52 @@ public final class DecodedEvent
 		return new DecodedEvent(token, installmethod, duration, stat,
 			processid, timestamp, timestampend, aws, disk, environment, errors,
 			coldstart, custommetrics, performanceentries, labels, plugins);
+	}
+	
+	/**
+	 * Decodes a custom metric.
+	 *
+	 * @param __data The data to decode.
+	 * @return The decoded custom metric.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/07/16
+	 */
+	public static CustomMetric decodeCustomMetric(JsonObject __data)
+		throws NullPointerException
+	{
+		if (__data == null)
+			throw new NullPointerException();
+		
+		String name = ((JsonString)__data.get("name")).getString();
+		
+		JsonString sval = (JsonString)__data.get("s");
+		JsonNumber nval = (JsonNumber)__data.get("n");
+		
+		if (sval != null)
+			return new CustomMetric(name, sval.getString());
+		return new CustomMetric(name, nval.longValue());
+	}
+	
+	/**
+	 * Decodes a performance entry.
+	 *
+	 * @param __data The input data.
+	 * @return The decoded entry.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/07/16
+	 */
+	public static PerformanceEntry decodePerformanceEntry(JsonObject __data)
+		throws NullPointerException
+	{
+		if (__data == null)
+			throw new NullPointerException();
+		
+		return new PerformanceEntry(
+			((JsonString)(__data.get("name"))).getString(),
+			((JsonString)(__data.get("entryType"))).getString(),
+			(long)(((JsonNumber)(__data.get("startTime"))).doubleValue() * 1_000_000.0D),
+			(long)(((JsonNumber)(__data.get("duration"))).doubleValue() * 1_000_000.0D),
+			((JsonNumber)(__data.get("timestamp"))).longValue());
 	}
 	
 	/**
@@ -774,11 +802,16 @@ public final class DecodedEvent
 		/**
 		 * Initializes error information.
 		 *
+		 * @param __stack The stack.
+		 * @param __name The error name.
+		 * @param __message The message.
 		 * @since 2018/07/13
 		 */
-		public Errors()
+		public Errors(String __stack, String __name, String __message)
 		{
-			throw new Error("TODO");
+			this.stack = __stack;
+			this.name = __name;
+			this.message = __message;
 		}
 		
 		/**
@@ -789,13 +822,44 @@ public final class DecodedEvent
 		 * @throws NullPointerException On null arguments.
 		 * @since 2018/07/17
 		 */
-		public static Host decodeEvent(JsonObject __data)
+		public static Errors decodeEvent(JsonObject __data)
 			throws NullPointerException
 		{
 			if (__data == null)
 				throw new NullPointerException();
 			
-			throw new Error("TODO");
+			String stack = null;
+			String name = null;
+			String message = null;
+			
+			
+			for (Map.Entry<String, JsonValue> e : __data.entrySet())
+			{
+				JsonValue v = e.getValue();
+				
+				String k;
+				switch ((k = e.getKey()))
+				{
+					case "stack":
+						stack = ((JsonString)v).getString();
+						break;
+					
+					case "name":
+						name = ((JsonString)v).getString();
+						break;
+						
+					case "message":
+						message = ((JsonString)v).getString();
+						break;
+						
+						// Unknown
+					default:
+						throw new RuntimeException(
+							"Invalid key in Error event: " + k);
+				}
+			}
+			
+			return new Errors(stack, name, message);
 		}
 	}
 	
