@@ -726,6 +726,23 @@ public final class DecodedEvent
 		{
 			throw new Error("TODO");
 		}
+		
+		/**
+		 * Decodes the host information.
+		 *
+		 * @param __data The input event data.
+		 * @return The decoded data.
+		 * @throws NullPointerException On null arguments.
+		 * @since 2018/07/17
+		 */
+		public static Host decodeEvent(JsonObject __data)
+			throws NullPointerException
+		{
+			if (__data == null)
+				throw new NullPointerException();
+			
+			throw new Error("TODO");
+		}
 	}
 	
 	/**
@@ -800,11 +817,14 @@ public final class DecodedEvent
 		/**
 		 * Initializes the Linux information.
 		 *
+		 * @param __pids Process ID maps.
 		 * @since 2018/07/13
 		 */
-		public Linux()
+		public Linux(Map<String, Pid> __pids)
 		{
-			throw new Error("TODO");
+			this.pids = Collections.<String, Pid>unmodifiableMap(
+				(__pids == null ? new LinkedHashMap<String, Pid>() :
+				new LinkedHashMap<>(__pids)));
 		}
 		
 		/**
@@ -820,8 +840,31 @@ public final class DecodedEvent
 		{
 			if (__data == null)
 				throw new NullPointerException();
+			
+			Map<String, Pid> pids = new LinkedHashMap<>();
+			
+			for (Map.Entry<String, JsonValue> e : __data.entrySet())
+			{
+				JsonValue v = e.getValue();
 				
-			throw new Error("TODO");
+				String k;
+				switch ((k = e.getKey()))
+				{
+					case "pid":
+						for (Map.Entry<String, JsonValue> f :
+							((JsonObject)v).entrySet())
+							pids.put(f.getKey(),
+								Pid.decodeEvent((JsonObject)f.getValue()));
+						break;
+						
+						// Unknown
+					default:
+						throw new RuntimeException(
+							"Invalid key in Host event: " + k);
+				}
+			}
+			
+			return new Linux(pids);
 		}
 	}
 	
@@ -955,11 +998,63 @@ public final class DecodedEvent
 		/**
 		 * Initializes the PID information.
 		 *
+		 * @param __stat End stat.
+		 * @param __statstart Starting stat.
+		 * @param __status Current process status
 		 * @since 2018/07/13
 		 */
-		public Pid()
+		public Pid(Stat __stat, Stat __statstart, Status __status)
 		{
-			throw new Error("TODO");
+			this.stat = __stat;
+			this.statstart = __statstart;
+			this.status = __status;
+		}
+		
+		/**
+		 * Decodes the event data.
+		 *
+		 * @param __data Event data.
+		 * @return Decoded event data.
+		 * @throws NullPointerException On null arguments.
+		 * @since 2018/07/16
+		 */
+		public static Pid decodeEvent(JsonObject __data)
+			throws NullPointerException
+		{
+			if (__data == null)
+				throw new NullPointerException();
+			
+			Stat stat = null;
+			Stat statstart = null;
+			Status status = null;
+			
+			for (Map.Entry<String, JsonValue> e : __data.entrySet())
+			{
+				JsonValue v = e.getValue();
+				
+				String k;
+				switch ((k = e.getKey()))
+				{
+					case "stat":
+						stat = Stat.decodeEvent((JsonObject)v);
+						break;
+					
+					case "stat_start":
+						statstart = Stat.decodeEvent((JsonObject)v);
+						break;
+					
+					case "status":
+						status = Status.decodeEvent((JsonObject)v);
+						break;
+					
+						// Unknown
+					default:
+						throw new RuntimeException(
+							"Invalid key in Pid event: " + k);
+				}
+			}
+			
+			return new Pid(stat, statstart, status);
 		}
 	}
 	
@@ -1091,6 +1186,23 @@ public final class DecodedEvent
 		{
 			throw new Error("TODO");
 		}
+		
+		/**
+		 * Decodes the plugin information.
+		 *
+		 * @param __data The input event data.
+		 * @return The decoded data.
+		 * @throws NullPointerException On null arguments.
+		 * @since 2018/07/17
+		 */
+		public static Plugin decodeEvent(JsonObject __data)
+			throws NullPointerException
+		{
+			if (__data == null)
+				throw new NullPointerException();
+			
+			throw new Error("TODO");
+		}
 	}
 	
 	/**
@@ -1115,11 +1227,70 @@ public final class DecodedEvent
 		/**
 		 * Initializes stat information.
 		 *
+		 * @param __utime User time.
+		 * @param __stime System time.
+		 * @param __cutime User time with children.
+		 * @param __cstime System time with children.
 		 * @since 2018/07/13
 		 */
-		public Stat()
+		public Stat(long __utime, long __stime, long __cutime, long __cstime)
 		{
-			throw new Error("TODO");
+			this.utime = __utime;
+			this.stime = __stime;
+			this.cutime = __cutime;
+			this.cstime = __cstime;
+		}
+		
+		/**
+		 * Decodes the status information.
+		 *
+		 * @param __data The input event data.
+		 * @return The decoded data.
+		 * @throws NullPointerException On null arguments.
+		 * @since 2018/07/17
+		 */
+		public static Stat decodeEvent(JsonObject __data)
+			throws NullPointerException
+		{
+			if (__data == null)
+				throw new NullPointerException();
+			
+			long utime = Long.MIN_VALUE;
+			long stime = Long.MIN_VALUE;
+			long cutime = Long.MIN_VALUE;
+			long cstime = Long.MIN_VALUE;
+			
+			for (Map.Entry<String, JsonValue> e : __data.entrySet())
+			{
+				JsonValue v = e.getValue();
+				
+				String k;
+				switch ((k = e.getKey()))
+				{
+					case "utime":
+						utime = ((JsonNumber)v).longValue();
+						break;
+					
+					case "stime":
+						stime = ((JsonNumber)v).longValue();
+						break;
+					
+					case "cutime":
+						cutime = ((JsonNumber)v).longValue();
+						break;
+					
+					case "cstime":
+						cstime = ((JsonNumber)v).longValue();
+						break;
+					
+						// Unknown
+					default:
+						throw new RuntimeException(
+							"Invalid key in Stat event: " + k);
+				}
+			}
+			
+			return new Stat(utime, stime, cutime, cstime);
 		}
 	}
 	
@@ -1142,11 +1313,63 @@ public final class DecodedEvent
 		/**
 		 * Initialize status information.
 		 *
-		 * @since 2108/07/13
+		 * @param __vmrss Resident virtual memory.
+		 * @param __threads The number of threads
+		 * @param __fdsize The file descriptor count.
+		 * @since 2018/07/13
 		 */
-		public Status()
+		public Status(long __vmrss, int __threads, int __fdsize)
 		{
-			throw new Error("TODO");
+			this.vmrss = __vmrss;
+			this.threads = __threads;
+			this.fdsize = __fdsize;
+		}
+		
+		/**
+		 * Decodes the status information.
+		 *
+		 * @param __data The input event data.
+		 * @return The decoded data.
+		 * @throws NullPointerException On null arguments.
+		 * @since 2018/07/17
+		 */
+		public static Status decodeEvent(JsonObject __data)
+			throws NullPointerException
+		{
+			if (__data == null)
+				throw new NullPointerException();
+			
+			long vmrss = Long.MIN_VALUE;
+			int threads = Integer.MIN_VALUE;
+			int fdsize = Integer.MIN_VALUE;
+			
+			for (Map.Entry<String, JsonValue> e : __data.entrySet())
+			{
+				JsonValue v = e.getValue();
+				
+				String k;
+				switch ((k = e.getKey()))
+				{
+					case "VmRSS":
+						vmrss = ((JsonNumber)v).longValue();
+						break;
+					
+					case "Threads":
+						threads = ((JsonNumber)v).intValue();
+						break;
+					
+					case "FDSize":
+						fdsize = ((JsonNumber)v).intValue();
+						break;
+					
+						// Unknown
+					default:
+						throw new RuntimeException(
+							"Invalid key in Status event: " + k);
+				}
+			}
+			
+			return new Status(vmrss, threads, fdsize);
 		}
 	}
 	
