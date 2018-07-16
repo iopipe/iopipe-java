@@ -262,6 +262,7 @@ public final class DecodedEvent
 							decodePerformanceEntry((JsonObject)w);
 						performanceentries.put(p.name(), p);
 					}
+					break;
 				
 				case "labels":
 					for (JsonValue w : (JsonArray)v)
