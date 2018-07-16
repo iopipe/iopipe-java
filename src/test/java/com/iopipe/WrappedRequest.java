@@ -54,6 +54,17 @@ public final class WrappedRequest
 		List<Throwable> oops = new ArrayList<>();
 		String body = __r.bodyAsString();
 		
+		// Some data was PUT
+		if (__t == RequestType.PUT)
+			try
+			{
+				event = new PutEvent(__r.body());
+			}
+			catch (RuntimeException e)
+			{
+				oops.add(e);
+			}
+		
 		// Normal push event
 		if (event == null)
 			try
@@ -65,10 +76,22 @@ public final class WrappedRequest
 				oops.add(e);
 			}
 		
+		// Profiler signer
+		if (event == null)
+			try
+			{
+				event = SignerEvent.decode(body);
+			}
+			catch (RuntimeException e)
+			{
+				oops.add(e);
+			}
+		
 		// Failed to decode as something
-		if (event == null || !oops.isEmpty())
+		if (event == null)
 		{
-			RuntimeException t = new RuntimeException("Could not determine event type.");
+			RuntimeException t = new RuntimeException(
+				"Could not determine event type.");
 			
 			for (Throwable h : oops)
 				t.addSuppressed(h);

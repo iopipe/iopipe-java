@@ -1297,22 +1297,29 @@ public final class StandardPushEvent
 		/** Is the plugin enabled? */
 		public final boolean enabled;
 		
+		/** Uploads. */
+		public final List<String> uploads;
+		
 		/**
 		 * Initializes the plugin information.
 		 *
 		 * @param __name Name.
 		 * @param __version Version.
 		 * @param __homepage Homepage.
-		 * @param __enabled Is this enabled? 
+		 * @param __enabled Is this enabled?
+		 * @param __uploads Uploads.
 		 * @since 2018/07/13
 		 */
 		public Plugin(String __name, String __version, String __homepage,
-			boolean __enabled)
+			boolean __enabled, List<String> __uploads)
 		{
 			this.name = __name;
 			this.version = __version;
 			this.homepage = __homepage;
 			this.enabled = __enabled;
+			this.uploads = Collections.<String>unmodifiableList(
+				(__uploads == null ? new ArrayList<String>() :
+				new ArrayList<>(__uploads)));
 		}
 		
 		/**
@@ -1333,6 +1340,7 @@ public final class StandardPushEvent
 			String version = null;
 			String homepage = null;
 			boolean enabled = false;
+			List<String> uploads = new ArrayList<>();
 			
 			for (Map.Entry<String, JsonValue> e : __data.entrySet())
 			{
@@ -1357,6 +1365,11 @@ public final class StandardPushEvent
 						enabled = JsonValue.TRUE.equals(v);
 						break;
 					
+					case "uploads":
+						for (JsonValue w : (JsonArray)v)
+							uploads.add(((JsonString)w).getString());
+						break;
+					
 						// Unknown
 					default:
 						throw new RuntimeException(
@@ -1364,7 +1377,7 @@ public final class StandardPushEvent
 				}
 			}
 			
-			return new Plugin(name, version, homepage, enabled);
+			return new Plugin(name, version, homepage, enabled, uploads);
 		}
 	}
 	
