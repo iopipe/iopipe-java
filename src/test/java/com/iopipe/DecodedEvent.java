@@ -163,6 +163,30 @@ public final class DecodedEvent
 	}
 	
 	/**
+	 * Decodes a custom metric.
+	 *
+	 * @param __data The data to decode.
+	 * @return The decoded custom metric.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/07/16
+	 */
+	public static CustomMetric decodeCustomMetric(JsonObject __data)
+		throws NullPointerException
+	{
+		if (__data == null)
+			throw new NullPointerException();
+		
+		String name = ((JsonString)__data.get("name")).getString();
+		
+		JsonString sval = (JsonString)__data.get("s");
+		JsonNumber nval = (JsonNumber)__data.get("n");
+		
+		if (sval != null)
+			return new CustomMetric(name, sval.getString());
+		return new CustomMetric(name, nval.longValue());
+	}
+	
+	/**
 	 * Decodes the specified event.
 	 *
 	 * @param __data The event to decode.
@@ -248,7 +272,13 @@ public final class DecodedEvent
 					break;
 				
 				case "custom_metrics":
-					throw new Error("TODO custom_metrics");
+					for (JsonValue w : (JsonArray)v)
+					{
+						CustomMetric m = DecodedEvent.decodeCustomMetric(
+							((JsonObject)w));
+						custommetrics.put(m.name(), m);
+					}
+					break;
 				
 				case "performanceEntries":
 					throw new Error("TODO performanceEntries");
@@ -257,7 +287,12 @@ public final class DecodedEvent
 					throw new Error("TODO labels");
 				
 				case "plugins":
-					throw new Error("TODO plugins");
+					for (JsonValue w : (JsonArray)v)
+					{
+						Plugin p = Plugin.decodeEvent((JsonObject)w);
+						plugins.put(p.name, p);
+					}
+					break;
 				
 					// Unknown
 				default:
@@ -1199,11 +1234,19 @@ public final class DecodedEvent
 		/**
 		 * Initializes the plugin information.
 		 *
+		 * @param __name Name.
+		 * @param __version Version.
+		 * @param __homepage Homepage.
+		 * @param __enabled Is this enabled? 
 		 * @since 2018/07/13
 		 */
-		public Plugin()
+		public Plugin(String __name, String __version, String __homepage,
+			boolean __enabled)
 		{
-			throw new Error("TODO");
+			this.name = __name;
+			this.version = __version;
+			this.homepage = __homepage;
+			this.enabled = __enabled;
 		}
 		
 		/**
@@ -1220,7 +1263,42 @@ public final class DecodedEvent
 			if (__data == null)
 				throw new NullPointerException();
 			
-			throw new Error("TODO");
+			String name = null;
+			String version = null;
+			String homepage = null;
+			boolean enabled = false;
+			
+			for (Map.Entry<String, JsonValue> e : __data.entrySet())
+			{
+				JsonValue v = e.getValue();
+				
+				String k;
+				switch ((k = e.getKey()))
+				{
+					case "name":
+						name = ((JsonString)v).getString();
+						break;
+					
+					case "version":
+						version = ((JsonString)v).getString();
+						break;
+					
+					case "homepage":
+						homepage = ((JsonString)v).getString();
+						break;
+					
+					case "enabled":
+						enabled = JsonValue.TRUE.equals(v);
+						break;
+					
+						// Unknown
+					default:
+						throw new RuntimeException(
+							"Invalid key in Plugin event: " + k);
+				}
+			}
+			
+			return new Plugin(name, version, homepage, enabled);
 		}
 	}
 	
