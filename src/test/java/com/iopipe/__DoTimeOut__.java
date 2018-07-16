@@ -28,6 +28,10 @@ class __DoTimeOut__
 	protected final BooleanValue remoterecvokay =
 		new BooleanValue("remoterecvokay");
 	
+	/** Is there an auto label? */
+	protected final BooleanValue hasautolabel =
+		new BooleanValue("hasautolabel");
+	
 	/**
 	 * Initializes the test.
 	 *
@@ -50,6 +54,7 @@ class __DoTimeOut__
 		
 		super.assertTrue(this.haserror);
 		super.assertEquals(1, this.xmitcount);
+		super.assertTrue(this.hasautolabel);
 	}
 	
 	/**
@@ -86,6 +91,9 @@ class __DoTimeOut__
 			// It must have an error condition
 			if (event.hasError())
 				this.haserror.set(true);
+			
+			if (event.labels.contains("@iopipe/timeout"))
+				this.hasautolabel.set(true);
 		}
 	}
 	

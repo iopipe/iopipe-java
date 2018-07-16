@@ -65,6 +65,10 @@ class __DoProfilerPlugin__
 	protected final BooleanValue hasuploads =
 		new BooleanValue("hasuploads");
 	
+	/** Has auto label? */
+	protected final BooleanValue hasautolabel =
+		new BooleanValue("hasautolabel");
+	
 	/**
 	 * Constructs the test.
 	 *
@@ -90,6 +94,7 @@ class __DoProfilerPlugin__
 		super.assertTrue(this.gotput);
 		super.assertTrue(this.hassignerpostfields);
 		super.assertTrue(this.hasuploads);
+		super.assertTrue(this.hasautolabel);
 	}
 	
 	/**
@@ -159,6 +164,9 @@ class __DoProfilerPlugin__
 				if (plugin.uploads != null && !plugin.uploads.isEmpty())
 					this.hasuploads.set(true);
 			}
+			
+			if (event.labels.contains("@iopipe/plugin-profiler"))
+				this.hasautolabel.set(true);
 		}
 		
 		// Do not know what this is

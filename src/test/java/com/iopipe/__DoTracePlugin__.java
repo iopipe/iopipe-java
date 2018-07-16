@@ -59,6 +59,10 @@ class __DoTracePlugin__
 	protected final IntegerValue orderdepth =
 		new IntegerValue("orderdepth");
 	
+	/** Is there an auto label? */
+	protected final BooleanValue hasautolabel =
+		new BooleanValue("hasautolabel");
+	
 	/**
 	 * Constructs the test.
 	 *
@@ -89,6 +93,7 @@ class __DoTracePlugin__
 		
 		super.assertEquals(enabled, this.tracepluginexecuted);
 		super.assertEquals((enabled ? _ORDER.length / 2 : 0), this.orderdepth);
+		super.assertEquals(enabled, this.hasautolabel);
 	}
 	
 	/**
@@ -140,6 +145,9 @@ class __DoTracePlugin__
 				Objects.equals(e.type(), wt))
 				orderdepth.incrementAndGet();
 		}
+		
+		if (event.labels.contains("@iopipe/plugin-trace"))
+			this.hasautolabel.set(true);
 	}
 	
 	/**

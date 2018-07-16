@@ -33,6 +33,10 @@ class __DoCustomMetric__
 	protected final BooleanValue hascustomnumber =
 		new BooleanValue("hascustomnumber");
 	
+	/** Is there an auto label? */
+	protected final BooleanValue hasautolabel =
+		new BooleanValue("hasautolabel");
+	
 	/**
 	 * Constructs the test.
 	 *
@@ -56,6 +60,7 @@ class __DoCustomMetric__
 		
 		super.assertTrue(this.hascustomstring);
 		super.assertTrue(this.hascustomnumber);
+		super.assertTrue(this.hasautolabel);
 	}
 	
 	/**
@@ -79,6 +84,9 @@ class __DoCustomMetric__
 			if (m.hasLong())
 				this.hascustomnumber.set(true);
 		}
+		
+		if (event.labels.contains("@iopipe/metrics"))
+			this.hasautolabel.set(true);
 	}
 	
 	/**

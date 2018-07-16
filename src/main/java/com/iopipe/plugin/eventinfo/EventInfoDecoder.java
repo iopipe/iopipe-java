@@ -35,5 +35,16 @@ public interface EventInfoDecoder
 	 * @since 2018/04/23
 	 */
 	public abstract String eventType();
+	
+	/**
+	 * Returns the slugified event type.
+	 *
+	 * @return The slugified event type.
+	 * @since 2018/07/16
+	 */
+	public default String slugifiedEventType()
+	{
+		throw new Error("TODO");
+	}
 }
 
