@@ -68,9 +68,11 @@ class __DoInvalidToken__
 	@Override
 	public void remoteRequest(WrappedRequest __r)
 	{
+		StandardPushEvent event = (StandardPushEvent)__r.event;
+		
 		// Even though the request will fail, it still must be sent without
 		// error
-		if (!__r.event.hasError())
+		if (!event.hasError())
 			this.noerror.set(true);
 	}
 	

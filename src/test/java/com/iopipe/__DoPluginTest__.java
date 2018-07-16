@@ -92,20 +92,22 @@ class __DoPluginTest__
 	@Override
 	public void remoteRequest(WrappedRequest __r)
 	{
+		StandardPushEvent event = (StandardPushEvent)__r.event;
+		
 		// It is invalid if there is an error
-		if (!__r.event.hasError())
+		if (!event.hasError())
 			this.noerror.set(true);
 		
 		// See if the test plugin was specified
-		DecodedEvent.Plugin plugin = __r.event.plugins.get("test");
+		StandardPushEvent.Plugin plugin = event.plugins.get("test");
 		if (plugin != null)
 			this.pluginspecified.set(true);
 		
 		// Check if pre and post calls were made
-		if (__r.event.custommetrics.get("pre") != null)
+		if (event.custommetrics.get("pre") != null)
 			this.madepre.set(true);
 		
-		if (__r.event.custommetrics.get("post") != null)
+		if (event.custommetrics.get("post") != null)
 			this.madepost.set(true);
 	}
 	

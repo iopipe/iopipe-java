@@ -99,6 +99,8 @@ class __DoProfilerPlugin__
 	@Override
 	public void remoteRequest(WrappedRequest __r)
 	{
+		StandardPushEvent event = (StandardPushEvent)__r.event;
+		
 		// Ignore profiler PUT
 		if (__r.type == RequestType.PUT)
 		{
@@ -107,11 +109,11 @@ class __DoProfilerPlugin__
 		}
 		
 		// It is invalid if there is an error
-		if (!__r.event.hasError())
+		if (!event.hasError())
 			this.noerror.set(true);
 		
 		// See if the trace plugin was specified
-		DecodedEvent.Plugin plugin = __r.event.plugins.get("profiler");
+		StandardPushEvent.Plugin plugin = event.plugins.get("profiler");
 		if (plugin != null)
 			this.profilerpluginspecified.set(true);
 	}

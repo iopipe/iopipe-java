@@ -112,19 +112,21 @@ class __DoTracePlugin__
 	@Override
 	public void remoteRequest(WrappedRequest __r)
 	{
+		StandardPushEvent event = (StandardPushEvent)__r.event;
+		
 		// It is invalid if there is an error
-		if (!__r.event.hasError())
+		if (!event.hasError())
 			this.noerror.set(true);
 		
 		// See if the trace plugin was specified
-		DecodedEvent.Plugin plugin = __r.event.plugins.get("trace");
+		StandardPushEvent.Plugin plugin = event.plugins.get("trace");
 		if (plugin != null)
 			this.tracepluginspecified.set(true);
 		
 		// Check all entries that they are in the right order
 		IntegerValue orderdepth = this.orderdepth;
 		List<PerformanceEntry> es = new ArrayList<>(
-			__r.event.performanceentries.values());
+			event.performanceentries.values());
 		for (int i = 0, n = es.size(); i < n; i++)
 		{
 			PerformanceEntry e = es.get(i);

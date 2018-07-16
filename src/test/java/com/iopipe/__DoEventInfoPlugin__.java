@@ -126,14 +126,16 @@ class __DoEventInfoPlugin__
 	@Override
 	public void remoteRequest(WrappedRequest __r)
 	{
+		StandardPushEvent event = (StandardPushEvent)__r.event;
+		
 		EventInfoDecoder decoder = this.decoder;
 		
 		// It is invalid if there is an error
-		if (!__r.event.hasError())
+		if (!event.hasError())
 			this.noerror.set(true);
 		
 		// Go through custom metrics and check values
-		for (CustomMetric m : __r.event.custommetrics.values())
+		for (CustomMetric m : event.custommetrics.values())
 		{
 			if ("@iopipe/event-info.eventType".equals(m.name()))
 				this.typegot.set(true);

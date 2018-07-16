@@ -70,12 +70,14 @@ class __DoLabel__
 	@Override
 	public void remoteRequest(WrappedRequest __r)
 	{
+		StandardPushEvent event = (StandardPushEvent)__r.event;
+		
 		// It is invalid if there is an error
-		if (!__r.event.hasError())
+		if (!event.hasError())
 			this.noerror.set(true);
 		
 		// The label must be added
-		if (__r.event.labels.contains(this.label))
+		if (event.labels.contains(this.label))
 			this.haslabel.set(true);
 	}
 	

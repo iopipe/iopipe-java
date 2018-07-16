@@ -2,6 +2,8 @@ package com.iopipe;
 
 import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RequestType;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This contains the request information.
@@ -26,7 +28,7 @@ public final class WrappedRequest
 	public final int count;
 	
 	/** Decoded event data. */
-	public final DecodedEvent event;
+	public final Event event;
 	
 	/**
 	 * Initializes the wrapped request.
@@ -46,7 +48,36 @@ public final class WrappedRequest
 		this.type = __t;
 		this.request = __r;
 		this.count = __c;
-		this.event = DecodedEvent.decode(__r.bodyAsString());
+		
+		// Try to decode an event
+		Event event = null;
+		List<Throwable> oops = new ArrayList<>();
+		String body = __r.bodyAsString();
+		
+		// Normal push event
+		if (event == null)
+			try
+			{
+				event = StandardPushEvent.decode(body);
+			}
+			catch (RuntimeException e)
+			{
+				oops.add(e);
+			}
+		
+		// Failed to decode as something
+		if (event == null || !oops.isEmpty())
+		{
+			RuntimeException t = new RuntimeException("Could not determine event type.");
+			
+			for (Throwable h : oops)
+				t.addSuppressed(h);
+			
+			throw t;
+		}
+		
+		// Is valid
+		this.event = event;
 	}
 }
 

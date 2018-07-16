@@ -74,13 +74,15 @@ class __DoDiskReportCheck__
 	@Override
 	public void remoteRequest(WrappedRequest __r)
 	{
+		StandardPushEvent event = (StandardPushEvent)__r.event;
+		
 		Map<String, JsonValue> expand = __Utils__.expandObject(__r.request);
 		
 		// It is invalid if there is an error
-		if (!__r.event.hasError())
+		if (!event.hasError())
 			this.noerror.set(true);
 		
-		DecodedEvent.Disk usage = __r.event.disk;
+		StandardPushEvent.Disk usage = event.disk;
 		if (usage == null)
 			return;
 		

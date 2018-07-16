@@ -65,11 +65,13 @@ class __DoCustomMetric__
 	@Override
 	public void remoteRequest(WrappedRequest __r)
 	{
+		StandardPushEvent event = (StandardPushEvent)__r.event;
+		
 		// It is invalid if there is an error
-		if (!__r.event.hasError())
+		if (!event.hasError())
 			this.noerror.set(true);
 		
-		for (CustomMetric m : __r.event.custommetrics.values())
+		for (CustomMetric m : event.custommetrics.values())
 		{
 			if (m.hasString())
 				this.hascustomstring.set(true);

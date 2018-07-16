@@ -23,7 +23,8 @@ import javax.json.JsonValue;
  *
  * @since 2018/07/10
  */
-public final class DecodedEvent
+public final class StandardPushEvent
+	implements Event
 {
 	/** Project token. */
 	public final String token;
@@ -94,7 +95,7 @@ public final class DecodedEvent
 	 * @param __plugins Plugins used.
 	 * @since 2018/07/13
 	 */
-	public DecodedEvent(String __token, String __installmethod,
+	public StandardPushEvent(String __token, String __installmethod,
 		long __duration, Stat __stat, int __processid, long __timestamp,
 		long __timestampend, AWS __aws, Disk __disk, Environment __environment,
 		Errors __errors, boolean __coldstart,
@@ -149,7 +150,7 @@ public final class DecodedEvent
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/07/10
 	 */
-	public static DecodedEvent decode(String __data)
+	public static StandardPushEvent decode(String __data)
 		throws NullPointerException
 	{
 		if (__data == null)
@@ -157,7 +158,7 @@ public final class DecodedEvent
 		
 		try (StringReader r = new StringReader(__data))
 		{
-			return DecodedEvent.decode(
+			return StandardPushEvent.decode(
 				((JsonObject)(Json.createReader(r).read())));
 		}
 	}
@@ -170,7 +171,7 @@ public final class DecodedEvent
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/07/10
 	 */
-	public static DecodedEvent decode(JsonObject __data)
+	public static StandardPushEvent decode(JsonObject __data)
 		throws NullPointerException
 	{
 		if (__data == null)
@@ -249,7 +250,7 @@ public final class DecodedEvent
 				case "custom_metrics":
 					for (JsonValue w : (JsonArray)v)
 					{
-						CustomMetric m = DecodedEvent.decodeCustomMetric(
+						CustomMetric m = StandardPushEvent.decodeCustomMetric(
 							((JsonObject)w));
 						custommetrics.put(m.name(), m);
 					}
@@ -258,7 +259,7 @@ public final class DecodedEvent
 				case "performanceEntries":
 					for (JsonValue w : (JsonArray)v)
 					{
-						PerformanceEntry p = DecodedEvent.
+						PerformanceEntry p = StandardPushEvent.
 							decodePerformanceEntry((JsonObject)w);
 						performanceentries.put(p.name(), p);
 					}
@@ -283,7 +284,7 @@ public final class DecodedEvent
 			}
 		}
 		
-		return new DecodedEvent(token, installmethod, duration, stat,
+		return new StandardPushEvent(token, installmethod, duration, stat,
 			processid, timestamp, timestampend, aws, disk, environment, errors,
 			coldstart, custommetrics, performanceentries, labels, plugins);
 	}
