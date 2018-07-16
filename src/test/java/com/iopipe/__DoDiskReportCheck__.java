@@ -92,7 +92,7 @@ class __DoDiskReportCheck__
 		if (usage.usedmib > 0)
 			this.hasused.set(true);
 		
-		if (Double.isNaN(usage.usedpercentage))
+		if (!Double.isNaN(usage.usedpercentage))
 			this.haspercent.set(true);
 		
 		if (Math.signum(usage.usedpercentage) > 0)
