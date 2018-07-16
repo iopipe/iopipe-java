@@ -2,6 +2,7 @@ package com.iopipe;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -10,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.json.Json;
 import javax.json.JsonArray;
+import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.json.JsonString;
 import javax.json.JsonStructure;
@@ -203,7 +205,40 @@ public final class DecodedEvent
 			switch ((k = e.getKey()))
 			{
 				case "client_id":
-					
+					token = ((JsonString)v).getString();
+					break;
+				
+				case "installMethod":
+					installmethod = ((JsonString)v).getString();
+					break;
+				
+				case "duration":
+					duration = ((JsonNumber)v).longValue();
+					break;
+				
+				case "processId":
+					processid = ((JsonNumber)v).intValue();
+					break;
+				
+				case "timestamp":
+					timestamp = ((JsonNumber)v).longValue();
+					break;
+				
+				case "timestampEnd":
+					timestampend = ((JsonNumber)v).longValue();
+					break;
+				
+				case "aws":
+					aws = AWS.decodeEvent((JsonObject)v);
+					break;
+				
+				case "disk":
+					disk = Disk.decodeEvent((JsonObject)v);
+					break;
+				
+				case "environment":
+					environment = Environment.decodeEvent((JsonObject)v);
+					break;
 				
 					// Unknown
 				default:
@@ -235,11 +270,63 @@ public final class DecodedEvent
 		/**
 		 * Initializes the agent information.
 		 *
+		 * @param __runtime The current runtime.
+		 * @param __version The current version.
+		 * @param __loadtime The current load time.
 		 * @since 2018/07/13
 		 */
-		public Agent()
+		public Agent(String __runtime, String __version, long __loadtime)
 		{
-			throw new Error("TODO");
+			this.runtime = __runtime;
+			this.version = __version;
+			this.loadtime = __loadtime;
+		}
+		
+		/**
+		 * Decodes the agent information.
+		 *
+		 * @param __data The agent data.
+		 * @return The decoded information.
+		 * @throws NullPointerException On null arguments.
+		 * @since 2018/07/16
+		 */
+		public static Agent decodeEvent(JsonObject __data)
+			throws NullPointerException
+		{
+			if (__data == null)
+				throw new NullPointerException();
+			
+			String runtime = null;
+			String version = null;
+			long loadtime = Long.MIN_VALUE;
+			
+			for (Map.Entry<String, JsonValue> e : __data.entrySet())
+			{
+				JsonValue v = e.getValue();
+				
+				String k;
+				switch ((k = e.getKey()))
+				{
+					case "runtime":
+						runtime = ((JsonString)v).getString();
+						break;
+					
+					case "version":
+						version = ((JsonString)v).getString();
+						break;
+					
+					case "load_time":
+						loadtime = ((JsonNumber)v).longValue();
+						break;
+						
+						// Unknown
+					default:
+						throw new RuntimeException(
+							"Invalid key in Agent event: " + k);
+				}
+			}
+			
+			return new Agent(runtime, version, loadtime);
 		}
 	}
 	
@@ -280,11 +367,110 @@ public final class DecodedEvent
 		/**
 		 * Initializes the AWS information.
 		 *
+		 * @param __functionname The function name.
+		 * @param __functionversion The function version.
+		 * @param __requestid The request ID.
+		 * @param __invokedfunctionarn The invoked function ARN.
+		 * @param __loggroupname The log group name.
+		 * @param __logstreamname The log stream name.
+		 * @param __memorylimitmib Memory limit in MiB.
+		 * @param __remainingtime Remaining time.
+		 * @param __traceid Trace ID.
 		 * @since 2018/07/13 
 		 */
-		public AWS()
+		public AWS(String __functionname, String __functionversion,
+			String __requestid, String __invokedfunctionarn,
+			String __loggroupname, String __logstreamname,
+			long __memorylimitmib, long __remainingtime, String __traceid)
 		{
-			throw new Error("TODO");
+			this.functionname = __functionname;
+			this.functionversion = __functionversion;
+			this.requestid = __requestid;
+			this.invokedfunctionarn = __invokedfunctionarn;
+			this.loggroupname = __loggroupname;
+			this.logstreamname = __logstreamname;
+			this.memorylimitmib = __memorylimitmib;
+			this.remainingtime = __remainingtime;
+			this.traceid = __traceid;
+		}
+		
+		/**
+		 * Decodes an AWS JSON event.
+		 *
+		 * @param __data The object to decode.
+		 * @return The decoded object.
+		 * @throws NullPointerException On null arguments.
+		 * @since 2018/07/16
+		 */
+		public static AWS decodeEvent(JsonObject __data)
+			throws NullPointerException
+		{
+			if (__data == null)
+				throw new NullPointerException();
+			
+			String functionname = null;
+			String functionversion = null;
+			String requestid = null;
+			String invokedfunctionarn = null;
+			String loggroupname = null;
+			String logstreamname = null;
+			long memorylimitmib = Long.MIN_VALUE;
+			long remainingtime = Long.MIN_VALUE;
+			String traceid = null;
+			
+			for (Map.Entry<String, JsonValue> e : __data.entrySet())
+			{
+				JsonValue v = e.getValue();
+				
+				String k;
+				switch ((k = e.getKey()))
+				{
+					case "functionName":
+						functionname = ((JsonString)v).getString();
+						break;
+					
+					case "functionVersion":
+						functionversion = ((JsonString)v).getString();
+						break;
+					
+					case "awsRequestId":
+						requestid = ((JsonString)v).getString();
+						break;
+					
+					case "invokedFunctionArn":
+						invokedfunctionarn = ((JsonString)v).getString();
+						break;
+					
+					case "logGroupName":
+						loggroupname = ((JsonString)v).getString();
+						break;
+					
+					case "logStreamName":
+						logstreamname = ((JsonString)v).getString();
+						break;
+					
+					case "memoryLimitInMB":
+						memorylimitmib = ((JsonNumber)v).longValue();
+						break;
+					
+					case "getRemainingTimeInMillis":
+						remainingtime = ((JsonNumber)v).longValue();
+						break;
+					
+					case "traceId":
+						traceid = ((JsonString)v).getString();
+						break;
+					
+						// Unknown
+					default:
+						throw new RuntimeException(
+							"Invalid key in AWS event: " + k);
+				}
+			}
+			
+			return new AWS(functionname, functionversion, requestid,
+				invokedfunctionarn, loggroupname, logstreamname,
+				memorylimitmib, remainingtime, traceid);
 		}
 	}
 	
@@ -301,11 +487,49 @@ public final class DecodedEvent
 		/**
 		 * Initializes the CPU information.
 		 *
+		 * @param __times CPU times.
 		 * @since 2018/07/13
 		 */
-		public CPU()
+		public CPU(Times __times)
 		{
-			throw new Error("TODO");
+			this.times = __times;
+		}
+		
+		/**
+		 * Decodes event information.
+		 *
+		 * @param __data The event data.
+		 * @return The decoded information.
+		 * @throws NullPointerException On null arguments.
+		 * @since 2018/07/16
+		 */
+		public static CPU decodeEvent(JsonObject __data)
+			throws NullPointerException
+		{
+			if (__data == null)
+				throw new NullPointerException();
+			
+			Times times = null;
+			
+			for (Map.Entry<String, JsonValue> e : __data.entrySet())
+			{
+				JsonValue v = e.getValue();
+				
+				String k;
+				switch ((k = e.getKey()))
+				{
+					case "times":
+						times = Times.decodeEvent((JsonObject)v);
+						break;
+					
+						// Unknown
+					default:
+						throw new RuntimeException(
+							"Invalid key in CPU event: " + k);
+				}
+			}
+			
+			return new CPU(times);
 		}
 	}
 	
@@ -328,11 +552,62 @@ public final class DecodedEvent
 		/**
 		 * Initializes the disk information.
 		 *
+		 * @param __totalmib Total MiB.
+		 * @param __usedmib Used MiB.
+		 * @param __usedpercentage Used percentage.
 		 * @since 2018/07/13
 		 */
-		public Disk()
+		public Disk(long __totalmib, long __usedmib, double __usedpercentage)
 		{
-			throw new Error("TODO");
+			this.totalmib = __totalmib;
+			this.usedmib = __usedmib;
+			this.usedpercentage = __usedpercentage;
+		}
+		
+		/**
+		 * Decodes a disk event.
+		 *
+		 * @param __data Data.
+		 * @throws NullPointerException On null arguments.
+		 * @since 2108/07/16
+		 */
+		public static Disk decodeEvent(JsonObject __data)
+			throws NullPointerException
+		{
+			if (__data == null)
+				throw new NullPointerException();
+			
+			long totalmib = -1;
+			long usedmib = -1;
+			double usedpercentage = Double.NaN;
+			
+			for (Map.Entry<String, JsonValue> e : __data.entrySet())
+			{
+				JsonValue v = e.getValue();
+				
+				String k;
+				switch ((k = e.getKey()))
+				{
+					case "totalMiB":
+						totalmib = ((JsonNumber)v).longValue();
+						break;
+					
+					case "usedMiB":
+						usedmib = ((JsonNumber)v).longValue();
+						break;
+					
+					case "usedPercentage":
+						usedpercentage = ((JsonNumber)v).doubleValue();
+						break;
+					
+						// Unknown
+					default:
+						throw new RuntimeException(
+							"Invalid key in Disk event: " + k);
+				}
+			}
+			
+			return new Disk(totalmib, usedmib, usedpercentage);
 		}
 	}
 	
@@ -358,11 +633,71 @@ public final class DecodedEvent
 		/**
 		 * Initializes the environment information.
 		 *
+		 * @param __agent Agent information.
+		 * @param __runtime Runtime information.
+		 * @param __host Host information.
+		 * @param __os Operating system information.
 		 * @since 2018/07/13
 		 */
-		public Environment()
+		public Environment(Agent __agent, Runtime __runtime, Host __host,
+			OS __os)
 		{
-			throw new Error("TODO");
+			this.agent = __agent;
+			this.runtime = __runtime;
+			this.host = __host;
+			this.os = __os;
+		}
+		
+		/**
+		 * Decodes the environment information.
+		 *
+		 * @param __data The input data.
+		 * @return The decoded environment information.
+		 * @throws NullPointerException On null arguments.
+		 * @since 2018/07/16
+		 */
+		public static Environment decodeEvent(JsonObject __data)
+			throws NullPointerException
+		{
+			if (__data == null)
+				throw new NullPointerException();
+			
+			Agent agent = null;
+			Runtime runtime = null;
+			Host host = null;
+			OS os = null;
+			
+			for (Map.Entry<String, JsonValue> e : __data.entrySet())
+			{
+				JsonValue v = e.getValue();
+				
+				String k;
+				switch ((k = e.getKey()))
+				{
+					case "agent":
+						agent = Agent.decodeEvent((JsonObject)v);
+						break;
+					
+					case "runtime":
+						runtime = Runtime.decodeEvent((JsonObject)v);
+						break;
+					
+					case "host":
+						host = Host.decodeEvent((JsonObject)v);
+						break;
+					
+					case "os":
+						os = OS.decodeEvent((JsonObject)v);
+						break;
+					
+						// Unknown
+					default:
+						throw new RuntimeException(
+							"Invalid key in Environment event: " + k);
+				}
+			}
+			
+			return new Environment(agent, runtime, host, os);
 		}
 	}
 	
@@ -406,11 +741,49 @@ public final class DecodedEvent
 		/**
 		 * Initializes the host information.
 		 *
+		 * @param __bootid The boot identifier.
 		 * @since 2018/07/13
 		 */
-		public Host()
+		public Host(String __bootid)
 		{
-			throw new Error("TODO");
+			this.bootid = __bootid;
+		}
+		
+		/**
+		 * Decodes the host information.
+		 *
+		 * @param __data The input data.
+		 * @return The host information.
+		 * @throws NullPointerException On null arguments.
+		 * @since 2018/07/16
+		 */
+		public static Host decodeEvent(JsonObject __data)
+			throws NullPointerException
+		{
+			if (__data == null)
+				throw new NullPointerException();
+			
+			String bootid = null;
+			
+			for (Map.Entry<String, JsonValue> e : __data.entrySet())
+			{
+				JsonValue v = e.getValue();
+				
+				String k;
+				switch ((k = e.getKey()))
+				{
+					case "boot_id":
+						bootid = ((JsonString)v).getString();
+						break;
+						
+						// Unknown
+					default:
+						throw new RuntimeException(
+							"Invalid key in Host event: " + k);
+				}
+			}
+			
+			return new Host(bootid);
 		}
 	}
 	
@@ -433,31 +806,21 @@ public final class DecodedEvent
 		{
 			throw new Error("TODO");
 		}
-	}
-	
-	/**
-	 * Memory information.
-	 *
-	 * @since 2018/07/13
-	 */
-	public static final class Memory
-	{
-		/** Total memory. */
-		public final long totalbytes;
-		
-		/** Free memory. */
-		public final long freebytes;
-		
-		/** Used memory. */
-		public final long usedbytes;
 		
 		/**
-		 * Initializes memory information.
+		 * Decodes the specified event.
 		 *
-		 * @since 2018/07/13
+		 * @param __data The data to decode.
+		 * @return The decoded data.
+		 * @throws NullPointerException On null arguments.
+		 * @since 2018/07/16
 		 */
-		public Memory()
+		public static Linux decodeEvent(JsonObject __data)
+			throws NullPointerException
 		{
+			if (__data == null)
+				throw new NullPointerException();
+				
 			throw new Error("TODO");
 		}
 	}
@@ -472,8 +835,14 @@ public final class DecodedEvent
 		/** Hostname. */
 		public final String hostname;
 		
-		/** Memory information. */
-		public final Memory memory;
+		/** Total memory. */
+		public final long totalmem;
+		
+		/** Free memory. */
+		public final long freemem;
+		
+		/** Used memory. */
+		public final long usedmem;
 		
 		/** CPU information. */
 		public final List<CPU> cpus;
@@ -484,11 +853,86 @@ public final class DecodedEvent
 		/**
 		 * Initializes the OS information.
 		 *
+		 * @param __hostname Hostname.
+		 * @param __memory Memory information.
+		 * @param __cpus CPU information.
+		 * @param __linux Linux information.
 		 * @since 2018/07/13
 		 */
-		public OS()
+		public OS(String __hostname, long __totalmem, long __freemem,
+			long __usedmem, List<CPU> __cpus, Linux __linux)
 		{
-			throw new Error("TODO");
+			this.hostname = __hostname;
+			this.totalmem = __totalmem;
+			this.freemem = __freemem;
+			this.usedmem = __usedmem;
+			this.linux = __linux;
+			
+			this.cpus = Collections.<CPU>unmodifiableList((__cpus == null ?
+				new ArrayList<CPU>() : new ArrayList<>(__cpus)));
+		}
+		
+		/**
+		 * Decodes the OS information.
+		 *
+		 * @param __data The input data.
+		 * @return The OS information.
+		 * @throws NullPointerException On null arguments.
+		 * @since 2018/07/16
+		 */
+		public static OS decodeEvent(JsonObject __data)
+			throws NullPointerException
+		{
+			if (__data == null)
+				throw new NullPointerException();
+			
+			String hostname = null;
+			long totalmem = Long.MIN_VALUE;
+			long freemem = Long.MIN_VALUE;
+			long usedmem = Long.MIN_VALUE;
+			List<CPU> cpus = new ArrayList<>();
+			Linux linux = null;
+			
+			for (Map.Entry<String, JsonValue> e : __data.entrySet())
+			{
+				JsonValue v = e.getValue();
+				
+				String k;
+				switch ((k = e.getKey()))
+				{
+					case "hostname":
+						hostname = ((JsonString)v).getString();
+						break;
+					
+					case "totalmem":
+						totalmem = ((JsonNumber)v).longValue();
+						break;
+					
+					case "freemem":
+						freemem = ((JsonNumber)v).longValue();
+						break;
+					
+					case "usedmem":
+						usedmem = ((JsonNumber)v).longValue();
+						break;
+					
+					case "cpus":
+						for (JsonValue w : ((JsonArray)v))
+							cpus.add(CPU.decodeEvent((JsonObject)w));
+						break;
+					
+					case "linux":
+						linux = Linux.decodeEvent((JsonObject)v);
+						break;
+						
+						// Unknown
+					default:
+						throw new RuntimeException(
+							"Invalid key in OS event: " + k);
+				}
+			}
+			
+			return new OS(hostname, totalmem, freemem, usedmem, cpus, linux);
 		}
 	}
 	
@@ -544,11 +988,78 @@ public final class DecodedEvent
 		/**
 		 * Initializes the runtime.
 		 *
+		 * @param __name Name.
+		 * @param __version Version.
+		 * @param __vendor Vendor.
+		 * @param __vmvendor VM Vendor.
+		 * @param __vmversion VM Version.
 		 * @since 2018/07/13
 		 */
-		public Runtime()
+		public Runtime(String __name, String __version, String __vendor,
+			String __vmvendor, String __vmversion)
 		{
-			throw new Error("TODO");
+			this.name = __name;
+			this.version = __version;
+			this.vendor = __vendor;
+			this.vmvendor = __vmvendor;
+			this.vmversion = __vmversion;
+		}
+		
+		/**
+		 * Decodes the runtime event information.
+		 *
+		 * @param __data The input event.
+		 * @return The decoded runtime information.
+		 * @throws NullPointerException On null arguments.
+		 * @since 2018/07/16
+		 */
+		public static Runtime decodeEvent(JsonObject __data)
+			throws NullPointerException
+		{
+			if (__data == null)
+				throw new NullPointerException();
+			
+			String name = null;
+			String version = null;
+			String vendor = null;
+			String vmvendor = null;
+			String vmversion = null;
+			
+			for (Map.Entry<String, JsonValue> e : __data.entrySet())
+			{
+				JsonValue v = e.getValue();
+				
+				String k;
+				switch ((k = e.getKey()))
+				{
+					case "name":
+						name = ((JsonString)v).getString();
+						break;
+					
+					case "version":
+						version = ((JsonString)v).getString();
+						break;
+					
+					case "vendor":
+						vendor = ((JsonString)v).getString();
+						break;
+					
+					case "vmVendor":
+						vmvendor = ((JsonString)v).getString();
+						break;
+					
+					case "vmVersion":
+						vmversion = ((JsonString)v).getString();
+						break;
+					
+						// Unknown
+					default:
+						throw new RuntimeException(
+							"Invalid key in Runtime event: " + k);
+				}
+			}
+			
+			return new Runtime(name, version, vendor, vmvendor, vmversion);
 		}
 	}
 	
@@ -664,11 +1175,78 @@ public final class DecodedEvent
 		/**
 		 * Initializes the times information.
 		 *
+		 * @param __idle Idle time.
+		 * @param __irq IRQ time.
+		 * @param __sys System time.
+		 * @param __user User time.
+		 * @param __nice Nice time.
 		 * @since 2108/07/13
 		 */
-		public Times()
+		public Times(long __idle, long __irq, long __sys, long __user,
+			long __nice)
 		{
-			throw new Error("TODO");
+			this.idle = __idle;
+			this.irq = __irq;
+			this.sys = __sys;
+			this.user = __user;
+			this.nice = __nice;
+		}
+		
+		/**
+		 * Decodes the event information.
+		 *
+		 * @param __data The input event data.
+		 * @return The decoded data.
+		 * @throws NullPointerException On null arguments.
+		 * @since 2108/07/16
+		 */
+		public static Times decodeEvent(JsonObject __data)
+			throws NullPointerException
+		{
+			if (__data == null)
+				throw new NullPointerException();
+			
+			long idle = Long.MIN_VALUE;
+			long irq = Long.MIN_VALUE;
+			long sys = Long.MIN_VALUE;
+			long user = Long.MIN_VALUE;
+			long nice = Long.MIN_VALUE;
+			
+			for (Map.Entry<String, JsonValue> e : __data.entrySet())
+			{
+				JsonValue v = e.getValue();
+				
+				String k;
+				switch ((k = e.getKey()))
+				{
+					case "idle":
+						idle = ((JsonNumber)v).longValue();
+						break;
+						
+					case "irq":
+						irq = ((JsonNumber)v).longValue();
+						break;
+						
+					case "sys":
+						sys = ((JsonNumber)v).longValue();
+						break;
+						
+					case "user":
+						user = ((JsonNumber)v).longValue();
+						break;
+						
+					case "nice":
+						nice = ((JsonNumber)v).longValue();
+						break;
+					
+						// Unknown
+					default:
+						throw new RuntimeException(
+							"Invalid key in Runtime event: " + k);
+				}
+			}
+			
+			return new Times(idle, irq, sys, user, nice);
 		}
 	}
 }
