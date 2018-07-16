@@ -61,6 +61,7 @@ public abstract class Engine
 			__DoLongValueCustomMetric__::new,
 			__DoLongNameCustomMetric__::new,
 			__DoDiskReportCheck__::new,
+			__DoColdStartAutoLabel__::new,
 			
 			// Event Info
 			(__e) -> new __DoEventInfoPlugin__(__e,
