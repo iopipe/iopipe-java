@@ -240,6 +240,25 @@ public final class DecodedEvent
 					environment = Environment.decodeEvent((JsonObject)v);
 					break;
 				
+				case "errors":
+					throw new Error("TODO errors");
+				
+				case "coldstart":
+					coldstart = JsonValue.TRUE.equals(v);
+					break;
+				
+				case "custom_metrics":
+					throw new Error("TODO custom_metrics");
+				
+				case "performanceEntries":
+					throw new Error("TODO performanceEntries");
+				
+				case "labels":
+					throw new Error("TODO labels");
+				
+				case "plugins":
+					throw new Error("TODO plugins");
+				
 					// Unknown
 				default:
 					throw new RuntimeException("Invalid key in event: " + k);
