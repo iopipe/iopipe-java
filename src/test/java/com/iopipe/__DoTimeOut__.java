@@ -84,7 +84,7 @@ class __DoTimeOut__
 		if (now == 1)
 		{
 			// It must have an error condition
-			if (null != __Utils__.hasError(__r.request))
+			if (event.hasError())
 				this.haserror.set(true);
 		}
 	}

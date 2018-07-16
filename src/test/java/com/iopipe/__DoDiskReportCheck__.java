@@ -76,8 +76,6 @@ class __DoDiskReportCheck__
 	{
 		StandardPushEvent event = (StandardPushEvent)__r.event;
 		
-		Map<String, JsonValue> expand = __Utils__.expandObject(__r.request);
-		
 		// It is invalid if there is an error
 		if (!event.hasError())
 			this.noerror.set(true);
