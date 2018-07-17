@@ -145,11 +145,11 @@ public final class SystemMeasurement
 			if (val != null)
 			{
 				List<String> fields = __readValues(val);
-				int user = __readInt(fields, 1),
-					nice = __readInt(fields, 2),
-					sys = __readInt(fields, 3),
-					idle = __readInt(fields, 4),
-					irq = __readInt(fields, 6);
+				int user = __readInt(fields, 0),
+					nice = __readInt(fields, 1),
+					sys = __readInt(fields, 2),
+					idle = __readInt(fields, 3),
+					irq = __readInt(fields, 5);
 				
 				cpus.add(new Cpu(user, nice, sys, idle, irq));
 			}
