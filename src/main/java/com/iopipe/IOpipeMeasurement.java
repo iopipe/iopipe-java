@@ -140,6 +140,10 @@ public final class IOpipeMeasurement
 		Set<PerformanceEntry> perfentries = this._perfentries;
 		synchronized (perfentries)
 		{
+			// Performance entry was defined, so just say that the plugin was
+			// used for tracing data
+			this.addLabel("@iopipe/plugin-trace");
+			
 			perfentries.add(__e);
 		}
 	}
