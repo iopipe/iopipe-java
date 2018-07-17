@@ -63,6 +63,9 @@ public final class IOpipeMeasurement
 		Set<CustomMetric> custmetrics = this._custmetrics;
 		synchronized (custmetrics)
 		{
+			if (!__cm.name().startsWith("@iopipe/"))
+				this.addLabel("@iopipe/metrics");
+			
 			custmetrics.add(__cm);
 		}
 	}
@@ -87,7 +90,12 @@ public final class IOpipeMeasurement
 		{
 			for (CustomMetric cm : __cms)
 				if (cm != null)
+				{
+					if (!cm.name().startsWith("@iopipe/"))
+						this.addLabel("@iopipe/metrics");
+					
 					custmetrics.add(cm);
+				}
 		}
 	}
 	
