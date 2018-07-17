@@ -70,23 +70,15 @@ class __DoLabel__
 	@Override
 	public void remoteRequest(WrappedRequest __r)
 	{
-		Map<String, JsonValue> expand = __Utils__.expandObject(__r.request);
+		StandardPushEvent event = (StandardPushEvent)__r.event;
 		
 		// It is invalid if there is an error
-		if (null == __Utils__.hasError(expand))
+		if (!event.hasError())
 			this.noerror.set(true);
 		
 		// The label must be added
-		for (int i = 0; i >= 0; i++)
-		{
-			JsonValue jv = expand.get(".labels[" + i + "]");
-			
-			if (jv == null)
-				break;
-			
-			if (__Utils__.isEqual(jv, this.label))
-				this.haslabel.set(true);
-		}
+		if (event.labels.contains(this.label))
+			this.haslabel.set(true);
 	}
 	
 	/**

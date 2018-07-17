@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
+import com.iopipe.CustomMetric;
 import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RemoteResult;
 import com.iopipe.IOpipeMeasurement;
@@ -125,29 +126,22 @@ class __DoEventInfoPlugin__
 	@Override
 	public void remoteRequest(WrappedRequest __r)
 	{
+		StandardPushEvent event = (StandardPushEvent)__r.event;
+		
 		EventInfoDecoder decoder = this.decoder;
-		Map<String, JsonValue> expand = __Utils__.expandObject(__r.request);
 		
 		// It is invalid if there is an error
-		if (null == __Utils__.hasError(expand))
+		if (!event.hasError())
 			this.noerror.set(true);
 		
-		// Build a set of custom metric names
-		Set<String> keys = new LinkedHashSet<>();
-		for (JsonValue v : (JsonArray)(((JsonObject)__r.request.
-			bodyAsJsonStructure()).get("custom_metrics")))
+		// Go through custom metrics and check values
+		for (CustomMetric m : event.custommetrics.values())
 		{
-			// Convert to object
-			JsonObject obj = (JsonObject)v;
-			
-			// Is this the event type?
-			if (__Utils__.isEqual(obj.get("name"),
-				"@iopipe/event-info.eventType"))
+			if ("@iopipe/event-info.eventType".equals(m.name()))
 				this.typegot.set(true);
 			
-			// Is one of the keys?
-			else if (((JsonString)obj.get("name")).getString().startsWith(
-				"@iopipe/event-info." + decoder.eventType() + "."))
+			if (m.name().startsWith("@iopipe/event-info." +
+				decoder.eventType() + "."))
 				this.gotmetrics.set(true);
 		}
 	}

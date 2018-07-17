@@ -141,6 +141,9 @@ public abstract class Engine
 		if (__s == null)
 			throw new NullPointerException("NARG");
 		
+		_LOGGER.debug(() -> "..");
+		_LOGGER.debug(() -> "..");
+		_LOGGER.debug(() -> "..");
 		_LOGGER.debug(() -> ">>> BEGIN TEST: " + __s.fullName());
 		
 		// Run it
@@ -214,6 +217,14 @@ public abstract class Engine
 		// Ignore the mock exception
 		catch (MockException e)
 		{
+		}
+		
+		// This hopefully should not happen
+		catch (RuntimeException|Error e)
+		{
+			_LOGGER.debug("Test threw an exception!", e);
+			
+			throw e;
 		}
 			
 		// The body must have always been entered

@@ -75,6 +75,8 @@ class __DoTimeOut__
 	@Override
 	public void remoteRequest(WrappedRequest __r)
 	{
+		StandardPushEvent event = (StandardPushEvent)__r.event;
+		
 		// Increment count
 		int now = this.xmitcount.incrementAndGet();
 		
@@ -82,7 +84,7 @@ class __DoTimeOut__
 		if (now == 1)
 		{
 			// It must have an error condition
-			if (null != __Utils__.hasError(__r.request))
+			if (event.hasError())
 				this.haserror.set(true);
 		}
 	}

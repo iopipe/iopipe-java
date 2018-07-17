@@ -1,5 +1,6 @@
 package com.iopipe;
 
+import com.iopipe.CustomMetric;
 import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RemoteResult;
 import com.iopipe.IOpipeMeasurement;
@@ -60,17 +61,15 @@ class __DoLongValueCustomMetric__
 	@Override
 	public void remoteRequest(WrappedRequest __r)
 	{
-		Map<String, JsonValue> expand = __Utils__.expandObject(__r.request);
+		StandardPushEvent event = (StandardPushEvent)__r.event;
 		
 		// It is invalid if there is an error
-		if (null == __Utils__.hasError(expand))
+		if (!event.hasError())
 			this.noerror.set(true);
 		
-		for (int i = 0; i < 2; i++)
+		for (CustomMetric m : event.custommetrics.values())
 		{
-			JsonValue sv = expand.get(".custom_metrics[" + i + "].s");
-			
-			if (sv != null)
+			if (m.hasString())
 				this.hascustomstring.set(true);
 		}
 	}

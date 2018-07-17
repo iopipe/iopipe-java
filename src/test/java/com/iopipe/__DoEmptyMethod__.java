@@ -53,7 +53,9 @@ class __DoEmptyMethod__
 	@Override
 	public void remoteRequest(WrappedRequest __r)
 	{
-		if (null == __Utils__.hasError(__r.request))
+		StandardPushEvent event = (StandardPushEvent)__r.event;
+		
+		if (!event.hasError())
 			this.errorwasnotsent.set(true);
 	}
 	

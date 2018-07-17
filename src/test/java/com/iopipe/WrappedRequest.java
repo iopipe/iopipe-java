@@ -2,6 +2,8 @@ package com.iopipe;
 
 import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RequestType;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This contains the request information.
@@ -22,6 +24,12 @@ public final class WrappedRequest
 	/** The request being made. */
 	public final RemoteRequest request;
 	
+	/** The count of this request. */
+	public final int count;
+	
+	/** Decoded event data. */
+	public final Event event;
+	
 	/**
 	 * Initializes the wrapped request.
 	 *
@@ -29,15 +37,70 @@ public final class WrappedRequest
 	 * @param __a The authorization token.
 	 * @param __t The type of request.
 	 * @param __r The request being made.
+	 * @param __c The request count.
 	 * @since 2018/02/24
 	 */
 	public WrappedRequest(String __u, String __a, RequestType __t,
-		RemoteRequest __r)
+		RemoteRequest __r, int __c)
 	{
 		this.url = __u;
 		this.authtoken = __a;
 		this.type = __t;
 		this.request = __r;
+		this.count = __c;
+		
+		// Try to decode an event
+		Event event = null;
+		List<Throwable> oops = new ArrayList<>();
+		String body = __r.bodyAsString();
+		
+		// Some data was PUT
+		if (__t == RequestType.PUT)
+			try
+			{
+				event = new PutEvent(__r.body());
+			}
+			catch (RuntimeException e)
+			{
+				oops.add(e);
+			}
+		
+		// Normal push event
+		if (event == null)
+			try
+			{
+				event = StandardPushEvent.decode(body);
+			}
+			catch (RuntimeException e)
+			{
+				oops.add(e);
+			}
+		
+		// Profiler signer
+		if (event == null)
+			try
+			{
+				event = SignerEvent.decode(body);
+			}
+			catch (RuntimeException e)
+			{
+				oops.add(e);
+			}
+		
+		// Failed to decode as something
+		if (event == null)
+		{
+			RuntimeException t = new RuntimeException(
+				"Could not determine event type.");
+			
+			for (Throwable h : oops)
+				t.addSuppressed(h);
+			
+			throw t;
+		}
+		
+		// Is valid
+		this.event = event;
 	}
 }
 

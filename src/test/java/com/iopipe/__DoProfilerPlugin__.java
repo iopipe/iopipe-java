@@ -53,6 +53,18 @@ class __DoProfilerPlugin__
 	protected final BooleanValue gotpost =
 		new BooleanValue("gotpost");
 	
+	/** Was a put made? */
+	protected final BooleanValue gotput =
+		new BooleanValue("gotput");
+	
+	/** Profiler has all the fields. */
+	protected final BooleanValue hassignerpostfields =
+		new BooleanValue("hassignerpostfields");
+	
+	/** Has uploads? */
+	protected final BooleanValue hasuploads =
+		new BooleanValue("hasuploads");
+	
 	/**
 	 * Constructs the test.
 	 *
@@ -75,6 +87,9 @@ class __DoProfilerPlugin__
 		super.assertTrue(this.noerror);
 		super.assertTrue(this.profilerpluginspecified);
 		super.assertTrue(this.gotpost);
+		super.assertTrue(this.gotput);
+		super.assertTrue(this.hassignerpostfields);
+		super.assertTrue(this.hasuploads);
 	}
 	
 	/**
@@ -99,29 +114,56 @@ class __DoProfilerPlugin__
 	@Override
 	public void remoteRequest(WrappedRequest __r)
 	{
-		// Ignore profiler PUT
-		if (__r.type == RequestType.PUT)
+		Event rawevent = __r.event;
+		
+		// Data being uploaded
+		if (rawevent instanceof PutEvent)
 		{
-			this.gotpost.set(true);
-			return;
+			if (__r.type == RequestType.PUT)
+				this.gotput.set(true);
 		}
 		
-		Map<String, JsonValue> expand = __Utils__.expandObject(__r.request);
-		
-		// It is invalid if there is an error
-		if (null == __Utils__.hasError(expand))
-			this.noerror.set(true);
-		
-		// See if the trace plugin was specified
-		for (int i = 0; i >= 0; i++)
+		// A request made by the signer
+		else if (rawevent instanceof SignerEvent)
 		{
-			JsonValue v = expand.get(".plugins[" + i + "].name");
-			if (v == null)
-				break;
+			SignerEvent event = (SignerEvent)rawevent;
 			
-			if (__Utils__.isEqual(v, "profiler"))
-				this.profilerpluginspecified.set(true);
+			// Post was made?
+			if (__r.type == RequestType.POST)
+				this.gotpost.set(true);
+			
+			// Needs to have all the fields
+			if (event.arn != null &&
+				event.requestid != null &&
+				event.timestamp > Long.MIN_VALUE &&
+				event.extension != null)
+				this.hassignerpostfields.set(true);
 		}
+		
+		// Standard push event
+		else if (rawevent instanceof StandardPushEvent)
+		{
+			StandardPushEvent event = (StandardPushEvent)rawevent;
+			
+			// It is invalid if there is an error
+			if (!event.hasError())
+				this.noerror.set(true);
+			
+			// See if the trace plugin was specified
+			StandardPushEvent.Plugin plugin = event.plugins.get("profiler");
+			if (plugin != null)
+			{
+				this.profilerpluginspecified.set(true);
+				
+				// There must also be uploads
+				if (plugin.uploads != null && !plugin.uploads.isEmpty())
+					this.hasuploads.set(true);
+			}
+		}
+		
+		// Do not know what this is
+		else
+			throw new RuntimeException("Unknown event type in profiler?");
 	}
 	
 	/**

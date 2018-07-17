@@ -74,27 +74,26 @@ class __DoDiskReportCheck__
 	@Override
 	public void remoteRequest(WrappedRequest __r)
 	{
-		Map<String, JsonValue> expand = __Utils__.expandObject(__r.request);
+		StandardPushEvent event = (StandardPushEvent)__r.event;
 		
 		// It is invalid if there is an error
-		if (null == __Utils__.hasError(expand))
+		if (!event.hasError())
 			this.noerror.set(true);
 		
-		JsonValue total = expand.get(".disk.totalMiB"),
-			used = expand.get(".disk.usedMiB"),
-			percent = expand.get(".disk.usedPercentage");
+		StandardPushEvent.Disk usage = event.disk;
+		if (usage == null)
+			return;
 		
-		if (total != null)
+		if (usage.totalmib > 0)
 			this.hastotal.set(true);
 		
-		if (used != null)
+		if (usage.usedmib > 0)
 			this.hasused.set(true);
 		
-		if (percent != null)
+		if (!Double.isNaN(usage.usedpercentage))
 			this.haspercent.set(true);
 		
-		if ((total instanceof JsonNumber) &&
-			((JsonNumber)total).longValue() > 0)
+		if (Math.signum(usage.usedpercentage) > 0)
 			this.nonzeropositivetotal.set(true);
 	}
 	
