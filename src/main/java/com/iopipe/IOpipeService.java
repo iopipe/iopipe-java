@@ -72,6 +72,9 @@ public final class IOpipeService
 	/** Is the service enabled and working? */
 	protected final boolean enabled;
 	
+	/** The coldstart flag indicator to use. */
+	private final AtomicBoolean _coldstartflag;
+	
 	/** Plugin state. */
 	final __Plugins__ _plugins;
 	
@@ -132,6 +135,11 @@ public final class IOpipeService
 		
 		// Detect all available plugins
 		this._plugins = new __Plugins__(enabled, __config);
+		
+		// Cold starts can either use the default global instance or they
+		// can use a per-instance indicator. This is mostly used for testing.
+		this._coldstartflag = (__config.getUseLocalColdStart() ?
+			new AtomicBoolean() : IOpipeService._THAWED);
 	}
 	
 	/**
@@ -241,7 +249,7 @@ public final class IOpipeService
 			System.identityHashCode(__context)));
 		
 		// Is this coldstarted?
-		boolean coldstarted = !IOpipeService._THAWED.getAndSet(true);
+		boolean coldstarted = !this._coldstartflag.getAndSet(true);
 		measurement.__setColdStart(coldstarted);
 		
 		// Run pre-execution plugins

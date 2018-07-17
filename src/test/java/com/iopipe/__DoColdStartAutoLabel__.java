@@ -2,6 +2,7 @@ package com.iopipe;
 
 import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RemoteResult;
+import com.iopipe.IOpipeConfigurationBuilder;
 import com.iopipe.IOpipeMeasurement;
 import java.util.Map;
 import javax.json.JsonString;
@@ -58,6 +59,20 @@ class __DoColdStartAutoLabel__
 		
 		// These conditions must be the same
 		super.assertEquals(this.hascoldstart.get(), this.haslabel);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @since 2018/07/17
+	 */
+	@Override
+	public void modifyConfig(IOpipeConfigurationBuilder __cb)
+		throws NullPointerException
+	{
+		if (__cb == null)
+			throw new NullPointerException();
+		
+		__cb.setUseLocalColdStart(true);
 	}
 	
 	/**

@@ -118,6 +118,9 @@ public final class IOpipeConfiguration
 	/** The URL to the profiler. */
 	protected final String profilerurl;
 	
+	/** Use local coldstarts. */
+	protected final boolean localcoldstart;
+	
 	/** The state of plugins. */
 	private final Map<String, Boolean> _pluginstate =
 		new TreeMap<>(_PLUGIN_COMPARATOR);
@@ -219,6 +222,7 @@ public final class IOpipeConfiguration
 		else
 			this.profilerurl = profilerurl;
 		
+		this.localcoldstart = __builder._localcoldstart;
 		this._pluginstate.putAll(__builder._pluginstate);
 	}
 	
@@ -380,13 +384,27 @@ public final class IOpipeConfiguration
 				String.format("{enabled=%s, token=%s, " +
 					"connectionfactory=%s, timeoutwindow=%d, " +
 					"installmethod=%s, " +
-					"pluginstate=%s, serviceurl=%s, profilerurl=%s}",
+					"pluginstate=%s, serviceurl=%s, profilerurl=%s, " +
+					"localcoldstart=%b}",
 					this.enabled,
 					this.token, this.connectionfactory, this.timeoutwindow,
 					this.installmethod,
-					this._pluginstate, this.serviceurl, this.profilerurl)));
+					this._pluginstate, this.serviceurl, this.profilerurl,
+					this.localcoldstart)));
 		
 		return rv;
+	}
+	
+	/**
+	 * Returns if cold starts are indicated by local services rather than
+	 * using global indicators of cold starts.
+	 *
+	 * @return Return if cold start detection is local per instance.
+	 * @since 2018/07/17
+	 */
+	public final boolean getUseLocalColdStart()
+	{
+		return this.localcoldstart;
 	}
 	
 	/**
