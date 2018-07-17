@@ -252,6 +252,10 @@ public final class IOpipeService
 		boolean coldstarted = !this._coldstartflag.getAndSet(true);
 		measurement.__setColdStart(coldstarted);
 		
+		// Add auto-label for coldstart
+		if (coldstarted)
+			exec.label("@iopipe/coldstart");
+		
 		// Run pre-execution plugins
 		__Plugins__.__Info__[] plugins = this._plugins.__info();
 		for (__Plugins__.__Info__ i : plugins)
