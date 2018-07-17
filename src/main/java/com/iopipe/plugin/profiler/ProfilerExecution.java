@@ -295,6 +295,9 @@ public class ProfilerExecution
 			// Debug result
 			_LOGGER.debug(() -> "Profiler recv: " + result + " " +
 				result.bodyAsString());
+			
+			// Add auto-label
+			execution.label("@iopipe/plugin-profiler");
 		}
 	}
 	
