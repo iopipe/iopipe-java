@@ -20,8 +20,8 @@ public class EventInfoExecution
 	/** Decoders to use for events. */
 	protected final EventInfoDecoders decoders;
 	
-	/** Custom metrics to add to the plugin. */
-	private final AtomicReference<CustomMetric[]> _result =
+	/** Results of the plugin execution. */
+	private final AtomicReference<__Result__> _result =
 		new AtomicReference<>();
 	
 	/**
@@ -51,10 +51,10 @@ public class EventInfoExecution
 	 */
 	final void __post()
 	{
-		AtomicReference<CustomMetric[]> result = this._result;
+		AtomicReference<__Result__> result = this._result;
 		
 		// Try to get the object before locking on it
-		CustomMetric[] post = result.get();
+		__Result__ post = result.get();
 		if (post == null)
 			synchronized (result)
 			{
@@ -82,7 +82,10 @@ public class EventInfoExecution
 			return;
 		
 		// Add all custom metrics
-		this.execution.measurement().addCustomMetrics(post);
+		IOpipeExecution execution = this.execution;
+		execution.measurement().addCustomMetrics(post._metrics);
+		execution.label("@iopipe/plugin-event-info");
+		execution.label("@iopipe/" + post._decoder.slugifiedEventType());
 	}
 	
 	/**
@@ -118,7 +121,7 @@ public class EventInfoExecution
 		protected final Object object;
 		
 		/** Where the report will go. */
-		protected final AtomicReference<CustomMetric[]> result;
+		protected final AtomicReference<__Result__> result;
 		
 		/** Decoders to use to parse the object with. */
 		protected final EventInfoDecoders decoders;
@@ -133,7 +136,7 @@ public class EventInfoExecution
 		 * were specified.
 		 * @since 2018/04/24
 		 */
-		private __Worker__(Object __o, AtomicReference<CustomMetric[]> __r,
+		private __Worker__(Object __o, AtomicReference<__Result__> __r,
 			EventInfoDecoders __d)
 			throws NullPointerException
 		{
@@ -153,13 +156,15 @@ public class EventInfoExecution
 		public final void run()
 		{
 			// Determine the custom metrics to use for the event
-			CustomMetric[] metrics = this.decoders.decode(this.object);
+			EventInfoDecoder[] decoder = new EventInfoDecoder[1];
+			CustomMetric[] metrics = this.decoders.decode(this.object,
+				decoder);
 			if (metrics == null)
 				metrics = new CustomMetric[0];
 			
 			// Store result
-			AtomicReference<CustomMetric[]> result = this.result;
-			result.set(metrics);
+			AtomicReference<__Result__> result = this.result;
+			result.set(new __Result__(decoder[0], metrics));
 			
 			// Notify any threads that are waiting on this thread that a
 			// result was just made available
