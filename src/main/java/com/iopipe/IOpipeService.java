@@ -488,6 +488,7 @@ public final class IOpipeService
 			{
 				this._thrownexception = e;
 				measurement.__setThrown(e);
+				measurement.addLabel("@iopipe/error");
 			}
 			
 			// Count how long execution has taken
