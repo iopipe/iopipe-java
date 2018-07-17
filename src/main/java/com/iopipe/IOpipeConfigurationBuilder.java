@@ -209,17 +209,21 @@ public class IOpipeConfigurationBuilder
 	}
 	
 	/**
-	 * This allows {@link IOpipeService} to detect coldstarts using a local
-	 * per-instance basis rather than using a global coldstart flag.
+	 * Set to true {@code true} if cold start detection is to be managed per
+	 * individual instance of {@link IOpipeService}, this will result in the
+	 * first execution under that instance being treated as a cold start.
+	 *
+	 * Otherwise {@code false} will use cold start detection on a per process
+	 * basis.
 	 *
 	 * This generally is not needed and is not recommended as warm starts will
-	 * be flagged as coldstarts if a new invocation occurs. This is only for
+	 * be flagged as coldstarts if a new instance is created. This is only for
 	 * advanced service usage.
 	 *
 	 * This defaults to {@code false}.
 	 *
-	 * @param __yes If {@code true} then coldstarts are indicated by the
-	 * individual service itself rather than a global instance of them.
+	 * @param __yes If {@code true} then coldstarts are to be managed per
+	 * instance of {@code IOpipeService}.
 	 * @since 2018/07/17
 	 */
 	public final void setUseLocalColdStart(boolean __yes)

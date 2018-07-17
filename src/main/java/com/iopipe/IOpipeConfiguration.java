@@ -396,10 +396,15 @@ public final class IOpipeConfiguration
 	}
 	
 	/**
-	 * Returns if cold starts are indicated by local services rather than
-	 * using global indicators of cold starts.
+	 * Returns {@code true} if cold start detection is managed per individual
+	 * instance of {@link IOpipeService}, this will result in the first
+	 * execution under that instance being treated as a cold start.
 	 *
-	 * @return Return if cold start detection is local per instance.
+	 * Otherwise {@code false} will use cold start detection on a per process
+	 * basis.
+	 *
+	 * @return Returns {@code true} if cold start detection is per instance of
+	 * {@link IOpipeService} instead of per process.
 	 * @since 2018/07/17
 	 */
 	public final boolean getUseLocalColdStart()
