@@ -66,6 +66,14 @@ class __DoEventInfoPlugin__
 	protected final BooleanValue gotmetrics =
 		new BooleanValue("gotmetrics");
 	
+	/** Is there an auto label? */
+	protected final BooleanValue hasautolabel =
+		new BooleanValue("hasautolabel");
+	
+	/** Has the slug name auto label been specified */
+	protected final BooleanValue hasslugnameautolabel =
+		new BooleanValue("hasslugnameautolabel");
+	
 	/** The decoder that is used. */
 	protected final EventInfoDecoder decoder;
 	
@@ -103,6 +111,8 @@ class __DoEventInfoPlugin__
 		// Must have read all metrics and the event type
 		super.assertTrue(this.typegot);
 		super.assertTrue(this.gotmetrics);
+		super.assertTrue(this.hasautolabel);
+		super.assertTrue(this.hasslugnameautolabel);
 	}
 	
 	/**
@@ -144,6 +154,12 @@ class __DoEventInfoPlugin__
 				decoder.eventType() + "."))
 				this.gotmetrics.set(true);
 		}
+		
+		if (event.labels.contains("@iopipe/plugin-event-info"))
+			this.hasautolabel.set(true);
+		
+		if (event.labels.contains("@iopipe/" + decoder.slugifiedEventType()))
+			this.hasslugnameautolabel.set(true);
 	}
 	
 	/**

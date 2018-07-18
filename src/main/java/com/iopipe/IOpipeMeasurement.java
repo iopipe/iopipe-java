@@ -63,6 +63,9 @@ public final class IOpipeMeasurement
 		Set<CustomMetric> custmetrics = this._custmetrics;
 		synchronized (custmetrics)
 		{
+			if (!__cm.name().startsWith("@iopipe/"))
+				this.addLabel("@iopipe/metrics");
+			
 			custmetrics.add(__cm);
 		}
 	}
@@ -87,7 +90,12 @@ public final class IOpipeMeasurement
 		{
 			for (CustomMetric cm : __cms)
 				if (cm != null)
+				{
+					if (!cm.name().startsWith("@iopipe/"))
+						this.addLabel("@iopipe/metrics");
+					
 					custmetrics.add(cm);
+				}
 		}
 	}
 	
@@ -132,6 +140,10 @@ public final class IOpipeMeasurement
 		Set<PerformanceEntry> perfentries = this._perfentries;
 		synchronized (perfentries)
 		{
+			// Performance entry was defined, so just say that the plugin was
+			// used for tracing data
+			this.addLabel("@iopipe/plugin-trace");
+			
 			perfentries.add(__e);
 		}
 	}

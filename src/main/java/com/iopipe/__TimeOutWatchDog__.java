@@ -154,9 +154,13 @@ final class __TimeOutWatchDog__
 					"Execution timed out.");
 				reported.setStackTrace(sourcethread.getStackTrace());
 				
-				// Send report to the service
+				// Update execution information
 				IOpipeExecution exec = this.execution;
 				exec.measurement().__setThrown(reported);
+				exec.label("@iopipe/error");
+				exec.label("@iopipe/timeout");
+				
+				// Upload
 				this.service.__sendRequest(exec.__buildRequest());
 				
 				// Do not need to execute anymore

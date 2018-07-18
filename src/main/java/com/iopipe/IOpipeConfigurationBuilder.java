@@ -40,6 +40,9 @@ public class IOpipeConfigurationBuilder
 	/** The URL to send profiler requests to. */
 	volatile String _profilerurl;
 	
+	/** Use local coldstarts per service. */
+	volatile boolean _localcoldstart;
+	
 	/**
 	 * Initializes the builder with uninitialized values.
 	 *
@@ -70,6 +73,7 @@ public class IOpipeConfigurationBuilder
 		this._installmethod = __c.getInstallMethod();
 		this._serviceurl = __c.getServiceUrl();
 		this._profilerurl = __c.getProfilerUrl();
+		this._localcoldstart = __c.getUseLocalColdStart();
 	}
 	
 	/**
@@ -202,6 +206,29 @@ public class IOpipeConfigurationBuilder
 				"cannot be negative.");
 		
 		this._timeoutwindow = __ms;
+	}
+	
+	/**
+	 * Set to true {@code true} if cold start detection is to be managed per
+	 * individual instance of {@link IOpipeService}, this will result in the
+	 * first execution under that instance being treated as a cold start.
+	 *
+	 * Otherwise {@code false} will use cold start detection on a per process
+	 * basis.
+	 *
+	 * This generally is not needed and is not recommended as warm starts will
+	 * be flagged as coldstarts if a new instance is created. This is only for
+	 * advanced service usage.
+	 *
+	 * This defaults to {@code false}.
+	 *
+	 * @param __yes If {@code true} then coldstarts are to be managed per
+	 * instance of {@code IOpipeService}.
+	 * @since 2018/07/17
+	 */
+	public final void setUseLocalColdStart(boolean __yes)
+	{
+		this._localcoldstart = __yes;
 	}
 }
 

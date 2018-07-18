@@ -69,6 +69,20 @@ public final class EventInfoDecoders
 	 */
 	public final CustomMetric[] decode(Object __o)
 	{
+		return this.decode(__o, null);
+	}
+	
+	/**
+	 * Decodes the specified object and returns an array containing custom
+	 * metrics to be added to the report.
+	 *
+	 * @param __o The object to report against.
+	 * @param __d Optional output for the decoder which was used.
+	 * @return The custom metrics which detail the object.
+	 * @since 2018/07/17
+	 */
+	public final CustomMetric[] decode(Object __o, EventInfoDecoder[] __d)
+	{
 		// If this is the null object then it is rather pointless to try and
 		// decode it
 		if (__o == null)
@@ -98,6 +112,10 @@ public final class EventInfoDecoders
 		{
 			decoder = decoders.get(match);
 		}
+		
+		// Record the used decoder
+		if (__d != null && __d.length > 0)
+			__d[0] = decoder;
 		
 		// Handle all input values
 		ValueAcceptor a = new ValueAcceptor(decoder.eventType());

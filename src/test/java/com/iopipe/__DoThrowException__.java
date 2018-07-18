@@ -20,6 +20,10 @@ class __DoThrowException__
 	protected final BooleanValue remoterecvokay =
 		new BooleanValue("remoterecvokay");
 	
+	/** Has error auto label? */
+	protected final BooleanValue hasautolabel =
+		new BooleanValue("hasautolabel");
+	
 	/**
 	 * Constructs the test.
 	 *
@@ -39,6 +43,7 @@ class __DoThrowException__
 	{
 		super.assertTrue(this.remoterecvokay);
 		super.assertTrue(this.errorwassent);
+		super.assertTrue(this.hasautolabel);
 	}
 	
 	/**
@@ -52,6 +57,9 @@ class __DoThrowException__
 		
 		if (event.hasError())
 			this.errorwassent.set(true);
+		
+		if (event.labels.contains("@iopipe/error"))
+			this.hasautolabel.set(true);
 	}
 	
 	/**

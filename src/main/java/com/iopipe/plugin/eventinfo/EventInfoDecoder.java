@@ -35,5 +35,43 @@ public interface EventInfoDecoder
 	 * @since 2018/04/23
 	 */
 	public abstract String eventType();
+	
+	/**
+	 * Returns the slugified event type.
+	 *
+	 * For example {@code apiGateway} becomes {@code api-gateway}.
+	 *
+	 * @return The slugified event type.
+	 * @since 2018/07/16
+	 */
+	public default String slugifiedEventType()
+	{
+		// Use event type but fallback just in case it was never set
+		String et = this.eventType();
+		if (et == null)
+			et = "unknown";
+		
+		// Just go through and add dashes before capitals
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0, n = et.length(); i < n; i++)
+		{
+			char c = et.charAt(i);
+			
+			// Prefix with dash?
+			if (c >= 'A' && c <= 'Z')
+			{
+				// Never dash on first character
+				if (i > 0)
+					sb.append('-');
+				
+				// Lowercase it
+				c = (char)((c - 'A') + 'a');
+			}
+			
+			sb.append(c);
+		}
+		
+		return sb.toString();
+	}
 }
 
