@@ -11,6 +11,14 @@ import com.iopipe.http.RemoteRequest;
 public interface IOpipeEventUploader
 {
 	/**
+	 * Returns the number of requests that have failed.
+	 *
+	 * @return The number of requests that have failed.
+	 * @since 2018/07/23
+	 */
+	public abstract int badRequestCount();
+	
+	/**
 	 * Uploads the specified request to the remote server.
 	 *
 	 * @param __r The request to upload.

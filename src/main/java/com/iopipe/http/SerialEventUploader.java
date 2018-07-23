@@ -36,6 +36,15 @@ public final class SerialEventUploader
 	 * {@inheritDoc}
 	 * @since 2018/07/23
 	 */
+	public final int badRequestCount()
+	{
+		throw new Error("TODO");
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @since 2018/07/23
+	 */
 	@Override
 	public final void upload(RemoteRequest __r)
 		throws NullPointerException
