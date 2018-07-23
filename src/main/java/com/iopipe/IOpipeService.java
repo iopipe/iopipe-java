@@ -9,6 +9,7 @@ import com.iopipe.http.RemoteException;
 import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RemoteResult;
 import com.iopipe.http.RequestType;
+import com.iopipe.http.SerialEventUploader;
 import com.iopipe.plugin.IOpipePlugin;
 import com.iopipe.plugin.IOpipePluginExecution;
 import com.iopipe.plugin.IOpipePluginPostExecutable;
@@ -66,8 +67,8 @@ public final class IOpipeService
 	/** The configuration used to connect to the service. */
 	protected final IOpipeConfiguration config;
 	
-	/** The connection to the server. */
-	protected final RemoteConnection connection;
+	/** The uploader for pushing events. */
+	protected final IOpipeEventUploader uploader;
 	
 	/** Is the service enabled and working? */
 	protected final boolean enabled;
@@ -80,9 +81,6 @@ public final class IOpipeService
 	
 	/** The number of times this context has been executed. */
 	private volatile int _execcount;
-	
-	/** The number of times the server replied with a code other than 2xx. */
-	private volatile int _badresultcount;
 	
 	/**
 	 * Initializes the service using the default configuration.
@@ -130,8 +128,10 @@ public final class IOpipeService
 			connection = new NullConnection();
 		
 		this.enabled = enabled;
-		this.connection = connection;
 		this.config = __config;
+		
+		// Setup upload
+		this.uploader = new SerialEventUploader(connection);
 		
 		// Detect all available plugins
 		this._plugins = new __Plugins__(enabled, __config);
@@ -163,7 +163,7 @@ public final class IOpipeService
 	 */
 	public final int getBadResultCount()
 	{
-		return this._badresultcount;
+		return this.uploader.badRequestCount();
 	}
 	
 	/**
@@ -241,7 +241,6 @@ public final class IOpipeService
 		{
 			// Disabled lambdas could still rely on measurements, despite them
 			// not doing anything useful at all
-			this._badresultcount++;
 			return __func.apply(exec);
 		}
 		
@@ -339,52 +338,16 @@ public final class IOpipeService
 	 * Sends the specified request to the server.
 	 *
 	 * @param __r The request to send to the server.
-	 * @return The result of the report.
 	 * @throws NullPointerException On null arguments.
 	 * @since 2017/12/15
 	 */
-	@Deprecated
-	final RemoteResult __sendRequest(RemoteRequest __r)
+	final void __sendRequest(RemoteRequest __r)
 		throws NullPointerException
 	{
 		if (__r == null)
 			throw new NullPointerException();
 		
-		// Generate report
-		try
-		{
-			// Report what is to be sent
-			_LOGGER.debug(() -> "Send: " + __r + " " + __debugBody(__r));
-			
-			RemoteResult result = this.connection.send(RequestType.POST, __r);
-			
-			// Only the 200 range is valid for okay responses
-			int code = result.code();
-			if (!(code >= 200 && code < 300))
-			{
-				this._badresultcount++;
-				
-				// Emit errors for failed requests
-				_LOGGER.error(() -> "Recv: " + result + " " +
-					__debugBody(result));
-			}
-			
-			// Debug log successful requests
-			else
-				_LOGGER.debug(() -> "Recv: " + result + " " +
-					__debugBody(result));
-			
-			return result;
-		}
-		
-		// Failed to write to the server
-		catch (RemoteException e)
-		{
-			_LOGGER.error("Could not sent request to server.", e);
-			
-			this._badresultcount++;
-			return new RemoteResult(503, RemoteBody.MIMETYPE_JSON, "");
-		}
+		this.uploader.upload(__r);
 	}
 	
 	/**
@@ -403,28 +366,6 @@ public final class IOpipeService
 			_INSTANCE = (rv = new IOpipeService());
 		}
 		return rv;
-	}
-	
-	/**
-	 * Shows string representation of the body.
-	 *
-	 * @param __b The body to decode.
-	 * @return The string result.
-	 * @since 2018/02/24
-	 */
-	private static final String __debugBody(RemoteBody __b)
-	{
-		try
-		{
-			String rv = __b.bodyAsString();
-			if (rv.indexOf('\0') >= 0)
-				return "BINARY DATA";
-			return rv;
-		}
-		catch (Throwable t)
-		{
-			return "Could not decode!";
-		}
 	}
 	
 	/**
