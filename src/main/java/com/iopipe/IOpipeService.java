@@ -10,6 +10,7 @@ import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RemoteResult;
 import com.iopipe.http.RequestType;
 import com.iopipe.http.SerialEventUploader;
+import com.iopipe.http.ThreadedEventUploader;
 import com.iopipe.plugin.IOpipePlugin;
 import com.iopipe.plugin.IOpipePluginExecution;
 import com.iopipe.plugin.IOpipePluginPostExecutable;
@@ -131,16 +132,22 @@ public final class IOpipeService
 		this.config = __config;
 		
 		// Setup uploader
+		IOpipeEventUploader uploader;
 		if (!enabled)
-			this.uploader = new __NullUploader__();
+			uploader = new __NullUploader__();
 		else
 			switch (__config.getPublishMethod())
 			{
+				case THREADED:
+					uploader = new ThreadedEventUploader(connection);
+					break;
+				
 				case SERIAL:
 				default:
-					this.uploader = new SerialEventUploader(connection);
+					uploader = new SerialEventUploader(connection);
 					break;
 			}
+		this.uploader = uploader;
 		
 		// Detect all available plugins
 		this._plugins = new __Plugins__(enabled, __config);

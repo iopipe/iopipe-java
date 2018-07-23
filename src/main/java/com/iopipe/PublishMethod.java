@@ -14,11 +14,17 @@ public enum PublishMethod
 	 */
 	SERIAL,
 	
+	/**
+	 * Uses a background thread that is able to upload events to the service
+	 * which allows most invocations to continue with executions as needed.
+	 */
+	THREADED,
+	
 	/** End. */
 	;
 	
 	/** The default publish method. */
 	static final PublishMethod _DEFAULT =
-		PublishMethod.SERIAL;
+		PublishMethod.THREADED;
 }
 
