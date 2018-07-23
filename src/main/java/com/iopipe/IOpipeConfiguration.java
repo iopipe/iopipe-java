@@ -121,6 +121,9 @@ public final class IOpipeConfiguration
 	/** Use local coldstarts. */
 	protected final boolean localcoldstart;
 	
+	/** The method to use when publishing events to the service. */
+	protected final PublishMethod publishmethod;
+	
 	/** The state of plugins. */
 	private final Map<String, Boolean> _pluginstate =
 		new TreeMap<>(_PLUGIN_COMPARATOR);
@@ -190,6 +193,7 @@ public final class IOpipeConfiguration
 		int timeoutwindow = __builder._timeoutwindow;
 		String installmethod = __builder._installmethod;
 		String serviceurl = __builder._serviceurl;
+		PublishMethod publishmethod = __builder._publishmethod;
 		
 		if (token == null)
 			throw new IllegalArgumentException("A project token must be " +
@@ -214,6 +218,8 @@ public final class IOpipeConfiguration
 		this.connectionfactory = connectionfactory;
 		this.timeoutwindow = timeoutwindow;
 		this.installmethod = installmethod;
+		this.publishmethod = (publishmethod == null ?
+			PublishMethod._DEFAULT : publishmethod);
 		
 		// Optional
 		String profilerurl = __builder._profilerurl;
@@ -247,7 +253,9 @@ public final class IOpipeConfiguration
 			Objects.equals(this.installmethod, o.installmethod) &&
 			this._pluginstate.equals(o._pluginstate) &&
 			Objects.equals(this.serviceurl, o.serviceurl) &&
-			Objects.equals(this.profilerurl, o.profilerurl);
+			Objects.equals(this.profilerurl, o.profilerurl) &&
+			this.localcoldstart == o.localcoldstart &&
+			Objects.equals(this.publishmethod, o.publishmethod);
 	}
 	
 	/**
@@ -295,6 +303,18 @@ public final class IOpipeConfiguration
 	}
 	
 	/**
+	 * Returns the publish method that is currently being used for the
+	 * publication of events.
+	 *
+	 * @return The current publish method that is being used.
+	 * @since 2018/07/23
+	 */
+	public final PublishMethod getPublishMethod()
+	{
+		return this.publishmethod;
+	}
+	
+	/**
 	 * Returns the URL to use for service events.
 	 *
 	 * @return The URL for service events.
@@ -318,6 +338,23 @@ public final class IOpipeConfiguration
 	}
 	
 	/**
+	 * Returns {@code true} if cold start detection is managed per individual
+	 * instance of {@link IOpipeService}, this will result in the first
+	 * execution under that instance being treated as a cold start.
+	 *
+	 * Otherwise {@code false} will use cold start detection on a per process
+	 * basis.
+	 *
+	 * @return Returns {@code true} if cold start detection is per instance of
+	 * {@link IOpipeService} instead of per process.
+	 * @since 2018/07/17
+	 */
+	public final boolean getUseLocalColdStart()
+	{
+		return this.localcoldstart;
+	}
+	
+	/**
 	 * {@inheritDoc}
 	 * @since 2017/12/12
 	 */
@@ -331,7 +368,9 @@ public final class IOpipeConfiguration
 			Objects.hashCode(this.installmethod) ^
 			this._pluginstate.hashCode() ^
 			Objects.hashCode(this.serviceurl) ^
-			Objects.hashCode(this.profilerurl);
+			Objects.hashCode(this.profilerurl) ^
+			Boolean.hashCode(this.localcoldstart) ^
+			Objects.hashCode(this.publishmethod);
 	}
 	
 	/**
@@ -385,31 +424,14 @@ public final class IOpipeConfiguration
 					"connectionfactory=%s, timeoutwindow=%d, " +
 					"installmethod=%s, " +
 					"pluginstate=%s, serviceurl=%s, profilerurl=%s, " +
-					"localcoldstart=%b}",
+					"localcoldstart=%b, publishmethod=%s}",
 					this.enabled,
 					this.token, this.connectionfactory, this.timeoutwindow,
 					this.installmethod,
 					this._pluginstate, this.serviceurl, this.profilerurl,
-					this.localcoldstart)));
+					this.localcoldstart, this.publishmethod)));
 		
 		return rv;
-	}
-	
-	/**
-	 * Returns {@code true} if cold start detection is managed per individual
-	 * instance of {@link IOpipeService}, this will result in the first
-	 * execution under that instance being treated as a cold start.
-	 *
-	 * Otherwise {@code false} will use cold start detection on a per process
-	 * basis.
-	 *
-	 * @return Returns {@code true} if cold start detection is per instance of
-	 * {@link IOpipeService} instead of per process.
-	 * @since 2018/07/17
-	 */
-	public final boolean getUseLocalColdStart()
-	{
-		return this.localcoldstart;
 	}
 	
 	/**

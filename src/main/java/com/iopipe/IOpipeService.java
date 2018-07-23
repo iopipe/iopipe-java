@@ -130,8 +130,17 @@ public final class IOpipeService
 		this.enabled = enabled;
 		this.config = __config;
 		
-		// Setup upload
-		this.uploader = new SerialEventUploader(connection);
+		// Setup uploader
+		if (!enabled)
+			this.uploader = new __NullUploader__();
+		else
+			switch (__config.getPublishMethod())
+			{
+				case SERIAL:
+				default:
+					this.uploader = new SerialEventUploader(connection);
+					break;
+			}
 		
 		// Detect all available plugins
 		this._plugins = new __Plugins__(enabled, __config);

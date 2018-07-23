@@ -43,6 +43,10 @@ public class IOpipeConfigurationBuilder
 	/** Use local coldstarts per service. */
 	volatile boolean _localcoldstart;
 	
+	/** How events are published to the service. */
+	volatile PublishMethod _publishmethod =
+		PublishMethod._DEFAULT;
+	
 	/**
 	 * Initializes the builder with uninitialized values.
 	 *
@@ -74,6 +78,7 @@ public class IOpipeConfigurationBuilder
 		this._serviceurl = __c.getServiceUrl();
 		this._profilerurl = __c.getProfilerUrl();
 		this._localcoldstart = __c.getUseLocalColdStart();
+		this._publishmethod = __c.getPublishMethod();
 	}
 	
 	/**
@@ -164,6 +169,19 @@ public class IOpipeConfigurationBuilder
 	public final void setProjectToken(String __token)
 	{
 		this._token = __token;
+	}
+	
+	/**
+	 * Sets the publish method for events sent to the IOpipe service, the
+	 * documentation for {@link PublishMethod} details the methods in detail.
+	 *
+	 * @param __m How events should be published.
+	 * @see PublishMethod
+	 * @since 2018/07/23
+	 */
+	public final void setPublishMethod(PublishMethod __m)
+	{
+		this._publishmethod = (__m == null ? PublishMethod._DEFAULT : __m);
 	}
 	
 	/**
