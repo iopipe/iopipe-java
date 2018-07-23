@@ -343,6 +343,7 @@ public final class IOpipeService
 	 * @throws NullPointerException On null arguments.
 	 * @since 2017/12/15
 	 */
+	@Deprecated
 	final RemoteResult __sendRequest(RemoteRequest __r)
 		throws NullPointerException
 	{
