@@ -128,14 +128,6 @@ public final class ThreadedEventUploader
 		final Condition _queuetrigger =
 			this._queuelock.newCondition();
 		
-		/** The thread which is considered the last thread of execution. */
-		final AtomicReference<Thread> _finalthread =
-			new AtomicReference<>();
-		
-		/** Counter index for the final thread of execution. */
-		final AtomicInteger _finalthreadcounter =
-			new AtomicInteger(1);
-		
 		/**
 		 * Initializes the runner.
 		 *
@@ -166,7 +158,6 @@ public final class ThreadedEventUploader
 			Queue<RemoteRequest> queue = this._queue;
 			Lock queuelock = this._queuelock;
 			Condition queuetrigger = this._queuetrigger;
-			AtomicInteger finalthreadcounter = this._finalthreadcounter;
 			
 			// Batch multiple requests from the queue to reduce locking that
 			// is done
@@ -242,10 +233,9 @@ public final class ThreadedEventUploader
 				// than doing multiple many invocations
 				badrequestcount.getAndAdd(badcount);
 				
-				// If this was the last invocation then notify the running
-				// thread that this happened
-				if (activecount.decrementAndGet() == 0)
-					finalthreadcounter.incrementAndGet();
+				// Reduce the active count because the invocation was sent
+				// to the server, so no more events are running
+				activecount.decrementAndGet();
 			}
 		}
 		
@@ -276,17 +266,6 @@ public final class ThreadedEventUploader
 			if (__r == null)
 				throw new NullPointerException();
 			
-			// Try and become the final thread
-			AtomicReference<Thread> finalthread = this._finalthread;
-			boolean isfinalthread = this._finalthread.compareAndSet(null,
-				Thread.currentThread());
-			
-			// This is used to determine if the last invocation was triggered
-			AtomicInteger finalthreadcounter = this._finalthreadcounter;
-			int finalcounter = 0;
-			if (isfinalthread)
-				finalcounter = finalthreadcounter.get();
-			
 			// Add to the queue
 			Queue<RemoteRequest> queue = this._queue;
 			queue.add(__r);
@@ -308,11 +287,20 @@ public final class ThreadedEventUploader
 				}
 			}
 			
-			// If this is the final thread then we have to wait until all the
-			// events have been drained before we continue
-			if (isfinalthread)
-				while (finalcounter == finalthreadcounter.get())
-					continue;
+			// We only need to return from this method when there is still
+			// items in the queue which are currently being sent in the other
+			// thread. That uploader thread might be running behind this thread
+			// due to perhaps garbage collection or JIT compilation.
+			// So this means if active count is one then we are the only
+			// thread running that has an event waiting to happen.
+			// Now if another thread is running then active count will be
+			// another value except one. In this case there is an invocation
+			// happening so we do not have to worry about AWS freezing our
+			// process. However, the thread that sees an active count of one
+			// will be the one to block waiting for the event to be sent.
+			AtomicInteger activecount = this._activecount;
+			while (activecount.get() == 1)
+				continue;
 		}
 	}
 }
