@@ -113,6 +113,10 @@ public final class ThreadedEventUploader
 		final AtomicInteger _activecount =
 			new AtomicInteger();
 		
+		/** The number of entries in the queue. */
+		final AtomicInteger _inqueue =
+			new AtomicInteger();
+		
 		/** Lock for the event queue. */
 		final Lock _queuelock =
 			new ReentrantLock();
@@ -156,6 +160,7 @@ public final class ThreadedEventUploader
 		{
 			AtomicInteger badrequestcount = this._badrequestcount;
 			AtomicInteger activecount = this._activecount;
+			AtomicInteger inqueue = this._inqueue;
 			Queue<RemoteRequest> queue = this._queue;
 			Lock queuelock = this._queuelock;
 			Condition queuetrigger = this._queuetrigger;
@@ -168,43 +173,41 @@ public final class ThreadedEventUploader
 			// Constantly read input events
 			for (;;)
 			{
-				// The number of items which were batched, this is to prevent
-				// locking multiple times just to send one thing
-				int count = 0;
+				// Determine how many items are waiting in the queue and
+				// can safely be read
+				int awaiting = inqueue.getAndSet(0);
 				
-				// See if there is an event waiting in the queue
-				while (count < _BATCH_LIMIT)
+				// The queue is empty so just wait until it fills again
+				if (awaiting == 0)
+				{
+					queuelock.lock();
+					try
+					{
+						queuetrigger.awaitNanos(10_000_000L);
+					}
+					
+					// Ignore this and just try the loop again
+					catch (InterruptedException e)
+					{
+					}
+					
+					// Always clear the lock
+					finally
+					{
+						queuelock.unlock();
+					}
+					
+					// Try again
+					continue;
+				}
+				
+				// Pull items from the queue
+				int count = 0;
+				for (int i = 0; i < awaiting; i++)
 				{
 					RemoteRequest request = queue.poll();
 					
-					// No more requests
-					if (request == null)
-					{
-						// At least one request was read
-						if (count > 0)
-							break;
-						
-						// Otherwise wait for the condition to be set
-						queuelock.lock();
-						try
-						{
-							queuetrigger.awaitNanos(1_000_000L);
-						}
-						
-						// Ignore this and just try the loop again
-						catch (InterruptedException e)
-						{
-						}
-						
-						// Always clear the lock
-						finally
-						{
-							queuelock.unlock();
-						}
-					}
-					
-					// Add it otherwise
-					else
+					if (i < _BATCH_COUNT)
 						batch[count++] = request;
 				}
 				
@@ -291,16 +294,23 @@ public final class ThreadedEventUploader
 			Queue<RemoteRequest> queue = this._queue;
 			queue.add(__r);
 			
-			// Signal thread that an event was pushed
-			Lock queuelock = this._queuelock;
-			queuelock.lock();
-			try
+			// There are more things in the queue
+			int was = this._inqueue.getAndIncrement();
+			
+			// Signal thread that an event was pushed, but only if there was
+			// nothing (the other thread would have been asleep)
+			if (was == 0)
 			{
-				this._queuetrigger.signal();
-			}
-			finally
-			{
-				queuelock.unlock();
+				Lock queuelock = this._queuelock;
+				queuelock.lock();
+				try
+				{
+					this._queuetrigger.signal();
+				}
+				finally
+				{
+					queuelock.unlock();
+				}
 			}
 			
 			// If this is the final thread then we have to wait until all the
@@ -347,3 +357,4 @@ public final class ThreadedEventUploader
 		}
 	}
 }
+
