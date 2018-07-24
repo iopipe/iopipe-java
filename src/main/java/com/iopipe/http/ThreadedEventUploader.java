@@ -96,7 +96,7 @@ public final class ThreadedEventUploader
 	{
 		/** The number of invocations before the queue is utilized. */
 		private static final int _ACTIVE_THRESHOLD =
-			4;
+			8;
 		
 		/** The number of uploads to batch together. */
 		private static final int _BATCH_COUNT =
