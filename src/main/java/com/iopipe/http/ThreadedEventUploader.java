@@ -228,17 +228,14 @@ public final class ThreadedEventUploader
 					{
 						badcount++;
 					}
-					
-					// Reduce the active count because the invocation was sent
-					// to the server, so no more events are running
-					finally
-					{
-						activecount.decrementAndGet();
-					}
 				
 				// Add to the request count all at once since it is faster
 				// than doing multiple many invocations
 				badrequestcount.getAndAdd(badcount);
+				
+				// Reduce the active count because the invocation was sent
+				// to the server, so no more events are running
+				activecount.getAndAdd(-awaiting);
 			}
 		}
 		
