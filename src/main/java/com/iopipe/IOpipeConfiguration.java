@@ -475,6 +475,20 @@ public final class IOpipeConfiguration
 				rv.setTimeOutWindow(150);
 			}
 			
+			// Publish method
+			String publishmethod = System.getProperty(
+				"com.iopipe.publishmethod",
+				System.getenv("IOPIPE_PUBLISH_METHOD"));
+			if (publishmethod != null)
+				try
+				{
+					rv.setPublishMethod(PublishMethod.valueOf(
+						publishmethod.toUpperCase()));
+				}
+				catch (IllegalArgumentException e)
+				{
+				}
+			
 			// Go through system properties to get the enabled state of
 			// plugins
 			for (Map.Entry<Object, Object> e : System.getProperties().
