@@ -3,8 +3,13 @@ package com.iopipe.http;
 import com.iopipe.IOpipeEventUploader;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.Queue;
 
 /**
  * This is an event uploader which
@@ -96,9 +101,9 @@ public final class ThreadedEventUploader
 		/** The connection that is used. */
 		protected final RemoteConnection connection;
 		
-		/** The queue of requests, linked list has cheap queue-ness. */
-		final Deque<RemoteRequest> _queue =
-			new LinkedList();
+		/** Use concurrent queue since it is quite fast. */
+		final Queue<RemoteRequest> _queue =
+			new ConcurrentLinkedQueue<>();
 		
 		/** The number of bad requests. */
 		final AtomicInteger _badrequestcount =
@@ -107,6 +112,14 @@ public final class ThreadedEventUploader
 		/** The number of running lambdas. */
 		final AtomicInteger _activecount =
 			new AtomicInteger();
+		
+		/** Lock for the event queue. */
+		final Lock _queuelock =
+			new ReentrantLock();
+		
+		/** Condition which triggers when something is added. */
+		final Condition _queuetrigger =
+			this._queuelock.newCondition();
 		
 		/** Monitor for when the last event is drained. */
 		final Object _lastmonitor =
@@ -142,7 +155,9 @@ public final class ThreadedEventUploader
 		{
 			AtomicInteger badrequestcount = this._badrequestcount;
 			AtomicInteger activecount = this._activecount;
-			Deque<RemoteRequest> queue = this._queue;
+			Queue<RemoteRequest> queue = this._queue;
+			Lock queuelock = this._queuelock;
+			Condition queuetrigger = this._queuetrigger;
 			Object lastmonitor = this._lastmonitor;
 			
 			// Batch multiple requests from the queue to reduce locking that
@@ -157,49 +172,51 @@ public final class ThreadedEventUploader
 				int count = 0;
 				
 				// See if there is an event waiting in the queue
-				RemoteRequest request = null;
-__outer:
-				for (;;)
-					synchronized (queue)
+				while (count < _BATCH_LIMIT)
+				{
+					RemoteRequest request = queue.poll();
+					
+					// No more requests
+					if (request == null)
 					{
-						// Try to grab as many requests from the queue as
-						// possible
-						while (count < _BATCH_LIMIT)
+						// At least one request was read
+						if (count > 0)
+							break;
+						
+						// Otherwise wait for the condition to be set
+						queuelock.lock();
+						try
 						{
-							request = queue.pollFirst();
-							
-							// No more requests in the queue
-							if (request == null)
-							{
-								// There was at least one request so do not
-								// block waiting for more ever!
-								if (count > 0)
-									break __outer;
-								
-								// Wait 
-								try
-								{
-									queue.wait(100L);
-								}
-								catch (InterruptedException e)
-								{
-									// Just try again
-								}
-							}
-							
-							// Fill the request
-							else
-								batch[count++] = request;
+							queuetrigger.awaitNanos(1_000_000L);
+						}
+						
+						// Ignore this and just try the loop again
+						catch (InterruptedException e)
+						{
+						}
+						
+						// Always clear the lock
+						finally
+						{
+							queuelock.unlock();
 						}
 					}
+					
+					// Add it otherwise
+					else
+						batch[count++] = request;
+				}
 				
-				// Send report
+				// Send reports in batches
 				for (int i = 0; i < count; i++)
 					try
 					{
 						// Send it
 						RemoteResult result = this.connection.send(
 							RequestType.POST, batch[i]);
+						
+						// Clear so the reference gets garbage collected
+						batch[i] = null;
 						
 						// Only the 200 range is valid for okay responses
 						int code = result.code();
@@ -269,15 +286,20 @@ __outer:
 				}
 			}
 			
-			// Lock on the queue
-			Deque<RemoteRequest> queue = this._queue;
-			synchronized (queue)
+			// Add to the queue
+			Queue<RemoteRequest> queue = this._queue;
+			queue.add(__r);
+			
+			// Signal thread that an event was pushed
+			Lock queuelock = this._queuelock;
+			queuelock.lock();
+			try
 			{
-				// Add the event to the queue
-				queue.addLast(__r);
-				
-				// Tell the uploader that an event is waiting if it was locked
-				queue.notify();
+				this._queuetrigger.signal();
+			}
+			finally
+			{
+				queuelock.unlock();
 			}
 			
 			// If this is the final thread then we have to wait until all the
