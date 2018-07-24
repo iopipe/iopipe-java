@@ -125,16 +125,13 @@ public final class ThreadedEventUploader
 		final Condition _queuetrigger =
 			this._queuelock.newCondition();
 		
-		/** Monitor for when the last event is drained. */
-		final Object _lastmonitor =
-			new Object();
-		
-		/** Monitor on the final thread indicator, used for blocking. */
-		final Object _finalthreadmonitor =
-			new Object();
-		
 		/** The thread which is considered the last thread of execution. */
-		Thread _finalthread;
+		final AtomicReference<Thread> _finalthread =
+			new AtomicReference<>();
+		
+		/** Counter index for the final thread of execution. */
+		final AtomicInteger _finalthreadcounter =
+			new AtomicInteger(1);
 		
 		/**
 		 * Initializes the runner.
@@ -164,7 +161,7 @@ public final class ThreadedEventUploader
 			Queue<RemoteRequest> queue = this._queue;
 			Lock queuelock = this._queuelock;
 			Condition queuetrigger = this._queuetrigger;
-			Object lastmonitor = this._lastmonitor;
+			AtomicInteger finalthreadcounter = this._finalthreadcounter;
 			
 			// Batch multiple requests from the queue to reduce locking that
 			// is done
@@ -237,10 +234,7 @@ public final class ThreadedEventUploader
 				// If this was the last invocation then notify the running
 				// thread that this happened
 				if (activecount.decrementAndGet() == 0)
-					synchronized (lastmonitor)
-					{
-						lastmonitor.notifyAll();
-					}
+					finalthreadcounter.incrementAndGet();
 			}
 		}
 		
@@ -271,24 +265,16 @@ public final class ThreadedEventUploader
 			if (__r == null)
 				throw new NullPointerException();
 			
-			// Determine if this is the final thread of execution
-			boolean isfinalthread = false;
-			Thread mythread = Thread.currentThread();
-			Object finalthreadmonitor = this._finalthreadmonitor;
-			synchronized (finalthreadmonitor)
-			{
-				// We are the final thread?
-				Thread finalthread = this._finalthread;
-				if (finalthread == mythread)
-					isfinalthread = true;
-				
-				// No other threads, become the final thread
-				else if (finalthread == null)
-				{
-					this._finalthread = mythread;
-					isfinalthread = true;
-				}
-			}
+			// Try and become the final thread
+			AtomicReference<Thread> finalthread = this._finalthread;
+			boolean isfinalthread = this._finalthread.compareAndSet(null,
+				Thread.currentThread());
+			
+			// This is used to determine if the last invocation was triggered
+			AtomicInteger finalthreadcounter = this._finalthreadcounter;
+			int finalcounter = 0;
+			if (isfinalthread)
+				finalcounter = finalthreadcounter.get();
 			
 			// Add to the queue
 			Queue<RemoteRequest> queue = this._queue;
@@ -316,44 +302,8 @@ public final class ThreadedEventUploader
 			// If this is the final thread then we have to wait until all the
 			// events have been drained before we continue
 			if (isfinalthread)
-			{
-				Object lastmonitor = this._lastmonitor;
-				synchronized (lastmonitor)
-				{
-					AtomicInteger activecount = this._activecount;
-					for (;;)
-					{
-						// See if the number of active events are zero, if they
-						// are then nothing is happening and everything was
-						// sent
-						if (activecount.get() <= 0)
-						{
-							// Clear the final thread so it is gone now
-							synchronized (finalthreadmonitor)
-							{
-								this._finalthread = null;
-							}
-							
-							// There are no invocations and it is safe to
-							// return, if any other events happen to occur
-							// before this happens then another thread will
-							// just become the final thread.
-							return;
-						}
-						
-						// Wait for the last monitor to be notified which
-						// indicates that activecount was made to be zero
-						try
-						{
-							lastmonitor.wait(5L);
-						}
-						catch (InterruptedException e)
-						{
-							// Try again
-						}
-					}
-				}
-			}
+				while (finalcounter == finalthreadcounter.get())
+					continue;
 		}
 	}
 }
