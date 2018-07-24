@@ -25,6 +25,10 @@ public final class ThreadedEventUploader
 	/** The runner itself. */
 	protected final __Runner__ _runner;
 	
+	/** The number of bad requests. */
+	final AtomicInteger _badrequestcount =
+		new AtomicInteger();
+	
 	/**
 	 * Initializes the threaded event uploader.
 	 *
@@ -39,7 +43,7 @@ public final class ThreadedEventUploader
 			throw new NullPointerException();
 		
 		// Setup runner
-		__Runner__ runner = new __Runner__(__con);
+		__Runner__ runner = new __Runner__(__con, this._badrequestcount);
 		
 		// Then setup the thread running that
 		Thread thread = new Thread(runner, "IOpipe-EventUploader");
@@ -67,7 +71,7 @@ public final class ThreadedEventUploader
 	@Override
 	public final int badRequestCount()
 	{
-		return this._runner._badrequestcount.get();
+		return this._badrequestcount.get();
 	}
 	
 	/**
@@ -105,13 +109,12 @@ public final class ThreadedEventUploader
 		final Queue<RemoteRequest> _queue =
 			new ConcurrentLinkedQueue<>();
 		
-		/** The number of bad requests. */
-		final AtomicInteger _badrequestcount =
-			new AtomicInteger();
-		
 		/** The number of running lambdas. */
 		final AtomicInteger _activecount =
 			new AtomicInteger();
+		
+		/** The number of bad requests. */
+		final AtomicInteger _badrequestcount;
 		
 		/** The number of entries in the queue. */
 		final AtomicInteger _inqueue =
@@ -137,15 +140,17 @@ public final class ThreadedEventUploader
 		 * Initializes the runner.
 		 *
 		 * @param __con The connection used.
+		 * @param __bcr The counter for bad requests.
 		 * @throws NullPointerException On null arguments.
 		 * @since 2018/07/23
 		 */
-		private __Runner__(RemoteConnection __con)
+		private __Runner__(RemoteConnection __con, AtomicInteger __brc)
 		{
-			if (__con == null)
+			if (__con == null || __brc == null)
 				throw new NullPointerException();
 			
 			this.connection = __con;
+			this._badrequestcount = __brc;
 		}
 		
 		/**
