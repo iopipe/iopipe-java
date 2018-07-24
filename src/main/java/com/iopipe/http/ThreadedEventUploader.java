@@ -210,6 +210,7 @@ public final class ThreadedEventUploader
 				}
 				
 				// Send reports in batches
+				int badcount = 0;
 				for (int i = 0; i < count; i++)
 					try
 					{
@@ -223,14 +224,18 @@ public final class ThreadedEventUploader
 						// Only the 200 range is valid for okay responses
 						int code = result.code();
 						if (!(code >= 200 && code < 300))
-							badrequestcount.getAndIncrement();
+							badcount++;
 					}
 					
 					// Failed to write to the server
 					catch (RemoteException e)
 					{
-						badrequestcount.getAndIncrement();
+						badcount++;
 					}
+				
+				// Add to the request count all at once since it is faster
+				// than doing multiple many invocations
+				badrequestcount.getAndAdd(badcount);
 				
 				// If this was the last invocation then notify the running
 				// thread that this happened
