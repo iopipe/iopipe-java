@@ -180,7 +180,8 @@ public final class ThreadedEventUploader
 					queuelock.lock();
 					try
 					{
-						queuetrigger.awaitNanos(10_000_000L);
+						// Just check back every second
+						queuetrigger.awaitNanos(1_000_000_000L);
 					}
 					
 					// Ignore this and just try the loop again
@@ -280,11 +281,9 @@ public final class ThreadedEventUploader
 			Queue<RemoteRequest> queue = this._queue;
 			queue.add(__r);
 			
-			// There are more things in the queue
-			int was = this._inqueue.getAndIncrement();
-			
 			// Signal thread that an event was pushed, but only if there was
 			// nothing (the other thread would have been asleep)
+			int was = this._inqueue.getAndIncrement();
 			if (was == 0)
 			{
 				Lock queuelock = this._queuelock;
