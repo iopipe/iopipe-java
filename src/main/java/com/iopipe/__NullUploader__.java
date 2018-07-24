@@ -16,6 +16,15 @@ final class __NullUploader__
 	 * @since 2018/07/23
 	 */
 	@Override
+	public final void await()
+	{
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @since 2018/07/23
+	 */
+	@Override
 	public int badRequestCount()
 	{
 		return 0;

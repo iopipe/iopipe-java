@@ -47,6 +47,18 @@ public final class SerialEventUploader
 	 * {@inheritDoc}
 	 * @since 2018/07/23
 	 */
+	@Override
+	public final void await()
+	{
+		// This is not used, this uploader does not care about the number of
+		// events which are to be generated for upload
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @since 2018/07/23
+	 */
+	@Override
 	public final int badRequestCount()
 	{
 		return _badresultcount.get();

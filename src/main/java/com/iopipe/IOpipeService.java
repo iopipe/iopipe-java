@@ -260,6 +260,10 @@ public final class IOpipeService
 			return __func.apply(exec);
 		}
 		
+		// Tell the uploader that we are in an invocation and we will wait for
+		// an event to occur
+		this.uploader.await();
+		
 		_LOGGER.debug(() -> String.format("Invoking context %08x",
 			System.identityHashCode(__context)));
 		
