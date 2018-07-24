@@ -94,6 +94,10 @@ public final class ThreadedEventUploader
 	private static final class __Runner__
 		implements Runnable
 	{
+		/** The number of invocations before the queue is utilized. */
+		private static final int _ACTIVE_THRESHOLD =
+			4;
+		
 		/** The number of uploads to batch together. */
 		private static final int _BATCH_COUNT =
 			64;
@@ -127,6 +131,10 @@ public final class ThreadedEventUploader
 		/** Condition which triggers when something is added. */
 		final Condition _queuetrigger =
 			this._queuelock.newCondition();
+		
+		/** Lock on the thread which waits for events to upload. */
+		final Lock _victim =
+			new ReentrantLock();
 		
 		/**
 		 * Initializes the runner.
@@ -168,7 +176,7 @@ public final class ThreadedEventUploader
 			{
 				// Determine how many items are waiting in the queue and
 				// can safely be read
-				int awaiting = inqueue.getAndSet(0);
+				int awaiting = inqueue.get();
 				
 				// The queue is empty so just wait until it fills again
 				if (awaiting == 0)
@@ -205,6 +213,10 @@ public final class ThreadedEventUploader
 						batch[count++] = request;
 				}
 				
+				// Items read from the queue, reduce the count after they have
+				// been read
+				inqueue.getAndAdd(-awaiting);
+				
 				// Send reports in batches
 				int badcount = 0;
 				for (int i = 0; i < count; i++)
@@ -233,8 +245,9 @@ public final class ThreadedEventUploader
 				// than doing multiple many invocations
 				badrequestcount.getAndAdd(badcount);
 				
-				// Reduce the active count because the invocation was sent
-				// to the server, so no more events are running
+				// Reduce the active count by the number of events which
+				// were sent, this is used by the victim thread to stop
+				// blocking
 				activecount.getAndAdd(-awaiting);
 			}
 		}
@@ -266,13 +279,53 @@ public final class ThreadedEventUploader
 			if (__r == null)
 				throw new NullPointerException();
 			
-			// Add to the queue
+			// Get the number of threads running at once for even generation
+			AtomicInteger activecount = this._activecount;
+			int nowactive = activecount.get();
+			
+			// If nothing is going on then we can just send our events
+			// serially because sending it to a queue will just add latency
+			// since this thread would be waiting around anyway for the queue
+			// to be emptied
+			if (nowactive < _ACTIVE_THRESHOLD)
+			{
+				AtomicInteger badrequestcount = this._badrequestcount;
+				
+				// Just send the event serially
+				try
+				{
+					// Send it
+					RemoteResult result = this.connection.send(
+						RequestType.POST, __r);
+					
+					// Only the 200 range is valid for okay responses
+					int code = result.code();
+					if (!(code >= 200 && code < 300))
+						badrequestcount.incrementAndGet();
+				}
+				
+				// Failed to write to the server
+				catch (RemoteException e)
+				{
+					badrequestcount.incrementAndGet();
+				}
+				
+				// This thread is no longer active for an event and nothing
+				// more needs to be done
+				activecount.decrementAndGet();
+				return;
+			}
+			
+			// There are too many threads that are running, so spill over these
+			// events to the queue to be sent via another thread so we can
+			// return to the user faster
 			Queue<RemoteRequest> queue = this._queue;
 			queue.add(__r);
 			
 			// Signal thread that an event was pushed, but only if there was
 			// nothing (the other thread would have been asleep)
-			int was = this._inqueue.getAndIncrement();
+			AtomicInteger inqueue = this._inqueue;
+			int was = inqueue.getAndIncrement();
 			if (was == 0)
 			{
 				Lock queuelock = this._queuelock;
@@ -287,20 +340,29 @@ public final class ThreadedEventUploader
 				}
 			}
 			
-			// We only need to return from this method when there is still
-			// items in the queue which are currently being sent in the other
-			// thread. That uploader thread might be running behind this thread
-			// due to perhaps garbage collection or JIT compilation.
-			// So this means if active count is one then we are the only
-			// thread running that has an event waiting to happen.
-			// Now if another thread is running then active count will be
-			// another value except one. In this case there is an invocation
-			// happening so we do not have to worry about AWS freezing our
-			// process. However, the thread that sees an active count of one
-			// will be the one to block waiting for the event to be sent.
-			AtomicInteger activecount = this._activecount;
-			while (activecount.get() == 1)
-				continue;
+			// Get the number of events that are waiting to be sent
+			nowactive = activecount.get();
+			
+			// Try and see if our thread will become the victim thread if
+			// events are currently being processed.
+			// The victim thread is the one which will end up waiting for the
+			// queue to empty to ensure that all events are sent. Any other
+			// threads which are not the victim thread will just return if
+			// they fail to get this lock.
+			Lock victim = this._victim;
+			if (nowactive > 0 && victim.tryLock())
+				try
+				{
+					// Wait until the queue is drained
+					while (inqueue.get() > 0)
+						continue;
+				}
+				
+				// Unlock the victim thread, another thread can claim it
+				finally
+				{
+					victim.unlock();
+				}
 		}
 	}
 }
