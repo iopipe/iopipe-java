@@ -3,6 +3,8 @@ package com.iopipe.http;
 import com.iopipe.IOpipeEventUploader;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.Deque;
+import java.util.LinkedList;
 
 /**
  * This is an event uploader which
@@ -83,8 +85,20 @@ public final class ThreadedEventUploader
 	private static final class __Runner__
 		implements Runnable
 	{
+		/** The number of uploads to batch together. */
+		private static final int _BATCH_COUNT =
+			64;
+		
+		/** The limit to the batch count. */
+		private static final int _BATCH_LIMIT =
+			_BATCH_COUNT - 1;
+		
 		/** The connection that is used. */
 		protected final RemoteConnection connection;
+		
+		/** The queue of requests, linked list has cheap queue-ness. */
+		final Deque<RemoteRequest> _queue =
+			new LinkedList();
 		
 		/** The number of bad requests. */
 		final AtomicInteger _badrequestcount =
@@ -126,7 +140,87 @@ public final class ThreadedEventUploader
 		 */
 		public final void run()
 		{
-			throw new Error("TODO");
+			AtomicInteger badrequestcount = this._badrequestcount;
+			AtomicInteger activecount = this._activecount;
+			Deque<RemoteRequest> queue = this._queue;
+			Object lastmonitor = this._lastmonitor;
+			
+			// Batch multiple requests from the queue to reduce locking that
+			// is done
+			RemoteRequest[] batch = new RemoteRequest[_BATCH_COUNT];
+			
+			// Constantly read input events
+			for (;;)
+			{
+				// The number of items which were batched, this is to prevent
+				// locking multiple times just to send one thing
+				int count = 0;
+				
+				// See if there is an event waiting in the queue
+				RemoteRequest request = null;
+__outer:
+				for (;;)
+					synchronized (queue)
+					{
+						// Try to grab as many requests from the queue as
+						// possible
+						while (count < _BATCH_LIMIT)
+						{
+							request = queue.pollFirst();
+							
+							// No more requests in the queue
+							if (request == null)
+							{
+								// There was at least one request so do not
+								// block waiting for more ever!
+								if (count > 0)
+									break __outer;
+								
+								// Wait 
+								try
+								{
+									queue.wait(100L);
+								}
+								catch (InterruptedException e)
+								{
+									// Just try again
+								}
+							}
+							
+							// Fill the request
+							else
+								batch[count++] = request;
+						}
+					}
+				
+				// Send report
+				for (int i = 0; i < count; i++)
+					try
+					{
+						// Send it
+						RemoteResult result = this.connection.send(
+							RequestType.POST, batch[i]);
+						
+						// Only the 200 range is valid for okay responses
+						int code = result.code();
+						if (!(code >= 200 && code < 300))
+							badrequestcount.getAndIncrement();
+					}
+					
+					// Failed to write to the server
+					catch (RemoteException e)
+					{
+						badrequestcount.getAndIncrement();
+					}
+				
+				// If this was the last invocation then notify the running
+				// thread that this happened
+				if (activecount.decrementAndGet() == 0)
+					synchronized (lastmonitor)
+					{
+						lastmonitor.notifyAll();
+					}
+			}
 		}
 		
 		/**
@@ -175,8 +269,16 @@ public final class ThreadedEventUploader
 				}
 			}
 			
-			if (true)
-				throw new Error("TODO");
+			// Lock on the queue
+			Deque<RemoteRequest> queue = this._queue;
+			synchronized (queue)
+			{
+				// Add the event to the queue
+				queue.addLast(__r);
+				
+				// Tell the uploader that an event is waiting if it was locked
+				queue.notify();
+			}
 			
 			// If this is the final thread then we have to wait until all the
 			// events have been drained before we continue
