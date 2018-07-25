@@ -12,22 +12,33 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 /**
- * This is an event uploader which
+ * This is an event uploader which initially acts like the serial event
+ * uploader until a concurrent execution threshold is reached where it then
+ * starts to operate using a queue.
  *
  * @since 2018/07/23
  */
 public final class ThreadedEventUploader
 	implements IOpipeEventUploader
 {
-	/** The runner thread. */
-	protected final Thread _thread;
+	/** The number of invocations before the queue is utilized. */
+	private static final int _ACTIVE_THRESHOLD =
+		8;
 	
-	/** The runner itself. */
-	protected final __Runner__ _runner;
+	/** The connection to send events through. */
+	protected final RemoteConnection connection;
+	
+	/** The number of running lambdas. */
+	final AtomicInteger _activecount =
+		new AtomicInteger();
 	
 	/** The number of bad requests. */
 	final AtomicInteger _badrequestcount =
 		new AtomicInteger();
+	
+	/** The currently active runner. */
+	final AtomicReference<__Runner__> _runner =
+		new AtomicReference<>();
 	
 	/**
 	 * Initializes the threaded event uploader.
@@ -42,16 +53,7 @@ public final class ThreadedEventUploader
 		if (__con == null)
 			throw new NullPointerException();
 		
-		// Setup runner
-		__Runner__ runner = new __Runner__(__con, this._badrequestcount);
-		
-		// Then setup the thread running that
-		Thread thread = new Thread(runner, "IOpipe-EventUploader");
-		thread.setDaemon(true);
-		thread.start();
-		
-		this._runner = runner;
-		this._thread = thread;
+		this.connection = __con;
 	}
 	
 	/**
@@ -61,7 +63,10 @@ public final class ThreadedEventUploader
 	@Override
 	public final void await()
 	{
-		this._runner.__await();
+		// Increases the number of invocations that are currently happening
+		// so that way events in the background can be sent without waiting
+		// for the request to generate a result.
+		this._activecount.getAndIncrement();
 	}
 	
 	/**
@@ -82,7 +87,108 @@ public final class ThreadedEventUploader
 	public final void upload(RemoteRequest __r)
 		throws NullPointerException
 	{
-		this._runner.__upload(__r);
+		if (__r == null)
+			throw new NullPointerException();
+		
+		// Get the number of threads running at once for even generation
+		AtomicInteger activecount = this._activecount;
+		int nowactive = activecount.get();
+		
+		// If nothing is going on then we can just send our events
+		// serially because sending it to a queue will just add latency
+		// since this thread would be waiting around anyway for the queue
+		// to be emptied
+		if (nowactive < _ACTIVE_THRESHOLD)
+		{
+			AtomicInteger badrequestcount = this._badrequestcount;
+			
+			// Just send the event serially
+			try
+			{
+				// Send it
+				RemoteResult result = this.connection.send(
+					RequestType.POST, __r);
+				
+				// Only the 200 range is valid for okay responses
+				int code = result.code();
+				if (!(code >= 200 && code < 300))
+					badrequestcount.incrementAndGet();
+			}
+			
+			// Failed to write to the server
+			catch (RemoteException e)
+			{
+				badrequestcount.incrementAndGet();
+			}
+			
+			// This thread is no longer active for an event and nothing
+			// more needs to be done
+			activecount.decrementAndGet();
+			return;
+		}
+		
+		// Many events are happening at once and we are spilling over so
+		// start a background thread on demand to send events.
+		try
+		{
+			__Runner__ runner = this.__runner();
+			if (runner != null)
+				runner.__upload(__r);
+		}
+		
+		// If thread creation fails then do not fatally crash the lambda
+		catch (RuntimeException|OutOfMemoryError e)
+		{
+		}
+	}
+	
+	/**
+	 * Returns the runner that is used for pushed queue events.
+	 *
+	 * @return The runner to use.
+	 * @since 2018/07/25
+	 */
+	private final __Runner__ __runner()
+	{
+		AtomicReference<__Runner__> ref = this._runner;
+		
+		// If the runner already exists then use that one
+		__Runner__ rv = ref.get();
+		if (rv != null)
+			return rv;
+		
+		// Setup a new runner
+		rv = new __Runner__(this.connection, this._badrequestcount, ref,
+			this._activecount);
+		
+		// Try and set the current runner to our newly created runner
+		if (ref.compareAndSet(null, rv))
+		{
+			// Need to setup a thread for the runner
+			Thread thread = new Thread(rv, "IOpipe-EventUploader");
+			thread.setDaemon(true);
+			
+			// Try to set the thread to max priority so that it executes
+			// sooner rather than later since we really want those events to
+			// be flushed
+			try
+			{
+				thread.setPriority(Thread.MAX_PRIORITY);
+			}
+			catch (SecurityException e)
+			{
+				// Failed to do that, it is desired but it is not required
+			}
+			
+			// Start it
+			thread.start();
+			
+			// Use our new runner since we got it in
+			return rv;
+		}
+		
+		// Another thread got a runner created so we will be using that one
+		return ref.get();
 	}
 	
 	/**
@@ -94,9 +200,13 @@ public final class ThreadedEventUploader
 	private static final class __Runner__
 		implements Runnable
 	{
-		/** The number of invocations before the queue is utilized. */
-		private static final int _ACTIVE_THRESHOLD =
-			8;
+		/** The number of nanoseconds to wait for events on. */
+		private static final long _REST_DURATION =
+			500_000_000L;
+		
+		/** The number of nanoseconds to wait until we time out and stop. */
+		private static final long _TIMEOUT_WAIT =
+			_REST_DURATION * 10;
 		
 		/** The number of uploads to batch together. */
 		private static final int _BATCH_COUNT =
@@ -113,9 +223,11 @@ public final class ThreadedEventUploader
 		final Queue<RemoteRequest> _queue =
 			new ConcurrentLinkedQueue<>();
 		
-		/** The number of running lambdas. */
-		final AtomicInteger _activecount =
-			new AtomicInteger();
+		/** Atomic runner reference, used to clear the runner on timeout. */
+		final AtomicReference<__Runner__> _runner;
+		
+		/** The number of requests active at once. */
+		final AtomicInteger _activecount;
 		
 		/** The number of bad requests. */
 		final AtomicInteger _badrequestcount;
@@ -141,16 +253,21 @@ public final class ThreadedEventUploader
 		 *
 		 * @param __con The connection used.
 		 * @param __bcr The counter for bad requests.
+		 * @param __r Our own runner reference.
+		 * @param __ac The number of events that are active at once.
 		 * @throws NullPointerException On null arguments.
 		 * @since 2018/07/23
 		 */
-		private __Runner__(RemoteConnection __con, AtomicInteger __brc)
+		private __Runner__(RemoteConnection __con, AtomicInteger __brc,
+			AtomicReference<__Runner__> __r, AtomicInteger __ac)
 		{
-			if (__con == null || __brc == null)
+			if (__con == null || __brc == null || __r == null || __ac == null)
 				throw new NullPointerException();
 			
 			this.connection = __con;
 			this._badrequestcount = __brc;
+			this._runner = __r;
+			this._activecount = __ac;
 		}
 		
 		/**
@@ -171,6 +288,9 @@ public final class ThreadedEventUploader
 			// is done
 			RemoteRequest[] batch = new RemoteRequest[_BATCH_COUNT];
 			
+			// This is used to detect timeout
+			long timeout = System.currentTimeMillis() + _TIMEOUT_WAIT;
+			
 			// Constantly read input events
 			for (;;)
 			{
@@ -181,6 +301,19 @@ public final class ThreadedEventUploader
 				// The queue is empty so just wait until it fills again
 				if (awaiting == 0)
 				{
+					// We just timed out with no events
+					if (System.currentTimeMillis() >= timeout)
+					{
+						// Only clear the runner if the runner used is this
+						// instance. This is to ensure that if there are ever
+						// two active runners at once that one does not clear
+						// the other.
+						this._runner.compareAndSet(this, null);
+						
+						// This terminates and stops the thread
+						return;
+					}
+					
 					queuelock.lock();
 					try
 					{
@@ -249,19 +382,11 @@ public final class ThreadedEventUploader
 				// were sent, this is used by the victim thread to stop
 				// blocking
 				activecount.getAndAdd(-awaiting);
+				
+				// Set new timeout so the thread stays alive for a short
+				// duration after events have occurred
+				timeout = System.currentTimeMillis() + _TIMEOUT_WAIT;
 			}
-		}
-		
-		/**
-		 * Increases the number of invocations that are currently happening
-		 * so that way events in the background can be sent without waiting
-		 * for the request to generate a result.
-		 *
-		 * @since 2018/07/23
-		 */
-		public final void __await()
-		{
-			this._activecount.getAndIncrement();
 		}
 		
 		/**
@@ -278,43 +403,6 @@ public final class ThreadedEventUploader
 		{
 			if (__r == null)
 				throw new NullPointerException();
-			
-			// Get the number of threads running at once for even generation
-			AtomicInteger activecount = this._activecount;
-			int nowactive = activecount.get();
-			
-			// If nothing is going on then we can just send our events
-			// serially because sending it to a queue will just add latency
-			// since this thread would be waiting around anyway for the queue
-			// to be emptied
-			if (nowactive < _ACTIVE_THRESHOLD)
-			{
-				AtomicInteger badrequestcount = this._badrequestcount;
-				
-				// Just send the event serially
-				try
-				{
-					// Send it
-					RemoteResult result = this.connection.send(
-						RequestType.POST, __r);
-					
-					// Only the 200 range is valid for okay responses
-					int code = result.code();
-					if (!(code >= 200 && code < 300))
-						badrequestcount.incrementAndGet();
-				}
-				
-				// Failed to write to the server
-				catch (RemoteException e)
-				{
-					badrequestcount.incrementAndGet();
-				}
-				
-				// This thread is no longer active for an event and nothing
-				// more needs to be done
-				activecount.decrementAndGet();
-				return;
-			}
 			
 			// There are too many threads that are running, so spill over these
 			// events to the queue to be sent via another thread so we can
@@ -341,7 +429,8 @@ public final class ThreadedEventUploader
 			}
 			
 			// Get the number of events that are waiting to be sent
-			nowactive = activecount.get();
+			AtomicInteger activecount = this._activecount;
+			int nowactive = activecount.get();
 			
 			// Try and see if our thread will become the victim thread if
 			// events are currently being processed.
