@@ -131,6 +131,10 @@ public final class ThreadStatistics
 			long id = tids[i];
 			ThreadInfo info = __bean.getThreadInfo(id);
 			
+			// No information on the thread, ignore
+			if (info == null)
+				continue;
+			
 			// These might not be supported
 			long cputime = -1;
 			try
