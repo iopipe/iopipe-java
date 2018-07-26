@@ -625,10 +625,10 @@ public final class StandardPushEvent
 	public static final class Disk
 	{
 		/** Total MiB. */
-		public final long totalmib;
+		public final double totalmib;
 		
 		/** Used MiB. */
-		public final long usedmib;
+		public final double usedmib;
 		
 		/** Used percentage. */
 		public final double usedpercentage;
@@ -641,7 +641,7 @@ public final class StandardPushEvent
 		 * @param __usedpercentage Used percentage.
 		 * @since 2018/07/13
 		 */
-		public Disk(long __totalmib, long __usedmib, double __usedpercentage)
+		public Disk(double __totalmib, double __usedmib, double __usedpercentage)
 		{
 			this.totalmib = __totalmib;
 			this.usedmib = __usedmib;
@@ -661,8 +661,8 @@ public final class StandardPushEvent
 			if (__data == null)
 				throw new NullPointerException();
 			
-			long totalmib = -1;
-			long usedmib = -1;
+			double totalmib = Double.NaN;
+			double usedmib = Double.NaN;
 			double usedpercentage = Double.NaN;
 			
 			for (Map.Entry<String, JsonValue> e : __data.entrySet())
@@ -673,11 +673,11 @@ public final class StandardPushEvent
 				switch ((k = e.getKey()))
 				{
 					case "totalMiB":
-						totalmib = ((JsonNumber)v).longValue();
+						totalmib = ((JsonNumber)v).doubleValue();
 						break;
 					
 					case "usedMiB":
-						usedmib = ((JsonNumber)v).longValue();
+						usedmib = ((JsonNumber)v).doubleValue();
 						break;
 					
 					case "usedPercentage":
