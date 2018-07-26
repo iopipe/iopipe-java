@@ -215,6 +215,21 @@ take precedence when available.
    * If set to `false` then the plugin will be disabled.
    * If this is not set for a plugin then it will use the setting from the
      plugin if it should be enabled by default or not.
+ * `com.iopipe.publishmethod` or `IOPIPE_PUBLISH_METHOD`
+   * Determines how IOpipe events are to be published to the IOpipe service.
+   * If set to `serial` after an event is generated it will be sent to IOpipe
+     and execution will block until a response is returned.
+   * If set to `threaded`, for a low number of concurrent invocations this will
+     act the same as `serial`. However when there are more concurrent
+     invocations a background thread will send events to IOpipe.
+     * While the event queue is filled, one thread will wait until the queue
+       is emptied while the others are allowed to return. This should ensure
+       that events are sent to IOpipe while other threads can return to the
+       user more quickly.
+   * If not set, this defaults to `threaded`.
+ * `com.iopipe.threadedpublishthreshold` or `IOPIPE_THREADED_PUBLISH_THRESHOLD`
+   * If this set then the threaded publisher will allow this many concurrent
+     invocations to occur at once before switching to a background thread.
 
 Log4j2 is used for debugging output and it can be configured via environment
 variable. Information on its configuration is at:
