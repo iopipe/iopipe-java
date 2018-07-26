@@ -47,6 +47,10 @@ public class IOpipeConfigurationBuilder
 	volatile PublishMethod _publishmethod =
 		PublishMethod._DEFAULT;
 	
+	/** The threshold for the threaded serial to background. */
+	volatile int _threadedthreshold =
+		8;
+	
 	/**
 	 * Initializes the builder with uninitialized values.
 	 *
@@ -79,6 +83,7 @@ public class IOpipeConfigurationBuilder
 		this._profilerurl = __c.getProfilerUrl();
 		this._localcoldstart = __c.getUseLocalColdStart();
 		this._publishmethod = __c.getPublishMethod();
+		this._threadedthreshold = __c.getThreadedPublishThreshold();
 	}
 	
 	/**
@@ -206,6 +211,19 @@ public class IOpipeConfigurationBuilder
 	public final void setServiceUrl(String __u)
 	{
 		this._serviceurl = __u;
+	}
+	
+	/**
+	 * For the threaded event publisher this sets the threshold of how many
+	 * invocations can run at once before it switches from serial to a
+	 * background publisher.
+	 *
+	 * @param __t The threshold.
+	 * @since 2018/07/25
+	 */
+	public final void setThreadedPublishThreshold(int __t)
+	{
+		this._threadedthreshold = Math.max(1, __t);
 	}
 	
 	/**

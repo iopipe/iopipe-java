@@ -124,6 +124,9 @@ public final class IOpipeConfiguration
 	/** The method to use when publishing events to the service. */
 	protected final PublishMethod publishmethod;
 	
+	/** Number of concurrent invocations before using a background thread. */
+	protected final int threadedthreshold;
+	
 	/** The state of plugins. */
 	private final Map<String, Boolean> _pluginstate =
 		new TreeMap<>(_PLUGIN_COMPARATOR);
@@ -229,6 +232,8 @@ public final class IOpipeConfiguration
 			this.profilerurl = profilerurl;
 		
 		this.localcoldstart = __builder._localcoldstart;
+		this.threadedthreshold = Math.max(1, __builder._threadedthreshold);
+		
 		this._pluginstate.putAll(__builder._pluginstate);
 	}
 	
@@ -255,7 +260,8 @@ public final class IOpipeConfiguration
 			Objects.equals(this.serviceurl, o.serviceurl) &&
 			Objects.equals(this.profilerurl, o.profilerurl) &&
 			this.localcoldstart == o.localcoldstart &&
-			Objects.equals(this.publishmethod, o.publishmethod);
+			Objects.equals(this.publishmethod, o.publishmethod) &&
+			this.threadedthreshold == o.threadedthreshold;
 	}
 	
 	/**
@@ -326,6 +332,19 @@ public final class IOpipeConfiguration
 	}
 	
 	/**
+	 * When using the threaded publisher, this value determines the threshold
+	 * for the number of concurrent invocations must be happening at once
+	 * before a background thread is used.
+	 *
+	 * @return The threshold.
+	 * @since 2018/07/25
+	 */
+	public final int getThreadedPublishThreshold()
+	{
+		return this.threadedthreshold;
+	}
+	
+	/**
 	 * Returns the timeout window in milliseconds.
 	 *
 	 * @return The timeout window in milliseconds, if the return value is
@@ -370,7 +389,8 @@ public final class IOpipeConfiguration
 			Objects.hashCode(this.serviceurl) ^
 			Objects.hashCode(this.profilerurl) ^
 			Boolean.hashCode(this.localcoldstart) ^
-			Objects.hashCode(this.publishmethod);
+			Objects.hashCode(this.publishmethod) ^
+			this.threadedthreshold;
 	}
 	
 	/**
@@ -424,12 +444,14 @@ public final class IOpipeConfiguration
 					"connectionfactory=%s, timeoutwindow=%d, " +
 					"installmethod=%s, " +
 					"pluginstate=%s, serviceurl=%s, profilerurl=%s, " +
-					"localcoldstart=%b, publishmethod=%s}",
+					"localcoldstart=%b, publishmethod=%s, " +
+					"threadedthreshold=%d}",
 					this.enabled,
 					this.token, this.connectionfactory, this.timeoutwindow,
 					this.installmethod,
 					this._pluginstate, this.serviceurl, this.profilerurl,
-					this.localcoldstart, this.publishmethod)));
+					this.localcoldstart, this.publishmethod,
+					this.threadedthreshold)));
 		
 		return rv;
 	}
@@ -488,6 +510,18 @@ public final class IOpipeConfiguration
 				catch (IllegalArgumentException e)
 				{
 				}
+			
+			// The threshold before the threaded publisher switches from
+			// serial to a background thread
+			try
+			{
+				rv.setThreadedPublishThreshold(Integer.valueOf(
+					System.getProperty("com.iopipe.threadedpublishthreshold",
+					System.getenv("IOPIPE_THREADED_PUBLISH_THRESHOLD"))));
+			}
+			catch (NumberFormatException e)
+			{
+			}
 			
 			// Go through system properties to get the enabled state of
 			// plugins

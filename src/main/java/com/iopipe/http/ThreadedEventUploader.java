@@ -21,9 +21,8 @@ import java.util.Queue;
 public final class ThreadedEventUploader
 	implements IOpipeEventUploader
 {
-	/** The number of invocations before the queue is utilized. */
-	private static final int _ACTIVE_THRESHOLD =
-		8;
+	/** The threshold before switching from serial to background thread. */
+	protected final int threshold;
 	
 	/** The connection to send events through. */
 	protected final RemoteConnection connection;
@@ -44,16 +43,18 @@ public final class ThreadedEventUploader
 	 * Initializes the threaded event uploader.
 	 *
 	 * @param __con The connection to use.
+	 * @param __t The threshold to use before switching to a background thread.
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/07/23
 	 */
-	public ThreadedEventUploader(RemoteConnection __con)
+	public ThreadedEventUploader(RemoteConnection __con, int __t)
 		throws NullPointerException
 	{
 		if (__con == null)
 			throw new NullPointerException();
 		
 		this.connection = __con;
+		this.threshold = Math.max(1, __t);
 	}
 	
 	/**
@@ -98,7 +99,7 @@ public final class ThreadedEventUploader
 		// serially because sending it to a queue will just add latency
 		// since this thread would be waiting around anyway for the queue
 		// to be emptied
-		if (nowactive < _ACTIVE_THRESHOLD)
+		if (nowactive < this.threshold)
 		{
 			AtomicInteger badrequestcount = this._badrequestcount;
 			

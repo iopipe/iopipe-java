@@ -139,7 +139,8 @@ public final class IOpipeService
 			switch (__config.getPublishMethod())
 			{
 				case THREADED:
-					uploader = new ThreadedEventUploader(connection);
+					uploader = new ThreadedEventUploader(connection,
+						__config.getThreadedPublishThreshold());
 					break;
 				
 				case SERIAL:
