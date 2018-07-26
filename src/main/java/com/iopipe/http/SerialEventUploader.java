@@ -78,9 +78,6 @@ public final class SerialEventUploader
 		// Generate report
 		try
 		{
-			// Report what is to be sent
-			_LOGGER.debug(() -> "Send: " + __r + " " + __debugBody(__r));
-			
 			RemoteResult result = this.connection.send(RequestType.POST, __r);
 			
 			// Only the 200 range is valid for okay responses
@@ -93,11 +90,6 @@ public final class SerialEventUploader
 				_LOGGER.error(() -> "Recv: " + result + " " +
 					__debugBody(result));
 			}
-			
-			// Debug log successful requests
-			else
-				_LOGGER.debug(() -> "Recv: " + result + " " +
-					__debugBody(result));
 		}
 		
 		// Failed to write to the server
@@ -116,7 +108,7 @@ public final class SerialEventUploader
 	 * @return The string result.
 	 * @since 2018/02/24
 	 */
-	private static final String __debugBody(RemoteBody __b)
+	static final String __debugBody(RemoteBody __b)
 	{
 		try
 		{

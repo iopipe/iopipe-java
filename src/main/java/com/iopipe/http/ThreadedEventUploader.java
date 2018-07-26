@@ -10,6 +10,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.Queue;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * This is an event uploader which initially acts like the serial event
@@ -21,6 +23,10 @@ import java.util.Queue;
 public final class ThreadedEventUploader
 	implements IOpipeEventUploader
 {
+	/** Logging. */
+	private static final Logger _LOGGER =
+		LogManager.getLogger(ThreadedEventUploader.class);
+	
 	/** The threshold before switching from serial to background thread. */
 	protected final int threshold;
 	
@@ -113,13 +119,21 @@ public final class ThreadedEventUploader
 				// Only the 200 range is valid for okay responses
 				int code = result.code();
 				if (!(code >= 200 && code < 300))
+				{
 					badrequestcount.incrementAndGet();
+				
+					// Emit errors for failed requests
+					_LOGGER.error(() -> "Recv: " + result + " " +
+						SerialEventUploader.__debugBody(result));
+				}
 			}
 			
 			// Failed to write to the server
 			catch (RemoteException e)
 			{
 				badrequestcount.incrementAndGet();
+				
+				_LOGGER.error("Could not sent request to server.", e);
 			}
 			
 			// This thread is no longer active for an event and nothing
@@ -366,13 +380,21 @@ public final class ThreadedEventUploader
 						// Only the 200 range is valid for okay responses
 						int code = result.code();
 						if (!(code >= 200 && code < 300))
+						{
 							badcount++;
+							
+							// Emit errors for failed requests
+							_LOGGER.error(() -> "Recv: " + result + " " +
+								SerialEventUploader.__debugBody(result));
+						}
 					}
 					
 					// Failed to write to the server
 					catch (RemoteException e)
 					{
 						badcount++;
+						
+						_LOGGER.error("Could not sent request to server.", e);
 					}
 				
 				// Add to the request count all at once since it is faster
