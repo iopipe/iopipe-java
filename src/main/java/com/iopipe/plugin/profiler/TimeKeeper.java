@@ -1,5 +1,7 @@
 package com.iopipe.plugin.profiler;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 /**
  * This keeps track of the various times.
  *
@@ -8,10 +10,12 @@ package com.iopipe.plugin.profiler;
 public final class TimeKeeper
 {
 	/** Absolute time. */
-	private volatile long _abs;
+	private final AtomicLong _abs =
+		new AtomicLong();
 	
 	/** Time spent at the top of the stack. */
-	private volatile long _self;
+	private final AtomicLong _self =
+		new AtomicLong();
 	
 	/**
 	 * Returns the absolute time.
@@ -21,7 +25,7 @@ public final class TimeKeeper
 	 */
 	public final long absolute()
 	{
-		return this._abs;
+		return this._abs.get();
 	}
 	
 	/**
@@ -33,9 +37,9 @@ public final class TimeKeeper
 	 */
 	public final void addTime(boolean __self, long __v)
 	{
-		this._abs += __v;
+		this._abs.getAndAdd(__v);
 		if (__self)
-			this._self += __v;
+			this._self.getAndAdd(__v);
 	}
 	
 	/**
@@ -46,6 +50,6 @@ public final class TimeKeeper
 	 */
 	public final long self()
 	{
-		return this._self;
+		return this._self.get();
 	}
 }

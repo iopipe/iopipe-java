@@ -40,7 +40,7 @@ public final class EventInfoDecoders
 		new LinkedHashMap<>();
 	
 	/** Cache of classes that have been registered for type lookup. */
-	private volatile Class<?>[] _classes =
+	private Class<?>[] _classes =
 		new Class<?>[0];
 	
 	/**

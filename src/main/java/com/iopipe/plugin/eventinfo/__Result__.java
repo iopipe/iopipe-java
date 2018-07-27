@@ -11,10 +11,10 @@ import com.iopipe.CustomMetric;
 final class __Result__
 {
 	/** The decoder information, needed for event info. */
-	final EventInfoDecoder _decoder;
+	public final EventInfoDecoder _decoder;
 	
 	/** Custom metrics. */
-	final CustomMetric[] _metrics;
+	public final CustomMetric[] _metrics;
 	
 	/**
 	 * Initializes the result.

@@ -17,6 +17,7 @@ import java.io.Closeable;
 import java.io.PrintStream;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.HashMap;
@@ -79,10 +80,12 @@ public final class IOpipeService
 	final __Plugins__ _plugins;
 	
 	/** The number of times this context has been executed. */
-	private volatile int _execcount;
+	private final AtomicInteger _execcount =
+		new AtomicInteger();
 	
 	/** The number of times the server replied with a code other than 2xx. */
-	private volatile int _badresultcount;
+	private final AtomicInteger _badresultcount =
+		new AtomicInteger();
 	
 	/**
 	 * Initializes the service using the default configuration.
@@ -163,7 +166,7 @@ public final class IOpipeService
 	 */
 	public final int getBadResultCount()
 	{
-		return this._badresultcount;
+		return this._badresultcount.get();
 	}
 	
 	/**
@@ -219,7 +222,7 @@ public final class IOpipeService
 		if (__context == null || __func == null)
 			throw new NullPointerException();
 		
-		int execcount = ++this._execcount;
+		int execcount = this._execcount.incrementAndGet();
 		
 		// Create thread group so it is known which threads are part of this
 		// execution and not other executions
@@ -228,10 +231,13 @@ public final class IOpipeService
 			Thread.currentThread().getThreadGroup() :
 			new ThreadGroup(String.format("IOpipe-execution-%08d",
 				System.identityHashCode(__context))));
+				
+		// Is this coldstarted?
+		boolean coldstarted = !this._coldstartflag.getAndSet(true);
 		
 		// Setup execution information
 		long nowtime = System.currentTimeMillis();
-		IOpipeMeasurement measurement = new IOpipeMeasurement();
+		IOpipeMeasurement measurement = new IOpipeMeasurement(coldstarted);
 		IOpipeExecution exec = new IOpipeExecution(this, config, __context,
 			measurement, threadgroup, nowtime, __input);
 		
@@ -241,16 +247,12 @@ public final class IOpipeService
 		{
 			// Disabled lambdas could still rely on measurements, despite them
 			// not doing anything useful at all
-			this._badresultcount++;
+			this._badresultcount.incrementAndGet();
 			return __func.apply(exec);
 		}
 		
 		_LOGGER.debug(() -> String.format("Invoking context %08x",
 			System.identityHashCode(__context)));
-		
-		// Is this coldstarted?
-		boolean coldstarted = !this._coldstartflag.getAndSet(true);
-		measurement.__setColdStart(coldstarted);
 		
 		// Add auto-label for coldstart
 		if (coldstarted)
@@ -326,13 +328,14 @@ public final class IOpipeService
 		
 		// Throw the called exception as if the wrapper did not have any
 		// trouble
-		Throwable rt = runner._thrownexception;
+		__Result__<R> result = runner._result;
+		Throwable rt = result.thrown;
 		if (rt != null)
 			if (rt instanceof Error)
 				throw (Error)rt;
 			else
 				throw (RuntimeException)rt;
-		return runner._returnvalue;
+		return result.value;
 	}
 	
 	/**
@@ -361,7 +364,7 @@ public final class IOpipeService
 			int code = result.code();
 			if (!(code >= 200 && code < 300))
 			{
-				this._badresultcount++;
+				this._badresultcount.incrementAndGet();
 				
 				// Emit errors for failed requests
 				_LOGGER.error(() -> "Recv: " + result + " " +
@@ -381,7 +384,7 @@ public final class IOpipeService
 		{
 			_LOGGER.error("Could not sent request to server.", e);
 			
-			this._badresultcount++;
+			this._badresultcount.incrementAndGet();
 			return new RemoteResult(503, RemoteBody.MIMETYPE_JSON, "");
 		}
 	}
@@ -427,6 +430,45 @@ public final class IOpipeService
 	}
 	
 	/**
+	 * The result of an execution.
+	 *
+	 * @param <R> The type of value to return.
+	 * @since 2018/07/27
+	 */
+	private static final class __Result__<R>
+	{
+		/** Exception that was thrown. */
+		public final Throwable thrown;
+		
+		/** The return value. */
+		public final R value;
+		
+		/**
+		 * Initializes the result.
+		 *
+		 * @param __v The value.
+		 * @since 2018/07/27
+		 */
+		__Result__(R __v)
+		{
+			this.thrown = null;
+			this.value = __v;
+		}
+		
+		/**
+		 * Initializes the exception.
+		 *
+		 * @param __t The thrown exception
+		 * @since 2018/07/27
+		 */
+		__Result__(Throwable __t)
+		{
+			this.thrown = __t;
+			this.value = null;
+		}
+	}
+	
+	/**
 	 * Runs the thread and logs execution time and any exceptions.
 	 *
 	 * @param <R> The type of value to return.
@@ -441,11 +483,8 @@ public final class IOpipeService
 		/** The function to execute. */
 		protected final Function<IOpipeExecution, R> function;
 		
-		/** The return value. */
-		volatile R _returnvalue;
-		
-		/** Exception which has been thrown. */
-		volatile Throwable _thrownexception;
+		/** The result of the call. */
+		volatile __Result__<R> _result;
 		
 		/**
 		 * Initializes the runner.
@@ -477,22 +516,30 @@ public final class IOpipeService
 			
 			// Keep track of execution time
 			long ticker = System.nanoTime();
+			__Result__ result = null;
 			try
 			{
-				this._returnvalue = this.function.apply(exec);
+				result = new __Result__(this.function.apply(exec));
 			}
 			
 			// An exception or error was thrown, so that will be reported
 			// Error is very fatal, but still report that it occured
 			catch (RuntimeException|Error e)
 			{
-				this._thrownexception = e;
+				result = new __Result__(e);
+				
 				measurement.__setThrown(e);
 				measurement.addLabel("@iopipe/error");
 			}
 			
 			// Count how long execution has taken
-			measurement.__setDuration(System.nanoTime() - ticker);
+			finally
+			{
+				measurement.__setDuration(System.nanoTime() - ticker);
+			}
+			
+			// Store the result
+			this._result = result;
 		}
 	}
 }

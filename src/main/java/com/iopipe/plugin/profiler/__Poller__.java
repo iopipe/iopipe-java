@@ -1,5 +1,7 @@
 package com.iopipe.plugin.profiler;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * This class polls a thread group
  *
@@ -15,7 +17,8 @@ final class __Poller__
 	protected final ThreadGroup group;
 	
 	/** Should execution stop? */
-	volatile boolean _stop;
+	final AtomicBoolean _stop =
+		new AtomicBoolean();
 	
 	/**
 	 * Initializes the thread poller.
@@ -44,6 +47,7 @@ final class __Poller__
 	{
 		ThreadGroup group = this.group;
 		Tracker tracker = this.tracker;
+		AtomicBoolean stop = this._stop;
 		
 		// Used as temporary storage for active thread enumeration
 		Thread[] threads = new Thread[1];
@@ -71,7 +75,7 @@ final class __Poller__
 				}
 			
 			// Stop polling?
-			if (this._stop)
+			if (stop.get())
 				break;
 			
 			// Calculate how long the method has been running, this is used

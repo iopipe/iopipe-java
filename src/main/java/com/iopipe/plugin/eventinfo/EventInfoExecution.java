@@ -53,39 +53,28 @@ public class EventInfoExecution
 	{
 		AtomicReference<__Result__> result = this._result;
 		
-		// Try to get the object before locking on it
-		__Result__ post = result.get();
-		if (post == null)
-			synchronized (result)
-			{
-				// After lock, try to get it again
-				post = result.get();
-				if (post == null)
-				{
-					// Wait for a short duration and give the report thread
-					// a final chance to complete decoding
-					try
-					{
-						result.wait(20L);
-					}
-					catch (InterruptedException e)
-					{
-					}
-					
-					// Just implicitely get it
-					post = result.get();
-				}
-			}
+		// Event info decoding should be very simple and there is really no
+		// need to wait on a lock. When the event executes this information
+		// should quickly be made available anyway.
+		__Result__ post;
+		while ((post = result.get()) == null)
+			continue;
 		
 		// No object was returned so do nothing
 		if (post == null)
 			return;
 		
+		// No metrics or decoder exists
+		EventInfoDecoder decoder = post._decoder;
+		CustomMetric[] metrics = post._metrics;
+		if (decoder == null || metrics == null)
+			return;
+		
 		// Add all custom metrics
 		IOpipeExecution execution = this.execution;
-		execution.measurement().addCustomMetrics(post._metrics);
+		execution.measurement().addCustomMetrics(metrics);
 		execution.label("@iopipe/plugin-event-info");
-		execution.label("@iopipe/" + post._decoder.slugifiedEventType());
+		execution.label("@iopipe/" + decoder.slugifiedEventType());
 	}
 	
 	/**
@@ -155,22 +144,27 @@ public class EventInfoExecution
 		@Override
 		public final void run()
 		{
+			EventInfoDecoder[] decoder;
+			CustomMetric[] metrics;
+			
 			// Determine the custom metrics to use for the event
-			EventInfoDecoder[] decoder = new EventInfoDecoder[1];
-			CustomMetric[] metrics = this.decoders.decode(this.object,
-				decoder);
-			if (metrics == null)
-				metrics = new CustomMetric[0];
-			
-			// Store result
 			AtomicReference<__Result__> result = this.result;
-			result.set(new __Result__(decoder[0], metrics));
-			
-			// Notify any threads that are waiting on this thread that a
-			// result was just made available
-			synchronized (result)
+			try
 			{
-				result.notify();
+				decoder = new EventInfoDecoder[1];
+				metrics = this.decoders.decode(this.object, decoder);
+				if (metrics == null)
+					metrics = new CustomMetric[0];
+				
+				// Store result
+				result.set(new __Result__(decoder[0], metrics));
+			}
+			
+			// Failed to decode so since the one CPU is burning up, we need
+			// to set some result
+			catch (Throwable t)
+			{
+				result.set(new __Result__(null, null));
 			}
 		}
 	}

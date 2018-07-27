@@ -126,7 +126,7 @@ public final class IOpipeConfiguration
 		new TreeMap<>(_PLUGIN_COMPARATOR);
 	
 	/** String representation. */
-	private volatile Reference<String> _string;
+	private Reference<String> _string;
 	
 	/**
 	 * Initializes the default configuration.

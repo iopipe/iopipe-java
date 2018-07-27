@@ -17,7 +17,7 @@ public final class RemoteResult
 	protected final int code;
 	
 	/** String representation. */
-	private volatile Reference<String> _string;
+	private Reference<String> _string;
 	
 	/**
 	 * Initializes the request with the given data.

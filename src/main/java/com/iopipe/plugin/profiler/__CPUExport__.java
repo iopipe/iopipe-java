@@ -279,10 +279,10 @@ final class __CPUExport__
 			new HashMap<>();
 		
 		/** Current write pointer (for narrow compact data). */
-		private volatile int _narrowp;
+		private int _narrowp;
 		
 		/** Current write pointer (for wide compact data). */
-		private volatile int _widep;
+		private int _widep;
 		
 		/**
 		 * Returns the approximated maximum compact data size.
