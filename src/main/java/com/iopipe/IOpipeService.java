@@ -231,10 +231,13 @@ public final class IOpipeService
 			Thread.currentThread().getThreadGroup() :
 			new ThreadGroup(String.format("IOpipe-execution-%08d",
 				System.identityHashCode(__context))));
+				
+		// Is this coldstarted?
+		boolean coldstarted = !this._coldstartflag.getAndSet(true);
 		
 		// Setup execution information
 		long nowtime = System.currentTimeMillis();
-		IOpipeMeasurement measurement = new IOpipeMeasurement();
+		IOpipeMeasurement measurement = new IOpipeMeasurement(coldstarted);
 		IOpipeExecution exec = new IOpipeExecution(this, config, __context,
 			measurement, threadgroup, nowtime, __input);
 		
@@ -250,10 +253,6 @@ public final class IOpipeService
 		
 		_LOGGER.debug(() -> String.format("Invoking context %08x",
 			System.identityHashCode(__context)));
-		
-		// Is this coldstarted?
-		boolean coldstarted = !this._coldstartflag.getAndSet(true);
-		measurement.__setColdStart(coldstarted);
 		
 		// Add auto-label for coldstart
 		if (coldstarted)

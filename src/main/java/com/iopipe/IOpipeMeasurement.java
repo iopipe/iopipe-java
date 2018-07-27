@@ -12,6 +12,9 @@ import java.util.TreeSet;
  */
 public final class IOpipeMeasurement
 {
+	/** Is this execution one which is a cold start? */
+	private final boolean coldstart;
+	
 	/**
 	 * Performance entries which have been added to the measurement, this
 	 * field is locked since multiple threads may be adding entries.
@@ -34,16 +37,15 @@ public final class IOpipeMeasurement
 	private volatile long _duration =
 		Long.MIN_VALUE;
 
-	/** Is this execution one which is a cold start? */
-	private volatile boolean _coldstart;
-
 	/**
 	 * Initializes the measurement holder.
 	 *
+	 * @param __cs Has this been coldstarted?
 	 * @since 2018/03/15
 	 */
-	IOpipeMeasurement()
+	IOpipeMeasurement(boolean __cs)
 	{
+		this.coldstart = __cs;
 	}
 	
 	/**
@@ -268,20 +270,7 @@ public final class IOpipeMeasurement
 	 */
 	public boolean isColdStarted()
 	{
-		return this._coldstart;
-	}
-
-	/**
-	 * Sets whether or not the execution was a cold start. A cold start
-	 * indicates that the JVM was started fresh and a previous instance is not
-	 * being reused.
-	 *
-	 * @param __cold If {@code true} then the execution follows a cold start.
-	 * @since 2017/12/20
-	 */
-	void __setColdStart(boolean __cold)
-	{
-		this._coldstart = __cold;
+		return this.coldstart;
 	}
 
 	/**
