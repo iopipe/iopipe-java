@@ -29,7 +29,7 @@ public final class CustomMetric
 	protected final boolean haslong;
 	
 	/** String representation. */
-	private volatile Reference<String> _string;
+	private Reference<String> _string;
 	
 	/**
 	 * Initializes the custom metric with a string value.

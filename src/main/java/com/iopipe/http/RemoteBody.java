@@ -28,16 +28,16 @@ public abstract class RemoteBody
 	private final byte[] _body;
 	
 	/** String representation of the body. */
-	private volatile Reference<String> _string;
+	private Reference<String> _string;
 	
 	/** JSON representation of the body. */
-	private volatile Reference<JsonStructure> _json;
+	private Reference<JsonStructure> _json;
 	
 	/** toString() representation. */
-	private volatile Reference<String> _tostring;
+	private Reference<String> _tostring;
 	
 	/** Hash code for this body. */
-	private volatile int _hash;
+	private int _hash;
 	
 	/**
 	 * Initializes the body with the given data.
