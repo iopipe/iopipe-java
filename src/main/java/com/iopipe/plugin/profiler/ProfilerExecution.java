@@ -86,11 +86,11 @@ public class ProfilerExecution
 	/** Access token for the uploaded data. */
 	private volatile String _jwtaccesstoken;
 	
-	/** The tread which is pollng for profiling. */
-	private volatile Thread _pollthread;
+	/** The tread which is pollng for profiling (only in lambda thread). */
+	private Thread _pollthread;
 	
-	/** The poller for execution. */
-	private volatile __Poller__ _poller;
+	/** The poller for execution (only in lambda thread). */
+	private __Poller__ _poller;
 	
 	/** Initial statistics when the plugin is initialized. */
 	private ManagementStatistics _beginstats;
