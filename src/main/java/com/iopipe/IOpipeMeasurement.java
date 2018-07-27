@@ -1,6 +1,8 @@
 package com.iopipe;
 
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.TreeSet;
@@ -31,11 +33,12 @@ public final class IOpipeMeasurement
 		new LinkedHashSet<>();
 	
 	/** The exception which may have been thrown. */
-	private volatile Throwable _thrown;
+	private final AtomicReference<Throwable> _thrown =
+		new AtomicReference<>();
 
 	/** The duration of execution in nanoseconds. */
-	private volatile long _duration =
-		Long.MIN_VALUE;
+	private final AtomicLong _duration =
+		new AtomicLong(Long.MIN_VALUE);
 
 	/**
 	 * Initializes the measurement holder.
@@ -215,7 +218,7 @@ public final class IOpipeMeasurement
 	 */
 	public long getDuration()
 	{
-		return this._duration;
+		return this._duration.get();
 	}
 	
 	/**
@@ -259,7 +262,7 @@ public final class IOpipeMeasurement
 	 */
 	public Throwable getThrown()
 	{
-		return this._thrown;
+		return this._thrown.get();
 	}
 	
 	/**
@@ -276,22 +279,23 @@ public final class IOpipeMeasurement
 	/**
 	 * Sets the duration of execution.
 	 *
-	 * @param __ns The execution duration in nanoseconds.
+	 * @param __ns The execution duration in nanoseconds, this may only be set
+	 * once.
 	 * @since 2017/12/15
 	 */
 	void __setDuration(long __ns)
 	{
-		this._duration = __ns;
+		this._duration.compareAndSet(Long.MIN_VALUE, __ns);
 	}
 
 	/**
 	 * Sets the throwable generated during execution.
 	 *
-	 * @param __t The generated throwable.
+	 * @param __t The generated throwable, this may only be set once.
 	 * @since 2017/12/15
 	 */
 	void __setThrown(Throwable __t)
 	{
-		this._thrown = __t;
+		this._thrown.compareAndSet(null, __t);
 	}
 }
