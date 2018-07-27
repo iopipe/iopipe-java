@@ -184,7 +184,7 @@ public class ProfilerExecution
 		
 		// Tell the poller to stop and interrupt it so it wakes up from any
 		// sleep state
-		this._poller._stop = true;
+		this._poller._stop.set(true);
 		this._pollthread.interrupt();
 		
 		// Get statistics at the end of execution after the method has ended
