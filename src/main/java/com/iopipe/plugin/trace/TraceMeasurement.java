@@ -3,6 +3,7 @@ package com.iopipe.plugin.trace;
 import com.iopipe.IOpipeConstants;
 import com.iopipe.IOpipeMeasurement;
 import com.iopipe.PerformanceEntry;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * This class measures a duration of time and is intended to be used with
@@ -29,7 +30,8 @@ public final class TraceMeasurement
 	protected final long startns;
 	
 	/** Has this been closed? */
-	private volatile boolean _closed;
+	private final AtomicBoolean _closed =
+		new AtomicBoolean();
 	
 	/**
 	 * Initializes the measurement tracking.
@@ -70,9 +72,8 @@ public final class TraceMeasurement
 	public void close()
 	{
 		if (this.enabled)
-			if (!this._closed)
+			if (this._closed.compareAndSet(false, true))
 			{
-				this._closed = true;
 				
 				// There are two end marks, one for the end mark and the
 				// actual duration but they end at the same time
