@@ -27,6 +27,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Base64;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -73,18 +74,9 @@ public class ProfilerExecution
 	private final Tracker _tracker =
 		new Tracker();
 	
-	/** Remote URL access lock. */
-	private final Object _remotelock =
-		new Object();
-	
-	/** Remote URL. */
-	private volatile String _remote;
-	
-	/** Was the remote invalid? */
-	private volatile boolean _remoteinvalid;
-	
-	/** Access token for the uploaded data. */
-	private volatile String _jwtaccesstoken;
+	/** The remote to access. */
+	private final AtomicReference<__Remote__> _remote =
+		new AtomicReference<>();
 	
 	/** The tread which is pollng for profiling (only in lambda thread). */
 	private Thread _pollthread;
@@ -160,8 +152,13 @@ public class ProfilerExecution
 	@Override
 	public JsonObject extraReport()
 	{
+		// No remote, ignore
+		__Remote__ remote = this._remote.get();
+		if (remote == null)
+			return null;
+		
 		// If no access token was specified then just ignore it
-		String jwtaccesstoken = this._jwtaccesstoken;
+		String jwtaccesstoken = remote.jwtaccesstoken;
 		if (jwtaccesstoken == null)
 			return null;
 		
@@ -309,36 +306,14 @@ public class ProfilerExecution
 	 */
 	private final String __awaitRemote()
 	{
-		Object remotelock = this._remotelock;
-		synchronized (remotelock)
-		{
-			for (;;)
-			{
-				String rv = this._remote;
-				
-				// Not specified?
-				if (rv == null)
-				{
-					// Not valid
-					if (this._remoteinvalid)
-						return null;
-					
-					// Wait for it to be read
-					else
-						try
-						{
-							remotelock.wait();
-						}
-						catch (InterruptedException e)
-						{
-						}
-				}
-				
-				// Use that URL
-				else
-					return rv;
-			}
-		}
+		AtomicReference<__Remote__> atom = this._remote;
+		
+		// Burn CPU for a bit waiting for the remote
+		__Remote__ rv;
+		while ((rv = atom.get()) == null)
+			continue;
+		
+		return rv.url;
 	}
 	
 	/**
@@ -350,7 +325,6 @@ public class ProfilerExecution
 	{
 		// Use a connection to an alternative URL using the same connection
 		// type as the other.
-		Object remotelock = this._remotelock;
 		try
 		{
 			IOpipeExecution execution = this.execution;
@@ -411,25 +385,16 @@ public class ProfilerExecution
 				resp.bodyAsString());
 			
 			// Return it
-			synchronized (remotelock)
-			{
-				this._remote = url;
-				this._jwtaccesstoken = jwtaccesstoken;
-				remotelock.notifyAll();
-			}
+			this._remote.set(new __Remote__(true, url, jwtaccesstoken));
 		}
 		
 		// Could not send to the remote end
-		catch (RuntimeException|Error e)
+		catch (Throwable e)
 		{
 			_LOGGER.error("Could not determine the profiler upload URL.", e);
 			
 			// Mark invalid
-			synchronized (remotelock)
-			{
-				this._remoteinvalid = true;
-				remotelock.notifyAll();
-			}
+			this._remote.set(new __Remote__(false, null, null));
 		}
 	}
 	
