@@ -17,6 +17,7 @@ import java.io.Closeable;
 import java.io.PrintStream;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.HashMap;
@@ -79,10 +80,12 @@ public final class IOpipeService
 	final __Plugins__ _plugins;
 	
 	/** The number of times this context has been executed. */
-	private volatile int _execcount;
+	private final AtomicInteger _execcount =
+		new AtomicInteger();
 	
 	/** The number of times the server replied with a code other than 2xx. */
-	private volatile int _badresultcount;
+	private final AtomicInteger _badresultcount =
+		new AtomicInteger();
 	
 	/**
 	 * Initializes the service using the default configuration.
@@ -163,7 +166,7 @@ public final class IOpipeService
 	 */
 	public final int getBadResultCount()
 	{
-		return this._badresultcount;
+		return this._badresultcount.get();
 	}
 	
 	/**
@@ -219,7 +222,7 @@ public final class IOpipeService
 		if (__context == null || __func == null)
 			throw new NullPointerException();
 		
-		int execcount = ++this._execcount;
+		int execcount = this._execcount.incrementAndGet();
 		
 		// Create thread group so it is known which threads are part of this
 		// execution and not other executions
@@ -241,7 +244,7 @@ public final class IOpipeService
 		{
 			// Disabled lambdas could still rely on measurements, despite them
 			// not doing anything useful at all
-			this._badresultcount++;
+			this._badresultcount.incrementAndGet();
 			return __func.apply(exec);
 		}
 		
@@ -361,7 +364,7 @@ public final class IOpipeService
 			int code = result.code();
 			if (!(code >= 200 && code < 300))
 			{
-				this._badresultcount++;
+				this._badresultcount.incrementAndGet();
 				
 				// Emit errors for failed requests
 				_LOGGER.error(() -> "Recv: " + result + " " +
@@ -381,7 +384,7 @@ public final class IOpipeService
 		{
 			_LOGGER.error("Could not sent request to server.", e);
 			
-			this._badresultcount++;
+			this._badresultcount.incrementAndGet();
 			return new RemoteResult(503, RemoteBody.MIMETYPE_JSON, "");
 		}
 	}
