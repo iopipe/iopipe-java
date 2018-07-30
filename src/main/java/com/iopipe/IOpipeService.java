@@ -15,9 +15,12 @@ import com.iopipe.plugin.IOpipePluginPostExecutable;
 import com.iopipe.plugin.IOpipePluginPreExecutable;
 import java.io.Closeable;
 import java.io.PrintStream;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.HashMap;
@@ -60,6 +63,14 @@ public final class IOpipeService
 	/** The process stat when the process started. */
 	static final SystemMeasurement.Times _STAT_START =
 		SystemMeasurement.measureTimes(SystemMeasurement.SELF_PROCESS);
+	
+	/** Stores the execution for the current thread. */
+	private static final ThreadLocal<Reference<IOpipeExecution>> _EXECUTIONS =
+		new InheritableThreadLocal<>();
+	
+	/** Reference to the last execution that has occurred, just in case. */
+	private static final AtomicReference<Reference<IOpipeExecution>> _LAST =
+		new AtomicReference<>();
 	
 	/** If an instance was created then this will be that one instance. */
 	private static volatile IOpipeService _INSTANCE;
@@ -241,6 +252,19 @@ public final class IOpipeService
 		IOpipeExecution exec = new IOpipeExecution(this, config, __context,
 			measurement, threadgroup, nowtime, __input);
 		
+		// Use a reference to allow the execution to be garbage collected if
+		// it is no longer referred to or is in the stack of any method.
+		// Otherwise execution references will just sit around in memory and
+		// might not get freed ever.
+		ThreadLocal<Reference<IOpipeExecution>> executions = _EXECUTIONS;
+		executions.set(new WeakReference<>(exec));
+		
+		// Just in case there was no way to get the current execution in the
+		// event that the thread local could not be obtained
+		AtomicReference<Reference<IOpipeExecution>> lastexec = _LAST;
+		Reference<IOpipeExecution> refexec = new WeakReference<>(exec);
+		lastexec.compareAndSet(null, refexec);
+		
 		// If disabled, just run the function
 		IOpipeConfiguration config = this.config;
 		if (!enabled)
@@ -248,7 +272,16 @@ public final class IOpipeService
 			// Disabled lambdas could still rely on measurements, despite them
 			// not doing anything useful at all
 			this._badresultcount.incrementAndGet();
-			return __func.apply(exec);
+			
+			try
+			{
+				return __func.apply(exec);
+			}
+			finally
+			{
+				// Clear the last execution because it is no longer occuring
+				lastexec.compareAndSet(refexec, null);
+			}
 		}
 		
 		_LOGGER.debug(() -> String.format("Invoking context %08x",
@@ -325,6 +358,10 @@ public final class IOpipeService
 		// Generate and send result to server
 		if (watchdog == null || !watchdog._generated.getAndSet(true))
 			this.__sendRequest(exec.__buildRequest());
+		
+		// Clear the last execution that is occuring, but only if ours was
+		// still associated with it
+		lastexec.compareAndSet(refexec, null);
 		
 		// Throw the called exception as if the wrapper did not have any
 		// trouble
@@ -466,6 +503,31 @@ public final class IOpipeService
 			this.thrown = __t;
 			this.value = null;
 		}
+	}
+	
+	/**
+	 * Returns the current execution of the current thread.
+	 *
+	 * @return The current execution or {@code null} if it could not obtained.
+	 * @since 2018/07/30
+	 */
+	static final IOpipeExecution __execution()
+	{
+		Reference<IOpipeExecution> ref = _EXECUTIONS.get();
+		IOpipeExecution rv;
+		
+		// If there is no thread local then use the last instance
+		if (ref == null || null == (rv = ref.get()))
+		{
+			ref = _LAST.get();
+			
+			// No last execution exists either
+			if (ref == null || null == (rv = ref.get()))
+				return null;
+		}
+		
+		// There was a thread local or last execution
+		return rv;
 	}
 	
 	/**
