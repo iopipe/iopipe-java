@@ -64,7 +64,7 @@ public final class IOpipeService
 	static final SystemMeasurement.Times _STAT_START =
 		SystemMeasurement.measureTimes(SystemMeasurement.SELF_PROCESS);
 	
-	/** Stores the execution for the current thread. */
+	/** Stores the execution for the current thread, inherited by child threads. */
 	private static final ThreadLocal<Reference<IOpipeExecution>> _EXECUTIONS =
 		new InheritableThreadLocal<>();
 	
@@ -257,12 +257,12 @@ public final class IOpipeService
 		// Otherwise execution references will just sit around in memory and
 		// might not get freed ever.
 		ThreadLocal<Reference<IOpipeExecution>> executions = _EXECUTIONS;
-		executions.set(new WeakReference<>(exec));
+		Reference<IOpipeExecution> refexec = new WeakReference<>(exec);
+		executions.set(refexec);
 		
 		// Just in case there was no way to get the current execution in the
 		// event that the thread local could not be obtained
 		AtomicReference<Reference<IOpipeExecution>> lastexec = _LAST;
-		Reference<IOpipeExecution> refexec = new WeakReference<>(exec);
 		lastexec.compareAndSet(null, refexec);
 		
 		// If disabled, just run the function
