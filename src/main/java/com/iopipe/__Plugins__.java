@@ -16,8 +16,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import org.pmw.tinylog.Logger;
 
 /**
  * This represents plugins which are available to the service with the
@@ -27,10 +26,6 @@ import org.apache.logging.log4j.LogManager;
  */
 final class __Plugins__
 {
-	/** Logging. */
-	private static final Logger _LOGGER =
-		LogManager.getLogger(__Plugins__.class);
-	
 	/** Plugin information per execution class. */
 	private final Map<Class<? extends IOpipePluginExecution>, __Info__> _info =
 		new LinkedHashMap<>();
@@ -67,9 +62,8 @@ final class __Plugins__
 			// Do not let plugin initailization fail
 			catch (RuntimeException e)
 			{
-				_LOGGER.error("Failed to initialize plugin {}.",
+				Logger.error(e, "Failed to initialize plugin {}.",
 					p.getClass().getName());
-				_LOGGER.error("Could not initialize plugin.", e);
 			}
 	}
 	
@@ -130,10 +124,10 @@ final class __Plugins__
 		// There is a bad service configuration
 		catch (ServiceConfigurationError e)
 		{
-			_LOGGER.error("There is a service configuration error, this " +
+			Logger.error(e, "There is a service configuration error, this " +
 				"means that most and usually all plugins will be disabled." +
 				"The usual cause of this is META-INF/services which is" +
-				"missing a class or that class fails to load.", e);
+				"missing a class or that class fails to load.");
 		}
 		
 		return rv;
