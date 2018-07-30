@@ -829,6 +829,17 @@ public final class IOpipeExecution
 	}
 	
 	/**
+	 * Returns the current execution for the given thread.
+	 *
+	 * @return The execution context which is associated with this thread.
+	 * @since 2018/07/30
+	 */
+	public static final IOpipeExecution currentExecution()
+	{
+		throw new Error("TODO");
+	}
+	
+	/**
 	 * Checks if the given string is within the name limit before it is
 	 * reported.
 	 *
