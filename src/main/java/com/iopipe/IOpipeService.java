@@ -27,8 +27,7 @@ import java.util.Objects;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 import java.util.Set;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import org.pmw.tinylog.Logger;
 
 /**
  * This class provides a single connection to the IOpipe service which may then
@@ -45,10 +44,6 @@ import org.apache.logging.log4j.LogManager;
  */
 public final class IOpipeService
 {
-	/** Logging. */
-	private static final Logger _LOGGER =
-		LogManager.getLogger(IOpipeService.class);
-	
 	/** This is used to detect cold starts. */
 	static final AtomicBoolean _THAWED =
 		new AtomicBoolean();
@@ -125,7 +120,7 @@ public final class IOpipeService
 			// Cannot report error to IOpipe so print to the console
 			catch (RemoteException e)
 			{
-				_LOGGER.error("Could not connect to the remote server.", e);
+				Logger.error(e, "Could not connect to the remote server.");
 			}
 		
 		// If the connection failed, use one which does nothing
@@ -251,8 +246,8 @@ public final class IOpipeService
 			return __func.apply(exec);
 		}
 		
-		_LOGGER.debug(() -> String.format("Invoking context %08x",
-			System.identityHashCode(__context)));
+		Logger.debug("Invoking context {}.",
+			() -> System.identityHashCode(__context));
 		
 		// Add auto-label for coldstart
 		if (coldstarted)
@@ -270,7 +265,8 @@ public final class IOpipeService
 				}
 				catch (RuntimeException e)
 				{
-					_LOGGER.error("Could not run pre-executable plugin.", e);
+					Logger.error(e, "Could not run pre-executable plugin {}.",
+						i);
 				}
 		}
 		
@@ -318,7 +314,8 @@ public final class IOpipeService
 				}
 				catch (RuntimeException e)
 				{
-					_LOGGER.error("Could not run post-executable plugin.", e);
+					Logger.error(e, "Could not run post-executable plugin {}.",
+						i);
 				}
 		}
 		
@@ -355,9 +352,6 @@ public final class IOpipeService
 		// Generate report
 		try
 		{
-			// Report what is to be sent
-			_LOGGER.debug(() -> "Send: " + __r + " " + __debugBody(__r));
-			
 			RemoteResult result = this.connection.send(RequestType.POST, __r);
 			
 			// Only the 200 range is valid for okay responses
@@ -366,15 +360,10 @@ public final class IOpipeService
 			{
 				this._badresultcount.incrementAndGet();
 				
-				// Emit errors for failed requests
-				_LOGGER.error(() -> "Recv: " + result + " " +
-					__debugBody(result));
+				// Only emit errors for failed requests
+				Logger.error("Request {} failed with result {}.",
+					__r, result);
 			}
-			
-			// Debug log successful requests
-			else
-				_LOGGER.debug(() -> "Recv: " + result + " " +
-					__debugBody(result));
 			
 			return result;
 		}
@@ -382,7 +371,7 @@ public final class IOpipeService
 		// Failed to write to the server
 		catch (RemoteException e)
 		{
-			_LOGGER.error("Could not sent request to server.", e);
+			Logger.error(e, "Request {} failed due to exception.", __r);
 			
 			this._badresultcount.incrementAndGet();
 			return new RemoteResult(503, RemoteBody.MIMETYPE_JSON, "");
@@ -400,7 +389,7 @@ public final class IOpipeService
 		IOpipeService rv = _INSTANCE;
 		if (rv == null)
 		{
-			_LOGGER.debug("Initializing new service instance.");
+			Logger.debug("Initializing new service instance.");
 			
 			_INSTANCE = (rv = new IOpipeService());
 		}

@@ -7,6 +7,8 @@ import com.iopipe.plugin.IOpipePluginPostExecutable;
 import com.iopipe.plugin.IOpipePluginPreExecutable;
 import com.iopipe.plugin.profiler.ProfilerPlugin;
 import com.iopipe.plugin.trace.TracePlugin;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -168,6 +170,9 @@ final class __Plugins__
 		/** Is this post-executable. */
 		protected final boolean postexecutable;
 		
+		/** String representation. */
+		private Reference<String> _string;
+		
 		/**
 		 * Initializes the plugin.
 		 *
@@ -289,6 +294,23 @@ final class __Plugins__
 		public final IOpipePlugin plugin()
 		{
 			return this.plugin;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 * @since 2018/07/30
+		 */
+		@Override
+		public final String toString()
+		{
+			Reference<String> ref = this._string;
+			String rv;
+			
+			if (ref == null || null == (rv = ref.get()))
+				this._string = new WeakReference<>(
+					(rv = this.name + "@" + this.version));
+			
+			return rv;
 		}
 		
 		/**
