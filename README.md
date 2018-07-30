@@ -43,7 +43,8 @@ For debugging on Amazon AWS, the additional dependency is required:
 </dependency>
 ```
 
-The shade plugin must also have the following transformer:
+If you are using log4j2 in your project then the following transformer must
+be specified:
 
 ```xml
 <configuration>
@@ -216,11 +217,11 @@ take precedence when available.
    * If this is not set for a plugin then it will use the setting from the
      plugin if it should be enabled by default or not.
 
-Log4j2 is used for debugging output and it can be configured via environment
-variable. Information on its configuration is at:
+IOpipe uses tinylog for its internal logging, to make debug output from IOpipe
+easier to see tinylog can be configured using the following information located
+at:
 
-* <https://logging.apache.org/log4j/2.x/manual/configuration.html>
-* <https://docs.aws.amazon.com/lambda/latest/dg/java-logging.html>
+ * <https://tinylog.org/configuration>
 
 The associated package is `com.iopipe`.
 
