@@ -38,8 +38,7 @@ import javax.json.JsonString;
 import javax.json.JsonStructure;
 import javax.json.JsonValue;
 import javax.json.stream.JsonGenerator;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import org.pmw.tinylog.Logger;
 
 /**
  * This contains the execution state for the profile plugin. This class is not
@@ -50,10 +49,6 @@ import org.apache.logging.log4j.LogManager;
 public class ProfilerExecution
 	implements IOpipePluginExecution
 {
-	/** Logging. */
-	private static final Logger _LOGGER =
-		LogManager.getLogger(ProfilerExecution.class);
-	
 	/** The default sampling rate (in nanoseconds). */
 	public static final int DEFAULT_SAMPLE_RATE =
 		1_000_000;
@@ -241,7 +236,7 @@ public class ProfilerExecution
 		}
 		catch (IOException e)
 		{
-			_LOGGER.debug("Failed to export snapshot data.", e);
+			Logger.error(e, "Failed to export profiler snapshot data.");
 			
 			// Ignore
 			exported = null;
@@ -252,9 +247,9 @@ public class ProfilerExecution
 		{
 			// Debug exported bytes to UUEncoded file data
 			final byte[] fexported = exported;
-			_LOGGER.debug(() -> "\nbegin-base64 644 " + prefix + ".zip\n" +
-				Base64.getMimeEncoder().encodeToString(fexported) +
-				"\n====\n");
+			Logger.debug("\nbegin-base64 644 {}.zip\n{}\n====\n",
+				() -> prefix,
+				() -> Base64.getMimeEncoder().encodeToString(fexported));
 			
 			// This is optional but when the debugging environment variable is
 			// set then this will write the file which is to be sent to IOpipe
@@ -277,7 +272,7 @@ public class ProfilerExecution
 			String remote = __awaitRemote();
 			if (remote == null)
 			{
-				_LOGGER.error("Could not obtain the remote URL.");
+				Logger.error("Could not obtain the profiler upload URL.");
 				return;
 			}
 			
@@ -290,8 +285,7 @@ public class ProfilerExecution
 				request);
 			
 			// Debug result
-			_LOGGER.debug(() -> "Profiler recv: " + result + " " +
-				result.bodyAsString());
+			Logger.debug("Profiler upload returned result {}.", result);
 			
 			// Add auto-label
 			execution.label("@iopipe/plugin-profiler");
@@ -336,7 +330,8 @@ public class ProfilerExecution
 				throw new RuntimeException("No profiler URL specified.");
 			
 			// Indicate where the profiler is uploading to
-			_LOGGER.debug(() -> "Profiler URL: " + desiredurl);
+			Logger.debug("Requesting profiler upload URL from {}.",
+				desiredurl);
 			
 			// Setup connection to the signed service to determine which
 			// URL we upload to
@@ -379,10 +374,9 @@ public class ProfilerExecution
 				throw new RuntimeException("Server did not access token.");
 			String jwtaccesstoken = ((JsonString)atv).getString();
 			
-			_LOGGER.debug(() -> "Got upload URL: " + url);
-			_LOGGER.debug(() -> "Got access token: " + jwtaccesstoken);
-			_LOGGER.debug(() -> "Signer sent: " + resp + " " +
-				resp.bodyAsString());
+			// Debug
+			Logger.debug("Signer upload to `{}` with access token `{}`.",
+				url, jwtaccesstoken);
 			
 			// Return it
 			this._remote.set(new __Remote__(true, url, jwtaccesstoken));
@@ -391,7 +385,7 @@ public class ProfilerExecution
 		// Could not send to the remote end
 		catch (Throwable e)
 		{
-			_LOGGER.error("Could not determine the profiler upload URL.", e);
+			Logger.error(e, "Could not determine the profiler upload URL.");
 			
 			// Mark invalid
 			this._remote.set(new __Remote__(false, null, null));
