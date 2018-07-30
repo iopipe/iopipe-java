@@ -34,8 +34,7 @@ import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.json.JsonString;
 import javax.json.JsonValue;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import org.pmw.tinylog.Logger;
 
 /**
  * This tests that the event info plugin detects the input event sources for
@@ -46,10 +45,6 @@ import org.apache.logging.log4j.LogManager;
 class __DoEventInfoPlugin__
 	extends Single
 {
-	/** Logging. */
-	private static final Logger _LOGGER =
-		LogManager.getLogger(__DoEventInfoPlugin__.class);
-	
 	/** Sent with no exception? */
 	protected final BooleanValue noerror =
 		new BooleanValue("noerror");
@@ -299,7 +294,7 @@ class __DoEventInfoPlugin__
 		// Debug conversion first
 		T rv = __cl.cast(jdc.<T>fromData(
 			__DoEventInfoPlugin__.__linesFromResource(__rc), __cl));
-		_LOGGER.debug("Testing POJO ({}) with {}.", __cl, rv);
+		Logger.debug("Testing POJO ({}) with {}.", __cl, rv);
 		
 		// Convert
 		return rv;
