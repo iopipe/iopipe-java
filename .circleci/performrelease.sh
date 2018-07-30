@@ -48,7 +48,6 @@ do
 		
 			# Help
 		?)
-		h)
 			print_help
 			exit 2
 	esac
