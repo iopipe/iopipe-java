@@ -230,13 +230,8 @@ public final class IOpipeService
 		
 		int execcount = this._execcount.incrementAndGet();
 		
-		// Create thread group so it is known which threads are part of this
-		// execution and not other executions
+		// Is this enabled?
 		boolean enabled = config.isEnabled();
-		ThreadGroup threadgroup = (!enabled ?
-			Thread.currentThread().getThreadGroup() :
-			new ThreadGroup(String.format("IOpipe-execution-%08d",
-				System.identityHashCode(__context))));
 				
 		// Is this coldstarted?
 		boolean coldstarted = !this._coldstartflag.getAndSet(true);
@@ -245,7 +240,7 @@ public final class IOpipeService
 		long nowtime = System.currentTimeMillis();
 		IOpipeMeasurement measurement = new IOpipeMeasurement(coldstarted);
 		IOpipeExecution exec = new IOpipeExecution(this, config, __context,
-			measurement, threadgroup, nowtime, __input);
+			measurement, nowtime, __input);
 		
 		// Use a reference to allow the execution to be garbage collected if
 		// it is no longer referred to or is in the stack of any method.
@@ -303,11 +298,6 @@ public final class IOpipeService
 				}
 		}
 		
-		// Run the function in another thread so that it becomes part of the
-		// given group, this is needed by the profiler plugin
-		__Runner__<R> runner = new __Runner__<R>(exec, __func);
-		Thread runnerthread = new Thread(threadgroup, runner, "main");
-		
 		// Register timeout with this execution number so if execution takes
 		// longer than expected a timeout is generated
 		// Timeouts can be disabled if the timeout window is zero, but they
@@ -317,20 +307,34 @@ public final class IOpipeService
 		if ((windowtime = config.getTimeOutWindow()) > 0 &&
 			__context.getRemainingTimeInMillis() > 0)
 			watchdog = new __TimeOutWatchDog__(this, __context,
-				runnerthread, windowtime, coldstarted, exec);
+				Thread.currentThread(), windowtime, coldstarted, exec);
 		
-		// Start the thread and wait until it dies
-		runnerthread.start();
-		for (;;)
-			try
-			{
-				runnerthread.join();
-				break;
-			}
-			catch (InterruptedException e)
-			{
-				// Ignore
-			}
+		// Result of execution
+		R value = null;
+		Throwable exception = null;
+		
+		// Keep track of execution time
+		long ticker = System.nanoTime();
+		try
+		{
+			value = __func.apply(exec);
+		}
+		
+		// An exception or error was thrown, so that will be reported
+		// Error is very fatal, but still report that it occured
+		catch (RuntimeException|Error e)
+		{
+			exception = e;
+			
+			measurement.__setThrown(e);
+			measurement.addLabel("@iopipe/error");
+		}
+		
+		// Count how long execution has taken
+		finally
+		{
+			measurement.__setDuration(System.nanoTime() - ticker);
+		}
 		
 		// It died, so stop the watchdog
 		if (watchdog != null)
@@ -362,14 +366,12 @@ public final class IOpipeService
 		
 		// Throw the called exception as if the wrapper did not have any
 		// trouble
-		__Result__<R> result = runner._result;
-		Throwable rt = result.thrown;
-		if (rt != null)
-			if (rt instanceof Error)
-				throw (Error)rt;
+		if (exception != null)
+			if (exception instanceof Error)
+				throw (Error)exception;
 			else
-				throw (RuntimeException)rt;
-		return result.value;
+				throw (RuntimeException)exception;
+		return value;
 	}
 	
 	/**
@@ -452,145 +454,6 @@ public final class IOpipeService
 		catch (Throwable t)
 		{
 			return "Could not decode!";
-		}
-	}
-	
-	/**
-	 * The result of an execution.
-	 *
-	 * @param <R> The type of value to return.
-	 * @since 2018/07/27
-	 */
-	private static final class __Result__<R>
-	{
-		/** Exception that was thrown. */
-		public final Throwable thrown;
-		
-		/** The return value. */
-		public final R value;
-		
-		/**
-		 * Initializes the result.
-		 *
-		 * @param __v The value.
-		 * @since 2018/07/27
-		 */
-		__Result__(R __v)
-		{
-			this.thrown = null;
-			this.value = __v;
-		}
-		
-		/**
-		 * Initializes the exception.
-		 *
-		 * @param __t The thrown exception
-		 * @since 2018/07/27
-		 */
-		__Result__(Throwable __t)
-		{
-			this.thrown = __t;
-			this.value = null;
-		}
-	}
-	
-	/**
-	 * Returns the current execution of the current thread.
-	 *
-	 * @return The current execution or {@code null} if it could not obtained.
-	 * @since 2018/07/30
-	 */
-	static final IOpipeExecution __execution()
-	{
-		Reference<IOpipeExecution> ref = _EXECUTIONS.get();
-		IOpipeExecution rv;
-		
-		// If there is no thread local then use the last instance
-		if (ref == null || null == (rv = ref.get()))
-		{
-			ref = _LAST.get();
-			
-			// No last execution exists either
-			if (ref == null || null == (rv = ref.get()))
-				return null;
-		}
-		
-		// There was a thread local or last execution
-		return rv;
-	}
-	
-	/**
-	 * Runs the thread and logs execution time and any exceptions.
-	 *
-	 * @param <R> The type of value to return.
-	 * @since 2018/02/09
-	 */
-	private static final class __Runner__<R>
-		implements Runnable
-	{
-		/** The execution state. */
-		protected final IOpipeExecution execution;
-		
-		/** The function to execute. */
-		protected final Function<IOpipeExecution, R> function;
-		
-		/** The result of the call. */
-		volatile __Result__<R> _result;
-		
-		/**
-		 * Initializes the runner.
-		 *
-		 * @param __exec The execution.
-		 * @param __func The function to invoke.
-		 * @throws NullPointerException On null arguments.
-		 * @since 2018/02/09
-		 */
-		__Runner__(IOpipeExecution __exec, Function<IOpipeExecution, R> __func)
-			throws NullPointerException
-		{
-			if (__exec == null || __func == null)
-				throw new NullPointerException();
-			
-			this.execution = __exec;
-			this.function = __func;
-		}
-		
-		/**
-		 * {@inheritDoc}
-		 * @since 2018/02/09
-		 */
-		@Override
-		public void run()
-		{
-			IOpipeExecution exec = this.execution;
-			IOpipeMeasurement measurement = exec.measurement();
-			
-			// Keep track of execution time
-			long ticker = System.nanoTime();
-			__Result__ result = null;
-			try
-			{
-				result = new __Result__(this.function.apply(exec));
-			}
-			
-			// An exception or error was thrown, so that will be reported
-			// Error is very fatal, but still report that it occured
-			catch (RuntimeException|Error e)
-			{
-				result = new __Result__(e);
-				
-				measurement.__setThrown(e);
-				measurement.addLabel("@iopipe/error");
-			}
-			
-			// Count how long execution has taken
-			finally
-			{
-				measurement.__setDuration(System.nanoTime() - ticker);
-			}
-			
-			// Store the result
-			this._result = result;
 		}
 	}
 }
