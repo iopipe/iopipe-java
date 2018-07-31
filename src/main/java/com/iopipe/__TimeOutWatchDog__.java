@@ -2,8 +2,7 @@ package com.iopipe;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import org.pmw.tinylog.Logger;
 
 /**
  * This class is used to log a timeout for a single execution of a context.
@@ -13,10 +12,6 @@ import org.apache.logging.log4j.LogManager;
 final class __TimeOutWatchDog__
 	implements Runnable
 {
-	/** Logging. */
-	private static final Logger _LOGGER =
-		LogManager.getLogger(__TimeOutWatchDog__.class);
-	
 	/**
 	 * The minimum sleep threshold.
 	 *
@@ -102,7 +97,7 @@ final class __TimeOutWatchDog__
 	@Override
 	public void run()
 	{
-		_LOGGER.debug("Started watchdog thread.");
+		Logger.debug("Started watchdog thread.");
 		
 		Context context = this.context;
 		AtomicBoolean finished = this._finished;
@@ -146,7 +141,7 @@ final class __TimeOutWatchDog__
 				IOpipeConfiguration config = this.config;
 				Thread sourcethread = this.sourcethread;
 				
-				_LOGGER.error("Thread {} timed out.", sourcethread);
+				Logger.error("Thread {} timed out.", sourcethread);
 				
 				// Generate a timeout exception, but for the ease of use in
 				// debugging use the stack trace of the thread which timed out

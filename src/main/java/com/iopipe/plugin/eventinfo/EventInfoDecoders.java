@@ -20,8 +20,6 @@ import javax.json.JsonStructure;
 import javax.json.JsonString;
 import javax.json.JsonValue;
 import javax.json.JsonWriter;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 /**
  * This class manages and initializes the decoders for event information
@@ -31,10 +29,6 @@ import org.apache.logging.log4j.LogManager;
  */
 public final class EventInfoDecoders
 {
-	/** Logging. */
-	private static final Logger _LOGGER =
-		LogManager.getLogger(EventInfoDecoders.class);
-	
 	/** Decoders which have been registered. */
 	private final Map<Class<?>, EventInfoDecoder> _decoders =
 		new LinkedHashMap<>();
