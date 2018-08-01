@@ -83,8 +83,8 @@ final class __TimeOutWatchDog__
 		this.coldstart = __cs;
 		this.execution = __exec;
 		
-		Thread timeoutthread = new Thread(this,
-			"IOpipe-WatchDog-" + System.identityHashCode(__context));
+		Thread timeoutthread = new Thread(__Shared__._SERVICE_THREAD_GROUP,
+			this, "IOpipe-WatchDog-" + System.identityHashCode(__context));
 		timeoutthread.setDaemon(true);
 		this.timeoutthread = timeoutthread;
 		timeoutthread.start();

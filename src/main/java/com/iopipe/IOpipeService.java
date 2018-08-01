@@ -456,5 +456,30 @@ public final class IOpipeService
 			return "Could not decode!";
 		}
 	}
+	
+	/**
+	 * Returns the current execution of the current thread.
+	 *
+	 * @return The current execution or {@code null} if it could not obtained.
+	 * @since 2018/07/30
+	 */
+	static final IOpipeExecution __execution()
+	{
+		Reference<IOpipeExecution> ref = _EXECUTIONS.get();
+		IOpipeExecution rv;
+		
+		// If there is no thread local then use the last instance
+		if (ref == null || null == (rv = ref.get()))
+		{
+			ref = _LAST.get();
+			
+			// No last execution exists either
+			if (ref == null || null == (rv = ref.get()))
+				return null;
+		}
+		
+		// There was a thread local or last execution
+		return rv;
+	}
 }
 
