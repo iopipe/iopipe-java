@@ -57,9 +57,6 @@ public final class IOpipeExecution
 	/** The measurement. */
 	protected final IOpipeMeasurement measurement;
 	
-	/** The thread group this execution runs under. */
-	protected final ThreadGroup threadgroup;
-	
 	/** The starting time in milliseconds. */
 	protected final long starttimemillis;
 	
@@ -90,19 +87,18 @@ public final class IOpipeExecution
 	 * @since 2018/01/19
 	 */
 	IOpipeExecution(IOpipeService __sv, IOpipeConfiguration __conf,
-		Context __context, IOpipeMeasurement __m, ThreadGroup __tg, long __st,
+		Context __context, IOpipeMeasurement __m, long __st,
 		Object __input)
 		throws NullPointerException
 	{
 		if (__sv == null || __conf == null || __context == null ||
-			__m == null || __tg == null)
+			__m == null)
 			throw new NullPointerException();
 		
 		this.service = __sv;
 		this.config = __conf;
 		this.context = __context;
 		this.measurement = __m;
-		this.threadgroup = __tg;
 		this.starttimemillis = __st;
 		this.input = __input;
 	}
@@ -436,12 +432,12 @@ public final class IOpipeExecution
 	/**
 	 * Returns the thread group which this execution is running under.
 	 *
-	 * @return The thread group of this execution.
+	 * @return The thread group of this execution, may return .
 	 * @since 2018/02/09
 	 */
 	public final ThreadGroup threadGroup()
 	{
-		return this.threadgroup;
+		return Thread.currentThread().getThreadGroup();
 	}
 
 	/**

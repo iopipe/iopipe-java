@@ -62,6 +62,9 @@ public class ProfilerExecution
 	/** Debug: Prefix to use for filenames in the snapshot. */
 	public static final String ALTERNATIVE_PREFIX;
 	
+	/** The service group the profiler belongs in. */
+	private static final ThreadGroup _SERVICE_GROUP;
+	
 	/** The execution state. */
 	protected final IOpipeExecution execution;
 	
@@ -89,6 +92,17 @@ public class ProfilerExecution
 	 */
 	static
 	{
+		// Initialize the service group
+		ThreadGroup sg = null;
+		try
+		{
+			sg = new ThreadGroup("IOpipe-ServiceThreads-Profiler");
+		}
+		catch (SecurityException e)
+		{
+			sg = Thread.currentThread().getThreadGroup();
+		}
+		
 		// Use system properties then default to the environment
 		long sr;
 		try
@@ -104,6 +118,7 @@ public class ProfilerExecution
 			sr = DEFAULT_SAMPLE_RATE;
 		}
 		
+		_SERVICE_GROUP = sg;
 		SAMPLE_RATE = Math.max(1,
 			(int)Math.min(Integer.MAX_VALUE, sr));
 		
@@ -401,7 +416,8 @@ public class ProfilerExecution
 	{
 		// Need to determine which server to send to, can be done in another
 		// thread
-		Thread getter = new Thread(this::__getRemote, "IOpipe-ProfilerGetURL");
+		Thread getter = new Thread(_SERVICE_GROUP, this::__getRemote,
+			"IOpipe-ProfilerGetURL");
 		getter.setDaemon(true);
 		getter.start();
 		
@@ -414,7 +430,8 @@ public class ProfilerExecution
 		this._poller = poller;
 		
 		// Initialize the polling thread
-		Thread pollthread = new Thread(poller, "IOpipe-ProfilerWorker");
+		Thread pollthread = new Thread(_SERVICE_GROUP, poller,
+			"IOpipe-ProfilerWorker");
 		pollthread.setDaemon(true);
 		
 		// Set a higher priority if that is possible so that way the traces

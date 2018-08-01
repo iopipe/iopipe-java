@@ -14,6 +14,9 @@ import java.util.concurrent.atomic.AtomicReference;
 public class EventInfoExecution
 	implements IOpipePluginExecution
 {
+	/** The thread group the plugin runs under. */
+	private static final ThreadGroup _SERVICE_GROUP;
+	
 	/** The execution to track. */
 	protected final IOpipeExecution execution;
 	
@@ -23,6 +26,27 @@ public class EventInfoExecution
 	/** Results of the plugin execution. */
 	private final AtomicReference<__Result__> _result =
 		new AtomicReference<>();
+	
+	/**
+	 * Initializes static fields needed by the execution.
+	 *
+	 * @since 2018/08/01
+	 */
+	static
+	{
+		// Get service thread group to hide from the profiler
+		ThreadGroup sg = null;
+		try
+		{
+			sg = new ThreadGroup("IOpipe-ServiceThreads-EventInfo");
+		}
+		catch (SecurityException e)
+		{
+			sg = Thread.currentThread().getThreadGroup();
+		}
+		
+		_SERVICE_GROUP = sg;
+	}
 	
 	/**
 	 * Initializes the plugin state for a single execution.
@@ -90,8 +114,9 @@ public class EventInfoExecution
 	{
 		// Setup thread which runs in the background which decodes the object
 		// that was input
-		Thread worker = new Thread(new __Worker__(this.execution.input(),
-			this._result, this.decoders), "IOpipe-EventInfoWorker");
+		Thread worker = new Thread(_SERVICE_GROUP, new __Worker__(
+			this.execution.input(), this._result, this.decoders),
+			"IOpipe-EventInfoWorker");
 		worker.setDaemon(true);
 		
 		// Start it
