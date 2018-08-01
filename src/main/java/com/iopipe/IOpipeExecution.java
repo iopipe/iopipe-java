@@ -824,6 +824,18 @@ public final class IOpipeExecution
 	}
 	
 	/**
+	 * Returns the current execution for the given thread.
+	 *
+	 * @return The execution context which is associated with this thread or
+	 * {@code null} if there is no associated execution.
+	 * @since 2018/07/30
+	 */
+	public static final IOpipeExecution currentExecution()
+	{
+		return IOpipeService.__execution();
+	}
+	
+	/**
 	 * Checks if the given string is within the name limit before it is
 	 * reported.
 	 *

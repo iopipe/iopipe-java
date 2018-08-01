@@ -38,6 +38,9 @@ class __DoTracePlugin__
 	
 	/** Is the plugin enabled? */
 	protected final boolean enabled;
+	
+	/** Is the execution passed as a parameter or derived from the current. */
+	protected final boolean derived;
 		
 	/** Sent with no exception? */
 	protected final BooleanValue noerror =
@@ -68,13 +71,17 @@ class __DoTracePlugin__
 	 *
 	 * @param __e The owning engine.
 	 * @param __enabled Is the plugin enabled?
+	 * @param __derived Is the IOpipeExecution passed via parameter or is
+	 * it derived from the current thread.
 	 * @since 2018/01/24
 	 */
-	__DoTracePlugin__(Engine __e, boolean __enabled)
+	__DoTracePlugin__(Engine __e, boolean __enabled, boolean __derived)
 	{
-		super(__e, "traceplugin-" + (__enabled ? "enabled" : "disabled"));
+		super(__e, "traceplugin-" + (__enabled ? "enabled" : "disabled") +
+			"-" + (__derived ? "parameter" : "derived"));
 		
 		this.enabled = __enabled;
+		this.derived = __derived;
 	}
 	
 	/**
@@ -189,7 +196,9 @@ class __DoTracePlugin__
 			});
 		
 		// Make a measurement via TraceUtils
-		try (TraceMeasurement c = TraceUtils.measure(__e, "byutils"))
+		try (TraceMeasurement c = (this.derived ?
+			TraceUtils.measure("byutils") :
+			TraceUtils.measure(__e, "byutils")))
 		{
 			// Small delay to skew time
 			try

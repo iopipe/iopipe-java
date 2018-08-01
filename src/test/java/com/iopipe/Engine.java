@@ -36,8 +36,10 @@ public abstract class Engine
 		{
 			__DoEmptyMethod__::new,
 			__DoThrowException__::new,
-			(__e) -> new __DoTracePlugin__(__e, true),
-			(__e) -> new __DoTracePlugin__(__e, false),
+			(__e) -> new __DoTracePlugin__(__e, true, false),
+			(__e) -> new __DoTracePlugin__(__e, false, false),
+			(__e) -> new __DoTracePlugin__(__e, true, true),
+			(__e) -> new __DoTracePlugin__(__e, false, true),
 			__DoTimeOut__::new,
 			__DoInvalidToken__::new,
 			__DoCustomMetric__::new,
