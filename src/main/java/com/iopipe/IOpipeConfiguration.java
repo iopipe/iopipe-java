@@ -416,15 +416,21 @@ public final class IOpipeConfiguration
 	 */
 	public static final IOpipeConfiguration byDefault()
 	{
-		IOpipeConfigurationBuilder rv = new IOpipeConfigurationBuilder();
-		
-		// Enabled if not specified is "true" by default
-		boolean enabled;
-		rv.setEnabled((enabled = Boolean.valueOf(Objects.toString(
-			System.getProperty("com.iopipe.enabled",
-			System.getenv("IOPIPE_ENABLED")), "true"))));
-		if (enabled)
+		// Derive settings from environment variables
+		try
 		{
+			IOpipeConfigurationBuilder rv = new IOpipeConfigurationBuilder();
+			
+			// Enabled if not specified is "true" by default
+			boolean enabled;
+			rv.setEnabled((enabled = Boolean.valueOf(Objects.toString(
+				System.getProperty("com.iopipe.enabled",
+				System.getenv("IOPIPE_ENABLED")), "true"))));
+			
+			// If the configuration is not enabled, then use the disabled one
+			if (!enabled)
+				return IOpipeConfiguration.DISABLED_CONFIG;
+			
 			// Token
 			rv.setProjectToken(System.getProperty("com.iopipe.token",
 				Objects.toString(System.getenv("IOPIPE_TOKEN"),
@@ -494,13 +500,18 @@ public final class IOpipeConfiguration
 			
 			// And the profiler URL
 			rv.setProfilerUrl(IOpipeConstants.DEFAULT_PROFILER_URL);
+			
+			return rv.build();
 		}
 		
-		// Fallback to disabled configuration
-		else
+		// Prevent configuration code issues from taking down the lambda
+		catch (RuntimeException e)
+		{
+			Logger.error(e, "Failure building default configuration, disabling IOpipe.");
+			
+			// Use disabled configuration
 			return IOpipeConfiguration.DISABLED_CONFIG;
-		
-		return rv.build();
+		}
 	}
 }
 
