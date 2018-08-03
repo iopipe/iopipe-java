@@ -7,6 +7,7 @@ import com.iopipe.plugin.eventinfo.FirehoseDecoder;
 import com.iopipe.plugin.eventinfo.S3Decoder;
 import com.iopipe.plugin.eventinfo.ScheduledDecoder;
 import com.iopipe.plugin.eventinfo.SNSDecoder;
+import com.iopipe.plugin.eventinfo.SQSDecoder;
 import com.iopipe.plugin.IOpipePlugin;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -82,6 +83,9 @@ public abstract class Engine
 			(__e) -> new __DoEventInfoPlugin__(__e,
 				__DoEventInfoPlugin__::makeSNSEvent,
 				new SNSDecoder()),
+			(__e) -> new __DoEventInfoPlugin__(__e,
+				__DoEventInfoPlugin__::makeSQSEvent,
+				new SQSDecoder()),
 		};
 	
 	/** The base name for this engine. */

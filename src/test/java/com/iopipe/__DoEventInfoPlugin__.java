@@ -7,6 +7,7 @@ import com.amazonaws.services.lambda.runtime.events.KinesisFirehoseEvent;
 import com.amazonaws.services.lambda.runtime.events.S3Event;
 import com.amazonaws.services.lambda.runtime.events.ScheduledEvent;
 import com.amazonaws.services.lambda.runtime.events.SNSEvent;
+import com.amazonaws.services.lambda.runtime.events.SQSEvent;
 import com.amazonaws.services.s3.event.S3EventNotification;
 import com.amazonaws.services.simpleworkflow.flow.JsonDataConverter;
 import com.fasterxml.jackson.databind.cfg.MapperConfig;
@@ -261,6 +262,18 @@ class __DoEventInfoPlugin__
 	{
 		return __DoEventInfoPlugin__.<SNSEvent>__convert(
 			SNSEvent.class, "eventinfo_sns.json");
+	}
+	
+	/**
+	 * Creates an instance of makeSQSEvent.
+	 *
+	 * @return The created input.
+	 * @since 2018/08/02
+	 */
+	public static Object makeSQSEvent()
+	{
+		return __DoEventInfoPlugin__.<SQSEvent>__convert(
+			SQSEvent.class, "eventinfo_sqs.json");
 	}
 	
 	/**
