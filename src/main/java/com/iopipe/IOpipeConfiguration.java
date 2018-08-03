@@ -152,9 +152,9 @@ public final class IOpipeConfiguration
 		}
 		catch (IllegalArgumentException|SecurityException e)
 		{
-			Logger.error("Failed to initialize default configuration, " +
+			Logger.error(e, "Failed to initialize default configuration, " +
 				"your method will still run however it will not report " +
-				"anything to IOpipe.", e);
+				"anything to IOpipe.");
 		}
 		DEFAULT_CONFIG = use;
 		
