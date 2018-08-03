@@ -475,7 +475,9 @@ public final class IOpipeConfiguration
 					v = Objects.toString(e.getValue(), "");
 				
 				if (k.startsWith(_ENVIRONMENT_PLUGIN_PREFIX) &&
-					k.endsWith(_ENVIRONMENT_PLUGIN_SUFFIX))
+					k.endsWith(_ENVIRONMENT_PLUGIN_SUFFIX) &&
+					k.length() > (_ENVIRONMENT_PLUGIN_PREFIX.length() +
+						_ENVIRONMENT_PLUGIN_SUFFIX.length()))
 					rv.setPluginEnabled(k.substring(
 						_ENVIRONMENT_PLUGIN_PREFIX.length(),
 						k.length() - _ENVIRONMENT_PLUGIN_SUFFIX.length()),
