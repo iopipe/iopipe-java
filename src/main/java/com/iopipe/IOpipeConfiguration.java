@@ -152,9 +152,9 @@ public final class IOpipeConfiguration
 		}
 		catch (IllegalArgumentException|SecurityException e)
 		{
-			Logger.error("Failed to initialize default configuration, " +
+			Logger.error(e, "Failed to initialize default configuration, " +
 				"your method will still run however it will not report " +
-				"anything to IOpipe.", e);
+				"anything to IOpipe.");
 		}
 		DEFAULT_CONFIG = use;
 		
@@ -416,15 +416,21 @@ public final class IOpipeConfiguration
 	 */
 	public static final IOpipeConfiguration byDefault()
 	{
-		IOpipeConfigurationBuilder rv = new IOpipeConfigurationBuilder();
-		
-		// Enabled if not specified is "true" by default
-		boolean enabled;
-		rv.setEnabled((enabled = Boolean.valueOf(Objects.toString(
-			System.getProperty("com.iopipe.enabled",
-			System.getenv("IOPIPE_ENABLED")), "true"))));
-		if (enabled)
+		// Derive settings from environment variables
+		try
 		{
+			IOpipeConfigurationBuilder rv = new IOpipeConfigurationBuilder();
+			
+			// Enabled if not specified is "true" by default
+			boolean enabled;
+			rv.setEnabled((enabled = Boolean.valueOf(Objects.toString(
+				System.getProperty("com.iopipe.enabled",
+				System.getenv("IOPIPE_ENABLED")), "true"))));
+			
+			// If the configuration is not enabled, then use the disabled one
+			if (!enabled)
+				return IOpipeConfiguration.DISABLED_CONFIG;
+			
 			// Token
 			rv.setProjectToken(System.getProperty("com.iopipe.token",
 				Objects.toString(System.getenv("IOPIPE_TOKEN"),
@@ -469,7 +475,9 @@ public final class IOpipeConfiguration
 					v = Objects.toString(e.getValue(), "");
 				
 				if (k.startsWith(_ENVIRONMENT_PLUGIN_PREFIX) &&
-					k.endsWith(_ENVIRONMENT_PLUGIN_SUFFIX))
+					k.endsWith(_ENVIRONMENT_PLUGIN_SUFFIX) &&
+					k.length() > (_ENVIRONMENT_PLUGIN_PREFIX.length() +
+						_ENVIRONMENT_PLUGIN_SUFFIX.length()))
 					rv.setPluginEnabled(k.substring(
 						_ENVIRONMENT_PLUGIN_PREFIX.length(),
 						k.length() - _ENVIRONMENT_PLUGIN_SUFFIX.length()),
@@ -494,13 +502,18 @@ public final class IOpipeConfiguration
 			
 			// And the profiler URL
 			rv.setProfilerUrl(IOpipeConstants.DEFAULT_PROFILER_URL);
+			
+			return rv.build();
 		}
 		
-		// Fallback to disabled configuration
-		else
+		// Prevent configuration code issues from taking down the lambda
+		catch (RuntimeException e)
+		{
+			Logger.error(e, "Failure building default configuration, disabling IOpipe.");
+			
+			// Use disabled configuration
 			return IOpipeConfiguration.DISABLED_CONFIG;
-		
-		return rv.build();
+		}
 	}
 }
 
