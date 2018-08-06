@@ -51,6 +51,7 @@ public final class EventInfoDecoders
 		this.register(new S3Decoder());
 		this.register(new ScheduledDecoder());
 		this.register(new SNSDecoder());
+		this.register(new SQSDecoder());
 	}
 	
 	/**
