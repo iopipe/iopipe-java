@@ -7,6 +7,7 @@ import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RemoteResult;
 import com.iopipe.http.RequestType;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.pmw.tinylog.Logger;
 
 /**
  * This is a connection factory which allows results to be monitored.
@@ -113,6 +114,10 @@ final class __WrappedConnectionFactory__
 		public RemoteResult send(RequestType __t, RemoteRequest __r)
 			throws NullPointerException, RemoteException
 		{
+			// Debug
+			Logger.debug("Snooped request ({}): {}.", __t,
+				__r.bodyAsString());
+			
 			// Snoop the request being sent to the server to make sure it is
 			// being formed correctly
 			Single single = this.single;
