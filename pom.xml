@@ -10,7 +10,7 @@
   <scm>
     <connection>scm:git:https://github.com/iopipe/iopipe-java.git</connection>
     <url>https://github.com/iopipe/iopipe-java</url>
-    <tag>v1.6.0</tag>
+    <tag>v1.7.0-SNAPSHOT</tag>
   </scm>
   <developers>
    <developer>
