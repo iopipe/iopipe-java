@@ -289,6 +289,10 @@ public final class IOpipeExecution
 	 * This executes the specified method if the plugin exists, if it does
 	 * not exist then it will not be executed.
 	 *
+	 * @deprecated This method is deprecated and should not be used in code
+	 * because if a plugin is not available then the specified code will not
+	 * be executed. This is error prone and may lead to code paths being
+	 * different depending on the state of plugins.
 	 * @param <C> The class type of the execution state.
 	 * @param __cl The class object of the execution state.
 	 * @param __func The function to excute if the plugin exists and is valid.
@@ -296,6 +300,7 @@ public final class IOpipeExecution
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/01/23
 	 */
+	@Deprecated
 	public final <C extends IOpipePluginExecution> void plugin(Class<C> __cl,
 		Consumer<C> __func)
 		throws ClassCastException, NullPointerException
@@ -317,6 +322,10 @@ public final class IOpipeExecution
 	 * return an instance of {@link AutoCloseable} which may be used with
 	 * try-with-resources.
 	 *
+	 * @deprecated This method is deprecated and should not be used in code
+	 * because if a plugin is not available then the specified code will not
+	 * be executed. This is error prone and may lead to code paths being
+	 * different depending on the state of plugins.
 	 * @param <C> The class type of the execution state.
 	 * @param <R> The type of object to return.
 	 * @param __cl The class object of the execution state.
@@ -328,6 +337,7 @@ public final class IOpipeExecution
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/01/23
 	 */
+	@Deprecated
 	public final <C extends IOpipePluginExecution, R extends AutoCloseable>
 		R plugin(Class<C> __cl, Function<C, R> __func)
 		throws ClassCastException, NullPointerException
@@ -351,6 +361,10 @@ public final class IOpipeExecution
 	 * try-with-resources. An optional secondary argument may be passed to
 	 * simplify some operations that take an extra parameter.
 	 *
+	 * @deprecated This method is deprecated and should not be used in code
+	 * because if a plugin is not available then the specified code will not
+	 * be executed. This is error prone and may lead to code paths being
+	 * different depending on the state of plugins.
 	 * @param <C> The class type of the execution state.
 	 * @param <R> The type of object to return.
 	 * @param <V> The type of extra value to pass to the function.
@@ -364,6 +378,7 @@ public final class IOpipeExecution
 	 * @throws NullPointerException On null arguments except for {@code __v}.
 	 * @since 2018/01/23
 	 */
+	@Deprecated
 	public final <C extends IOpipePluginExecution, R extends AutoCloseable,
 		V> R plugin(Class<C> __cl, BiFunction<C, V, R> __func, V __v)
 		throws ClassCastException, NullPointerException
