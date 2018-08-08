@@ -17,6 +17,12 @@ It is licensed under the Apache 2.0.
    * [Implement `com.iopipe.SimpleRequestStreamHandlerWrapper`](#implement-comiopipesimplerequeststreamhandlerwrapper)
    * [Wrapping Without A Helper Class](#wrapping-without-a-helper-class)
  * [Accessing the AWS `Context` Object](#accessing-the-aws-context-object)
+ * [Monitoring](#monitoring)
+   * [Custom Metrics](#custom-metrics)
+   * [Event Info](#event-info)
+   * [Labels](#labels)
+   * [Profiling](#profiling)
+   * [Tracing](#tracing)
  * [Resources](#resources)
 
 # Building With IOpipe
@@ -196,21 +202,7 @@ protected final String wrappedHandleRequest(IOpipeExecution __exec, String __n)
 }
 ```
 
-# Resources
-
-For this agent:
-
- * [Code of Conduct](CODE_OF_CONDUCT.md)
- * [JavaDocs](https://www.javadoc.io/doc/com.iopipe/iopipe)
-
-In general:
-
- * [Java Programming Model on AWS](https://docs.aws.amazon.com/lambda/latest/dg/java-programming-model.html)
- * [Logging on AWS](https://docs.aws.amazon.com/lambda/latest/dg/java-logging.html)
-
---------------------------------------------
-# OLD STUFF BELOW
---------------------------------------------
+# Monitoring
 
 ## Custom Metrics
 
@@ -308,4 +300,16 @@ Disabling the plugin can be done as followed:
 
  * Setting the system property `com.iopipe.plugin.trace` to `false`.
  * Setting the environment variable `IOPIPE_TRACE_ENABLED` to `false`.
+
+# Resources
+
+For this agent:
+
+ * [Code of Conduct](CODE_OF_CONDUCT.md)
+ * [JavaDocs](https://www.javadoc.io/doc/com.iopipe/iopipe)
+
+In general:
+
+ * [Java Programming Model on AWS](https://docs.aws.amazon.com/lambda/latest/dg/java-programming-model.html)
+ * [Logging on AWS](https://docs.aws.amazon.com/lambda/latest/dg/java-logging.html)
 
