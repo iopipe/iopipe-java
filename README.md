@@ -147,7 +147,7 @@ service.<String>run(context, (exec) -> "Hello World!", input);
 # Configuration
 
 IOpipe may be configured using system properties and/or environment variables.
-Note that on AWS Lambda configuration must be done using environ,ent variables.
+Note that on AWS Lambda, environment variables must be used.
 If you do specify system properties then they will take precedence before
 environment variables.
 
