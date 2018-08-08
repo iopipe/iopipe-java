@@ -6,12 +6,55 @@ IOpipe Telemetry Agent for Java
 This project provides analytics and distributed tracing for event-driven
 applications running on AWS Lambda using [IOpipe](https://www.iopipe.com).
 
-The JavaDocs for this library are available on [JavaDoc.io](https://www.javadoc.io/doc/com.iopipe/iopipe).
+ * [IOpipe](https://iopipe.com/)
+ * [JavaDocs](https://www.javadoc.io/doc/com.iopipe/iopipe)
+ * [Building With IOpipe](#building-with-iopipe)
+   * [Maven](#maven)
+   * [Gradle](#gradle)
+ * [Resources](#resources)
+
+# Building With IOpipe
+
+This agent is available in Maven Central and Bintray and either can be used for
+including the agent in your library.
+
+## Maven
+
+Your `pom.xml` file may be modified to include the following dependency:
+
+```xml
+<dependency>
+  <groupId>com.iopipe</groupId>
+  <artifactId>iopipe</artifactId>
+  <version>1.6.0</version>
+</dependency>
+```
+
+It is highly recommended that you use the [Shade Plugin](https://maven.apache.org/plugins/maven-shade-plugin/index.html)
+for Maven since AWS requires that all classes and files are packed into a
+single JAR.
+
+If you are using third-party IOpipe plugins or are writing your own you should
+in your POM include the [service resource transformer for shading](https://maven.apache.org/plugins/maven-shade-plugin/examples/resource-transformers.html#ServicesResourceTransformer).
+
+## Gradle
+
+For a basic configuration with Gradle there is [an example build.gradle](https://github.com/iopipe/examples/blob/master/java/build.gradle) that you may use as a base for your
+project.
+
+# Resources
+
+ * [Java Programming Model on AWS](https://docs.aws.amazon.com/lambda/latest/dg/java-programming-model.html)
+ * [Logging on AWS](https://docs.aws.amazon.com/lambda/latest/dg/java-logging.html)
+
+--------------------------------------------
+# OLD STUFF BELOW
+--------------------------------------------
 
 # Installation & usage
 
 This documentation mostly refers to using Maven for your project, if you
-are using Gradle, [there is a basic build.gradle available in the examples project](https://github.com/iopipe/examples/blob/master/java/build.gradle).
+are using Gradle, 
 
 Using the IOpipe service with your pre-existing and newly created classes is
 quite simple. If you are using Maven it requires modification of your `pom.xml`
@@ -25,13 +68,7 @@ Logging can be enabled by following the instructions at:
 
 In the `pom.xml`, add the following block to your `<dependencies>`:
 
-```xml
-<dependency>
-  <groupId>com.iopipe</groupId>
-  <artifactId>iopipe</artifactId>
-  <version>1.6.0</version>
-</dependency>
-```
+
 
 For debugging on Amazon AWS, the additional dependency is required:
 
