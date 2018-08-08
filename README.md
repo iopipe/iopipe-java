@@ -307,6 +307,7 @@ For this agent:
 
  * [Code of Conduct](CODE_OF_CONDUCT.md)
  * [JavaDocs](https://www.javadoc.io/doc/com.iopipe/iopipe)
+ * [Writing and Using IOpipe Plugins for Java](PLUGINS.md)
 
 In general:
 
