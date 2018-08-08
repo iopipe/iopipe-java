@@ -17,7 +17,7 @@ It is licensed under the Apache 2.0.
    * [Implement `com.iopipe.SimpleRequestStreamHandlerWrapper`](#implement-comiopipesimplerequeststreamhandlerwrapper)
    * [Wrapping Without A Helper Class](#wrapping-without-a-helper-class)
  * [Accessing the AWS `Context` Object](#accessing-the-aws-context-object)
- * [Monitoring](#monitoring)
+ * [Measuring and Monitoring](#measuring-and-monitoring)
    * [Custom Metrics](#custom-metrics)
    * [Event Info](#event-info)
    * [Labels](#labels)
@@ -202,7 +202,7 @@ protected final String wrappedHandleRequest(IOpipeExecution __exec, String __n)
 }
 ```
 
-# Monitoring
+# Measuring and Monitoring
 
 ## Custom Metrics
 
