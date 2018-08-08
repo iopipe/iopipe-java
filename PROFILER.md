@@ -5,17 +5,30 @@ The IOpipe profiler generates snapshots which can be opened and parsed with
 for Windows and Mac, and may also be installed on Debian and Ubuntu based
 systems by running `apt-get install visualvm`.
 
+ * [Enabling Profiling](#enabling-profiling)
+   * [For Serverless Framework](#for-serverless-framework)
+ * [Customizing Profiling](#customizing-profiling)
+ * [Getting Profiling Data](#getting-profiling-data)
+ * [How To Use Sampling-Only Profiler Data](#how-to-use-sampling-only-profiler-data)
+ * [Statistics Data](#statistics-data)
+   * [Timing](#timing)
+   * [Class Loading](#class-loading)
+   * [Garbage Collection](#garbage-collection)
+   * [Memory](#memory)
+   * [Threads](#threads)
+   * [Buffer Pools](#buffer-pools)
+
 There is currently one mode of operation, which is a sampling-only profiler
 which inspects the state of all threads to determine how long they have been
 running for. This mode does not require any code to be modified to support profiling
 so all code run by your Lambda functions will be profiled automatically, as
 long as the profiler is enabled.
 
-## Enabling Profiling
+# Enabling Profiling
 
 Set the environment variable IOPIPE_PROFILER_ENABLED to `true`
 
-### For Serverless Framework:
+## For Serverless Framework
 
 In the `serverless.yml` file, under `functions:`, `(your_function_name_here):`, `environment:`, set the environment variable `IOPIPE_PROFILER_ENABLED` to `true`
 
@@ -52,7 +65,7 @@ debugging the profiler.
      instead.
    * The prefix should consist of characters which make up valid filenames.
 
-## Getting Profiling Data
+# Getting Profiling Data
 
 When the profiler is enabled, .zip files containing the profiling data may be downloaded from the individual
 invocation information page, under 'Profiling'. Unzip it, then load the file in VisualVM as a profile snapshot.
