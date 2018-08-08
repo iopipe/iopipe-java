@@ -8,7 +8,6 @@ applications running on AWS Lambda using [IOpipe](https://www.iopipe.com).
 
 It is licensed under the Apache 2.0.
 
- * [IOpipe](https://iopipe.com/)
  * [Building With IOpipe](#building-with-iopipe)
    * [Maven](#maven)
    * [Gradle](#gradle)
