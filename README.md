@@ -9,8 +9,6 @@ applications running on AWS Lambda using [IOpipe](https://www.iopipe.com).
 It is licensed under the Apache 2.0.
 
  * [IOpipe](https://iopipe.com/)
- * [JavaDocs](https://www.javadoc.io/doc/com.iopipe/iopipe)
- * [Code of Conduct](CODE_OF_CONDUCT.md)
  * [Building With IOpipe](#building-with-iopipe)
    * [Maven](#maven)
    * [Gradle](#gradle)
@@ -200,6 +198,13 @@ protected final String wrappedHandleRequest(IOpipeExecution __exec, String __n)
 ```
 
 # Resources
+
+For this agent:
+
+ * [Project Code of Conduct](CODE_OF_CONDUCT.md)
+ * [JavaDocs](https://www.javadoc.io/doc/com.iopipe/iopipe)
+
+In general:
 
  * [Java Programming Model on AWS](https://docs.aws.amazon.com/lambda/latest/dg/java-programming-model.html)
  * [Logging on AWS](https://docs.aws.amazon.com/lambda/latest/dg/java-logging.html)
