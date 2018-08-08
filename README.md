@@ -11,7 +11,7 @@ applications running on AWS Lambda using [IOpipe](https://www.iopipe.com).
  * [Building With IOpipe](#building-with-iopipe)
    * [Maven](#maven)
    * [Gradle](#gradle)
- * [Wrapping Your Lambda](#wrapping-your-lambda)'
+ * [Wrapping Your Lambda](#wrapping-your-lambda)
    * [Implement `com.iopipe.SimpleRequestHandlerWrapper`](#implement-comiopipesimplerequesthandlerwrapper)
    * [Implement `com.iopipe.SimpleRequestStreamHandlerWrapper`](#implement-comiopipesimplerequeststreamhandlerwrapper)
    * [Wrapping Without A Helper Class](#wrapping-without-a-helper-class)
