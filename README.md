@@ -11,6 +11,11 @@ applications running on AWS Lambda using [IOpipe](https://www.iopipe.com).
  * [Building With IOpipe](#building-with-iopipe)
    * [Maven](#maven)
    * [Gradle](#gradle)
+ * [Wrapping Your Lambda](#wrapping-your-lambda)'
+   * [Implement `com.iopipe.SimpleRequestHandlerWrapper`](#implement-comiopipesimplerequesthandlerwrapper)
+   * [Implement `com.iopipe.SimpleRequestStreamHandlerWrapper`](#implement-comiopipesimplerequeststreamhandlerwrapper)
+   * [Wrapping Without A Helper Class](#wrapping-without-a-helper-class)
+ * [Accessing the AWS `Context` Object](#accessing-the-aws-context-object)
  * [Resources](#resources)
 
 # Building With IOpipe
@@ -41,6 +46,110 @@ in your POM include the [service resource transformer for shading](https://maven
 
 For a basic configuration with Gradle there is [an example build.gradle](https://github.com/iopipe/examples/blob/master/java/build.gradle) that you may use as a base for your
 project.
+
+# Wrapping your Lambda
+
+There are three ways to wrap your lambda:
+
+ * If you are currently implementing `RequestHandler`,
+   extend the class `com.iopipe.SimpleRequestHandlerWrapper`.
+ * If you are currently implementing `RequestStreamHandler`,
+   extend the class `com.iopipe.SimpleRequestStreamHandlerWrapper`.
+ * You may also initialize the IOpipe wrapper yourself.
+
+## Implement `com.iopipe.SimpleRequestHandlerWrapper`
+
+This class provides an implementation of `RequestHandler<I, O>`.
+
+Add the following import statement:
+
+```java
+import com.iopipe.IOpipeExecution;
+import com.iopipe.SimpleRequestHandlerWrapper;
+```
+
+Add a class which extends:
+
+```java
+SimpleRequestHandlerWrapper<I, O>
+```
+
+Implement the following method:
+
+```java
+protected O wrappedHandleRequest(IOpipeExecution __exec, I __input)
+```
+
+## Implement `com.iopipe.SimpleRequestStreamHandlerWrapper`
+
+This class provides an implementation of `RequestStreamHandler`.
+
+Add the following import statements:
+
+```java
+import com.amazonaws.services.lambda.runtime.Context;
+import com.iopipe.IOpipeExecution;
+import com.iopipe.SimpleRequestStreamHandlerWrapper;
+import java.io.InputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+```
+
+Add a class which extends:
+
+```java
+SimpleRequestStreamHandlerWrapper
+```
+
+Implement the following method:
+
+```java
+protected void wrappedHandleRequest(IOpipeExecution __exec, InputStream __in, OutputStream __out) throws IOException
+```
+
+## Wrapping Without A Helper Class
+
+If you are unable to wrap using the `SimpleRequestHandlerWrapper` or
+`SimpleRequestStreamHandlerWrapper` you may manually wrap your method and then
+execute that method or code.
+
+Add the following import statements:
+
+```java
+import com.amazonaws.services.lambda.runtime.Context;
+import com.iopipe.IOpipeService;
+```
+
+Obtain an instance of `IOpipeService`:
+
+```java
+IOpipeService service = IOpipeService.instance();
+```
+
+Run by passing a lambda or a class which implements the functional interface
+`Function<IOpipeExecution, R>`, an input object may be specified which is
+usable by plugins that require it:
+
+```java
+service.<String>run(context, (exec) -> "Hello World!");
+service.<String>run(context, (exec) -> "Hello World!", input);
+```
+
+# Accessing the AWS `Context` Object
+
+The AWS `Context` object may be obtained by invoking `context()` on
+the `IOpipeExecution` instance. For example:
+
+```java
+protected final String wrappedHandleRequest(IOpipeExecution __exec, String __n)
+{
+    // Code here...
+    
+    Context context = __exec.context();
+    
+    // Code here...
+}
+```
 
 # Resources
 
