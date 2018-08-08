@@ -200,7 +200,7 @@ protected final String wrappedHandleRequest(IOpipeExecution __exec, String __n)
 
 For this agent:
 
- * [Project Code of Conduct](CODE_OF_CONDUCT.md)
+ * [Code of Conduct](CODE_OF_CONDUCT.md)
  * [JavaDocs](https://www.javadoc.io/doc/com.iopipe/iopipe)
 
 In general:
