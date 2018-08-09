@@ -2,6 +2,10 @@
 
 This document contains information on how to write and use plugins for IOpipe.
 
+ * [Using Plugins](#using-plugins)
+   * [Detailed Instructions](#detailed-instructions)
+ * [Writing Plugins](#writing-plugins)
+
 For every invocation that is performed there is a unique object which
 represents the state of the plugin for each plugin as they are needed. This
 execution state is initialized when the plugin is first referenced. When the

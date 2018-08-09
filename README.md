@@ -6,24 +6,33 @@ IOpipe Telemetry Agent for Java
 This project provides analytics and distributed tracing for event-driven
 applications running on AWS Lambda using [IOpipe](https://www.iopipe.com).
 
-The JavaDocs for this library are available on [JavaDoc.io](https://www.javadoc.io/doc/com.iopipe/iopipe).
+It is licensed under the Apache 2.0.
 
-# Installation & usage
+ * [Building With IOpipe](#building-with-iopipe)
+   * [Maven](#maven)
+   * [Gradle](#gradle)
+ * [Configuration](#configuration)
+ * [Wrapping Your Lambda](#wrapping-your-lambda)
+   * [Implement `com.iopipe.SimpleRequestHandlerWrapper`](#implement-comiopipesimplerequesthandlerwrapper)
+   * [Implement `com.iopipe.SimpleRequestStreamHandlerWrapper`](#implement-comiopipesimplerequeststreamhandlerwrapper)
+   * [Wrapping Without A Helper Class](#wrapping-without-a-helper-class)
+ * [Accessing the AWS `Context` Object](#accessing-the-aws-context-object)
+ * [Measuring and Monitoring](#measuring-and-monitoring)
+   * [Custom Metrics](#custom-metrics)
+   * [Event Info](#event-info)
+   * [Labels](#labels)
+   * [Profiling](#profiling)
+   * [Tracing](#tracing)
+ * [Resources](#resources)
 
-This documentation mostly refers to using Maven for your project, if you
-are using Gradle, [there is a basic build.gradle available in the examples project](https://github.com/iopipe/examples/blob/master/java/build.gradle).
+# Building With IOpipe
 
-Using the IOpipe service with your pre-existing and newly created classes is
-quite simple. If you are using Maven it requires modification of your `pom.xml`
-file, otherwise you may include the JAR file of the library to your project.
+This agent is available in Maven Central and Bintray and either can be used for
+including the agent in your library.
 
-More information on using Java Lambdas on Amazon AWS can be obtained at:
-<https://docs.aws.amazon.com/lambda/latest/dg/java-programming-model.html>.
+## Maven
 
-Logging can be enabled by following the instructions at:
-<https://docs.aws.amazon.com/lambda/latest/dg/java-logging.html>.
-
-In the `pom.xml`, add the following block to your `<dependencies>`:
+Your `pom.xml` file may be modified to include the following dependency:
 
 ```xml
 <dependency>
@@ -33,68 +42,34 @@ In the `pom.xml`, add the following block to your `<dependencies>`:
 </dependency>
 ```
 
-For debugging on Amazon AWS, the additional dependency is required:
+It is highly recommended that you use the [Shade Plugin](https://maven.apache.org/plugins/maven-shade-plugin/index.html)
+for Maven since AWS requires that all classes and files are packed into a
+single JAR.
 
-```xml
-<dependency>
-  <groupId>com.amazonaws</groupId>
-  <artifactId>aws-lambda-java-log4j2</artifactId>
-  <version>1.0.0</version>
-</dependency>
-```
+If you are using third-party IOpipe plugins or are writing your own you should
+in your POM include the [service resource transformer for shading](https://maven.apache.org/plugins/maven-shade-plugin/examples/resource-transformers.html#ServicesResourceTransformer).
 
-If you are using log4j2 in your project then the following transformer must
-be specified:
+If your JAR file is too big you may try [reducing the size of your JAR using the shade plugin](https://maven.apache.org/plugins/maven-shade-plugin/examples/includes-excludes.html).
+If that does not reduce the size of your JAR enough and you need more space
+you can __strip all debugging and source line information__, __which makes
+debugging much more difficult__, by running `pack200 -r -G path-to-target.jar`.
 
-```xml
-<configuration>
-  <transformers>
-    <transformer implementation="com.github.edwgiz.mavenShadePlugin.log4j2CacheTransformer.PluginsCacheFileTransformer" />
-  </transformers>
-</configuration>
-```
+## Gradle
 
-It is highly recommended to configure the shade plugin so that it merges service resources together, this will be _especially_ important if you plan to
-use a number of plugins which may exist across different packages. By default
-the shade plugin will not merge resources for you and as a result plugins will
-appear to disappear. As such, add the following transformer to the shade
-plugin:
+For a basic configuration with Gradle there is [an example build.gradle](https://github.com/iopipe/examples/blob/master/java/build.gradle) that you may use as a base for your
+project.
 
-```xml
-<configuration>
-  <transformers>
-    <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
-  </transformers>
-</configuration>
-```
+# Wrapping your Lambda
 
-To create a package which is ready for deployment you may run:
-
-```bash
-mvn package
-```
-
-If you wish to strip all debugging information in the JAR file __including__
-__potentially meaningful source lines to stack traces__ you can run the
-following command:
-
-```bash
-pack200 -r -G file.jar
-```
-
-Deployment is the same as other Java programs on the Amazon Lambda platform.
-
-## Configuration
-
-There are three ways to use the service:
+There are three ways to wrap your lambda:
 
  * If you are currently implementing `RequestHandler`,
-   implement `com.iopipe.SimpleRequestHandlerWrapper`
+   extend the class `com.iopipe.SimpleRequestHandlerWrapper`.
  * If you are currently implementing `RequestStreamHandler`,
-   implement `com.iopipe.SimpleRequestStreamHandlerWrapper`
- * You may also interact with IOpipe directly
+   extend the class `com.iopipe.SimpleRequestStreamHandlerWrapper`.
+ * You may also initialize the IOpipe wrapper yourself.
 
-### Implement `com.iopipe.SimpleRequestHandlerWrapper`.
+## Implement `com.iopipe.SimpleRequestHandlerWrapper`
 
 This class provides an implementation of `RequestHandler<I, O>`.
 
@@ -117,7 +92,7 @@ Implement the following method:
 protected O wrappedHandleRequest(IOpipeExecution __exec, I __input)
 ```
 
-### Implement `com.iopipe.SimpleRequestStreamHandlerWrapper`.
+## Implement `com.iopipe.SimpleRequestStreamHandlerWrapper`
 
 This class provides an implementation of `RequestStreamHandler`.
 
@@ -144,10 +119,11 @@ Implement the following method:
 protected void wrappedHandleRequest(IOpipeExecution __exec, InputStream __in, OutputStream __out) throws IOException
 ```
 
-### Using the service directly.
+## Wrapping Without A Helper Class
 
-This may be used with any request handler such as `RequestHandler` or
-`RequestStreamHandler`, although it is not limited to those interfaces.
+If you are unable to wrap using the `SimpleRequestHandlerWrapper` or
+`SimpleRequestStreamHandlerWrapper` you may manually wrap your method and then
+execute that method or code.
 
 Add the following import statements:
 
@@ -171,27 +147,12 @@ service.<String>run(context, (exec) -> "Hello World!");
 service.<String>run(context, (exec) -> "Hello World!", input);
 ```
 
-### Accessing the AWS `Context` Object
+# Configuration
 
-The AWS `Context` object may be obtained by invoking `context()` on
-the `IOpipeExecution` instance. For example:
-
-```java
-protected final String wrappedHandleRequest(IOpipeExecution __exec, String __n)
-{
-    // Code here...
-    
-    Context context = __exec.context();
-    
-    // Code here...
-}
-```
-
-### Setting system properties and environment variables
-
-Set up IOpipe using system properties or environment variables. N.B., it is necessary
-to use environment variables for running on AWS Lambda. System properties will
-take precedence when available.
+IOpipe may be configured using system properties and/or environment variables.
+Note that on AWS Lambda, environment variables must be used.
+If you do specify system properties then they will take precedence before
+environment variables.
 
 * `com.iopipe.enabled` or `IOPIPE_ENABLED`
   * If this is set and if the value is `true` (ignoring case) then the library
@@ -225,6 +186,24 @@ at:
 
 The associated package is `com.iopipe`.
 
+# Accessing the AWS `Context` Object
+
+The AWS `Context` object may be obtained by invoking `context()` on
+the `IOpipeExecution` instance. For example:
+
+```java
+protected final String wrappedHandleRequest(IOpipeExecution __exec, String __n)
+{
+    // Code here...
+    
+    Context context = __exec.context();
+    
+    // Code here...
+}
+```
+
+# Measuring and Monitoring
+
 ## Custom Metrics
 
 To use custom metrics, you can simply call the following two methods in the
@@ -252,6 +231,7 @@ It operates on the given input classes:
  * `com.amazonaws.services.lambda.runtime.events.S3Event`
  * `com.amazonaws.services.lambda.runtime.events.ScheduledEvent`
  * `com.amazonaws.services.lambda.runtime.events.SNSEvent`
+ * `com.amazonaws.services.lambda.runtime.events.SQSEvent`
  * `com.amazonaws.services.s3.event.S3EventNotification`
 
 By default this plugin is enabled and requires no changes to your code unless
@@ -321,54 +301,16 @@ Disabling the plugin can be done as followed:
  * Setting the system property `com.iopipe.plugin.trace` to `false`.
  * Setting the environment variable `IOPIPE_TRACE_ENABLED` to `false`.
 
-# Building and Installing the Project Locally
+# Resources
 
-This project requires at least Java 8 to run and additionally required Maven
-to build.
+For this agent:
 
-Compile the project:
+ * [Code of Conduct](CODE_OF_CONDUCT.md)
+ * [JavaDocs](https://www.javadoc.io/doc/com.iopipe/iopipe)
+ * [Writing and Using IOpipe Plugins for Java](PLUGINS.md)
 
-```bash
-mvn compile
-```
+In general:
 
-Compile JAR package:
-
-```bash
-mvn package
-```
-
-Run tests:
-
-```bash
-mvn test
-```
-
-Clean build:
-
-```bash
-mvn clean
-```
-
-Install the project into your own Maven repository:
-
-```bash
-mvn install
-```
-
-Generate Maven informational pages:
-
-```bash
-mvn site
-```
-
-generate JavaDoc:
-
-```bash
-mvn javadoc:javadoc
-```
-
-## License
-
-Apache 2.0
+ * [Java Programming Model on AWS](https://docs.aws.amazon.com/lambda/latest/dg/java-programming-model.html)
+ * [Logging on AWS](https://docs.aws.amazon.com/lambda/latest/dg/java-logging.html)
 
