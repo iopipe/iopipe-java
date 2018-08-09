@@ -1,6 +1,8 @@
 package com.iopipe;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.iopipe.http.NullConnection;
 import com.iopipe.http.RemoteBody;
 import com.iopipe.http.RemoteConnection;
@@ -201,7 +203,7 @@ public final class IOpipeService
 	 * @throws RuntimeException If the called function threw an exception.
 	 * @since 2018/08/09
 	 */
-	public final <I, O> O run(Context __context, AWSFunction<I, O> __func,
+	public final <I, O> O run(Context __context, RequestHandler<I, O> __func,
 		I __input)
 		throws Error, NullPointerException, RuntimeException
 	{
