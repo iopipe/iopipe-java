@@ -73,7 +73,7 @@ public abstract class SimpleRequestStreamHandlerWrapper
 	 *
 	 * @since 2017/12/17
 	 */
-	private static final class __IOException__
+	static final class __IOException__
 		extends RuntimeException
 	{
 		/**

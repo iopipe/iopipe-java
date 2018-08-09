@@ -16,6 +16,9 @@ import com.iopipe.plugin.IOpipePluginExecution;
 import com.iopipe.plugin.IOpipePluginPostExecutable;
 import com.iopipe.plugin.IOpipePluginPreExecutable;
 import java.io.Closeable;
+import java.io.InputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
@@ -214,6 +217,54 @@ public final class IOpipeService
 		// changed
 		return this.<O>run(__context, (__exec) -> __func.handleRequest(
 			__input, __exec.context()), __input);
+	}
+	
+	/**
+	 * Runs the specified function and generates a report.
+	 *
+	 * @param __context The context provided by the AWS service.
+	 * @param __func The lambda function to execute, measure, and generate a
+	 * report for.
+	 * @param __in The input stream for data.
+	 * @param __out The output stream for data.
+	 * @throws Error If the called function threw an error.
+	 * @throws IOException On read/write errors.
+	 * @throws NullPointerException If no function was specified.
+	 * @throws RuntimeException If the called function threw an exception.
+	 * @since 2018/08/09
+	 */
+	public final void run(Context __context, RequestStreamHandler __func,
+		InputStream __in, OutputStream __out)
+		throws Error, IOException, NullPointerException, RuntimeException
+	{
+		if (__func == null)
+			throw new NullPointerException();
+		
+		// Use the context derived from the execution in the event that it is
+		// changed
+		try
+		{
+			this.<Object>run(__context, (__exec) ->
+				{
+					try
+					{
+						__func.handleRequest(__in, __out, __exec.context());
+					}
+					catch (IOException e)
+					{
+						throw new SimpleRequestStreamHandlerWrapper.__IOException__(
+							e.getMessage(), e);
+					}
+					
+					return null;
+				}, __in);
+		}
+		
+		// Forward IOExceptions
+		catch (SimpleRequestStreamHandlerWrapper.__IOException__ e)
+		{
+			throw (IOException)e.getCause();
+		}
 	}
 	
 	/**
