@@ -189,6 +189,34 @@ public final class IOpipeService
 	/**
 	 * Runs the specified function and generates a report.
 	 *
+	 * @param <I> The input type.
+	 * @param <O> The output type.
+	 * @param __context The context provided by the AWS service.
+	 * @param __func The lambda function to execute, measure, and generate a
+	 * report for.
+	 * @param __input The input value for the lambda.
+	 * @return The result of the function.
+	 * @throws Error If the called function threw an error.
+	 * @throws NullPointerException If no function was specified.
+	 * @throws RuntimeException If the called function threw an exception.
+	 * @since 2018/08/09
+	 */
+	public final <I, O> O run(Context __context, AWSFunction<I, O> __func,
+		I __input)
+		throws Error, NullPointerException, RuntimeException
+	{
+		if (__func == null)
+			throw new NullPointerException();
+		
+		// Use the context derived from the execution in the event that it is
+		// changed
+		return this.<O>run(__context, (__exec) -> __func.handleRequest(
+			__input, __exec.context()), __input);
+	}
+	
+	/**
+	 * Runs the specified function and generates a report.
+	 *
 	 * @param <R> The value to return.
 	 * @param __context The context provided by the AWS service.
 	 * @param __func The lambda function to execute, measure, and generate a
