@@ -16,6 +16,33 @@ public final class GenericAWSRequestStreamHandler
 	implements RequestStreamHandler
 {
 	/**
+	 * Initializes the entry point for the generic stream handler using the
+	 * default system provided entry point.
+	 *
+	 * @since 2018/08/13
+	 */
+	public GenericAWSRequestStreamHandler()
+	{
+		this(EntryPoint.defaultEntryPoint());
+	}
+	
+	/**
+	 * Initializes the stream handler with the given entry point.
+	 *
+	 * @param __e The entry point to use.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/08/13
+	 */
+	public GenericAWSRequestStreamHandler(EntryPoint __e)
+		throws NullPointerException
+	{
+		if (__e == null)
+			throw new NullPointerException();
+		
+		throw new Error("TODO");
+	}
+	
+	/**
 	 * {@inheritDoc}
 	 * @since 2018/08/09
 	 */
