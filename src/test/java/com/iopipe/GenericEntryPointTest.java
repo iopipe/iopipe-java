@@ -1,15 +1,17 @@
 package com.iopipe;
 
+import com.iopipe.generic.EntryPoint;
+import java.lang.invoke.MethodHandle;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * This tests the generic AWS request handler.
+ * This tests to ensure that the entry point lookup works.
  *
  * @since 2018/08/13
  */
-public class GenericEntryPointAWSRequestHandlerTest
+public class GenericEntryPointTest
 {
 	/**
 	 * Tests the generic entry point.

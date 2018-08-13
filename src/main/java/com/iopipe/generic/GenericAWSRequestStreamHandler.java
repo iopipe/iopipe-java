@@ -2,6 +2,7 @@ package com.iopipe.generic;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
+import java.lang.invoke.MethodHandle;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
