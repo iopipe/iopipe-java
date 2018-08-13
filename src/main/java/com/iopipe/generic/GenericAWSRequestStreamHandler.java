@@ -1,4 +1,4 @@
-package com.iopipe;
+package com.iopipe.generic;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
