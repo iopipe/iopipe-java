@@ -52,7 +52,9 @@ public class GenericEntryPointTest
 				EntryPoint ep = new EntryPoint((Class)_METHODS[i],
 					(String)_METHODS[i + 1]);
 				
-				if ("squirrel".equals(ep.handle().invokeExact("SQUIRREL")))
+				if ("squirrel".equals((ep.isStatic() ?
+					ep.handle().invoke("SQUIRREL") :
+					ep.handle().invoke(ep.newInstance(), "SQUIRREL"))))
 					assertTrue(true, form);
 				else
 					assertTrue(false, form);
