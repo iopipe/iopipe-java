@@ -1,5 +1,6 @@
 package com.iopipe;
 
+import com.iopipe.elsewhere.Classes;
 import com.iopipe.generic.EntryPoint;
 import java.lang.invoke.MethodHandle;
 import org.junit.jupiter.api.Test;
@@ -14,24 +15,24 @@ import static org.junit.jupiter.api.Assertions.*;
 public class GenericEntryPointTest
 {
 	/** The methods to be tested for entry points. */
-	private static String[] _METHODS =
+	private static Object[] _METHODS =
 		{
-			"com.iopipe.elsewhere.PackagePrivateClass::instancePrivate",
-			"com.iopipe.elsewhere.PackagePrivateClass::instancePackagePrivate",
-			"com.iopipe.elsewhere.PackagePrivateClass::instanceProtected",
-			"com.iopipe.elsewhere.PackagePrivateClass::instancePublic",
-			"com.iopipe.elsewhere.PackagePrivateClass::staticPrivate",
-			"com.iopipe.elsewhere.PackagePrivateClass::staticPackagePrivate",
-			"com.iopipe.elsewhere.PackagePrivateClass::staticProtected",
-			"com.iopipe.elsewhere.PackagePrivateClass::staticPublic",
-			"com.iopipe.elsewhere.PublicClass::instancePrivate",
-			"com.iopipe.elsewhere.PublicClass::instancePackagePrivate",
-			"com.iopipe.elsewhere.PublicClass::instanceProtected",
-			"com.iopipe.elsewhere.PublicClass::instancePublic",
-			"com.iopipe.elsewhere.PublicClass::staticPrivate",
-			"com.iopipe.elsewhere.PublicClass::staticPackagePrivate",
-			"com.iopipe.elsewhere.PublicClass::staticProtected",
-			"com.iopipe.elsewhere.PublicClass::staticPublic",
+			Classes.PACKAGE_PRIVATE, "instancePrivate",
+			Classes.PACKAGE_PRIVATE, "instancePackagePrivate",
+			Classes.PACKAGE_PRIVATE, "instanceProtected",
+			Classes.PACKAGE_PRIVATE, "instancePublic",
+			Classes.PACKAGE_PRIVATE, "staticPrivate",
+			Classes.PACKAGE_PRIVATE, "staticPackagePrivate",
+			Classes.PACKAGE_PRIVATE, "staticProtected",
+			Classes.PACKAGE_PRIVATE, "staticPublic",
+			Classes.PUBLIC, "instancePrivate",
+			Classes.PUBLIC, "instancePackagePrivate",
+			Classes.PUBLIC, "instanceProtected",
+			Classes.PUBLIC, "instancePublic",
+			Classes.PUBLIC, "staticPrivate",
+			Classes.PUBLIC, "staticPackagePrivate",
+			Classes.PUBLIC, "staticProtected",
+			Classes.PUBLIC, "staticPublic",
 		};
 	
 	/**
@@ -42,23 +43,28 @@ public class GenericEntryPointTest
 	@Test
 	public void test()
 	{
-		for (String method : _METHODS)
+		for (int i = 0, n = _METHODS.length; i < n; i += 2)
+		{
+			String form = (((Class<?>)_METHODS[i]).getName()) + _METHODS[i + 1];
+			
 			try
 			{
-				EntryPoint ep = new EntryPoint(method);
+				EntryPoint ep = new EntryPoint((Class)_METHODS[i],
+					(String)_METHODS[i + 1]);
 				
 				if ("squirrel".equals(ep.handle().invokeExact("SQUIRREL")))
-					assertTrue(true, method);
+					assertTrue(true, form);
 				else
-					assertTrue(false, method);
+					assertTrue(false, form);
 			}
 			catch (Throwable t)
 			{
 				t.printStackTrace();
 				
 				// Failed
-				assertTrue(false, method);
+				assertTrue(false, form);
 			}
+		}
 	}
 }
 
