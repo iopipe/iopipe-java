@@ -37,6 +37,17 @@ public final class IntegerValue
 	}
 	
 	/**
+	 * Adds to the value atomically then returns it.
+	 *
+	 * @return The new value.
+	 * @since 2018/08/15
+	 */
+	public int addAndGet(int __v)
+	{
+		return this.value.addAndGet(__v);
+	}
+	
+	/**
 	 * Increments the value then returns it.
 	 *
 	 * @return The value after incrementing.
