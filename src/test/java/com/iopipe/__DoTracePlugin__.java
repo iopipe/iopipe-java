@@ -29,9 +29,13 @@ class __DoTracePlugin__
 		new String[]
 		{
 			"start:byplugin", "mark",
-			"start:byutils", "mark",
+			
+			
 			"end:byplugin", "mark",
 			"measure:byplugin", "measure",
+			
+			"start:byutils", "mark",
+			
 			"end:byutils", "mark",
 			"measure:byutils", "measure",
 		};
