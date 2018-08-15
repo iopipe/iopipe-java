@@ -99,7 +99,7 @@ class __DoTracePlugin__
 		boolean enabled = this.enabled;
 		
 		super.assertEquals(enabled, this.tracepluginexecuted);
-		super.assertEquals((enabled ? (1 << (_ORDER.length / 2) : 0)) - 1, this.orderdepth);
+		super.assertEquals((enabled ? ((1 << (_ORDER.length / 2)) - 1) : 0), this.orderdepth);
 		super.assertEquals(enabled, this.hasautolabel);
 	}
 	
