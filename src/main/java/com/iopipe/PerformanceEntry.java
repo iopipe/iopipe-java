@@ -70,11 +70,11 @@ public final class PerformanceEntry
 		if (rv != 0)
 			return rv;
 		
-		rv = Long.compare(this.durationns, __o.durationns);
+		rv = this.name.compareTo(__o.name);
 		if (rv != 0)
 			return rv;
 		
-		rv = this.name.compareTo(__o.name);
+		rv = Long.compare(this.durationns, __o.durationns);
 		if (rv != 0)
 			return rv;
 		
