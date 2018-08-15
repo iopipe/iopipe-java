@@ -309,6 +309,11 @@ public final class IOpipeService
 		if (__context == null || __func == null)
 			throw new NullPointerException();
 		
+		// Earliest start time for method entry
+		long nowtime = System.currentTimeMillis(),
+			nowmono = System.nanoTime();
+		
+		// Count executions
 		int execcount = this._execcount.incrementAndGet();
 		
 		// Is this enabled?
@@ -318,10 +323,9 @@ public final class IOpipeService
 		boolean coldstarted = !this._coldstartflag.getAndSet(true);
 		
 		// Setup execution information
-		long nowtime = System.currentTimeMillis();
 		IOpipeMeasurement measurement = new IOpipeMeasurement(coldstarted);
 		IOpipeExecution exec = new IOpipeExecution(this, config, __context,
-			measurement, nowtime, __input);
+			measurement, nowtime, __input, nowmono);
 		
 		// Use a reference to allow the execution to be garbage collected if
 		// it is no longer referred to or is in the stack of any method.
@@ -390,12 +394,9 @@ public final class IOpipeService
 			watchdog = new __TimeOutWatchDog__(this, __context,
 				Thread.currentThread(), windowtime, coldstarted, exec);
 		
-		// Result of execution
+		// Run the function
 		R value = null;
 		Throwable exception = null;
-		
-		// Keep track of execution time
-		long ticker = System.nanoTime();
 		try
 		{
 			value = __func.apply(exec);
@@ -409,12 +410,6 @@ public final class IOpipeService
 			
 			measurement.__setThrown(e);
 			measurement.addLabel("@iopipe/error");
-		}
-		
-		// Count how long execution has taken
-		finally
-		{
-			measurement.__setDuration(System.nanoTime() - ticker);
 		}
 		
 		// It died, so stop the watchdog

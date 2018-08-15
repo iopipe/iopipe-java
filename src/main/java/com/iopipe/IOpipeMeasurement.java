@@ -36,10 +36,6 @@ public final class IOpipeMeasurement
 	private final AtomicReference<Throwable> _thrown =
 		new AtomicReference<>();
 
-	/** The duration of execution in nanoseconds. */
-	private final AtomicLong _duration =
-		new AtomicLong(Long.MIN_VALUE);
-
 	/**
 	 * Initializes the measurement holder.
 	 *
@@ -214,11 +210,15 @@ public final class IOpipeMeasurement
 	 *
 	 * @return The execution duration, if this is negative then it is not
 	 * valid.
+	 * @deprecated This value is only set when the invocation has finished and
+	 * the report is to be generated, so it always will return
+	 * {@link Long#MIN_VALUE}.
 	 * @since 2017/12/15
 	 */
+	@Deprecated
 	public long getDuration()
 	{
-		return this._duration.get();
+		return Long.MIN_VALUE;
 	}
 	
 	/**
@@ -275,19 +275,7 @@ public final class IOpipeMeasurement
 	{
 		return this.coldstart;
 	}
-
-	/**
-	 * Sets the duration of execution.
-	 *
-	 * @param __ns The execution duration in nanoseconds, this may only be set
-	 * once.
-	 * @since 2017/12/15
-	 */
-	void __setDuration(long __ns)
-	{
-		this._duration.compareAndSet(Long.MIN_VALUE, __ns);
-	}
-
+	
 	/**
 	 * Sets the throwable generated during execution.
 	 *

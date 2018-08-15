@@ -60,8 +60,7 @@ public final class TraceMeasurement
 		// Create initial start mark if this is enabled
 		if (__enabled)
 			__m.addPerformanceEntry(new PerformanceEntry("start:" + __name,
-				"mark", startns - IOpipeConstants.LOAD_TIME_NANOS,
-				System.currentTimeMillis(), 0));
+				"mark", startns, System.currentTimeMillis(), 0));
 	}
 	
 	/**
@@ -78,16 +77,15 @@ public final class TraceMeasurement
 				// There are two end marks, one for the end mark and the
 				// actual duration but they end at the same time
 				long endns = System.nanoTime(),
-					endms = System.currentTimeMillis(),
-					relendns = endns -  - IOpipeConstants.LOAD_TIME_NANOS;
+					endms = System.currentTimeMillis();
 				
 				IOpipeMeasurement measurement = this.measurement;
 				String name = this.name;
 				
 				measurement.addPerformanceEntry(new PerformanceEntry(
-					"end:" + name, "mark", relendns, endms, 0));
+					"end:" + name, "mark", endns, endms, 0));
 				measurement.addPerformanceEntry(new PerformanceEntry(
-					"measure:" + name, "measure", relendns, endms,
+					"measure:" + name, "measure", endns, endms,
 					endns - this.startns));
 			}
 	}
