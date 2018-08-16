@@ -122,7 +122,7 @@ __outer:
 	 */
 	public final MethodHandle handleWithNewInstance()
 	{
-		if (!this.isstatic)
+		if (this.isstatic)
 			return this.handle(null);
 		
 		return this.handle(this.newInstance());
