@@ -18,7 +18,7 @@ public final class EntryPoint
 	/** The class the entry point is in. */
 	protected final Class<?> inclass;
 	
-	/** The method handle for execution. */
+	/** The base method handle for execution. */
 	protected final MethodHandle handle;
 	
 	/** Is this a static method? */
@@ -95,12 +95,37 @@ __outer:
 	/**
 	 * Returns the method handle for the invocation.
 	 *
+	 * @param __instance The instance to call on, for the first argument. If
+	 * the entry point is static then this is ignored.
 	 * @return The method handle for the invocation.
 	 * @since 2018/08/13
 	 */
-	public final MethodHandle handle()
+	public final MethodHandle handle(Object __instance)
 	{
-		return this.handle;
+		MethodHandle rv = this.handle;
+		
+		// Bind to the instance if this is not static so that calling the
+		// handle only involves the method arguments and does not require a
+		// the code using the handle to check if it is static
+		if (!this.isstatic)
+			return rv.bindTo(__instance);
+		
+		return rv;
+	}
+	
+	/**
+	 * Returns a method handle with a new instance of the current entry point
+	 * if it is non-static.
+	 *
+	 * @return The method handle with the new instance.
+	 * @since 2018/08/16
+	 */
+	public final MethodHandle handleWithNewInstance()
+	{
+		if (!this.isstatic)
+			return this.handle(null);
+		
+		return this.handle(this.newInstance());
 	}
 	
 	/**

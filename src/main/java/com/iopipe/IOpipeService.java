@@ -252,7 +252,7 @@ public final class IOpipeService
 					}
 					catch (IOException e)
 					{
-						throw new SimpleRequestStreamHandlerWrapper.__IOException__(
+						throw new IOpipeWrappedException(
 							e.getMessage(), e);
 					}
 					
@@ -261,7 +261,7 @@ public final class IOpipeService
 		}
 		
 		// Forward IOExceptions
-		catch (SimpleRequestStreamHandlerWrapper.__IOException__ e)
+		catch (IOpipeWrappedException e)
 		{
 			throw (IOException)e.getCause();
 		}

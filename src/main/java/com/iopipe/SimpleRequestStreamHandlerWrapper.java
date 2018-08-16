@@ -1,10 +1,10 @@
 package com.iopipe;
 
+import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 
 /**
  * This class is used as a base to create simple instances of wrapped lambdas
@@ -55,37 +55,15 @@ public abstract class SimpleRequestStreamHandlerWrapper
 					}
 					catch (IOException e)
 					{
-						__IOException__ toss =
-							new __IOException__(e.getMessage(), e);
-						toss.setStackTrace(e.getStackTrace());
+						IOpipeWrappedException toss =
+							new IOpipeWrappedException(e.getMessage(), e);
 						throw toss;
 					}
 				}, __in);
 		}
-		catch (__IOException__ e)
+		catch (IOpipeWrappedException e)
 		{
 			throw (IOException)e.getCause();
-		}
-	}
-	
-	/**
-	 * Used to propogate the exception to the outside.
-	 *
-	 * @since 2017/12/17
-	 */
-	static final class __IOException__
-		extends RuntimeException
-	{
-		/**
-		 * Wraps the specified exception.
-		 *
-		 * @param __m The message used.
-		 * @param __t The exception to wrap.
-		 * @since 2017/12/18
-		 */
-		__IOException__(String __m, Throwable __t)
-		{
-			super(__m, __t);
 		}
 	}
 }

@@ -2,6 +2,8 @@ package com.iopipe.generic;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
+import com.iopipe.IOpipeService;
+import com.iopipe.IOpipeWrappedException;
 import java.lang.invoke.MethodHandle;
 import java.io.InputStream;
 import java.io.IOException;
@@ -16,6 +18,9 @@ import java.io.OutputStream;
 public final class GenericAWSRequestStreamHandler
 	implements RequestStreamHandler
 {
+	/** The handle used for entry. */
+	protected final MethodHandle handle;
+	
 	/**
 	 * Initializes the entry point for the generic stream handler using the
 	 * default system provided entry point.
@@ -40,7 +45,7 @@ public final class GenericAWSRequestStreamHandler
 		if (__e == null)
 			throw new NullPointerException();
 		
-		throw new Error("TODO");
+		this.handle = __e.handle(this);
 	}
 	
 	/**
@@ -52,7 +57,34 @@ public final class GenericAWSRequestStreamHandler
 		Context __context)
 		throws IOException
 	{
-		throw new Error("TODO");
+		try
+		{
+			IOpipeService service = IOpipeService.instance();
+			service.<Object>run(__context, (__exec) ->
+				{
+					try
+					{
+						this.handle.invoke(__in, __out, __context);
+					}
+					catch (Throwable e)
+					{
+						throw new IOpipeWrappedException(e.getMessage(), e);
+					}
+					
+					return null;
+				}, __in);
+		}
+		catch (IOpipeWrappedException e)
+		{
+			Throwable t = e.getCause();
+			if (t instanceof IOException)
+				throw (IOException)t;
+			else if (t instanceof RuntimeException)
+				throw (RuntimeException)t;
+			else if (t instanceof Error)
+				throw (Error)t;
+			throw e;
+		}
 	}
 }
 
