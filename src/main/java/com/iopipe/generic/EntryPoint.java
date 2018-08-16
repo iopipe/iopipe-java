@@ -253,7 +253,7 @@ __outer:
 		String pair = System.getenv("IOPIPE_GENERIC_HANDLER");
 		if (pair == null)
 			throw new InvalidEntryPointException("The environment variable " +
-				"IOPIPE_GENERIC_HANDLER has not been set, execution cannot" +
+				"IOPIPE_GENERIC_HANDLER has not been set, execution cannot " +
 				"continue.");
 		
 		try
