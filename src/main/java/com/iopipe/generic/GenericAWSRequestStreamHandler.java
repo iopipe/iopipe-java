@@ -45,7 +45,7 @@ public final class GenericAWSRequestStreamHandler
 		if (__e == null)
 			throw new NullPointerException();
 		
-		this.handle = __e.handle(this);
+		this.handle = __e.handleWithNewInstance();
 	}
 	
 	/**
