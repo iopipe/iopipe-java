@@ -60,6 +60,9 @@ public final class IOpipeExecution
 	/** The starting time in milliseconds. */
 	protected final long starttimemillis;
 	
+	/** The starting time in monotonic nanoseconds. */
+	protected final long starttimemononanos;
+	
 	/**
 	 * The input object to the executing method, may be {@code null} if it
 	 * was passed or not used.
@@ -82,13 +85,14 @@ public final class IOpipeExecution
 	 * @param __st The start time in the system clock milliseconds.
 	 * @param __input The object which was passed to the method being
 	 * executed.
+	 * @param __sns The start time in monotonic nanoseconds.
 	 * @throws NullPointerException On null arguments except for
 	 * {@code __passed}.
 	 * @since 2018/01/19
 	 */
 	IOpipeExecution(IOpipeService __sv, IOpipeConfiguration __conf,
 		Context __context, IOpipeMeasurement __m, long __st,
-		Object __input)
+		Object __input, long __sns)
 		throws NullPointerException
 	{
 		if (__sv == null || __conf == null || __context == null ||
@@ -101,6 +105,7 @@ public final class IOpipeExecution
 		this.measurement = __m;
 		this.starttimemillis = __st;
 		this.input = __input;
+		this.starttimemononanos = __sns;
 	}
 	
 	/**
@@ -473,7 +478,8 @@ public final class IOpipeExecution
 		SystemMeasurement sysinfo = SystemMeasurement.measure();
 		
 		// The current timestamp
-		long nowtimestamp = System.currentTimeMillis();
+		long nowtimestamp = System.currentTimeMillis(),
+			starttimemononanos = this.starttimemononanos;
 		
 		StringWriter out = new StringWriter();
 		try (JsonGenerator gen = Json.createGenerator(out))
@@ -485,10 +491,6 @@ public final class IOpipeExecution
 			gen.write("installMethod",
 				Objects.toString(config.getInstallMethod(), "unknown"));
 
-			long duration = measurement.getDuration();
-			if (duration >= 0)
-				gen.write("duration", duration);
-			
 			SystemMeasurement.Stat stat = sysinfo.stat;
 			
 			gen.write("processId", stat.pid);
@@ -744,12 +746,12 @@ public final class IOpipeExecution
 				gen.write("name",
 					Objects.toString(perf.name(), "unknown"));
 				gen.write("startTime",
-					(double)perf.startNanoTime() / 1_000_000.0D);
+					(double)(perf.startNanoTime() - starttimemononanos) / 1_000_000.0D);
 				gen.write("duration",
 					(double)perf.durationNanoTime() / 1_000_000.0D);
 				gen.write("entryType",
 					Objects.toString(perf.type(), "unknown"));
-				gen.write("timestamp", nowtimestamp);
+				gen.write("timestamp", perf.startTimeMillis());
 				
 				gen.writeEnd();
 			}
@@ -830,6 +832,12 @@ public final class IOpipeExecution
 				
 				gen.writeEnd();
 			}
+			
+			// Write duration last so that all the overhead is recoreded as
+			// much as possible
+			long duration = System.nanoTime() - starttimemononanos;
+			if (duration >= 0)
+				gen.write("duration", duration);
 			
 			// Finished
 			gen.writeEnd();

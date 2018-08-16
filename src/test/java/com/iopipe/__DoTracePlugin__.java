@@ -29,9 +29,9 @@ class __DoTracePlugin__
 		new String[]
 		{
 			"start:byplugin", "mark",
-			"start:byutils", "mark",
 			"end:byplugin", "mark",
 			"measure:byplugin", "measure",
+			"start:byutils", "mark",
 			"end:byutils", "mark",
 			"measure:byutils", "measure",
 		};
@@ -99,7 +99,7 @@ class __DoTracePlugin__
 		boolean enabled = this.enabled;
 		
 		super.assertEquals(enabled, this.tracepluginexecuted);
-		super.assertEquals((enabled ? _ORDER.length / 2 : 0), this.orderdepth);
+		super.assertEquals((enabled ? ((1 << (_ORDER.length / 2)) - 1) : 0), this.orderdepth);
 		super.assertEquals(enabled, this.hasautolabel);
 	}
 	
@@ -150,7 +150,7 @@ class __DoTracePlugin__
 			
 			if (Objects.equals(e.name(), wv) &&
 				Objects.equals(e.type(), wt))
-				orderdepth.incrementAndGet();
+				orderdepth.addAndGet(1 << i);
 		}
 		
 		if (event.labels.contains("@iopipe/plugin-trace"))
