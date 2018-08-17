@@ -62,6 +62,7 @@ public abstract class Engine
 			__DoColdStartAutoLabel__::new,
 			__DoRecursive__::new,
 			__DoGenericEntryPoint__::new,
+			__DoGenericStreamHandler__::new,
 			
 			// Event Info
 			(__e) -> new __DoEventInfoPlugin__(__e,
