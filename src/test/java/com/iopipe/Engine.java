@@ -61,6 +61,7 @@ public abstract class Engine
 			__DoDiskReportCheck__::new,
 			__DoColdStartAutoLabel__::new,
 			__DoRecursive__::new,
+			__DoGenericEntryPoint__::new,
 			
 			// Event Info
 			(__e) -> new __DoEventInfoPlugin__(__e,
