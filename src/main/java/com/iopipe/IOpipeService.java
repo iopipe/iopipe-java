@@ -309,6 +309,14 @@ public final class IOpipeService
 		if (__context == null || __func == null)
 			throw new NullPointerException();
 		
+		// If an execution is already running, just ignore wrapping and
+		// generating events and just call it directly
+		{
+			IOpipeExecution exec = IOpipeService.__execution();
+			if (exec != null)
+				return __func.apply(exec);
+		}
+		
 		// Earliest start time for method entry
 		long nowtime = System.currentTimeMillis(),
 			nowmono = System.nanoTime();
@@ -438,6 +446,7 @@ public final class IOpipeService
 		
 		// Clear the last execution that is occuring, but only if ours was
 		// still associated with it
+		executions.set(null);
 		lastexec.compareAndSet(refexec, null);
 		
 		// Throw the called exception as if the wrapper did not have any
