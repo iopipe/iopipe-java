@@ -63,6 +63,7 @@ public abstract class Engine
 			__DoRecursive__::new,
 			__DoGenericEntryPoint__::new,
 			__DoGenericStreamHandler__::new,
+			__DoGenericHandler__::new,
 			
 			// Event Info
 			(__e) -> new __DoEventInfoPlugin__(__e,

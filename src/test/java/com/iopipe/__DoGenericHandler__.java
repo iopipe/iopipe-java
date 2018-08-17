@@ -1,9 +1,9 @@
 package com.iopipe;
 
 import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
+import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.iopipe.generic.EntryPoint;
-import com.iopipe.generic.GenericAWSRequestStreamHandler;
+import com.iopipe.generic.GenericAWSRequestHandler;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -14,11 +14,11 @@ import com.iopipe.http.RemoteResult;
 import com.iopipe.IOpipeMeasurement;
 
 /**
- * Checks to ensure the generic stream handler works.
+ * Checks to ensure the generic handler works.
  *
  * @since 2018/08/17
  */
-class __DoGenericStreamHandler__
+class __DoGenericHandler__
 	extends Single
 {
 	/** Sent with no exception? */
@@ -39,9 +39,9 @@ class __DoGenericStreamHandler__
 	 * @param __e The owning engine.
 	 * @since 2018/08/17
 	 */
-	__DoGenericStreamHandler__(Engine __e)
+	__DoGenericHandler__(Engine __e)
 	{
-		super(__e, "genericstreamhandler");
+		super(__e, "generichandler");
 	}
 	
 	/**
@@ -94,18 +94,10 @@ class __DoGenericStreamHandler__
 	public void run(IOpipeExecution __e)
 		throws Throwable
 	{
-		ByteArrayInputStream bin = new ByteArrayInputStream(
-			"SQUIRRELS".getBytes());
-		ByteArrayOutputStream bout = new ByteArrayOutputStream();
-		
 		// Run output
-		new GenericAWSRequestStreamHandler(
+		__e.label((String)(new GenericAWSRequestHandler(
 			new EntryPoint(Handler.class, "handleRequest")).
-			handleRequest(bin, bout, __e.context());
-		
-		// Check output
-		bout.flush();
-		__e.label(new String(bout.toByteArray()));
+			handleRequest("SQUIRRELS", __e.context())));
 	}
 	
 	/**
@@ -114,28 +106,16 @@ class __DoGenericStreamHandler__
 	 * @since 2018/08/17
 	 */
 	public static final class Handler
-		implements RequestStreamHandler
+		implements RequestHandler<String, String>
 	{
 		/**
 		 * {@inheritDoc}
-		 * @since 2018/08/16
+		 * @since 2018/08/17
 		 */
 		@Override
-		public final void handleRequest(InputStream __in,
-			OutputStream __out, Context __ctx)
-			throws IOException
+		public final String handleRequest(String __in, Context __ctx)
 		{
-			for (;;)
-			{
-				int c = __in.read();
-				
-				if (c < 0)
-					break;
-				
-				if (c >= 'A' && c <= 'Z')
-					c = (c - 'A') + 'a';
-				__out.write(c);
-			}
+			return __in.toLowerCase();
 		}
 	}
 }
