@@ -1,14 +1,39 @@
 package com.iopipe;
 
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
+import com.amazonaws.services.lambda.runtime.events.CloudFrontEvent;
+import com.amazonaws.services.lambda.runtime.events.KinesisEvent;
+import com.amazonaws.services.lambda.runtime.events.KinesisFirehoseEvent;
+import com.amazonaws.services.lambda.runtime.events.S3Event;
+import com.amazonaws.services.lambda.runtime.events.ScheduledEvent;
+import com.amazonaws.services.lambda.runtime.events.SNSEvent;
+import com.amazonaws.services.lambda.runtime.events.SQSEvent;
+import com.amazonaws.services.s3.event.S3EventNotification;
+import com.amazonaws.services.simpleworkflow.flow.JsonDataConverter;
+import com.fasterxml.jackson.databind.cfg.MapperConfig;
+import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.datatype.joda.JodaModule;
+import com.iopipe.CustomMetric;
+import com.iopipe.http.RemoteRequest;
+import com.iopipe.http.RemoteResult;
+import com.iopipe.IOpipeMeasurement;
 import com.iopipe.plugin.eventinfo.APIGatewayDecoder;
 import com.iopipe.plugin.eventinfo.CloudFrontDecoder;
-import com.iopipe.plugin.eventinfo.KinesisDecoder;
+import com.iopipe.plugin.eventinfo.EventInfoDecoder;
 import com.iopipe.plugin.eventinfo.FirehoseDecoder;
+import com.iopipe.plugin.eventinfo.KinesisDecoder;
 import com.iopipe.plugin.eventinfo.S3Decoder;
 import com.iopipe.plugin.eventinfo.ScheduledDecoder;
 import com.iopipe.plugin.eventinfo.SNSDecoder;
 import com.iopipe.plugin.eventinfo.SQSDecoder;
 import com.iopipe.plugin.IOpipePlugin;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -16,10 +41,19 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.ServiceLoader;
-import org.pmw.tinylog.Logger;
+import java.util.Set;
+import javax.json.JsonArray;
+import javax.json.JsonNumber;
+import javax.json.JsonObject;
+import javax.json.JsonString;
+import javax.json.JsonValue;
 import org.junit.jupiter.api.DynamicTest;
+import org.pmw.tinylog.Logger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -90,6 +124,32 @@ public abstract class Engine
 			(__e) -> new __DoEventInfoPlugin__(__e,
 				__DoEventInfoPlugin__::makeSQSEvent,
 				new SQSDecoder()),
+			
+			// Object translator
+			(__e) -> new __DoGenericObjectTranslate__(__e,
+				"eventinfo_apigateway.json",
+				APIGatewayProxyRequestEvent.class),
+			(__e) -> new __DoGenericObjectTranslate__(__e,
+				"eventinfo_cloudfront.json",
+				CloudFrontEvent.class),
+			(__e) -> new __DoGenericObjectTranslate__(__e,
+				"eventinfo_kinesis.json",
+				KinesisEvent.class),
+			(__e) -> new __DoGenericObjectTranslate__(__e,
+				"eventinfo_firehose.json",
+				KinesisFirehoseEvent.class),
+			(__e) -> new __DoGenericObjectTranslate__(__e,
+				"eventinfo_s3.json",
+				S3EventNotification.class),
+			(__e) -> new __DoGenericObjectTranslate__(__e,
+				"eventinfo_scheduled.json",
+				ScheduledEvent.class),
+			(__e) -> new __DoGenericObjectTranslate__(__e,
+				"eventinfo_sns.json",
+				SNSEvent.class),
+			(__e) -> new __DoGenericObjectTranslate__(__e,
+				"eventinfo_sqs.json",
+				SQSEvent.class),
 		};
 	
 	/** The base name for this engine. */

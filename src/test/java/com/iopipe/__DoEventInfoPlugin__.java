@@ -286,7 +286,7 @@ class __DoEventInfoPlugin__
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/04/18
 	 */
-	public static <T> T __convert(Class<T> __cl, String __rc)
+	static <T> T __convert(Class<T> __cl, String __rc)
 		throws NullPointerException
 	{
 		if (__cl == null || __rc == null)
@@ -307,7 +307,7 @@ class __DoEventInfoPlugin__
 		// Debug conversion first
 		T rv = __cl.cast(jdc.<T>fromData(
 			__DoEventInfoPlugin__.__linesFromResource(__rc), __cl));
-		Logger.debug("Testing POJO ({}) with {}.", __cl, rv);
+		Logger.debug("Converted to Object ({}) with {}.", __cl, rv);
 		
 		// Convert
 		return rv;

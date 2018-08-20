@@ -84,8 +84,8 @@ public abstract class ObjectTranslator<F, T>
 	 * @return A translator to translate from one class to the other.
 	 * @since 2018/08/20
 	 */
-	public static final <F, T> ObjectTranslator<F, T> translator(Class<F> __f,
-		Class<T> __t)
+	public static final <F, T> ObjectTranslator<F, T> translator(
+		Class<? extends F> __f, Class<? extends T> __t)
 		throws NullPointerException
 	{
 		if (__f == null || __t == null)
