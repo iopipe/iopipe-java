@@ -6,6 +6,7 @@ import com.iopipe.IOpipeService;
 import com.iopipe.IOpipeWrappedException;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.Type;
 import java.util.AbstractMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
@@ -23,10 +24,13 @@ public final class GenericAWSRequestHandler
 	protected final MethodHandle handle;
 	
 	/** The target class of the first argument. */
-	protected final Class<?> targetclass;
+	protected final Type targettype;
+	
+	/** Translator to the target. */
+	protected final ObjectTranslator translator;
 	
 	/** Cache for translators. */
-	private final Map<Class<?>, ObjectTranslator<?, ?>> _translators =
+	private final Map<Type, ObjectTranslator> _translators =
 		new ConcurrentHashMap<>();
 	
 	/**
@@ -58,9 +62,14 @@ public final class GenericAWSRequestHandler
 		this.handle = (handle = __e.handleWithNewInstance());
 		
 		// Need to figure out the type of class to target
-		MethodType type = handle.type();
-		if (type.parameterCount() > 0)
-			this.targetclass = handle.type().parameterType(0);
+		Type[] parameters = __e.parameters();
+		if (parameters.length > 0)
+		{
+			Type t = parameters[0];
+			
+			this.translator = ObjectTranslator.translator(t);
+			this.targettype = t;
+		}
 		else
 			throw new InvalidEntryPointException("Entry point is not valid " +
 				"because it lacks a first paramater: " + handle);
@@ -78,25 +87,10 @@ public final class GenericAWSRequestHandler
 			IOpipeService service = IOpipeService.instance();
 			return service.<Object>run(__context, (__exec) ->
 				{
-					// Translate the input object and be sure to catch any
-					// issues with it
-					Map<Class<?>, ObjectTranslator<?, ?>> translators =
-						this._translators;
-					
-					Class<?> fromcl = __in.getClass(),
-						tocl = this.targetclass;
-					
-					ObjectTranslator<?, ?> translator = translators.get(
-						fromcl);
-					if (translator == null)
-						translators.put(fromcl, (translator = ObjectTranslator.
-							translator(fromcl, tocl)));
-					
-					// Invoke it
 					try
 					{
-						return this.handle.invoke(translator.translateObject(__in),
-							__context);
+						return this.handle.invoke(
+							this.translator.translate(__in), __context);
 					}
 					catch (Throwable e)
 					{

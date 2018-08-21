@@ -4,6 +4,7 @@ import com.iopipe.generic.ObjectTranslator;
 import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RemoteResult;
 import com.iopipe.IOpipeMeasurement;
+import java.lang.reflect.Type;
 import java.util.Map;
 import javax.json.JsonString;
 import javax.json.JsonNumber;
@@ -31,7 +32,7 @@ class __DoGenericObjectTranslate__
 	protected final String file;
 	
 	/** The to class. */
-	protected final Class<?> to;
+	protected final Type to;
 	
 	/**
 	 * Constructs the test.
@@ -41,9 +42,9 @@ class __DoGenericObjectTranslate__
 	 * @param __to The to class.
 	 * @since 2018/08/20
 	 */
-	__DoGenericObjectTranslate__(Engine __e, String __file, Class<?> __to)
+	__DoGenericObjectTranslate__(Engine __e, String __file, Type __to)
 	{
-		super(__e, "objtrans-" + __file + "-" + __to.getSimpleName());
+		super(__e, "objtrans-" + __file + "-" + __to.toString());
 		
 		this.file = __file;
 		this.to = __to;
@@ -98,8 +99,7 @@ class __DoGenericObjectTranslate__
 			this.file);
 		
 		// Translate it
-		Object target = ObjectTranslator.<Object, Object>translator(
-			basic.getClass(), this.to).translate(basic);
+		Object target = ObjectTranslator.translator(this.to).translate(basic);
 		
 		// Debug log
 		Logger.debug("Object translated ({}) `{}` into ({}) `{}`",
