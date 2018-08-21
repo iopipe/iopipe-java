@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.iopipe.CustomMetric;
+import com.iopipe.elsewhere.SimplePOJO;
 import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RemoteResult;
 import com.iopipe.IOpipeMeasurement;
@@ -150,6 +151,15 @@ public abstract class Engine
 			(__e) -> new __DoGenericObjectTranslate__(__e,
 				"eventinfo_sqs.json",
 				SQSEvent.class),
+			(__e) -> new __DoGenericObjectTranslate__(__e,
+				"simplepojo.json",
+				SimplePOJO.class),
+			(__e) -> new __DoGenericObjectTranslate__(__e,
+				"string.json",
+				String.class),
+			(__e) -> new __DoGenericObjectTranslate__(__e,
+				"integer.json",
+				Integer.class),
 		};
 	
 	/** The base name for this engine. */
@@ -288,7 +298,8 @@ public abstract class Engine
 		// This hopefully should not happen
 		catch (RuntimeException|Error e)
 		{
-			Logger.error(e, "Test threw an exception!");
+			Logger.error("Test threw an exception!");
+			e.printStackTrace();
 			
 			throw e;
 		}
