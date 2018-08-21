@@ -43,7 +43,7 @@ class __DoGenericObjectTranslate__
 	 */
 	__DoGenericObjectTranslate__(Engine __e, String __file, Class<?> __to)
 	{
-		super(__e, "objecttranslate-" + __file);
+		super(__e, "objtrans-" + __file + "-" + __to.getSimpleName());
 		
 		this.file = __file;
 		this.to = __to;
@@ -102,8 +102,12 @@ class __DoGenericObjectTranslate__
 			basic.getClass(), this.to).translate(basic);
 		
 		// Debug log
-		Logger.debug("Translated ({}) `{}` into ({}) `{}`",
+		Logger.debug("Object translated ({}) `{}` into ({}) `{}`",
 			basic.getClass(), basic, target.getClass(), target);
+		__e.customMetric("source.class", basic.getClass().getName());
+		__e.customMetric("source.value", basic.toString());
+		__e.customMetric("target.class", target.getClass().getName());
+		__e.customMetric("target.value", target.toString());
 	}
 }
 

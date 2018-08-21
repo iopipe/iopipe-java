@@ -11,10 +11,10 @@ package com.iopipe.generic;
 public abstract class ObjectTranslator<F, T>
 {
 	/** The class to convert from. */
-	protected final Class<F> from;
+	protected final Class<? extends F> from;
 	
 	/** The class to convert to. */
-	protected final Class<T> to;
+	protected final Class<? extends T> to;
 	
 	/**
 	 * Initializes a translator from the given to the given type.
@@ -24,7 +24,7 @@ public abstract class ObjectTranslator<F, T>
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/08/20
 	 */
-	private ObjectTranslator(Class<F> __f, Class<T> __t)
+	private ObjectTranslator(Class<? extends F> __f, Class<? extends T> __t)
 		throws NullPointerException
 	{
 		if (__f == null || __t == null)
@@ -107,7 +107,43 @@ public abstract class ObjectTranslator<F, T>
 		if (__f == null || __t == null)
 			throw new NullPointerException();
 		
+		// If F can be assigned to T then no translation is needed, it is just
+		// a cast
+		if (__t.isAssignableFrom(__f))
+			return new __SimpleCast__<F, T>(__f, __t);
+		
 		throw new Error("TODO");
+	}
+	
+	/**
+	 * This is a translator which is a simple cast between two given classes.
+	 *
+	 * @since 2018/08/21
+	 */
+	private static final class __SimpleCast__<F, T>
+		extends ObjectTranslator<F, T>
+	{
+		/**
+		 * Initializes the translator.
+		 *
+		 * @param __f The from class.
+		 * @param __t The to class.
+		 * @since 2018/08/21
+		 */
+		private __SimpleCast__(Class<? extends F> __f, Class<? extends T> __t)
+		{
+			super(__f, __t);
+		}
+	
+		/**
+		 * {@inheritDoc}
+		 * @since 2018/08/21
+		 */
+		@Override
+		public final T translate(F __f)
+		{
+			return this.to.cast(__f);
+		}
 	}
 }
 

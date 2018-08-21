@@ -163,6 +163,15 @@ public abstract class Engine
 			(__e) -> new __DoGenericObjectTranslate__(__e,
 				"boolean.json",
 				Boolean.class),
+			(__e) -> new __DoGenericObjectTranslate__(__e,
+				"string.json",
+				String.class),
+			(__e) -> new __DoGenericObjectTranslate__(__e,
+				"integer.json",
+				String.class),
+			(__e) -> new __DoGenericObjectTranslate__(__e,
+				"boolean.json",
+				String.class),
 		};
 	
 	/** The base name for this engine. */

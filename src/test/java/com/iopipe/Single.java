@@ -60,7 +60,7 @@ public abstract class Single
 		
 		// Do not let test names be really long
 		int cplen = __n.codePointCount(0, __n.length());
-		if (cplen > 24)
+		if (cplen > 32)
 			this.basename = __n.substring(0, __n.offsetByCodePoints(0, 24));
 		else
 			this.basename = __n;
