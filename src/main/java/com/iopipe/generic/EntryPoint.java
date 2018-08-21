@@ -7,6 +7,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 
 /**
  * This represents an entry point to another method.
@@ -23,6 +24,9 @@ public final class EntryPoint
 	
 	/** Is this a static method? */
 	protected final boolean isstatic;
+	
+	/** Parameters to the method. */
+	private final Type[] _parameters;
 	
 	/**
 	 * Initializes the entry point.
@@ -90,6 +94,7 @@ __outer:
 		
 		this.inclass = __cl;
 		this.isstatic = ((used.getModifiers() & Modifier.STATIC) != 0);
+		this._parameters = used.getGenericParameterTypes();
 	}
 	
 	/**
@@ -227,6 +232,17 @@ __outer:
 				{
 				}
 		}
+	}
+	
+	/**
+	 * Returns the parameters for the entry type.
+	 *
+	 * @return The parameters for the method call.
+	 * @since 2018/08/21
+	 */
+	public final Type[] parameters()
+	{
+		return this._parameters.clone();
 	}
 	
 	/**
