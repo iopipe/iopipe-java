@@ -35,6 +35,17 @@ public abstract class ObjectTranslator<F, T>
 	}
 	
 	/**
+	 * Translates from the given object to the destination object.
+	 *
+	 * @param __f The object to translate, if this is null then no object
+	 * is translated and null is returned.
+	 * @return The result of the translation, if {@code __f} is null then this
+	 * will return null.
+	 * @since 2018/08/20
+	 */
+	public abstract T translate(F __f);
+	
+	/**
 	 * {@inheritDoc}
 	 * @since 2018/08/20
 	 */
@@ -63,7 +74,8 @@ public abstract class ObjectTranslator<F, T>
 	}
 	
 	/**
-	 * Translates from the given object to the destination object.
+	 * Translates from the given object to the destination object without
+	 * using any compile time safety.
 	 *
 	 * @param __f The object to translate, if this is null then no object
 	 * is translated and null is returned.
@@ -71,7 +83,11 @@ public abstract class ObjectTranslator<F, T>
 	 * will return null.
 	 * @since 2018/08/20
 	 */
-	public abstract T translate(F __f);
+	@SuppressWarnings({"unchecked"})
+	public final T translateObject(Object __f)
+	{
+		return this.<T>translate((F)__f);
+	}
 	
 	/**
 	 * Creates a translator for converting from the input class to the output
