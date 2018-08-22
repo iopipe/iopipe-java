@@ -1,6 +1,7 @@
 package com.iopipe.generic;
 
 import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import java.lang.reflect.Type;
@@ -112,6 +113,10 @@ public abstract class ObjectTranslator
 			// Setup mapper
 			ObjectMapper mapper = new ObjectMapper();
 			this.mapper = mapper;
+			
+			// The case mappings for JSON are treated as case insensitive
+			mapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES,
+				true);
 			
 			// Setup type that can be used to handle the given type
 			TypeFactory factory = mapper.getTypeFactory();
