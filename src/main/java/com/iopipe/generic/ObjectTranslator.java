@@ -1,5 +1,8 @@
 package com.iopipe.generic;
 
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import java.lang.reflect.Type;
 
 /**
@@ -90,6 +93,12 @@ public abstract class ObjectTranslator
 	private static final class __JacksonConvert__
 		extends ObjectTranslator
 	{
+		/** The object mapper used. */
+		protected final ObjectMapper mapper;
+		
+		/** The type that is used for the conversion process. */
+		protected final JavaType type;
+		
 		/**
 		 * Initializes the translator.
 		 *
@@ -99,6 +108,15 @@ public abstract class ObjectTranslator
 		private __JacksonConvert__(Type __t)
 		{
 			super(__t);
+			
+			// Setup mapper
+			ObjectMapper mapper = new ObjectMapper();
+			this.mapper = mapper;
+			
+			// Setup type that can be used to handle the given type
+			TypeFactory factory = mapper.getTypeFactory();
+			JavaType type;
+			this.type = (type = factory.constructType(__t));
 		}
 	
 		/**
@@ -108,7 +126,7 @@ public abstract class ObjectTranslator
 		@Override
 		public final Object translate(Object __f)
 		{
-			throw new Error("No conversion yet for " + this.to);
+			return this.mapper.convertValue(__f, this.type);
 		}
 	}
 }
