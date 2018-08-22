@@ -19,6 +19,7 @@ It is licensed under the Apache 2.0.
    * [Implement `com.iopipe.SimpleRequestHandlerWrapper`](#implement-comiopipesimplerequesthandlerwrapper)
    * [Implement `com.iopipe.SimpleRequestStreamHandlerWrapper`](#implement-comiopipesimplerequeststreamhandlerwrapper)
    * [Wrapping Without A Helper Class](#wrapping-without-a-helper-class)
+ * [Accessing IOpipe's `IOpipeExecution` Instance](#accessing-iopipes-iopipeexecution-instance)
  * [Accessing the AWS `Context` Object](#accessing-the-aws-context-object)
  * [Measuring and Monitoring](#measuring-and-monitoring)
    * [Custom Metrics](#custom-metrics)
@@ -228,6 +229,12 @@ at:
  * <https://tinylog.org/configuration>
 
 The associated package is `com.iopipe`.
+
+# Accessing IOpipe's `IOpipeExecution` Instance
+
+If `IOpipeExecution` needs to be obtained then you may use:
+
+ * `IOpipeExecution.currentExecution()`
 
 # Accessing the AWS `Context` Object
 
