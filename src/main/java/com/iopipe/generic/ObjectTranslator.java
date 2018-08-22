@@ -1,5 +1,6 @@
 package com.iopipe.generic;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.fasterxml.jackson.databind.MapperFeature;
@@ -118,6 +119,8 @@ public abstract class ObjectTranslator
 			// The case mappings for JSON are treated as case insensitive
 			mapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES,
 				true);
+			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
+				false);
 			
 			// Dates must be constructed
 			mapper.registerModule(new JodaModule());
