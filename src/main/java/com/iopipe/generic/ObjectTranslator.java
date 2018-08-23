@@ -1,11 +1,5 @@
 package com.iopipe.generic;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.datatype.joda.JodaModule;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 import java.lang.reflect.Type;
 
 /**
@@ -15,22 +9,27 @@ import java.lang.reflect.Type;
  */
 public abstract class ObjectTranslator
 {
+	/** The type to convert from. */
+	protected final Type from;
+	
 	/** The type to convert to. */
 	protected final Type to;
 	
 	/**
 	 * Initializes a translator to the given type.
 	 *
+	 * @param __f The from type.
 	 * @param __t The target type
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/08/20
 	 */
-	private ObjectTranslator(Type __t)
+	ObjectTranslator(Type __f, Type __t)
 		throws NullPointerException
 	{
-		if (__t == null)
+		if (__f == null || __t == null)
 			throw new NullPointerException();
 		
+		this.from = __f;
 		this.to = __t;
 	}
 	
@@ -59,7 +58,19 @@ public abstract class ObjectTranslator
 			return false;
 		
 		ObjectTranslator o = (ObjectTranslator)__o;
-		return this.to.equals(o.to);
+		return this.from.equals(o.from) &&
+			this.to.equals(o.to);
+	}
+	
+	/**
+	 * Returns the from type.
+	 *
+	 * @return The from type.
+	 * @since 2018/08/22
+	 */
+	public final Type from()
+	{
+		return this.from;
 	}
 	
 	/**
@@ -69,77 +80,35 @@ public abstract class ObjectTranslator
 	@Override
 	public final int hashCode()
 	{
-		return this.to.hashCode();
+		return this.from.hashCode() ^ this.to.hashCode();
+	}
+	
+	/**
+	 * Returns the to type.
+	 *
+	 * @return The to type.
+	 * @since 2018/08/22
+	 */
+	public final Type to()
+	{
+		return this.to;
 	}
 	
 	/**
 	 * Creates a translator for converting objects to the given type.
 	 *
+	 * @param __f The from type.
 	 * @param __t The to class.
 	 * @return A translator to translate from one class to the other.
 	 * @since 2018/08/20
 	 */
-	public static final ObjectTranslator translator(Type __t)
+	public static final ObjectTranslator translator(Type __f, Type __t)
 		throws NullPointerException
 	{
-		if (__t == null)
+		if (__f == null || __t == null)
 			throw new NullPointerException();
 		
-		return new __JacksonConvert__(__t);
-	}
-	
-	/**
-	 * Converter which uses jackson.
-	 *
-	 * @since 2018/08/21
-	 */
-	private static final class __JacksonConvert__
-		extends ObjectTranslator
-	{
-		/** The object mapper used. */
-		protected final ObjectMapper mapper;
-		
-		/** The type that is used for the conversion process. */
-		protected final JavaType type;
-		
-		/**
-		 * Initializes the translator.
-		 *
-		 * @param __t The to type.
-		 * @since 2018/08/21
-		 */
-		private __JacksonConvert__(Type __t)
-		{
-			super(__t);
-			
-			// Setup mapper
-			ObjectMapper mapper = new ObjectMapper();
-			this.mapper = mapper;
-			
-			// The case mappings for JSON are treated as case insensitive
-			mapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES,
-				true);
-			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
-				false);
-			
-			// Dates must be constructed
-			mapper.registerModule(new JodaModule());
-			
-			// Setup type that can be used to handle the given type
-			TypeFactory factory = mapper.getTypeFactory();
-			JavaType type;
-			this.type = (type = factory.constructType(__t));
-		}
-	
-		/**
-		 * {@inheritDoc}
-		 * @since 2018/08/21
-		 */
-		@Override
-		public final Object translate(Object __f)
-		{
-			return this.mapper.convertValue(__f, this.type);
-		}
+		return new __JacksonConvert__(__f, __t);
 	}
 }
 

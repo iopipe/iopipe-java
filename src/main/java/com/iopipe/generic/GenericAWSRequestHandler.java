@@ -8,7 +8,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Type;
 import java.util.AbstractMap;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.Map;
 
 /**
@@ -26,12 +26,9 @@ public final class GenericAWSRequestHandler
 	/** The target class of the first argument. */
 	protected final Type targettype;
 	
-	/** Translator to the target. */
-	protected final ObjectTranslator translator;
-	
-	/** Cache for translators. */
-	private final Map<Type, ObjectTranslator> _translators =
-		new ConcurrentHashMap<>();
+	/** The last translator. */
+	private final AtomicReference<ObjectTranslator> _cachetrans =
+		new AtomicReference<>();
 	
 	/**
 	 * Initializes the entry point for the generic handler using the
@@ -64,12 +61,7 @@ public final class GenericAWSRequestHandler
 		// Need to figure out the type of class to target
 		Type[] parameters = __e.parameters();
 		if (parameters.length > 0)
-		{
-			Type t = parameters[0];
-			
-			this.translator = ObjectTranslator.translator(t);
-			this.targettype = t;
-		}
+			this.targettype = parameters[0];
 		else
 			throw new InvalidEntryPointException("Entry point is not valid " +
 				"because it lacks a first paramater: " + handle);
@@ -87,10 +79,24 @@ public final class GenericAWSRequestHandler
 			IOpipeService service = IOpipeService.instance();
 			return service.<Object>run(__context, (__exec) ->
 				{
+					// Used to cache the last input since it may share common
+					// data although it may change
+					AtomicReference<ObjectTranslator> cachetrans =
+						this._cachetrans;
+					ObjectTranslator translator = cachetrans.get();
+					
+					// See if a new translator should be used
+					Type now = (__in == null ? Object.class : __in.getClass()),
+						was = (translator == null ? null : translator.from());
+					if (now != was && !now.equals(was))
+						cachetrans.set((translator =
+							ObjectTranslator.translator(now, this.targettype)));
+					
+					// Execute
 					try
 					{
-						return this.handle.invoke(
-							this.translator.translate(__in), __context);
+						return this.handle.invoke(translator.translate(__in),
+							__context);
 					}
 					catch (Throwable e)
 					{

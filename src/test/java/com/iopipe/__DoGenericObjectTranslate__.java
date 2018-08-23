@@ -99,7 +99,8 @@ class __DoGenericObjectTranslate__
 			this.file);
 		
 		// Translate it
-		Object target = ObjectTranslator.translator(this.to).translate(basic);
+		Object target = ObjectTranslator.translator(basic.getClass(),
+			this.to).translate(basic);
 		
 		// Debug log
 		Logger.debug("Object translated ({}) `{}` into ({}) `{}`",
