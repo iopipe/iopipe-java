@@ -108,6 +108,11 @@ public abstract class ObjectTranslator
 		if (__f == null || __t == null)
 			throw new NullPointerException();
 		
+		// Identity conversion or any type to Object (which does no
+		// conversion at all)
+		if (__f.equals(__t) || __t.equals(Object.class))
+			return new __IdentityConvert__(__f, __t);
+		
 		return new __JacksonConvert__(__f, __t);
 	}
 }
