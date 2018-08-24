@@ -25,14 +25,12 @@ class __AWSAdapters__
 	 *
 	 * @param __pass The target handle.
 	 * @param __a Argument A.
-	 * @param __b Argument B.
 	 * @param __c The context.
 	 * @return The result of execution.
 	 * @throws Throwable On any exception.
 	 * @since 2018/08/24
 	 */
-	static Object __type0Static(MethodHandle __pass, Object __a, Object __b,
-		Context __c)
+	static Object __type0Static(MethodHandle __pass, Object __a, Context __c)
 		throws Throwable
 	{
 		return __pass.invoke();
@@ -44,17 +42,51 @@ class __AWSAdapters__
 	 * @param __pass The target handle.
 	 * @param __i The object instance.
 	 * @param __a Argument A.
-	 * @param __b Argument B.
 	 * @param __c The context.
 	 * @return The result of execution.
 	 * @throws Throwable On any exception.
 	 * @since 2018/08/24
 	 */
 	static Object __type0Instance(MethodHandle __pass, Object __i, Object __a,
-		Object __b, Context __c)
+		Context __c)
 		throws Throwable
 	{
 		return __pass.invoke(__i);
+	}
+	
+	/**
+	 * Forwards to a type 1 static method.
+	 *
+	 * @param __pass The target handle.
+	 * @param __a Argument A.
+	 * @param __c The context.
+	 * @return The result of execution.
+	 * @throws Throwable On any exception.
+	 * @since 2018/08/24
+	 */
+	static Object __type1Static(MethodHandle __pass, Object __a, Context __c)
+		throws Throwable
+	{
+		return __pass.invoke(__a);
+	}
+	
+	/**
+	 * Forwards to a type 1 instance method.
+	 *
+	 * @param __pass The target handle.
+	 * @param __i The object instance.
+	 * @param __a Argument A.
+	 * @param __c The context.
+	 * @return The result of execution.
+	 * @throws Throwable On any exception.
+	 * @since 2018/08/24
+	 */
+	static Object __type1Instance(MethodHandle __pass, Object __i, Object __a,
+		Context __c)
+		throws Throwable
+	{
+		System.err.printf("DEBUG -- Passed: %s (%s)%n", __pass, __pass.type().toMethodDescriptorString());
+		return __pass.invoke(__i, __a);
 	}
 }
 

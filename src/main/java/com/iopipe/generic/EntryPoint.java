@@ -406,7 +406,7 @@ __outer:
 		// Extract all the details in the method to rebuild it
 		int pn = used.getParameterCount();
 		Type[] parms = used.getGenericParameterTypes();
-		boolean isstatic = ((used.getModifiers() & Modifier.ABSTRACT) != 0);
+		boolean isstatic = ((used.getModifiers() & Modifier.STATIC) != 0);
 		Type pa = (pn > 0 ? parms[0] : null),
 			pb = (pn > 1 ? parms[1] : null),
 			pc = (pn > 2 ? parms[2] : null);
@@ -466,18 +466,28 @@ __outer:
 					if (isstatic)
 						usedhandle = lookup.findStatic(__AWSAdapters__.class,
 							"__type0Static", MethodType.methodType(
-								MethodHandle.class, Object.class, Object.class,
+								Object.class, MethodHandle.class, Object.class,
 								Context.class)).bindTo(basehandle);
 					else
 						usedhandle = lookup.findStatic(__AWSAdapters__.class,
 							"__type0Instance", MethodType.methodType(
-								MethodHandle.class, Object.class, Object.class,
+								Object.class, MethodHandle.class, Object.class,
 								Object.class, Context.class)).bindTo(basehandle);
 					break;
 				
 					// 1: (A)
 				case 1:
-					throw new Error("TODO");
+					if (isstatic)
+						usedhandle = lookup.findStatic(__AWSAdapters__.class,
+							"__type1Static", MethodType.methodType(
+								Object.class, MethodHandle.class, Object.class,
+								Context.class)).bindTo(basehandle);
+					else
+						usedhandle = lookup.findStatic(__AWSAdapters__.class,
+							"__type1Instance", MethodType.methodType(
+								Object.class, MethodHandle.class, Object.class,
+								Object.class, Context.class)).bindTo(basehandle);
+					break;
 				
 					// 2: (A, Context), identity handler
 				case 2:

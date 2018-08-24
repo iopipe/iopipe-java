@@ -113,7 +113,7 @@ class __DoGenericEntryPoint__
 				EntryPoint ep = EntryPoint.newAWSEntryPoint((Class)_METHODS[i],
 					(String)_METHODS[i + 1]);
 				
-				if ("squirrel".equals(ep.handleWithNewInstance().invoke("SQUIRREL")))
+				if ("squirrel".equals(ep.handleWithNewInstance().invoke("SQUIRREL", null)))
 					this.count.incrementAndGet();
 			}
 			catch (Throwable t)
