@@ -505,7 +505,17 @@ __outer:
 					
 					// 5: (IOpipeExecution, A)
 				case 5:
-					throw new Error("TODO");
+					if (isstatic)
+						usedhandle = lookup.findStatic(__AWSAdapters__.class,
+							"__type5Static", MethodType.methodType(
+								Object.class, MethodHandle.class, Object.class,
+								Context.class)).bindTo(basehandle);
+					else
+						usedhandle = lookup.findStatic(__AWSAdapters__.class,
+							"__type5Instance", MethodType.methodType(
+								Object.class, MethodHandle.class, Object.class,
+								Object.class, Context.class)).bindTo(basehandle);
+					break;
 					
 					// 6: (IOpipeExecution, I, O)
 				case 6:

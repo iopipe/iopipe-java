@@ -1,6 +1,7 @@
 package com.iopipe.generic;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import com.iopipe.IOpipeExecution;
 import java.lang.invoke.MethodHandle;
 
 /**
@@ -85,8 +86,41 @@ class __AWSAdapters__
 		Context __c)
 		throws Throwable
 	{
-		System.err.printf("DEBUG -- Passed: %s (%s)%n", __pass, __pass.type().toMethodDescriptorString());
 		return __pass.invoke(__i, __a);
+	}
+	
+	/**
+	 * Forwards to a type 5 static method.
+	 *
+	 * @param __pass The target handle.
+	 * @param __a Argument A.
+	 * @param __c The context.
+	 * @return The result of execution.
+	 * @throws Throwable On any exception.
+	 * @since 2018/08/24
+	 */
+	static Object __type5Static(MethodHandle __pass, Object __a, Context __c)
+		throws Throwable
+	{
+		return __pass.invoke(IOpipeExecution.currentExecution(), __a);
+	}
+	
+	/**
+	 * Forwards to a type 5 instance method.
+	 *
+	 * @param __pass The target handle.
+	 * @param __i The object instance.
+	 * @param __a Argument A.
+	 * @param __c The context.
+	 * @return The result of execution.
+	 * @throws Throwable On any exception.
+	 * @since 2018/08/24
+	 */
+	static Object __type5Instance(MethodHandle __pass, Object __i, Object __a,
+		Context __c)
+		throws Throwable
+	{
+		return __pass.invoke(__i, IOpipeExecution.currentExecution(), __a);
 	}
 }
 
