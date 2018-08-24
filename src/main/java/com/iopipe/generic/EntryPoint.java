@@ -361,7 +361,7 @@ __outer:
 		// Prefer ones with higher priority first
 		int discovered;
 		Method used = null;
-		for (discovered = 3; discovered >= 0; discovered--)
+		for (discovered = 6; discovered >= 0; discovered--)
 		{
 			used = entries[discovered];
 			if (used != null)

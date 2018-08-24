@@ -55,7 +55,7 @@ class __DoGenericEntryPoint__
 	 */
 	__DoGenericEntryPoint__(Engine __e)
 	{
-		super(__e, "recursive");
+		super(__e, "entrypoint");
 	}
 	
 	/**
@@ -118,6 +118,7 @@ class __DoGenericEntryPoint__
 			}
 			catch (Throwable t)
 			{
+				t.printStackTrace();
 			}
 		}
 	}
