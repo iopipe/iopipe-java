@@ -363,6 +363,7 @@ public final class IOpipeService
 			finally
 			{
 				// Clear the last execution because it is no longer occuring
+				executions.set(null);
 				lastexec.compareAndSet(refexec, null);
 			}
 		}

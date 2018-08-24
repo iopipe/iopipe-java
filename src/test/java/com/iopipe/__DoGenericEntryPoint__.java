@@ -110,7 +110,7 @@ class __DoGenericEntryPoint__
 			
 			try
 			{
-				EntryPoint ep = new EntryPoint((Class)_METHODS[i],
+				EntryPoint ep = EntryPoint.newAWSEntryPoint((Class)_METHODS[i],
 					(String)_METHODS[i + 1]);
 				
 				if ("squirrel".equals(ep.handleWithNewInstance().invoke("SQUIRREL")))

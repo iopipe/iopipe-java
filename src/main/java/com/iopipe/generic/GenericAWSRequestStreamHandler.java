@@ -29,7 +29,7 @@ public final class GenericAWSRequestStreamHandler
 	 */
 	public GenericAWSRequestStreamHandler()
 	{
-		this(EntryPoint.defaultEntryPoint());
+		this(EntryPoint.defaultAWSEntryPoint());
 	}
 	
 	/**

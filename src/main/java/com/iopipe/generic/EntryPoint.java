@@ -1,13 +1,23 @@
 package com.iopipe.generic;
 
+import com.amazonaws.services.lambda.runtime.Context;
+import com.iopipe.IOpipeExecution;
 import com.iopipe.IOpipeFatalError;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * This represents an entry point to another method.
@@ -31,70 +41,24 @@ public final class EntryPoint
 	/**
 	 * Initializes the entry point.
 	 *
-	 * @param __cl The class to look within.
-	 * @param __m The name of the method to load.
-	 * @throws InvalidEntryPointException If the entry point is not valid.
+	 * @param __cl The used class.
+	 * @param __h The handle to execute.
+	 * @param __static Is this static?
+	 * @param __parmeters Parameters to the entry point.
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/08/13
 	 */
-	public EntryPoint(Class<?> __cl, String __m)
+	private EntryPoint(Class<?> __cl, MethodHandle __h, boolean __static,
+		Type[] __parameters)
 		throws InvalidEntryPointException, NullPointerException
 	{
-		if (__cl == null || __m == null)
+		if (__cl == null || __h == null || __parameters == null)
 			throw new NullPointerException();
 		
-		// Look in this class for the given named method
-		Method used = null;
-__outer:
-		for (Class<?> look = __cl; look != null; look = look.getSuperclass())
-			for (Method m : look.getDeclaredMethods())
-				if (__m.equals(m.getName()))
-				{
-					used = m;
-					break;
-				}
-		
-		// No method found
-		if (used == null)
-			throw new InvalidEntryPointException("The entry point " + __m +
-				" in class " + __cl + " is not valid.");
-		
-		// Allow us to call this method without performing any access checks
-		boolean access = used.isAccessible();
-		if (!access)
-			try
-			{
-				used.setAccessible(true);
-			}
-			catch (SecurityException e)
-			{
-			}
-		
-		// Get method handle from it, assuming the previous call worked
-		try
-		{
-			this.handle = MethodHandles.lookup().unreflect(used);
-		}
-		catch (IllegalAccessException e)
-		{
-			throw new InvalidEntryPointException("Could not access the " +
-				"generic entry point method.", e);
-		}
-		
-		// If this was not accessible, then we would have tried to make it so
-		// so just revert access to it
-		if (!access)
-			try
-			{
-				used.setAccessible(false);
-			}
-			catch (SecurityException e)
-			{
-			}
-		
 		this.inclass = __cl;
-		this.isstatic = ((used.getModifiers() & Modifier.STATIC) != 0);
-		this._parameters = used.getGenericParameterTypes();
+		this.handle = __h;
+		this.isstatic = __static;
+		this._parameters = __parameters.clone();
 	}
 	
 	/**
@@ -246,24 +210,12 @@ __outer:
 	}
 	
 	/**
-	 * Returns the default entry point.
-	 *
-	 * @return The default entry point.
-	 * @since 2018/08/13
-	 */
-	public static final EntryPoint defaultEntryPoint()
-	{
-		// For now since only AWS is supported detect the entry point for AWS
-		return EntryPoint.__awsEntryPoint();
-	}
-	
-	/**
 	 * Returns the entry that would be used for AWS services.
 	 *
 	 * @return The entry point for AWS method.
 	 * @since 2018/08/14
 	 */
-	private static final EntryPoint __awsEntryPoint()
+	public static final EntryPoint defaultAWSEntryPoint()
 	{
 		// This variable is very important
 		String pair = System.getenv("IOPIPE_GENERIC_HANDLER");
@@ -277,11 +229,13 @@ __outer:
 			// Only a class is specified
 			int dx = pair.indexOf("::");
 			if (dx < 0)
-				return new EntryPoint(Class.forName(pair), "handleRequest");
+				return EntryPoint.newAWSEntryPoint(Class.forName(pair),
+					"handleRequest");
 			
 			// Class and method
 			else
-				return new EntryPoint(Class.forName(pair.substring(0, dx)),
+				return EntryPoint.newAWSEntryPoint(
+					Class.forName(pair.substring(0, dx)),
 					pair.substring(dx + 2));
 		}
 		catch (ClassNotFoundException e)
@@ -290,6 +244,257 @@ __outer:
 				"IOPIPE_GENERIC_HANDLER is set to a class which does not " +
 				"exist. (" + pair + ")", e);
 		}
+	}
+	
+	/**
+	 * Returns the default entry point.
+	 *
+	 * @return The default entry point.
+	 * @since 2018/08/13
+	 */
+	public static final EntryPoint defaultEntryPoint()
+	{
+		// For now since only AWS is supported detect the entry point for AWS
+		return EntryPoint.defaultAWSEntryPoint();
+	}
+	
+	/**
+	 * Initializes an entry point which is valid for Amazon AWS.
+	 *
+	 * @param __cl The class to call into.
+	 * @param __m The method to be executed.
+	 * @throws InvalidEntryPointException If the entry point is not valid.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/08/03
+	 */
+	public static final EntryPoint newAWSEntryPoint(Class<?> __cl, String __m)
+		throws InvalidEntryPointException, NullPointerException
+	{
+		if (__cl == null || __m == null)
+			throw new NullPointerException();
+		
+		// There may be multiple type of entry points that are available
+		// 0: ()
+		// 1: (A)
+		// 2: (A, Context)
+		// 3: (I, O)
+		// 4: (I, O, Context)
+		// 5: (IOpipeExecution, A)
+		// 6: (IOpipeExecution, I, O)
+		Method[] entries = new Method[7];
+		
+		// Go through mappings and look for specific method types
+		int scancount = 0;
+__outer:
+		for (Class<?> look = __cl; look != null; look = look.getSuperclass())
+		{
+			// A previous run through the loop found a match, so do not try
+			// to use any upper class methods
+			if (scancount > 0)
+				break;
+			
+			// Scan for methods
+			for (Method m : look.getDeclaredMethods())
+			{
+				// This is not what our method is called
+				if (!__m.equals(m.getName()))
+					continue;
+				
+				// Ignore abstract methods, they cannot be called
+				if ((m.getModifiers() & Modifier.ABSTRACT) != 0)
+					continue;
+				
+				int pn = m.getParameterCount();
+				Class<?>[] parms = m.getParameterTypes();
+				
+				Class<?> pa = (pn > 0 ? parms[0] : null),
+					pb = (pn > 1 ? parms[1] : null),
+					pc = (pn > 2 ? parms[2] : null);
+				
+				// Determine which kind of entry point type this is
+				int ehdx;
+				if (IOpipeExecution.class.equals(pa))
+					if (pn == 3 &&
+						InputStream.class.isAssignableFrom(pb) &&
+						OutputStream.class.isAssignableFrom(pc))
+						ehdx = 6;
+					else if (pn == 2)
+						ehdx = 5;
+					else
+						ehdx = -1;
+				else if (InputStream.class.isAssignableFrom(pa) &&
+					OutputStream.class.isAssignableFrom(pb))
+					if (Context.class.isAssignableFrom(pc))
+						ehdx = 4;
+					else
+						ehdx = 3;
+				else if (pn == 2 && Context.class.isAssignableFrom(pb))
+					ehdx = 2;
+				else if (pn == 1)
+					ehdx = 1;
+				else if (pn == 0)
+					ehdx = 0;
+				else
+					ehdx = -1;
+				
+				// Not a valid handle
+				if (ehdx < 0)
+					continue;
+				
+				// Record the method if nothing is already there
+				if (entries[ehdx] == null)
+				{
+					entries[ehdx] = m;
+					
+					// Found all method types, so stop
+					if (++scancount == 4)
+						break __outer;
+				}
+			}
+		}
+		
+		// No methods were found
+		if (scancount == 0)
+			throw new InvalidEntryPointException("The entry point " + __m +
+				" in class " + __cl + " is not valid, no method was found.");
+		
+		// Prefer ones with higher priority first
+		int discovered;
+		Method used = null;
+		for (discovered = 3; discovered >= 0; discovered--)
+		{
+			used = entries[discovered];
+			if (used != null)
+				break;
+		}
+		
+		// Allow us to call this method without performing any access checks
+		boolean access = used.isAccessible();
+		if (!access)
+			try
+			{
+				used.setAccessible(true);
+			}
+			catch (SecurityException e)
+			{
+			}
+		
+		// Get method handle from it, assuming the previous call worked
+		MethodHandle basehandle;
+		try
+		{
+			basehandle = MethodHandles.lookup().unreflect(used);
+		}
+		catch (IllegalAccessException e)
+		{
+			throw new InvalidEntryPointException("Could not access the " +
+				"generic entry point method.", e);
+		}
+		
+		// If this was not accessible, then we would have tried to make it so
+		// so just revert access to it
+		if (!access)
+			try
+			{
+				used.setAccessible(false);
+			}
+			catch (SecurityException e)
+			{
+			}
+		
+		
+		// Extract all the details in the method to rebuild it
+		int pn = used.getParameterCount();
+		Type[] parms = used.getGenericParameterTypes();
+		boolean isstatic = ((used.getModifiers() & Modifier.ABSTRACT) != 0);
+		Type pa = (pn > 0 ? parms[0] : null),
+			pb = (pn > 1 ? parms[1] : null),
+			pc = (pn > 2 ? parms[2] : null);
+		
+		// Always normalize parameters to either be a stream type or non-stream
+		// type, with a context
+		Type[] passparameters;
+		switch (discovered)
+		{
+				// Parameter and context
+			case 0:
+			case 1:
+			case 2:
+			case 5:
+				passparameters = new Type[]
+					{
+						(pa != null ? pa : Object.class),
+						Context.class,
+					};
+				break;
+			
+				// Input and output streams
+			case 3:
+			case 4:
+			case 6:
+				passparameters = new Type[]
+					{
+						(pa != null ? pa : InputStream.class),
+						(pb != null ? pb : OutputStream.class),
+						Context.class,
+					};
+				break;
+			
+				// It is an error if this happens
+			default:
+				throw new Error("If this has happened then something is " +
+					"very wrong.");
+		}
+		
+		// 0: ()
+		// 1: (A)
+		// 2: (A, Context)
+		// 3: (I, O)
+		// 4: (I, O, Context)
+		// 5: (IOpipeExecution, A)
+		// 6: (IOpipeExecution, I, O)
+		
+		// Build a compatible method handle and parameter set
+		MethodHandle usedhandle;
+		switch (discovered)
+		{
+				// 0: ()
+			case 0:
+				throw new Error("TODO");
+			
+				// 1: (A)
+			case 1:
+				throw new Error("TODO");
+			
+				// 2: (A, Context), identity handler
+			case 2:
+				usedhandle = basehandle;
+				break;
+				
+				// 3: (I, O)
+			case 3:
+				throw new Error("TODO");
+				
+				// 4: (I, O, Context), identity handler
+			case 4:
+				usedhandle = basehandle;
+				break;
+				
+				// 5: (IOpipeExecution, A)
+			case 5:
+				throw new Error("TODO");
+				
+				// 6: (IOpipeExecution, I, O)
+			case 6:
+				throw new Error("TODO");
+			
+				// It is an error if this happens
+			default:
+				throw new Error("If this has happened then something is " +
+					"very wrong.");
+		}
+		
+		return new EntryPoint(__cl, usedhandle, isstatic, passparameters);
 	}
 }
 

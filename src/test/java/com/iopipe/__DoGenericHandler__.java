@@ -96,7 +96,7 @@ class __DoGenericHandler__
 	{
 		// Run output
 		__e.label((String)(new GenericAWSRequestHandler(
-			new EntryPoint(Handler.class, "handleRequest")).
+			EntryPoint.newAWSEntryPoint(Handler.class, "handleRequest")).
 			handleRequest("SQUIRRELS", __e.context())));
 	}
 	

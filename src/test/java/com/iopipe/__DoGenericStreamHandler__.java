@@ -100,7 +100,7 @@ class __DoGenericStreamHandler__
 		
 		// Run output
 		new GenericAWSRequestStreamHandler(
-			new EntryPoint(Handler.class, "handleRequest")).
+			EntryPoint.newAWSEntryPoint(Handler.class, "handleRequest")).
 			handleRequest(bin, bout, __e.context());
 		
 		// Check output

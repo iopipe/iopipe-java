@@ -38,7 +38,7 @@ public final class GenericAWSRequestHandler
 	 */
 	public GenericAWSRequestHandler()
 	{
-		this(EntryPoint.defaultEntryPoint());
+		this(EntryPoint.defaultAWSEntryPoint());
 	}
 	
 	/**
