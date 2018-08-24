@@ -35,6 +35,9 @@ class __DoGenericAWSEntryPoint__
 	protected final IntegerValue count =
 		new IntegerValue("count");
 	
+	/** Labels counted. */
+	protected final IntegerValue labelcount =
+		new IntegerValue("labelcount");
 	/**
 	 * Constructs the test.
 	 *
@@ -56,7 +59,8 @@ class __DoGenericAWSEntryPoint__
 		super.assertTrue(this.remoterecvokay);
 		super.assertTrue(this.noerror);
 		
-		super.assertEquals(7, this.count);
+		super.assertEquals(14, this.count);
+		super.assertEquals(14, this.labelcount);
 	}
 	
 	/**
@@ -71,6 +75,10 @@ class __DoGenericAWSEntryPoint__
 		// It is invalid if there is an error
 		if (!event.hasError())
 			this.noerror.set(true);
+		
+		for (String l : event.labels)
+			if (l.startsWith("static") || l.startsWith("instance"))
+				this.labelcount.increment();
 	}
 	
 	/**

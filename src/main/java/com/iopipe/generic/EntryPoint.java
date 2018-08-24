@@ -422,10 +422,18 @@ __outer:
 			case 0:
 			case 1:
 			case 2:
-			case 5:
 				passparameters = new Type[]
 					{
 						(pa != null ? pa : Object.class),
+						Context.class,
+					};
+				break;
+				
+				// Starts from second argument
+			case 5:
+				passparameters = new Type[]
+					{
+						(pb != null ? pb : Object.class),
 						Context.class,
 					};
 				break;
@@ -433,11 +441,20 @@ __outer:
 				// Input and output streams
 			case 3:
 			case 4:
-			case 6:
 				passparameters = new Type[]
 					{
 						(pa != null ? pa : InputStream.class),
 						(pb != null ? pb : OutputStream.class),
+						Context.class,
+					};
+				break;
+				
+				// Starts from second argument
+			case 6:
+				passparameters = new Type[]
+					{
+						(pb != null ? pb : InputStream.class),
+						(pc != null ? pc : OutputStream.class),
 						Context.class,
 					};
 				break;

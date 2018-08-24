@@ -97,6 +97,23 @@ public class AWSEntries
 	}
 	
 	/**
+	 * Type 6 entry.
+	 *
+	 * @param __exec Execution state
+	 * @param __i Input.
+	 * @param __o Output.
+	 * @throws IOException On read/write errors.
+	 * @since 2018/08/24
+	 */
+	public void instance6(IOpipeExecution __exec, InputStream __i,
+		OutputStream __o)
+		throws IOException
+	{
+		__exec.label("instance6");
+		AWSEntries.__copy(__i, __o);
+	}
+	
+	/**
 	 * Type 0 entry.
 	 *
 	 * @return A value.
@@ -180,7 +197,7 @@ public class AWSEntries
 	}
 	
 	/**
-	 * Type 5 entry.
+	 * Type 6 entry.
 	 *
 	 * @param __exec Execution state
 	 * @param __i Input.
