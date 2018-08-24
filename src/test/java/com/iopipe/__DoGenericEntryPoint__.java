@@ -118,7 +118,7 @@ class __DoGenericEntryPoint__
 			}
 			catch (Throwable t)
 			{
-				t.printStackTrace();
+				throw new RuntimeException(t);
 			}
 		}
 	}
