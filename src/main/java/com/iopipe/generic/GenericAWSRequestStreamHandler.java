@@ -25,11 +25,28 @@ public final class GenericAWSRequestStreamHandler
 	 * Initializes the entry point for the generic stream handler using the
 	 * default system provided entry point.
 	 *
+	 * @throws InvalidEntryPointException If the entry point is not valid.
 	 * @since 2018/08/13
 	 */
 	public GenericAWSRequestStreamHandler()
+		throws InvalidEntryPointException
 	{
 		this(EntryPoint.defaultAWSEntryPoint());
+	}
+	
+	/**
+	 * Initializes the stream handler with the given entry point.
+	 *
+	 * @param __c The entry class.
+	 * @param __m The entry method.
+	 * @throws InvalidEntryPointException If the entry point is not valid.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/08/24
+	 */
+	public GenericAWSRequestStreamHandler(Class<?> __cl, String __m)
+		throws InvalidEntryPointException, NullPointerException
+	{
+		this(EntryPoint.newAWSEntryPoint(__cl, __m));
 	}
 	
 	/**

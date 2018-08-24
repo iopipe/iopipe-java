@@ -34,11 +34,27 @@ public final class GenericAWSRequestHandler
 	 * Initializes the entry point for the generic handler using the
 	 * default system provided entry point.
 	 *
+	 * @throws InvalidEntryPointException If the entry point is not valid.
 	 * @since 2018/08/17
 	 */
 	public GenericAWSRequestHandler()
 	{
 		this(EntryPoint.defaultAWSEntryPoint());
+	}
+	
+	/**
+	 * Initializes the handler with the given entry point.
+	 *
+	 * @param __c The entry class.
+	 * @param __m The entry method.
+	 * @throws InvalidEntryPointException If the entry point is not valid.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/08/24
+	 */
+	public GenericAWSRequestHandler(Class<?> __cl, String __m)
+		throws InvalidEntryPointException, NullPointerException
+	{
+		this(EntryPoint.newAWSEntryPoint(__cl, __m));
 	}
 	
 	/**
@@ -50,7 +66,7 @@ public final class GenericAWSRequestHandler
 	 * @since 2018/08/17
 	 */
 	public GenericAWSRequestHandler(EntryPoint __e)
-		throws NullPointerException
+		throws InvalidEntryPointException, NullPointerException
 	{
 		if (__e == null)
 			throw new NullPointerException();

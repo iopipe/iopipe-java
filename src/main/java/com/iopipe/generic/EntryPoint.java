@@ -313,7 +313,7 @@ __outer:
 				
 				// Determine which kind of entry point type this is
 				int ehdx;
-				if (IOpipeExecution.class.equals(pa))
+				if (pn >= 1 && IOpipeExecution.class.equals(pa))
 					if (pn == 3 &&
 						InputStream.class.isAssignableFrom(pb) &&
 						OutputStream.class.isAssignableFrom(pc))
@@ -322,12 +322,14 @@ __outer:
 						ehdx = 5;
 					else
 						ehdx = -1;
-				else if (InputStream.class.isAssignableFrom(pa) &&
+				else if (pn >= 2 && InputStream.class.isAssignableFrom(pa) &&
 					OutputStream.class.isAssignableFrom(pb))
-					if (Context.class.isAssignableFrom(pc))
+					if (pn == 3 && Context.class.isAssignableFrom(pc))
 						ehdx = 4;
-					else
+					else if (pn == 2)
 						ehdx = 3;
+					else
+						ehdx = -1;
 				else if (pn == 2 && Context.class.isAssignableFrom(pb))
 					ehdx = 2;
 				else if (pn == 1)
