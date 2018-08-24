@@ -2,6 +2,8 @@ package com.iopipe.generic;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.iopipe.IOpipeExecution;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.invoke.MethodHandle;
 
 /**
@@ -19,22 +21,6 @@ class __AWSAdapters__
 	 */
 	private __AWSAdapters__()
 	{
-	}
-	
-	/**
-	 * Forwards to a type 0 static method.
-	 *
-	 * @param __pass The target handle.
-	 * @param __a Argument A.
-	 * @param __c The context.
-	 * @return The result of execution.
-	 * @throws Throwable On any exception.
-	 * @since 2018/08/24
-	 */
-	static Object __type0Static(MethodHandle __pass, Object __a, Context __c)
-		throws Throwable
-	{
-		return __pass.invoke();
 	}
 	
 	/**
@@ -56,7 +42,7 @@ class __AWSAdapters__
 	}
 	
 	/**
-	 * Forwards to a type 1 static method.
+	 * Forwards to a type 0 static method.
 	 *
 	 * @param __pass The target handle.
 	 * @param __a Argument A.
@@ -65,10 +51,10 @@ class __AWSAdapters__
 	 * @throws Throwable On any exception.
 	 * @since 2018/08/24
 	 */
-	static Object __type1Static(MethodHandle __pass, Object __a, Context __c)
+	static Object __type0Static(MethodHandle __pass, Object __a, Context __c)
 		throws Throwable
 	{
-		return __pass.invoke(__a);
+		return __pass.invoke();
 	}
 	
 	/**
@@ -90,7 +76,7 @@ class __AWSAdapters__
 	}
 	
 	/**
-	 * Forwards to a type 5 static method.
+	 * Forwards to a type 1 static method.
 	 *
 	 * @param __pass The target handle.
 	 * @param __a Argument A.
@@ -99,10 +85,45 @@ class __AWSAdapters__
 	 * @throws Throwable On any exception.
 	 * @since 2018/08/24
 	 */
-	static Object __type5Static(MethodHandle __pass, Object __a, Context __c)
+	static Object __type1Static(MethodHandle __pass, Object __a, Context __c)
 		throws Throwable
 	{
-		return __pass.invoke(IOpipeExecution.currentExecution(), __a);
+		return __pass.invoke(__a);
+	}
+	
+	/**
+	 * Forwards to type 3 instance method.
+	 *
+	 * @param __pass The target handle.
+	 * @param __i The object instance.
+	 * @param __in The input stream.
+	 * @param __out The output stream.
+	 * @param __c The context.
+	 * @throws Throwable On any exception.
+	 * @since 2018/08/24
+	 */
+	static void __type3Instance(MethodHandle __pass, Object __i,
+		InputStream __in, OutputStream __out, Context __c)
+		throws Throwable
+	{
+		__pass.invoke(__i, __in, __out);
+	}
+	
+	/**
+	 * Forwards to type 3 instance method.
+	 *
+	 * @param __pass The target handle.
+	 * @param __in The input stream.
+	 * @param __out The output stream.
+	 * @param __c The context.
+	 * @throws Throwable On any exception.
+	 * @since 2018/08/24
+	 */
+	static void __type3Static(MethodHandle __pass,
+		InputStream __in, OutputStream __out, Context __c)
+		throws Throwable
+	{
+		__pass.invoke(__in, __out);
 	}
 	
 	/**
@@ -121,6 +142,57 @@ class __AWSAdapters__
 		throws Throwable
 	{
 		return __pass.invoke(__i, IOpipeExecution.currentExecution(), __a);
+	}
+	
+	/**
+	 * Forwards to a type 5 static method.
+	 *
+	 * @param __pass The target handle.
+	 * @param __a Argument A.
+	 * @param __c The context.
+	 * @return The result of execution.
+	 * @throws Throwable On any exception.
+	 * @since 2018/08/24
+	 */
+	static Object __type5Static(MethodHandle __pass, Object __a, Context __c)
+		throws Throwable
+	{
+		return __pass.invoke(IOpipeExecution.currentExecution(), __a);
+	}
+	
+	/**
+	 * Forwards to type 6 instance method.
+	 *
+	 * @param __pass The target handle.
+	 * @param __i The object instance.
+	 * @param __in The input stream.
+	 * @param __out The output stream.
+	 * @param __c The context.
+	 * @throws Throwable On any exception.
+	 * @since 2018/08/24
+	 */
+	static void __type6Instance(MethodHandle __pass, Object __i,
+		InputStream __in, OutputStream __out, Context __c)
+		throws Throwable
+	{
+		__pass.invoke(__i, IOpipeExecution.currentExecution(), __in, __out);
+	}
+	
+	/**
+	 * Forwards to type 6 instance method.
+	 *
+	 * @param __pass The target handle.
+	 * @param __in The input stream.
+	 * @param __out The output stream.
+	 * @param __c The context.
+	 * @throws Throwable On any exception.
+	 * @since 2018/08/24
+	 */
+	static void __type6Static(MethodHandle __pass,
+		InputStream __in, OutputStream __out, Context __c)
+		throws Throwable
+	{
+		__pass.invoke(IOpipeExecution.currentExecution(), __in, __out);
 	}
 }
 

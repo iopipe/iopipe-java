@@ -498,7 +498,18 @@ __outer:
 					
 					// 3: (I, O)
 				case 3:
-					throw new Error("TODO");
+					if (isstatic)
+						usedhandle = lookup.findStatic(__AWSAdapters__.class,
+							"__type3Static", MethodType.methodType(
+								void.class, MethodHandle.class, InputStream.class,
+								OutputStream.class, Context.class)).bindTo(basehandle);
+					else
+						usedhandle = lookup.findStatic(__AWSAdapters__.class,
+							"__type3Instance", MethodType.methodType(
+								void.class, MethodHandle.class, Object.class,
+								InputStream.class, OutputStream.class,
+								Context.class)).bindTo(basehandle);
+					break;
 					
 					// 4: (I, O, Context), identity handler
 				case 4:
@@ -521,7 +532,18 @@ __outer:
 					
 					// 6: (IOpipeExecution, I, O)
 				case 6:
-					throw new Error("TODO");
+					if (isstatic)
+						usedhandle = lookup.findStatic(__AWSAdapters__.class,
+							"__type6Static", MethodType.methodType(
+								void.class, MethodHandle.class, InputStream.class,
+								OutputStream.class, Context.class)).bindTo(basehandle);
+					else
+						usedhandle = lookup.findStatic(__AWSAdapters__.class,
+							"__type6Instance", MethodType.methodType(
+								void.class, MethodHandle.class, Object.class,
+								InputStream.class, OutputStream.class,
+								Context.class)).bindTo(basehandle);
+					break;
 				
 					// This indicates that the code is wrong
 				default:
