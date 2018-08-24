@@ -440,7 +440,7 @@ __outer:
 					};
 				break;
 			
-				// It is an error if this happens
+				// This indicates the code is wrong
 			default:
 				throw new Error("If this has happened then something is " +
 					"very wrong.");
@@ -456,42 +456,62 @@ __outer:
 		
 		// Build a compatible method handle and parameter set
 		MethodHandle usedhandle;
-		switch (discovered)
+		MethodHandles.Lookup lookup = MethodHandles.lookup();
+		try
 		{
-				// 0: ()
-			case 0:
-				throw new Error("TODO");
-			
-				// 1: (A)
-			case 1:
-				throw new Error("TODO");
-			
-				// 2: (A, Context), identity handler
-			case 2:
-				usedhandle = basehandle;
-				break;
+			switch (discovered)
+			{
+					// 0: ()
+				case 0:
+					if (isstatic)
+						usedhandle = lookup.findStatic(__AWSAdapters__.class,
+							"__type0Static", MethodType.methodType(
+								MethodHandle.class, Object.class, Object.class,
+								Context.class)).bindTo(basehandle);
+					else
+						usedhandle = lookup.findStatic(__AWSAdapters__.class,
+							"__type0Instance", MethodType.methodType(
+								MethodHandle.class, Object.class, Object.class,
+								Object.class, Context.class)).bindTo(basehandle);
+					break;
 				
-				// 3: (I, O)
-			case 3:
-				throw new Error("TODO");
+					// 1: (A)
+				case 1:
+					throw new Error("TODO");
 				
-				// 4: (I, O, Context), identity handler
-			case 4:
-				usedhandle = basehandle;
-				break;
+					// 2: (A, Context), identity handler
+				case 2:
+					usedhandle = basehandle;
+					break;
+					
+					// 3: (I, O)
+				case 3:
+					throw new Error("TODO");
+					
+					// 4: (I, O, Context), identity handler
+				case 4:
+					usedhandle = basehandle;
+					break;
+					
+					// 5: (IOpipeExecution, A)
+				case 5:
+					throw new Error("TODO");
+					
+					// 6: (IOpipeExecution, I, O)
+				case 6:
+					throw new Error("TODO");
 				
-				// 5: (IOpipeExecution, A)
-			case 5:
-				throw new Error("TODO");
-				
-				// 6: (IOpipeExecution, I, O)
-			case 6:
-				throw new Error("TODO");
-			
-				// It is an error if this happens
-			default:
-				throw new Error("If this has happened then something is " +
-					"very wrong.");
+					// This indicates that the code is wrong
+				default:
+					throw new Error("If this has happened then something is " +
+						"very wrong.");
+			}
+		}
+		
+		// If this happens this is fatal and the code is wrong
+		catch (IllegalAccessException|NoSuchMethodException e)
+		{
+			throw new Error("Could not locate the AWS handle wrappers.", e);
 		}
 		
 		return new EntryPoint(__cl, usedhandle, isstatic, passparameters);
