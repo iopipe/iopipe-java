@@ -1,5 +1,9 @@
 package com.iopipe.generic;
 
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 
 /**
@@ -112,6 +116,35 @@ public abstract class ObjectTranslator
 		// conversion at all)
 		if (__f.equals(__t) || __t.equals(Object.class))
 			return new __IdentityConvert__(__f, __t);
+		
+		// Conversion of string to other type, construct or valueOf
+		MethodHandles.Lookup lookup = MethodHandles.lookup();
+		if (__f.equals(String.class) && (__t instanceof Class))
+		{
+			Class<?> tcl = (Class<?>)__t;
+			
+			// Try valueOf() first
+			try
+			{
+				return new __StringToConvert__(__f, __t,
+					lookup.findStatic(tcl, "valueOf",
+						MethodType.methodType(tcl, String.class)));
+			}
+			catch (IllegalAccessException|NoSuchMethodException e)
+			{
+			}
+			
+			// Try a constructor
+			try
+			{
+				return new __StringToConvert__(__f, __t,
+					lookup.findConstructor(tcl,
+						MethodType.methodType(void.class, String.class)));
+			}
+			catch (IllegalAccessException|NoSuchMethodException e)
+			{
+			}
+		}
 		
 		return new __JacksonConvert__(__f, __t);
 	}
