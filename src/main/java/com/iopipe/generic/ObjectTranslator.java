@@ -230,11 +230,10 @@ public abstract class ObjectTranslator
 			ParameterizedType t = (ParameterizedType)__t;
 			
 			// Check if the base raw type is a list
-			Type raw = t.getRawType();
-			if (__anylist && (raw instanceof Class) &&
-				!List.class.isAssignableFrom((Class<?>)raw))
+			Class<?> raw = ObjectTranslator.__rawClass(t);
+			if (__anylist && !List.class.isAssignableFrom(raw))
 				return null;
-			else if (!(List.class.equals(raw)))
+			else if (!__anylist && !List.class.equals(raw))
 				return null;
 			
 			// Only use the first argument if it is valid

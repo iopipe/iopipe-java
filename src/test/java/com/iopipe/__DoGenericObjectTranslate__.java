@@ -103,8 +103,8 @@ class __DoGenericObjectTranslate__
 			this.to).translate(basic);
 		
 		// Debug log
-		Logger.debug("Object translated ({}) `{}` into ({}) `{}`",
-			basic.getClass(), basic, target.getClass(), target);
+		Logger.debug("Object translated {} {}/[Wanted: {}] | `{}` -> `{}`",
+			basic.getClass(), target.getClass(), this.to, basic, target);
 		__e.customMetric("source.class", basic.getClass().getName());
 		__e.customMetric("source.value", basic.toString());
 		__e.customMetric("target.class", target.getClass().getName());
