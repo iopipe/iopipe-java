@@ -341,13 +341,17 @@ public abstract class IOpipeExecution
 	/**
 	 * Returns the current execution for the given thread.
 	 *
-	 * @return The execution context which is associated with this thread or
-	 * {@code null} if there is no associated execution.
+	 * @return The execution context which is associated with this thread, if
+	 * there is no valid execution context then one that does nothing will be
+	 * created.
 	 * @since 2018/07/30
 	 */
 	public static final IOpipeExecution currentExecution()
 	{
-		return IOpipeService.__execution();
+		IOpipeExecution rv = IOpipeService.__execution();
+		if (rv == null)
+			return new __NoOpExecution__();
+		return rv;
 	}
 }
 
