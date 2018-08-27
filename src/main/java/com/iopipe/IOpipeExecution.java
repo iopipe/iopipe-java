@@ -651,8 +651,8 @@ public final class IOpipeExecution
 			Throwable thrown = measurement.getThrown();
 			if (thrown != null)
 			{
-				// If this was a wrapped checked exception then instead of
-				// reporting our wrapper instead report the wrapped exception
+				// If this was a wrapped IOException then instead of reporting our
+				// wrapper instead report the wrapped exception
 				if (thrown instanceof IOpipeWrappedException)
 				{
 					Throwable instead = thrown.getCause();
