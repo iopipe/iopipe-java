@@ -332,7 +332,7 @@ public final class IOpipeService
 		
 		// Setup execution information
 		IOpipeMeasurement measurement = new IOpipeMeasurement(coldstarted);
-		IOpipeExecution exec = new IOpipeExecution(this, config, __context,
+		IOpipeExecution exec = new __ActiveExecution__(this, config, __context,
 			measurement, nowtime, __input, nowmono);
 		
 		// Use a reference to allow the execution to be garbage collected if
@@ -443,7 +443,8 @@ public final class IOpipeService
 		
 		// Generate and send result to server
 		if (watchdog == null || !watchdog._generated.getAndSet(true))
-			this.__sendRequest(exec.__buildRequest());
+			if (exec instanceof __ActiveExecution__)
+				this.__sendRequest(((__ActiveExecution__)exec).__buildRequest());
 		
 		// Clear the last execution that is occuring, but only if ours was
 		// still associated with it

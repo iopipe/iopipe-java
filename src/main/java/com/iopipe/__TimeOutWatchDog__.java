@@ -156,7 +156,9 @@ final class __TimeOutWatchDog__
 				exec.label("@iopipe/timeout");
 				
 				// Upload
-				this.service.__sendRequest(exec.__buildRequest());
+				if (exec instanceof __ActiveExecution__)
+					this.service.__sendRequest(
+						((__ActiveExecution__)exec).__buildRequest());
 				
 				// Do not need to execute anymore
 				return;
