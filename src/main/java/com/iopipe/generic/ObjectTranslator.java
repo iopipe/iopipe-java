@@ -146,6 +146,32 @@ public abstract class ObjectTranslator
 			}
 		}
 		
+		// The source is a number type
+		if ((__f instanceof Class) && Number.class.isAssignableFrom(((Class<?>)__f)))
+		{
+			// To int
+			if (__t.equals(Integer.class))
+				return new __FunctionConvert__(__f, __t,
+					(__o) -> Integer.valueOf(((Number)__o).intValue()));
+			
+			// To long
+			else if (__t.equals(Long.class))
+				return new __FunctionConvert__(__f, __t,
+					(__o) -> Long.valueOf(((Number)__o).longValue()));
+			
+			// To float
+			else if (__t.equals(Float.class))
+				return new __FunctionConvert__(__f, __t,
+					(__o) -> Float.valueOf(((Number)__o).floatValue()));
+			
+			// To double
+			else if (__t.equals(Double.class))
+				return new __FunctionConvert__(__f, __t,
+					(__o) -> Double.valueOf(((Number)__o).doubleValue()));
+		}
+		
+		// Could not setup a well known basic conversion so fall back to a
+		// generic conversion
 		return new __JacksonConvert__(__f, __t);
 	}
 }

@@ -4,8 +4,12 @@ import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Type;
 
 /**
- * This is the identity conversion which converts to objects without performing
- * any kind of translation.
+ * This represents a conversion from a string to a given object. Note that
+ * a method handle is used because the target is of any type which means that
+ * there may or may be a method that exists. So this is different from
+ * {@code __FunctionConvert__} since there may be a lack of a public
+ * constructor or a lack of {@code valueOf(string)} and because there is no
+ * publically known interface to handle these cases.
  *
  * @since 2018/08/24
  */
