@@ -9,6 +9,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonNumber;
@@ -39,7 +40,7 @@ public final class StandardPushEvent
 	public final Stat stat;
 	
 	/** Process ID. */
-	public final int processid;
+	public final String processid;
 	
 	/** Timestamp start. */
 	public final long timestamp;
@@ -96,7 +97,7 @@ public final class StandardPushEvent
 	 * @since 2018/07/13
 	 */
 	public StandardPushEvent(String __token, String __installmethod,
-		long __duration, Stat __stat, int __processid, long __timestamp,
+		long __duration, Stat __stat, String __processid, long __timestamp,
 		long __timestampend, AWS __aws, Disk __disk, Environment __environment,
 		Errors __errors, boolean __coldstart,
 		Map<String, CustomMetric> __custommetrics,
@@ -181,7 +182,7 @@ public final class StandardPushEvent
 		String installmethod = null;
 		long duration = Long.MIN_VALUE;
 		Stat stat = null;
-		int processid = Integer.MIN_VALUE;
+		String processid = UUID.randomUUID().toString();
 		long timestamp = Long.MIN_VALUE;
 		long timestampend = Long.MIN_VALUE;
 		AWS aws = null;
@@ -216,7 +217,7 @@ public final class StandardPushEvent
 					break;
 				
 				case "processId":
-					processid = ((JsonNumber)v).intValue();
+					processid = ((JsonString)v).getString();
 					break;
 				
 				case "timestamp":

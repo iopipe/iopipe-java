@@ -1,5 +1,7 @@
 package com.iopipe;
 
+import java.util.UUID;
+
 /**
  * Internal shared variables and such
  *
@@ -9,6 +11,10 @@ final class __Shared__
 {
 	/** The thread group to use main service threads under. */
 	static final ThreadGroup _SERVICE_THREAD_GROUP;
+	
+	/** The process ID, used to identify this process. */
+	static final UUID _PROCESS_ID =
+		UUID.randomUUID();
 	
 	/**
 	 * Initializes some shared variables.

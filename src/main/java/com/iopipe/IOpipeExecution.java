@@ -493,7 +493,7 @@ public final class IOpipeExecution
 
 			SystemMeasurement.Stat stat = sysinfo.stat;
 			
-			gen.write("processId", stat.pid);
+			gen.write("processId", __Shared__._PROCESS_ID.toString());
 			gen.write("timestamp", this.starttimemillis);
 			gen.write("timestampEnd", nowtimestamp);
 			
