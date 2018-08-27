@@ -392,7 +392,7 @@ final class __ActiveExecution__
 			{
 				// If this was a wrapped IOException then instead of reporting our
 				// wrapper instead report the wrapped exception
-				if (thrown instanceof SimpleRequestStreamHandlerWrapper.__IOException__)
+				if (thrown instanceof IOpipeWrappedException)
 				{
 					Throwable instead = thrown.getCause();
 					if (instead != null)
