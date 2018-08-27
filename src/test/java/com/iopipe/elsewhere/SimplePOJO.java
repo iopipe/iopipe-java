@@ -44,5 +44,14 @@ public class SimplePOJO
 	{
 		this.favoritenumber = __v;
 	}
+	
+	public String toString()
+	{
+		return "{favoriteanimal=" + this.favoriteanimal +
+			", favoritefood=" + this.favoritefood +
+			", favoritenumber=" + this.favoritenumber +
+			", dayofweek=" + this.dayofweek +
+			"}";
+	}
 }
 

@@ -2,9 +2,13 @@ package com.iopipe.generic;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * This class manages converters to the target type.
@@ -170,9 +174,110 @@ public abstract class ObjectTranslator
 					(__o) -> Double.valueOf(((Number)__o).doubleValue()));
 		}
 		
+		// The source and target are array/list compatible
+		Type sl = ObjectTranslator.__getListComponent(__f, true),
+			tl = ObjectTranslator.__getListComponent(__t, false);
+		if (sl != null && tl != null)
+			return new __ListyConvert__(__f, __t,
+				ObjectTranslator.translator(sl, tl));
+		
 		// Could not setup a well known basic conversion so fall back to a
 		// generic conversion
 		return new __JacksonConvert__(__f, __t);
+	}
+	
+	/**
+	 * Returns the type that is used for anything that can contain a list type
+	 * or an array.
+	 *
+	 * @param __t The type to check.
+	 * @param __anylist Can any list type be used?
+	 * @return If the type is a list or array then this returns the component
+	 * type.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/08/27
+	 */
+	static final Type __getListComponent(Type __t, boolean __anylist)
+		throws NullPointerException
+	{
+		if (__t == null)
+			throw new NullPointerException();
+		
+		// This represents a raw list?
+		if (__t instanceof Class)
+		{
+			Class<?> t = (Class<?>)__t;
+			
+			// Target is an array, use the component type
+			if (t.isArray())
+				return t.getComponentType();
+			
+			// Is kind of list
+			else if (__anylist && List.class.isAssignableFrom(t))
+				return Object.class;
+			
+			// Just the base list
+			else if (!__anylist && List.class.equals(t))
+				return Object.class;
+			
+			// Not one
+			return null;
+		}
+		
+		// Could be a list
+		else if (__t instanceof ParameterizedType)
+		{
+			ParameterizedType t = (ParameterizedType)__t;
+			
+			// Check if the base raw type is a list
+			Type raw = t.getRawType();
+			if (__anylist && (raw instanceof Class) &&
+				!List.class.isAssignableFrom((Class<?>)raw))
+				return null;
+			else if (!(List.class.equals(raw)))
+				return null;
+			
+			// Only use the first argument if it is valid
+			Type[] args = t.getActualTypeArguments();
+			if (args.length == 1)
+				return args[0];
+			
+			// Otherwise do not consider this type
+			return null;
+		}
+		
+		// Is an array
+		else if (__t instanceof GenericArrayType)
+			return ((GenericArrayType)__t).getGenericComponentType();
+		
+		// Not a list type
+		return null;
+	}
+	
+	/**
+	 * Returns the raw class.
+	 *
+	 * @param __t The type to get the raw type from.
+	 * @return The raw type
+	 * @throw NullPointerException On null arguments.
+	 * @since 2018/08/27
+	 */
+	static final Class<?> __rawClass(Type __t)
+		throws NullPointerException
+	{
+		if (__t == null)
+			throw new NullPointerException();
+		
+		// Just a normal class
+		if (__t instanceof Class)
+			return (Class<?>)__t;
+		
+		// Parameterized type
+		else if (__t instanceof ParameterizedType)
+			return ObjectTranslator.__rawClass(((ParameterizedType)__t).getRawType());
+		
+		// Unknown, lets just call it object
+		return Object.class;
 	}
 }
 

@@ -182,6 +182,22 @@ public abstract class Engine
 			(__e) -> new __DoGenericObjectTranslate__(__e,
 				"boolean.json",
 				String.class),
+				
+			(__e) -> new __DoGenericObjectTranslate__(__e,
+				"arraystring.json",
+				String[].class),
+			(__e) -> new __DoGenericObjectTranslate__(__e,
+				"arrayinteger.json",
+				int[].class),
+			(__e) -> new __DoGenericObjectTranslate__(__e,
+				"arrayinteger.json",
+				Double[].class),
+			(__e) -> new __DoGenericObjectTranslate__(__e,
+				"arrayinteger.json",
+				String[].class),
+			(__e) -> new __DoGenericObjectTranslate__(__e,
+				"arraysimplepojo.json",
+				SimplePOJO[].class),
 		};
 	
 	/** The base name for this engine. */
