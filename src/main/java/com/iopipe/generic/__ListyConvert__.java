@@ -5,6 +5,7 @@ import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.function.ToIntFunction;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -47,8 +48,6 @@ final class __ListyConvert__
 		if (__elem == null)
 			throw new NullPointerException();
 		
-		this.elementconverter = __elem;
-		
 		// Reading from array
 		if (__f instanceof GenericArrayType ||
 			((__f instanceof Class) && ((Class<?>)__f).isArray()))
@@ -64,15 +63,19 @@ final class __ListyConvert__
 			this.fromgetfunc = (__l, __i) -> ((List<?>)__l).get(__i);
 		}
 		
-		// Writing to array
+		// Need to use the to type
+		this.elementconverter = __elem;
+		Type targetelem = __elem.to();
+		
+		// Writing to object based array
 		if (__t instanceof GenericArrayType ||
-			((__t instanceof Class) && ((Class<?>)__f).isArray()))
+			((__t instanceof Class) && ((Class<?>)__t).isArray()))
 		{
 			// Need to figure out the array type first
-			Class<?> newtype = ObjectTranslator.__rawClass(__t);
+			Class<?> newtype = ObjectTranslator.__rawClass(targetelem);
 			
 			this.tonewfunc = (__l) -> Array.newInstance(newtype, __l);
-			this.tosetoraddfunc = (__l, __i, __v) -> ((Object[])__l)[__i] = __v;
+			this.tosetoraddfunc = (__l, __i, __v) -> Array.set(__l, __i, __v);
 		}
 		
 		// Writing to list
