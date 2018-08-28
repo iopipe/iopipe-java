@@ -1,0 +1,26 @@
+[
+	{
+		"favorite-animal":"squirrel",
+		"favoriteFood":"acorn",
+		"favorite-Number":29,
+		"day-of-week":"Monday"
+	},
+	{
+		"favorite-animal":"squirrels",
+		"favoriteFood":"acorns",
+		"favorite-Number":30,
+		"day-of-week":"Tuesday"
+	},
+	{
+		"favorite-animal":"squirrelss",
+		"favoriteFood":"acornss",
+		"favorite-Number":31,
+		"day-of-week":"Wednesday"
+	},
+	{
+		"favorite-animal":"squirrelsss",
+		"favoriteFood":"acornsss",
+		"favorite-Number":32,
+		"day-of-week":"Thursday"
+	}
+]

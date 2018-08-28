@@ -13,9 +13,13 @@ It is licensed under the Apache 2.0.
    * [Gradle](#gradle)
  * [Configuration](#configuration)
  * [Wrapping Your Lambda](#wrapping-your-lambda)
+   * [Generic Entry Point Wrappers](#generic-entry-point-wrappers)
+     * [`RequestHandler`](#requesthandler)
+     * [`RequestStreamHandler`](#requeststreamhandler)
    * [Implement `com.iopipe.SimpleRequestHandlerWrapper`](#implement-comiopipesimplerequesthandlerwrapper)
    * [Implement `com.iopipe.SimpleRequestStreamHandlerWrapper`](#implement-comiopipesimplerequeststreamhandlerwrapper)
    * [Wrapping Without A Helper Class](#wrapping-without-a-helper-class)
+ * [Accessing IOpipe's `IOpipeExecution` Instance](#accessing-iopipes-iopipeexecution-instance)
  * [Accessing the AWS `Context` Object](#accessing-the-aws-context-object)
  * [Measuring and Monitoring](#measuring-and-monitoring)
    * [Custom Metrics](#custom-metrics)
@@ -61,13 +65,48 @@ project.
 
 # Wrapping your Lambda
 
-There are three ways to wrap your lambda:
+There are four ways to wrap your lambda:
 
+ * Using one of the generic entry point wrappers.
  * If you are currently implementing `RequestHandler`,
    extend the class `com.iopipe.SimpleRequestHandlerWrapper`.
  * If you are currently implementing `RequestStreamHandler`,
    extend the class `com.iopipe.SimpleRequestStreamHandlerWrapper`.
  * You may also initialize the IOpipe wrapper yourself.
+
+## Generic Entry Point Wrappers
+
+By setting the entry point of the lambda in the configuration to a specific
+generic handler class then setting `IOPIPE_GENERIC_HANDLER` you may wrap
+any standard AWS entry point with IOpipe without needing to modify any code.
+
+If the exception `com.iopipe.generic.InvalidEntryPointException` or
+`com.iopipe.IOpipeFatalError` is thrown the message detail should specify
+mis-configuration or a handler that cannot be used.
+
+## `RequestHandler`
+
+Set the entry point of your lambda to:
+
+ * `com.iopipe.generic.GenericAWSRequestHandler`.
+
+The expected method signatures are:
+
+ * `(T)`
+ * `(T, Context)`
+ * `(IOpipeExecution, T)`
+
+## `RequestStreamHandler`
+
+Set the entry point of your lambda to:
+
+ * `com.iopipe.generic.GenericAWSRequestStreamHandler`
+
+The expected method signatures are:
+
+ * `(InputStream, OutputStream)`
+ * `(InputStream, OutputStream, Context)`
+ * `(IOpipeExecution, InputStream, OutputStream)`
 
 ## Implement `com.iopipe.SimpleRequestHandlerWrapper`
 
@@ -165,7 +204,7 @@ environment variables.
     the service.
   * If this is zero then the window is disabled.
   * If this is not set then it defaults to `150`.
-* `com.iopipe.token`, `IOPIPE_TOKEN`
+* `com.iopipe.token` or `IOPIPE_TOKEN`
   * This represents the token of the IOpipe collector which is to obtain
     statistics.
   * This is the default token which will be used if no token was specified in
@@ -177,6 +216,11 @@ environment variables.
    * If set to `false` then the plugin will be disabled.
    * If this is not set for a plugin then it will use the setting from the
      plugin if it should be enabled by default or not.
+ * `IOPIPE_GENERIC_HANDLER`
+   * This specifies the class (and optionally the method) to be used by the
+     generic handler to wrap with IOpipe.
+   * `com.example`, implies that the `requestHandler` method be used.
+   * `com.example::requestHandler` specifies both a class and method.
 
 IOpipe uses tinylog for its internal logging, to make debug output from IOpipe
 easier to see tinylog can be configured using the following information located
@@ -185,6 +229,12 @@ at:
  * <https://tinylog.org/configuration>
 
 The associated package is `com.iopipe`.
+
+# Accessing IOpipe's `IOpipeExecution` Instance
+
+If `IOpipeExecution` needs to be obtained then you may use:
+
+ * `IOpipeExecution.currentExecution()`
 
 # Accessing the AWS `Context` Object
 

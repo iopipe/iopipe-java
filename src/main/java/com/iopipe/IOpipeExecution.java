@@ -1,30 +1,11 @@
 package com.iopipe;
 
 import com.amazonaws.services.lambda.runtime.Context;
-import com.iopipe.http.RemoteBody;
-import com.iopipe.http.RemoteException;
-import com.iopipe.http.RemoteRequest;
-import com.iopipe.plugin.IOpipePlugin;
 import com.iopipe.plugin.IOpipePluginExecution;
 import com.iopipe.plugin.NoSuchPluginException;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.lang.ref.WeakReference;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import javax.json.Json;
-import javax.json.JsonException;
-import javax.json.JsonObject;
-import javax.json.JsonValue;
-import javax.json.stream.JsonGenerator;
-import org.pmw.tinylog.Logger;
 
 /**
  * This class provides access to information and functionality which is
@@ -38,74 +19,25 @@ import org.pmw.tinylog.Logger;
  *
  * @since 2018/01/19
  */
-public final class IOpipeExecution
+public abstract class IOpipeExecution
 {
-	/** Is this a Linux system? */
-	private static final boolean _IS_LINUX =
-		"linux".compareToIgnoreCase(
-			System.getProperty("os.name", "unknown")) == 0;
-	
-	/** The service which invoked the method. */
-	protected final IOpipeService service;
-	
-	/** The configuration. */
-	protected final IOpipeConfiguration config;
-	
-	/** The context. */
-	protected final Context context;
-	
 	/** The measurement. */
 	protected final IOpipeMeasurement measurement;
 	
-	/** The starting time in milliseconds. */
-	protected final long starttimemillis;
-	
-	/** The starting time in monotonic nanoseconds. */
-	protected final long starttimemononanos;
-	
 	/**
-	 * The input object to the executing method, may be {@code null} if it
-	 * was passed or not used.
-	 */
-	protected final Object input;
-	
-	/** Plugins which currently have an active exection state. */
-	private final Map<Class<? extends IOpipePluginExecution>,
-		IOpipePluginExecution> _active =
-		new HashMap<>();
-	
-	/**
-	 * Initializes the execution information.
+	 * Initializes the base execution.
 	 *
-	 * @param __sv The service which initialized this.
-	 * @param __conf The configuration for this service.
-	 * @param __context The context for the execution.
-	 * @param __m Measurement which is used to provide access to tracing.
-	 * @param __tg The thread group which the execution runs under.
-	 * @param __st The start time in the system clock milliseconds.
-	 * @param __input The object which was passed to the method being
-	 * executed.
-	 * @param __sns The start time in monotonic nanoseconds.
-	 * @throws NullPointerException On null arguments except for
-	 * {@code __passed}.
-	 * @since 2018/01/19
+	 * @param __m The measurement to use.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/08/27
 	 */
-	IOpipeExecution(IOpipeService __sv, IOpipeConfiguration __conf,
-		Context __context, IOpipeMeasurement __m, long __st,
-		Object __input, long __sns)
+	IOpipeExecution(IOpipeMeasurement __m)
 		throws NullPointerException
 	{
-		if (__sv == null || __conf == null || __context == null ||
-			__m == null)
+		if (__m == null)
 			throw new NullPointerException();
 		
-		this.service = __sv;
-		this.config = __conf;
-		this.context = __context;
 		this.measurement = __m;
-		this.starttimemillis = __st;
-		this.input = __input;
-		this.starttimemononanos = __sns;
 	}
 	
 	/**
@@ -114,22 +46,59 @@ public final class IOpipeExecution
 	 * @return The service configuration.
 	 * @since 2018/01/19
 	 */
-	public final IOpipeConfiguration config()
-	{
-		return this.config;
-	}
+	public abstract IOpipeConfiguration config();
 	
 	/**
 	 * Returns the context for the Amazon Web Service Lambda execution that
-	 * is currently running.
+	 * is currently running. If it is not known or is valid then a placeholder
+	 * context will be returned.
 	 *
 	 * @return The AWS context.
 	 * @since 2018/01/19
 	 */
-	public final Context context()
-	{
-		return this.context;
-	}
+	public abstract Context context();
+	
+	/**
+	 * Returns the object which was used as input for the method being
+	 * executed, {@code null} will be returned if it was not passed or is not
+	 * known.
+	 *
+	 * @return The extra object which was passed to the run method or
+	 * {@code null} if it was not passed or is not known.
+	 * @since 2018/04/16
+	 */
+	public abstract Object input();
+	
+	/**
+	 * This returns an instance of a plugin based on the class type of its
+	 * interface.
+	 *
+	 * @param <C> The class type of the execution state.
+	 * @param __cl The class object of the execution state.
+	 * @return The instance of the plugin's execution state.
+	 * @throws ClassCastException If the class type is not valid.
+	 * @throws NoSuchPluginException If the plugin does not exist.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/01/20
+	 */
+	public abstract <C extends IOpipePluginExecution> C plugin(Class<C> __cl)
+		throws ClassCastException, NoSuchPluginException, NullPointerException;
+	
+	/**
+	 * Returns the service which ran this execution.
+	 *
+	 * @return The service which ran this execution.
+	 * @since 2018/01/19
+	 */
+	public abstract IOpipeService service();
+	
+	/**
+	 * Returns the starting time of the execution on the wall clock.
+	 *
+	 * @return The starting time in milliseconds.
+	 * @since 2018/02/16
+	 */
+	public abstract long startTimestamp();
 	
 	/**
 	 * Adds the specified custom metric with a string value.
@@ -175,18 +144,6 @@ public final class IOpipeExecution
 	 * Returns the object which was used as input for the method being
 	 * executed.
 	 *
-	 * @return The extra object which was passed to the run method.
-	 * @since 2018/04/16
-	 */
-	public final Object input()
-	{
-		return this.input;
-	}
-	
-	/**
-	 * Returns the object which was used as input for the method being
-	 * executed.
-	 *
 	 * @param <T> The type of object to return.
 	 * @param __cl The type of object to return.
 	 * @return The extra object which was passed to the run method.
@@ -200,7 +157,7 @@ public final class IOpipeExecution
 		if (__cl == null)
 			throw new NullPointerException();
 		
-		return __cl.cast(this.input);
+		return __cl.cast(this.input());
 	}
 	
 	/*
@@ -231,63 +188,6 @@ public final class IOpipeExecution
 	public final IOpipeMeasurement measurement()
 	{
 		return this.measurement;
-	}
-	
-	/**
-	 * This returns an instance of a plugin based on the class type of its
-	 * interface.
-	 *
-	 * @param <C> The class type of the execution state.
-	 * @param __cl The class object of the execution state.
-	 * @return The instance of the plugin's execution state.
-	 * @throws ClassCastException If the class type is not valid.
-	 * @throws NoSuchPluginException If the plugin does not exist.
-	 * @throws NullPointerException On null arguments.
-	 * @since 2018/01/20
-	 */
-	public final <C extends IOpipePluginExecution> C plugin(Class<C> __cl)
-		throws ClassCastException, NoSuchPluginException, NullPointerException
-	{
-		if (__cl == null)
-			throw new NullPointerException();
-		
-		// Lock due to multiple threads
-		Map<Class<? extends IOpipePluginExecution>, IOpipePluginExecution>
-			active = this._active;
-		synchronized (active)
-		{
-			// Need to create the plugin if it does not exist
-			IOpipePluginExecution rv = active.get(__cl);
-			if (rv == null)
-			{
-				// Was pre-cached to not exist
-				if (active.containsKey(__cl))
-					throw new NoSuchPluginException(String.format(
-						"No plugin exists for %s or it is disabled.", __cl));
-				
-				// It is possible that the plugin does not exist or is
-				// disabled, it could be requested multiple times so cache it
-				__Plugins__.__Info__ info =  this.service._plugins.__get(__cl);
-				if (info == null || !info.isEnabled())
-				{
-					active.put(__cl, null);
-					throw new NoSuchPluginException(String.format(
-						"No plugin exists for %s or it is disabled.", __cl));
-				}
-				
-				// Initialize the plugin's execution state
-				rv = info.plugin().execute(this);
-				if (rv == null)
-				{
-					active.put(__cl, null);
-					throw new NoSuchPluginException(String.format(
-						"Could create execution instance for plugin.", __cl));
-				}
-				active.put(__cl, rv);
-			}
-			
-			return  __cl.cast(rv);
-		}
 	}
 	
 	/**
@@ -428,28 +328,6 @@ public final class IOpipeExecution
 	}
 	
 	/**
-	 * Returns the service which ran this execution.
-	 *
-	 * @return The service which ran this execution.
-	 * @since 2018/01/19
-	 */
-	public final IOpipeService service()
-	{
-		return this.service;
-	}
-	
-	/**
-	 * Returns the starting time of the execution on the wall clock.
-	 *
-	 * @return The starting time in milliseconds.
-	 * @since 2018/02/16
-	 */
-	public final long startTimestamp()
-	{
-		return this.starttimemillis;
-	}
-	
-	/**
 	 * Returns the thread group which this execution is running under.
 	 *
 	 * @return The thread group of this execution, may return .
@@ -459,446 +337,21 @@ public final class IOpipeExecution
 	{
 		return Thread.currentThread().getThreadGroup();
 	}
-
-	/**
-	 * Builds the request which is sent to the remote service.
-	 *
-	 * @return The remote request to send to the service.
-	 * @throws RemoteException If the request could not be built.
-	 * @since 2017/12/17
-	 */
-	final RemoteRequest __buildRequest()
-		throws RemoteException
-	{
-		Context aws = this.context;
-		IOpipeConfiguration config = this.config;
-		IOpipeMeasurement measurement = this.measurement;
-
-		// Snapshot system information
-		SystemMeasurement sysinfo = SystemMeasurement.measure();
-		
-		// The current timestamp
-		long nowtimestamp = System.currentTimeMillis(),
-			starttimemononanos = this.starttimemononanos;
-		
-		StringWriter out = new StringWriter();
-		try (JsonGenerator gen = Json.createGenerator(out))
-		{
-			gen.writeStartObject();
-
-			gen.write("client_id", config.getProjectToken());
-			// UNUSED: "projectId": "s"
-			gen.write("installMethod",
-				Objects.toString(config.getInstallMethod(), "unknown"));
-
-			SystemMeasurement.Stat stat = sysinfo.stat;
-			
-			gen.write("processId", __Shared__._PROCESS_ID.toString());
-			gen.write("timestamp", this.starttimemillis);
-			gen.write("timestampEnd", nowtimestamp);
-			
-			// AWS Context information
-			gen.writeStartObject("aws");
-
-			gen.write("functionName", aws.getFunctionName());
-			gen.write("functionVersion", aws.getFunctionVersion());
-			gen.write("awsRequestId", aws.getAwsRequestId());
-			gen.write("invokedFunctionArn", aws.getInvokedFunctionArn());
-			gen.write("logGroupName", aws.getLogGroupName());
-			gen.write("logStreamName", aws.getLogStreamName());
-			gen.write("memoryLimitInMB", aws.getMemoryLimitInMB());
-			gen.write("getRemainingTimeInMillis",
-				aws.getRemainingTimeInMillis());
-			gen.write("traceId", Objects.toString(
-				System.getenv("_X_AMZN_TRACE_ID"), "unknown"));
-
-			gen.writeEnd();
-
-			// Memory Usage -- UNUSED
-			/*gen.writeStartObject("memory");
-
-			gen.write("rssMiB", );
-			gen.write("totalMiB", );
-			gen.write("rssTotalPercentage", );
-
-			gen.writeEnd();*/
-			
-			// Disk usage
-			
-			SystemMeasurement.Disk tempdir = sysinfo.tempdir;
-			gen.writeStartObject("disk");
-			gen.write("totalMiB", tempdir.totalmib);
-			gen.write("usedMiB", tempdir.usedmib);
-			gen.write("usedPercentage", tempdir.usedpercent * 100.0);
-			gen.writeEnd();
-
-			// Environment start
-			gen.writeStartObject("environment");
-
-			// Agent
-			gen.writeStartObject("agent");
-			gen.write("runtime", "java");
-			gen.write("version", IOpipeConstants.AGENT_VERSION);
-			gen.write("load_time", IOpipeConstants.LOAD_TIME);
-			gen.writeEnd();
-
-			// Runtime information
-			gen.writeStartObject("runtime");
-			gen.write("name", "java");
-			gen.write("version", System.getProperty("java.version", ""));
-			gen.write("vendor", System.getProperty("java.vendor", ""));
-			gen.write("vmVendor", System.getProperty("java.vm.vendor", ""));
-			gen.write("vmVersion", System.getProperty("java.vm.version", ""));
-			gen.writeEnd();
-
-			// Unique operating system boot identifier
-			gen.writeStartObject("host");
-
-			gen.write("boot_id", SystemMeasurement.BOOTID);
-
-			gen.writeEnd();
-
-			// Operating System Start
-			gen.writeStartObject("os");
-			
-			gen.write("hostname", SystemMeasurement.HOSTNAME);
-
-			SystemMeasurement.Memory memory = sysinfo.memory;
-			gen.write("totalmem", memory.totalbytes);
-			gen.write("freemem", memory.freebytes);
-			gen.write("usedmem", memory.usedbytes);
-
-			// Start CPUs
-			gen.writeStartArray("cpus");
-
-			List<SystemMeasurement.Cpu> cpus = sysinfo.cpus;
-			for (int i = 0, n = cpus.size(); i < n; i++)
-			{
-				SystemMeasurement.Cpu cpu = cpus.get(i);
-
-				gen.writeStartObject();
-				gen.writeStartObject("times");
-
-				gen.write("idle", cpu.idle);
-				gen.write("irq", cpu.irq);
-				gen.write("sys", cpu.sys);
-				gen.write("user", cpu.user);
-				gen.write("nice", cpu.nice);
-
-				gen.writeEnd();
-				gen.writeEnd();
-			}
-
-			// End CPUs
-			gen.writeEnd();
-
-			// Linux information
-			if (_IS_LINUX)
-			{
-				// Start Linux
-				gen.writeStartObject("linux");
-
-				// Start PID
-				gen.writeStartObject("pid");
-
-				// Start self
-				gen.writeStartObject("self");
-
-				gen.writeStartObject("stat");
-
-				SystemMeasurement.Times times = sysinfo.times;
-				gen.write("utime", times.utime);
-				gen.write("stime", times.stime);
-				gen.write("cutime", times.cutime);
-				gen.write("cstime", times.cstime);
-
-				gen.writeEnd();
-
-				gen.writeStartObject("stat_start");
-
-				times = IOpipeService._STAT_START;
-				gen.write("utime", times.utime);
-				gen.write("stime", times.stime);
-				gen.write("cutime", times.cutime);
-				gen.write("cstime", times.cstime);
-
-				gen.writeEnd();
-
-				gen.writeStartObject("status");
-
-				gen.write("VmRSS", stat.vmrsskib);
-				gen.write("Threads", stat.threads);
-				gen.write("FDSize", stat.fdsize);
-
-				gen.writeEnd();
-
-      			// End self
-      			gen.writeEnd();
-
-				// End PID
-				gen.writeEnd();
-
-				// End Linux
-				gen.writeEnd();
-			}
-
-			// Operating System end
-			gen.writeEnd();
-
-			// Environment end
-			gen.writeEnd();
-
-			Throwable thrown = measurement.getThrown();
-			if (thrown != null)
-			{
-				// If this was a wrapped IOException then instead of reporting our
-				// wrapper instead report the wrapped exception
-				if (thrown instanceof SimpleRequestStreamHandlerWrapper.__IOException__)
-				{
-					Throwable instead = thrown.getCause();
-					if (instead != null)
-						thrown = instead;
-				}
-				
-				gen.writeStartObject("errors");
-
-				// Write the stack as if it were normally output on the console
-				StringWriter trace = new StringWriter();
-				try (PrintWriter pw = new PrintWriter(trace))
-				{
-					thrown.printStackTrace(pw);
-
-					pw.flush();
-				}
-
-				gen.write("stack", trace.toString());
-				gen.write("name", thrown.getClass().getName());
-				gen.write("message",
-					Objects.toString(thrown.getMessage(), ""));
-				// UNUSED: "stackHash": "s",
-				// UNUSED: "count": "n"
-
-				gen.writeEnd();
-			}
-
-			gen.write("coldstart", measurement.isColdStarted());
-			
-			// Add custom metrics, which multiple threads could be adding at
-			// once
-			gen.writeStartArray("custom_metrics");
-			CustomMetric[] custmetrics = measurement.getCustomMetrics();
-			for (int i = 0, n = custmetrics.length; i < n; i++)
-			{
-				CustomMetric metric = custmetrics[i];
-				
-				// Check that the name is in the limit
-				String xname = metric.name();
-				if (!IOpipeExecution.__isNameInLimit(xname))
-				{
-					Logger.warn("Metric name exceeds the {} codepoint " +
-						"length limit and will not be reported: {}",
-						IOpipeConstants.NAME_CODEPOINT_LIMIT, xname);
-					continue;
-				}
-				
-				// Check if the value is in range
-				String svalue;
-				if (metric.hasString())
-				{
-					svalue = metric.stringValue();
-					
-					if (!IOpipeExecution.__isValueInLimit(svalue))
-					{
-						Logger.warn("Metric value exceeds the {} codepoint " +
-							"length limit and will not be reported: {}",
-							IOpipeConstants.VALUE_CODEPOINT_LIMIT, xname);
-						continue;
-					}	
-				}
-				else
-					svalue = null;
-				
-				// Write data
-				gen.writeStartObject();
-				
-				gen.write("name", xname);
-				
-				if (svalue != null)
-					gen.write("s", svalue);
-				if (metric.hasLong())
-					gen.write("n", metric.longValue());
-				
-				gen.writeEnd();
-			}
-			
-			// End of metrics
-			gen.writeEnd();
-			
-			// Copy the performance entries which have been measured
-			gen.writeStartArray("performanceEntries");
-			PerformanceEntry[] perfs = measurement.getPerformanceEntries();
-			for (int i = 0, n = perfs.length; i < n; i++)
-			{
-				PerformanceEntry perf = perfs[i];
-				
-				gen.writeStartObject();
-				
-				gen.write("name",
-					Objects.toString(perf.name(), "unknown"));
-				gen.write("startTime",
-					(double)(perf.startNanoTime() - starttimemononanos) / 1_000_000.0D);
-				gen.write("duration",
-					(double)perf.durationNanoTime() / 1_000_000.0D);
-				gen.write("entryType",
-					Objects.toString(perf.type(), "unknown"));
-				gen.write("timestamp", perf.startTimeMillis());
-				
-				gen.writeEnd();
-			}
-			
-			// End of entries
-			gen.writeEnd();
-			
-			// Are there any labels to be added?
-			gen.writeStartArray("labels");
-			String[] labels = measurement.getLabels();
-			for (int i = 0, n = labels.length; i < n; i++)
-			{
-				String label = labels[i];
-				if (IOpipeExecution.__isNameInLimit(label))
-					gen.write(label);
-				
-				// Emit warning
-				else
-					Logger.warn("Label exceeds the {} codepoint limit and " +
-						"will not be reported: {}",
-						IOpipeConstants.NAME_CODEPOINT_LIMIT, label);
-			}
-			
-			// End of labels
-			gen.writeEnd();
-			
-			// Record plugins which are being used
-			Map<Class<? extends IOpipePluginExecution>, IOpipePluginExecution>
-				active = this._active;
-			__Plugins__.__Info__ plugins[] = this.service._plugins.__info();
-			if (plugins.length > 0)
-			{
-				gen.writeStartArray("plugins");
-				
-				for (__Plugins__.__Info__ i : plugins)
-				{
-					gen.writeStartObject();
-					
-					gen.write("name", i.name());
-					
-					String ve = i.version();
-					if (ve != null)
-						gen.write("version", ve);
-					
-					String hp = i.homepage();
-					if (hp != null)
-						gen.write("homepage", hp);
-					
-					boolean pluginenabled;
-					gen.write("enabled", (pluginenabled = i.isEnabled()));
-					
-					// The plugin may specify some extra data to be added to
-					// properties in the plugin field, however only add that
-					// information if it was specified accordingly and the
-					// plugin was enabled
-					if (pluginenabled)
-					{
-						// If a plugin was executed then it will have a state
-						// to which to obtain information from
-						IOpipePluginExecution iope;
-						synchronized (active)
-						{
-							iope = active.get(i.executionClass());
-						}
-						
-						// If it does define an extra object then record all
-						// of the fields
-						JsonObject extraobject = (iope == null ? null :
-							iope.extraReport());
-						if (extraobject != null)
-							for (Map.Entry<String, JsonValue> e :
-								extraobject.entrySet())
-								gen.write(e.getKey(), e.getValue());
-					}
-					
-					gen.writeEnd();
-				}
-				
-				gen.writeEnd();
-			}
-			
-			// Write duration last so that all the overhead is recoreded as
-			// much as possible
-			long duration = System.nanoTime() - starttimemononanos;
-			if (duration >= 0)
-				gen.write("duration", duration);
-			
-			// Finished
-			gen.writeEnd();
-			gen.flush();
-		}
-		catch (JsonException e)
-		{
-			throw new RemoteException("Could not build request", e);
-		}
-
-		return new RemoteRequest(RemoteBody.MIMETYPE_JSON, out.toString());
-	}
 	
 	/**
 	 * Returns the current execution for the given thread.
 	 *
-	 * @return The execution context which is associated with this thread or
-	 * {@code null} if there is no associated execution.
+	 * @return The execution context which is associated with this thread, if
+	 * there is no valid execution context then one that does nothing will be
+	 * created.
 	 * @since 2018/07/30
 	 */
 	public static final IOpipeExecution currentExecution()
 	{
-		return IOpipeService.__execution();
-	}
-	
-	/**
-	 * Checks if the given string is within the name limit before it is
-	 * reported.
-	 *
-	 * @param __s The name to check.
-	 * @return If the name is short enough to be included.
-	 * @throws NullPointerException On null arguments.
-	 * @since 2018/04/11
-	 */
-	private static final boolean __isNameInLimit(String __s)
-		throws NullPointerException
-	{
-		if (__s == null)
-			throw new NullPointerException();
-		
-		return __s.codePointCount(0, __s.length()) <
-			IOpipeConstants.NAME_CODEPOINT_LIMIT;
-	}
-	
-	/**
-	 * Checks if the given string is within the value limit before it is
-	 * reported.
-	 *
-	 * @param __s The name to check.
-	 * @return If the name is short enough to be included.
-	 * @throws NullPointerException On null arguments.
-	 * @since 2018/05/03
-	 */
-	private static final boolean __isValueInLimit(String __s)
-		throws NullPointerException
-	{
-		if (__s == null)
-			throw new NullPointerException();
-		
-		return __s.codePointCount(0, __s.length()) <
-			IOpipeConstants.VALUE_CODEPOINT_LIMIT;
+		IOpipeExecution rv = IOpipeService.__execution();
+		if (rv == null)
+			return new __NoOpExecution__();
+		return rv;
 	}
 }
 

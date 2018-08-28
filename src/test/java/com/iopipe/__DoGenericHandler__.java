@@ -1,19 +1,24 @@
 package com.iopipe;
 
+import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.iopipe.generic.EntryPoint;
+import com.iopipe.generic.GenericAWSRequestHandler;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RemoteResult;
 import com.iopipe.IOpipeMeasurement;
-import java.util.Map;
-import javax.json.JsonString;
-import javax.json.JsonNumber;
-import javax.json.JsonValue;
 
 /**
- * This performs the test of the labels which may be added to a report.
+ * Checks to ensure the generic handler works.
  *
- * @since 2018/04/11
+ * @since 2018/08/17
  */
-class __DoLabel__
+class __DoGenericHandler__
 	extends Single
 {
 	/** Sent with no exception? */
@@ -28,31 +33,20 @@ class __DoLabel__
 	protected final BooleanValue haslabel =
 		new BooleanValue("haslabel");
 	
-	/** Is this label supposed to appear in the dashboard? */
-	protected final boolean doshow;
-	
-	/** The label to add. */
-	protected final String label;
-	
 	/**
 	 * Constructs the test.
 	 *
 	 * @param __e The owning engine.
-	 * @param __show Show this in the dashboard.
-	 * @param __label The label to add.
-	 * @since 2018/04/11
+	 * @since 2018/08/17
 	 */
-	__DoLabel__(Engine __e, boolean __show, String __label)
+	__DoGenericHandler__(Engine __e)
 	{
-		super(__e, "label-" + __show + "-" + __label);
-		
-		this.doshow = __show;
-		this.label = __label;
+		super(__e, "generichandler");
 	}
 	
 	/**
 	 * {@inheritDoc}
-	 * @since 2018/04/11
+	 * @since 2018/08/17
 	 */
 	@Override
 	public void end()
@@ -60,12 +54,12 @@ class __DoLabel__
 		super.assertTrue(this.remoterecvokay);
 		super.assertTrue(this.noerror);
 		
-		super.assertEquals(this.doshow, this.haslabel);
+		super.assertTrue(this.haslabel);
 	}
 	
 	/**
 	 * {@inheritDoc}
-	 * @since 2018/04/11
+	 * @since 2018/08/17
 	 */
 	@Override
 	public void remoteRequest(WrappedRequest __r)
@@ -77,13 +71,13 @@ class __DoLabel__
 			this.noerror.set(true);
 		
 		// The label must be added
-		if (event.labels.contains(this.label))
+		if (event.labels.contains("squirrels"))
 			this.haslabel.set(true);
 	}
 	
 	/**
 	 * {@inheritDoc}
-	 * @since 2018/04/11
+	 * @since 2018/08/17
 	 */
 	@Override
 	public void remoteResult(WrappedResult __r)
@@ -94,13 +88,35 @@ class __DoLabel__
 	
 	/**
 	 * {@inheritDoc}
-	 * @since 2018/04/11
+	 * @since 2018/08/17
 	 */
 	@Override
 	public void run(IOpipeExecution __e)
 		throws Throwable
 	{
-		__e.label(this.label);
+		// Run output
+		__e.label((String)(new GenericAWSRequestHandler(
+			EntryPoint.newAWSEntryPoint(Handler.class, "handleRequest")).
+			handleRequest("SQUIRRELS", __e.context())));
+	}
+	
+	/**
+	 * Handler for requests.
+	 *
+	 * @since 2018/08/17
+	 */
+	public static final class Handler
+		implements RequestHandler<String, String>
+	{
+		/**
+		 * {@inheritDoc}
+		 * @since 2018/08/17
+		 */
+		@Override
+		public final String handleRequest(String __in, Context __ctx)
+		{
+			return __in.toLowerCase();
+		}
 	}
 }
 

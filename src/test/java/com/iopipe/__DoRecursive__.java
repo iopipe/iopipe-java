@@ -3,17 +3,13 @@ package com.iopipe;
 import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RemoteResult;
 import com.iopipe.IOpipeMeasurement;
-import java.util.Map;
-import javax.json.JsonString;
-import javax.json.JsonNumber;
-import javax.json.JsonValue;
 
 /**
- * This performs the test of the labels which may be added to a report.
+ * This checks to make sure that recursive calls operate correctly.
  *
- * @since 2018/04/11
+ * @since 2018/08/17
  */
-class __DoLabel__
+class __DoRecursive__
 	extends Single
 {
 	/** Sent with no exception? */
@@ -28,31 +24,20 @@ class __DoLabel__
 	protected final BooleanValue haslabel =
 		new BooleanValue("haslabel");
 	
-	/** Is this label supposed to appear in the dashboard? */
-	protected final boolean doshow;
-	
-	/** The label to add. */
-	protected final String label;
-	
 	/**
 	 * Constructs the test.
 	 *
 	 * @param __e The owning engine.
-	 * @param __show Show this in the dashboard.
-	 * @param __label The label to add.
-	 * @since 2018/04/11
+	 * @since 2018/08/17
 	 */
-	__DoLabel__(Engine __e, boolean __show, String __label)
+	__DoRecursive__(Engine __e)
 	{
-		super(__e, "label-" + __show + "-" + __label);
-		
-		this.doshow = __show;
-		this.label = __label;
+		super(__e, "recursive");
 	}
 	
 	/**
 	 * {@inheritDoc}
-	 * @since 2018/04/11
+	 * @since 2018/08/17
 	 */
 	@Override
 	public void end()
@@ -60,12 +45,12 @@ class __DoLabel__
 		super.assertTrue(this.remoterecvokay);
 		super.assertTrue(this.noerror);
 		
-		super.assertEquals(this.doshow, this.haslabel);
+		super.assertTrue(this.haslabel);
 	}
 	
 	/**
 	 * {@inheritDoc}
-	 * @since 2018/04/11
+	 * @since 2018/08/17
 	 */
 	@Override
 	public void remoteRequest(WrappedRequest __r)
@@ -77,13 +62,13 @@ class __DoLabel__
 			this.noerror.set(true);
 		
 		// The label must be added
-		if (event.labels.contains(this.label))
+		if (event.labels.contains("squirrels"))
 			this.haslabel.set(true);
 	}
 	
 	/**
 	 * {@inheritDoc}
-	 * @since 2018/04/11
+	 * @since 2018/08/17
 	 */
 	@Override
 	public void remoteResult(WrappedResult __r)
@@ -94,13 +79,17 @@ class __DoLabel__
 	
 	/**
 	 * {@inheritDoc}
-	 * @since 2018/04/11
+	 * @since 2018/08/17
 	 */
 	@Override
 	public void run(IOpipeExecution __e)
 		throws Throwable
 	{
-		__e.label(this.label);
+		IOpipeService.instance().run(__e.context(), (__x) ->
+			{
+				__x.label("squirrels");
+				return null;
+			});
 	}
 }
 

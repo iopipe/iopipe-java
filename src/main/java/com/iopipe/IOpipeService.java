@@ -252,7 +252,7 @@ public final class IOpipeService
 					}
 					catch (IOException e)
 					{
-						throw new SimpleRequestStreamHandlerWrapper.__IOException__(
+						throw new IOpipeWrappedException(
 							e.getMessage(), e);
 					}
 					
@@ -261,7 +261,7 @@ public final class IOpipeService
 		}
 		
 		// Forward IOExceptions
-		catch (SimpleRequestStreamHandlerWrapper.__IOException__ e)
+		catch (IOpipeWrappedException e)
 		{
 			throw (IOException)e.getCause();
 		}
@@ -309,6 +309,14 @@ public final class IOpipeService
 		if (__context == null || __func == null)
 			throw new NullPointerException();
 		
+		// If an execution is already running, just ignore wrapping and
+		// generating events and just call it directly
+		{
+			IOpipeExecution exec = IOpipeService.__execution();
+			if (exec != null)
+				return __func.apply(exec);
+		}
+		
 		// Earliest start time for method entry
 		long nowtime = System.currentTimeMillis(),
 			nowmono = System.nanoTime();
@@ -324,7 +332,7 @@ public final class IOpipeService
 		
 		// Setup execution information
 		IOpipeMeasurement measurement = new IOpipeMeasurement(coldstarted);
-		IOpipeExecution exec = new IOpipeExecution(this, config, __context,
+		IOpipeExecution exec = new __ActiveExecution__(this, config, __context,
 			measurement, nowtime, __input, nowmono);
 		
 		// Use a reference to allow the execution to be garbage collected if
@@ -355,6 +363,7 @@ public final class IOpipeService
 			finally
 			{
 				// Clear the last execution because it is no longer occuring
+				executions.set(null);
 				lastexec.compareAndSet(refexec, null);
 			}
 		}
@@ -434,10 +443,12 @@ public final class IOpipeService
 		
 		// Generate and send result to server
 		if (watchdog == null || !watchdog._generated.getAndSet(true))
-			this.__sendRequest(exec.__buildRequest());
+			if (exec instanceof __ActiveExecution__)
+				this.__sendRequest(((__ActiveExecution__)exec).__buildRequest());
 		
 		// Clear the last execution that is occuring, but only if ours was
 		// still associated with it
+		executions.set(null);
 		lastexec.compareAndSet(refexec, null);
 		
 		// Throw the called exception as if the wrapper did not have any

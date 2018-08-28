@@ -52,7 +52,7 @@ public final class MockContext
 	@Override
 	public final String getAwsRequestId()
 	{
-		return "mockawsrequestid";
+		return "00000000-0000-0000-0000-000000000000";
 	}
 	
 	/**

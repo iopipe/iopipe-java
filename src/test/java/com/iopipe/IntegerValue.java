@@ -48,6 +48,16 @@ public final class IntegerValue
 	}
 	
 	/**
+	 * Increments the value.
+	 *
+	 * @since 2018/01/26
+	 */
+	public void increment()
+	{
+		this.value.incrementAndGet();
+	}
+	
+	/**
 	 * Increments the value then returns it.
 	 *
 	 * @return The value after incrementing.
