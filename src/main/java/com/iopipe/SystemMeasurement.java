@@ -496,8 +496,10 @@ public final class SystemMeasurement
 			this.usedmib = (double)__usedbytes / 1048576.0;
 			this.freemib = (__totalbytes - __usedbytes) / 1048576.0;
 			
-			this.usedpercent = Double.min(1.0, Double.max(0.0,
+			double usedpercent = Double.min(1.0, Double.max(0.0,
 				(double)__usedbytes / (double)__totalbytes));
+			this.usedpercent = ((Double.isInfinite(usedpercent) ||
+				Double.isNaN(usedpercent)) ? 100.0 : usedpercent);
 		}
 	}
 	
