@@ -499,7 +499,7 @@ public final class SystemMeasurement
 			double usedpercent = Double.min(1.0, Double.max(0.0,
 				(double)__usedbytes / (double)__totalbytes));
 			this.usedpercent = ((Double.isInfinite(usedpercent) ||
-				Double.isNaN(usedpercent)) ? 100.0 : usedpercent);
+				Double.isNaN(usedpercent)) ? 1.0 : usedpercent);
 		}
 	}
 	
