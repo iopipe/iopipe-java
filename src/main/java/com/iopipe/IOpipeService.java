@@ -416,8 +416,9 @@ public final class IOpipeService
 		{
 			exception = e;
 			
-			measurement.__setThrown(e);
-			measurement.addLabel("@iopipe/error");
+			if (exec instanceof __ActiveExecution__)
+				((__ActiveExecution__)exec).__setThrown(e);
+			exec.label("@iopipe/error");
 		}
 		
 		// It died, so stop the watchdog

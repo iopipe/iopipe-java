@@ -51,7 +51,7 @@ public abstract class IOpipeExecution
 	 * @param __cold Is this a cold start?
 	 * @since 2018/08/27
 	 */
-	IOpipeExecution(coldstart __cold)
+	IOpipeExecution(boolean __cold)
 	{
 		this.coldstart = __cold;
 	}
@@ -135,7 +135,7 @@ public abstract class IOpipeExecution
 		{
 			// Performance entry was defined, so just say that the plugin was
 			// used for tracing data
-			this.addLabel("@iopipe/plugin-trace");
+			this.label("@iopipe/plugin-trace");
 			
 			perfentries.add(__e);
 		}
@@ -159,7 +159,7 @@ public abstract class IOpipeExecution
 		synchronized (custmetrics)
 		{
 			if (!__cm.name().startsWith("@iopipe/"))
-				this.addLabel("@iopipe/metrics");
+				exec.label("@iopipe/metrics");
 			
 			custmetrics.add(__cm);
 		}
@@ -182,7 +182,7 @@ public abstract class IOpipeExecution
 		if (__name == null || __sv == null)
 			throw new NullPointerException();
 		
-		this.addCustomMetric(new CustomMetric(__name, __sv));
+		this.customMetric(new CustomMetric(__name, __sv));
 	}
 	
 	/**
@@ -202,7 +202,7 @@ public abstract class IOpipeExecution
 		if (__name == null)
 			throw new NullPointerException();
 		
-		this.addCustomMetric(new CustomMetric(__name, __lv));
+		this.customMetric(new CustomMetric(__name, __lv));
 	}
 	
 	/**
@@ -227,7 +227,7 @@ public abstract class IOpipeExecution
 				if (cm != null)
 				{
 					if (!cm.name().startsWith("@iopipe/"))
-						this.addLabel("@iopipe/metrics");
+						this.label("@iopipe/metrics");
 					
 					custmetrics.add(cm);
 				}
@@ -349,7 +349,7 @@ public abstract class IOpipeExecution
 	@Deprecated
 	public final IOpipeMeasurement measurement()
 	{
-		return this.measurement;
+		return new IOpipeMeasurement(new WeakReference<>(this));
 	}
 	
 	/**
