@@ -3,9 +3,15 @@ package com.iopipe;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.iopipe.plugin.IOpipePluginExecution;
 import com.iopipe.plugin.NoSuchPluginException;
+import java.util.Collection;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * This class provides access to information and functionality which is
@@ -21,23 +27,33 @@ import java.util.function.Function;
  */
 public abstract class IOpipeExecution
 {
-	/** The measurement. */
-	protected final IOpipeMeasurement measurement;
+	/** Was this detected to be a coldstart? */
+	protected final boolean coldstart;
+	
+	/**
+	 * Performance entries which have been added to the measurement, this
+	 * field is locked since multiple threads may be adding entries.
+	 */
+	private final Set<PerformanceEntry> _perfentries =
+		new TreeSet<>();
+	
+	/** Custom metrics that have been added, locked for thread safety. */
+	private final Set<CustomMetric> _custmetrics =
+		new TreeSet<>();
+	
+	/** Labels which have been added, locked for threading. */
+	private final Set<String> _labels =
+		new LinkedHashSet<>();
 	
 	/**
 	 * Initializes the base execution.
 	 *
-	 * @param __m The measurement to use.
-	 * @throws NullPointerException On null arguments.
+	 * @param __cold Is this a cold start?
 	 * @since 2018/08/27
 	 */
-	IOpipeExecution(IOpipeMeasurement __m)
-		throws NullPointerException
+	IOpipeExecution(coldstart __cold)
 	{
-		if (__m == null)
-			throw new NullPointerException();
-		
-		this.measurement = __m;
+		this.coldstart = __cold;
 	}
 	
 	/**
@@ -101,6 +117,55 @@ public abstract class IOpipeExecution
 	public abstract long startTimestamp();
 	
 	/**
+	 * Adds a single performance entry to the report.
+	 *
+	 * @param __e The entry to add to the report.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/01/19
+	 */
+	public final void addPerformanceEntry(PerformanceEntry __e)
+		throws NullPointerException
+	{
+		if (__e == null)
+			throw new NullPointerException();
+		
+		// Multiple threads could be adding entries
+		Set<PerformanceEntry> perfentries = this._perfentries;
+		synchronized (perfentries)
+		{
+			// Performance entry was defined, so just say that the plugin was
+			// used for tracing data
+			this.addLabel("@iopipe/plugin-trace");
+			
+			perfentries.add(__e);
+		}
+	}
+	
+	/**
+	 * Adds a single custom metric to the report.
+	 *
+	 * @param __cm The custom metric to add.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/01/20
+	 */
+	public final void customMetric(CustomMetric __cm)
+		throws NullPointerException
+	{
+		if (__cm == null)
+			throw new NullPointerException();
+		
+		// Multiple threads can add metrics at one time
+		Set<CustomMetric> custmetrics = this._custmetrics;
+		synchronized (custmetrics)
+		{
+			if (!__cm.name().startsWith("@iopipe/"))
+				this.addLabel("@iopipe/metrics");
+			
+			custmetrics.add(__cm);
+		}
+	}
+	
+	/**
 	 * Adds the specified custom metric with a string value.
 	 *
 	 * Custom metric names are limited to the length specified in
@@ -117,7 +182,7 @@ public abstract class IOpipeExecution
 		if (__name == null || __sv == null)
 			throw new NullPointerException();
 		
-		this.measurement.customMetric(__name, __sv);
+		this.addCustomMetric(new CustomMetric(__name, __sv));
 	}
 	
 	/**
@@ -137,7 +202,36 @@ public abstract class IOpipeExecution
 		if (__name == null)
 			throw new NullPointerException();
 		
-		this.measurement.customMetric(__name, __lv);
+		this.addCustomMetric(new CustomMetric(__name, __lv));
+	}
+	
+	/**
+	 * Adds multiple custom metrics in a single bulk operation.
+	 *
+	 * Parameters which are {@code null} are ignored.
+	 *
+	 * @param __cms The custom metrics to add.
+	 * @since 2018/04/24
+	 */
+	public final void customMetrics(CustomMetric... __cms)
+	{
+		// Do nothing
+		if (__cms == null)
+			return;
+		
+		// Bulk add all the custom metrics under a single lock
+		Set<CustomMetric> custmetrics = this._custmetrics;
+		synchronized (custmetrics)
+		{
+			for (CustomMetric cm : __cms)
+				if (cm != null)
+				{
+					if (!cm.name().startsWith("@iopipe/"))
+						this.addLabel("@iopipe/metrics");
+					
+					custmetrics.add(cm);
+				}
+		}
 	}
 	
 	/**
@@ -160,6 +254,65 @@ public abstract class IOpipeExecution
 		return __cl.cast(this.input());
 	}
 	
+	/**
+	 * Is this a coldstarted execution?
+	 *
+	 * @return If this is a coldstarted execution.
+	 * @since 2018/03/15
+	 */
+	public final boolean isColdStarted()
+	{
+		return this.coldstart;
+	}
+	
+	/**
+	 * Returns a copy of the custom metrics which were measured.
+	 *
+	 * @return The custom metrics which were measured.
+	 * @since 2018/03/15
+	 */
+	public final CustomMetric[] getCustomMetrics()
+	{
+		Collection<CustomMetric> custmetrics = this._custmetrics;
+		synchronized (custmetrics)
+		{
+			return custmetrics.<CustomMetric>toArray(
+				new CustomMetric[custmetrics.size()]);
+		}
+	}
+	
+	/**
+	 * Returns all of the labels which have been declared during the
+	 * execution.
+	 *
+	 * @return The labels which have been declared during execution.
+	 * @since 2018/04/11
+	 */
+	public final String[] getLabels()
+	{
+		Set<String> labels = this._labels;
+		synchronized (labels)
+		{
+			return labels.<String>toArray(new String[labels.size()]);
+		}
+	}
+	
+	/**
+	 * Returns a copy of the performance entries which were measured.
+	 *
+	 * @return The performance entries which were measured.
+	 * @since 2018/03/15
+	 */
+	public final PerformanceEntry[] getPerformanceEntries()
+	{
+		Collection<PerformanceEntry> perfentries = this._perfentries;
+		synchronized (perfentries)
+		{
+			return perfentries.<PerformanceEntry>toArray(
+				new PerformanceEntry[perfentries.size()]);
+		}
+	}
+	
 	/*
 	 * Adds a single label which will be passed in the report.
 	 *
@@ -176,7 +329,12 @@ public abstract class IOpipeExecution
 		if (__s == null)
 			throw new NullPointerException();
 		
-		this.measurement.addLabel(__s);
+		// Add it
+		Set<String> labels = this._labels;
+		synchronized (labels)
+		{
+			labels.add(__s);
+		}
 	}
 	
 	/**
@@ -354,7 +512,7 @@ public abstract class IOpipeExecution
 	{
 		IOpipeExecution rv = IOpipeService.__execution();
 		if (rv == null)
-			return new __NoOpExecution__();
+			return new __NoOpExecution__(!IOpipeService._THAWED.get());
 		return rv;
 	}
 }

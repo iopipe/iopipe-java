@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.ref.WeakReference;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -65,28 +66,32 @@ final class __ActiveExecution__
 		IOpipePluginExecution> _active =
 		new HashMap<>();
 	
+	/** The exception which may have been thrown. */
+	private final AtomicReference<Throwable> _thrown =
+		new AtomicReference<>();
+	
 	/**
 	 * Initializes the execution information.
 	 *
 	 * @param __sv The service which initialized this.
 	 * @param __conf The configuration for this service.
 	 * @param __context The context for the execution.
-	 * @param __m Measurement which is used to provide access to tracing.
 	 * @param __tg The thread group which the execution runs under.
 	 * @param __st The start time in the system clock milliseconds.
 	 * @param __input The object which was passed to the method being
 	 * executed.
 	 * @param __sns The start time in monotonic nanoseconds.
+	 * @param __cold Has this been coldstarted?
 	 * @throws NullPointerException On null arguments except for
 	 * {@code __passed}.
 	 * @since 2018/01/19
 	 */
 	__ActiveExecution__(IOpipeService __sv, IOpipeConfiguration __conf,
-		Context __context, IOpipeMeasurement __m, long __st,
-		Object __input, long __sns)
+		Context __context, long __st,
+		Object __input, long __sns, boolean __cold)
 		throws NullPointerException
 	{
-		super(__m);
+		super(__cold);
 		
 		if (__sv == null || __conf == null || __context == null)
 			throw new NullPointerException();
@@ -211,7 +216,6 @@ final class __ActiveExecution__
 	{
 		Context aws = this.context;
 		IOpipeConfiguration config = this.config;
-		IOpipeMeasurement measurement = this.measurement;
 
 		// Snapshot system information
 		SystemMeasurement sysinfo = SystemMeasurement.measure();
@@ -387,11 +391,11 @@ final class __ActiveExecution__
 			// Environment end
 			gen.writeEnd();
 
-			Throwable thrown = measurement.getThrown();
+			Throwable thrown = this._thrown.get();
 			if (thrown != null)
 			{
-				// If this was a wrapped IOException then instead of reporting our
-				// wrapper instead report the wrapped exception
+				// If this was a wrapped IOException then instead of reporting
+				// our wrapper instead report the wrapped exception
 				if (thrown instanceof IOpipeWrappedException)
 				{
 					Throwable instead = thrown.getCause();
@@ -420,12 +424,12 @@ final class __ActiveExecution__
 				gen.writeEnd();
 			}
 
-			gen.write("coldstart", measurement.isColdStarted());
+			gen.write("coldstart", this.isColdStarted());
 			
 			// Add custom metrics, which multiple threads could be adding at
 			// once
 			gen.writeStartArray("custom_metrics");
-			CustomMetric[] custmetrics = measurement.getCustomMetrics();
+			CustomMetric[] custmetrics = this.getCustomMetrics();
 			for (int i = 0, n = custmetrics.length; i < n; i++)
 			{
 				CustomMetric metric = custmetrics[i];
@@ -475,7 +479,7 @@ final class __ActiveExecution__
 			
 			// Copy the performance entries which have been measured
 			gen.writeStartArray("performanceEntries");
-			PerformanceEntry[] perfs = measurement.getPerformanceEntries();
+			PerformanceEntry[] perfs = this.getPerformanceEntries();
 			for (int i = 0, n = perfs.length; i < n; i++)
 			{
 				PerformanceEntry perf = perfs[i];
@@ -500,7 +504,7 @@ final class __ActiveExecution__
 			
 			// Are there any labels to be added?
 			gen.writeStartArray("labels");
-			String[] labels = measurement.getLabels();
+			String[] labels = this.getLabels();
 			for (int i = 0, n = labels.length; i < n; i++)
 			{
 				String label = labels[i];
@@ -626,6 +630,17 @@ final class __ActiveExecution__
 		
 		return __s.codePointCount(0, __s.length()) <
 			IOpipeConstants.VALUE_CODEPOINT_LIMIT;
+	}
+	
+	/**
+	 * Sets the throwable generated during execution.
+	 *
+	 * @param __t The generated throwable, this may only be set once.
+	 * @since 2017/12/15
+	 */
+	void __setThrown(Throwable __t)
+	{
+		this._thrown.compareAndSet(null, __t);
 	}
 }
 
