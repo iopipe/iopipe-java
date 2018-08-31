@@ -151,7 +151,8 @@ final class __TimeOutWatchDog__
 				
 				// Update execution information
 				IOpipeExecution exec = this.execution;
-				exec.measurement().__setThrown(reported);
+				if (exec instanceof __ActiveExecution__)
+					((__ActiveExecution__)exec).__setThrown(reported);
 				exec.label("@iopipe/error");
 				exec.label("@iopipe/timeout");
 				

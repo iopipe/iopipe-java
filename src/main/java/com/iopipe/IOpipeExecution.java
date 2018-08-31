@@ -3,6 +3,7 @@ package com.iopipe;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.iopipe.plugin.IOpipePluginExecution;
 import com.iopipe.plugin.NoSuchPluginException;
+import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -159,7 +160,7 @@ public abstract class IOpipeExecution
 		synchronized (custmetrics)
 		{
 			if (!__cm.name().startsWith("@iopipe/"))
-				exec.label("@iopipe/metrics");
+				this.label("@iopipe/metrics");
 			
 			custmetrics.add(__cm);
 		}
