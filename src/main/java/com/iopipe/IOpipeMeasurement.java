@@ -10,8 +10,13 @@ import java.util.TreeSet;
 /**
  * This class is used to keep track of measurements during execution.
  *
+ * @deprecated The methods here have been deprecated, measurements are now
+ * fully managed by the execution state. While this class exists all calls are
+ * forwarded to {@link IOpipeExecution}.
+ * @see IOpipeExecution
  * @since 2017/12/15
  */
+@Deprecated
 public final class IOpipeMeasurement
 {
 	/** Is this execution one which is a cold start? */
