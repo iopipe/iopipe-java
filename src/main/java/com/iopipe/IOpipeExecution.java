@@ -183,8 +183,12 @@ public abstract class IOpipeExecution
 	 * Returns the measurement recorder.
 	 *
 	 * @return The measurement recorder.
+	 * @deprecated The {@link IOpipeMeasurement} class has been deprecated and
+	 * its methods have been moved into this class, as such this method will
+	 * be removed in the next release.
 	 * @since 2018/01/19
 	 */
+	@Deprecated
 	public final IOpipeMeasurement measurement()
 	{
 		return this.measurement;
