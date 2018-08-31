@@ -1,7 +1,6 @@
 package com.iopipe.plugin.profiler;
 
 import com.iopipe.IOpipeExecution;
-import com.iopipe.IOpipeMeasurement;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -63,14 +62,12 @@ final class __CPUExport__
 		Tracker tracker = this.tracker;
 		MethodTracker methods = tracker.methods();
 		IOpipeExecution execution = this.execution;
-		IOpipeMeasurement measurement = this.measurement;
 		
 		// Write header fields
 		__dos.writeInt(VERSION);
 		long starttime = execution.startTimestamp();
 		__dos.writeLong(starttime);
-		__dos.writeLong((starttime) +
-			(measurement.getDuration() / 1_000_000L));
+		__dos.writeLong(System.currentTimeMillis());
 		
 		// Always measure thread time
 		__dos.writeBoolean(true);
