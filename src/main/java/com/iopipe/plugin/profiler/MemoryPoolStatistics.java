@@ -104,7 +104,7 @@ public final class MemoryPoolStatistics
 			return new MemoryPoolStatistics[0];
 		
 		int n = __beans.size();
-		List<MemoryPoolStatistics> rv = new ArrayList(n);
+		List<MemoryPoolStatistics> rv = new ArrayList<>(n);
 		for (int i = 0; i < n; i++)
 		{
 			MemoryPoolMXBean bean = __beans.get(i);

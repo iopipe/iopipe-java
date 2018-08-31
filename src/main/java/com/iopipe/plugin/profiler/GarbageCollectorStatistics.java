@@ -74,7 +74,7 @@ public final class GarbageCollectorStatistics
 			return new GarbageCollectorStatistics[0];
 		
 		int n = __beans.size();
-		List<GarbageCollectorStatistics> rv = new ArrayList(n);
+		List<GarbageCollectorStatistics> rv = new ArrayList<>(n);
 		for (int i = 0; i < n; i++)
 		{
 			GarbageCollectorMXBean bean = __beans.get(i);

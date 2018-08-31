@@ -78,7 +78,7 @@ public final class BufferPoolStatistics
 			return new BufferPoolStatistics[0];
 		
 		int n = __beans.size();
-		List<BufferPoolStatistics> rv = new ArrayList(n);
+		List<BufferPoolStatistics> rv = new ArrayList<>(n);
 		for (int i = 0; i < n; i++)
 		{
 			BufferPoolMXBean bean = __beans.get(i);

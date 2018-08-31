@@ -331,9 +331,8 @@ public final class IOpipeService
 		boolean coldstarted = !this._coldstartflag.getAndSet(true);
 		
 		// Setup execution information
-		IOpipeMeasurement measurement = new IOpipeMeasurement(coldstarted);
 		IOpipeExecution exec = new __ActiveExecution__(this, config, __context,
-			measurement, nowtime, __input, nowmono);
+			nowtime, __input, nowmono, coldstarted);
 		
 		// Use a reference to allow the execution to be garbage collected if
 		// it is no longer referred to or is in the stack of any method.
@@ -417,8 +416,9 @@ public final class IOpipeService
 		{
 			exception = e;
 			
-			measurement.__setThrown(e);
-			measurement.addLabel("@iopipe/error");
+			if (exec instanceof __ActiveExecution__)
+				((__ActiveExecution__)exec).__setThrown(e);
+			exec.label("@iopipe/error");
 		}
 		
 		// It died, so stop the watchdog

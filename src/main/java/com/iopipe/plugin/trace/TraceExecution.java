@@ -1,7 +1,6 @@
 package com.iopipe.plugin.trace;
 
 import com.iopipe.IOpipeExecution;
-import com.iopipe.IOpipeMeasurement;
 import com.iopipe.plugin.IOpipePluginExecution;
 
 /**
@@ -13,23 +12,13 @@ import com.iopipe.plugin.IOpipePluginExecution;
 public class TraceExecution
 	implements IOpipePluginExecution
 {
-	/** The measurement to record to. */
-	protected final IOpipeMeasurement measurement;
-	
 	/**
 	 * Initializes the trace execution instance.
 	 *
-	 * @param __m The measurement to record to.
-	 * @throws NullPointerException On null arguments.
 	 * @since 2018/01/20
 	 */
-	public TraceExecution(IOpipeMeasurement __m)
-		throws NullPointerException
+	TraceExecution()
 	{
-		if (__m == null)
-			throw new NullPointerException();
-		
-		this.measurement = __m;
 	}
 	
 	/**
@@ -44,15 +33,18 @@ public class TraceExecution
 	 * @param __name The name of the measurement.
 	 * @return The measurement which was added to the report.
 	 * @throws NullPointerException On null arguments.
+	 * @deprecated This method is not recommended to be used, use
+	 * {@link TraceUtils#measure(String)} instead.
 	 * @since 2018/01/23
 	 */
+	@Deprecated
 	public TraceMeasurement measure(String __name)
 		throws NullPointerException
 	{
 		if (__name == null)
 			throw new NullPointerException();
 		
-		return new TraceMeasurement(true, this.measurement, __name);
+		return TraceUtils.measure(__name);
 	}
 }
 

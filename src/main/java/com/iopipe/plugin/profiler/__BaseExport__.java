@@ -1,7 +1,6 @@
 package com.iopipe.plugin.profiler;
 
 import com.iopipe.IOpipeExecution;
-import com.iopipe.IOpipeMeasurement;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -24,9 +23,6 @@ abstract class __BaseExport__
 	/** The execution. */
 	protected final IOpipeExecution execution;
 	
-	/** The measurement. */
-	protected final IOpipeMeasurement measurement;
-	
 	/** The sampling rate. */
 	protected final int samplerate;
 	
@@ -47,7 +43,6 @@ abstract class __BaseExport__
 		
 		this.tracker = __t;
 		this.execution = __e;
-		this.measurement = __e.measurement();
 		this.samplerate = __sr;
 	}
 	

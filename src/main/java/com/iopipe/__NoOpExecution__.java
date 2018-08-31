@@ -22,11 +22,12 @@ final class __NoOpExecution__
 	/**
 	 * Initializes the noop execution.
 	 *
+	 * @param __cold Has this been coldstarted?
 	 * @since 2018/08/27
 	 */
-	__NoOpExecution__()
+	__NoOpExecution__(boolean __cold)
 	{
-		super(new IOpipeMeasurement(false));
+		super(__cold);
 	}
 	
 	/**

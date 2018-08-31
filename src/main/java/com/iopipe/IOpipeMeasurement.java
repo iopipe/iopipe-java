@@ -1,50 +1,36 @@
 package com.iopipe;
 
-import java.util.Collection;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.TreeSet;
+import java.lang.ref.Reference;
 
 /**
  * This class is used to keep track of measurements during execution.
  *
+ * @deprecated The methods here have been deprecated, measurements are now
+ * fully managed by the execution state. While this class exists all calls are
+ * forwarded to {@link IOpipeExecution}.
+ * @see IOpipeExecution
  * @since 2017/12/15
  */
+@Deprecated
 public final class IOpipeMeasurement
 {
-	/** Is this execution one which is a cold start? */
-	private final boolean coldstart;
+	/** Reference to the execution. */
+	protected final Reference<IOpipeExecution> ref;
 	
 	/**
-	 * Performance entries which have been added to the measurement, this
-	 * field is locked since multiple threads may be adding entries.
-	 */
-	private final Set<PerformanceEntry> _perfentries =
-		new TreeSet<>();
-	
-	/** Custom metrics that have been added, locked for thread safety. */
-	private final Set<CustomMetric> _custmetrics =
-		new TreeSet<>();
-	
-	/** Labels which have been added, locked for threading. */
-	private final Set<String> _labels =
-		new LinkedHashSet<>();
-	
-	/** The exception which may have been thrown. */
-	private final AtomicReference<Throwable> _thrown =
-		new AtomicReference<>();
-
-	/**
-	 * Initializes the measurement holder.
+	 * Initializes the forwarder for measurements.
 	 *
-	 * @param __cs Has this been coldstarted?
-	 * @since 2018/03/15
+	 * @param __ref The refernece to the owning execution.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/08/31
 	 */
-	IOpipeMeasurement(boolean __cs)
+	IOpipeMeasurement(Reference<IOpipeExecution> __ref)
+		throws NullPointerException
 	{
-		this.coldstart = __cs;
+		if (__ref == null)
+			throw new NullPointerException();
+		
+		this.ref = __ref;
 	}
 	
 	/**
@@ -52,23 +38,20 @@ public final class IOpipeMeasurement
 	 *
 	 * @param __cm The custom metric to add.
 	 * @throws NullPointerException On null arguments.
+	 * @deprecated Use {@link IOpipeExecution.customMetric(CustomMetric)}
+	 * instead.
 	 * @since 2018/01/20
 	 */
+	@Deprecated
 	public void addCustomMetric(CustomMetric __cm)
 		throws NullPointerException
 	{
 		if (__cm == null)
 			throw new NullPointerException();
 		
-		// Multiple threads can add metrics at one time
-		Set<CustomMetric> custmetrics = this._custmetrics;
-		synchronized (custmetrics)
-		{
-			if (!__cm.name().startsWith("@iopipe/"))
-				this.addLabel("@iopipe/metrics");
-			
-			custmetrics.add(__cm);
-		}
+		IOpipeExecution exec = this.ref.get();
+		if (exec != null)
+			exec.customMetric(__cm);
 	}
 	
 	/**
@@ -77,27 +60,20 @@ public final class IOpipeMeasurement
 	 * Parameters which are {@code null} are ignored.
 	 *
 	 * @param __cms The custom metrics to add.
+	 * @deprecated Use {@link IOpipeExecution.customMetrics(CustomMetric[])}
+	 * instead.
 	 * @since 2018/04/24
 	 */
+	@Deprecated
 	public void addCustomMetrics(CustomMetric... __cms)
 	{
 		// Do nothing
 		if (__cms == null)
 			return;
 		
-		// Bulk add all the custom metrics under a single lock
-		Set<CustomMetric> custmetrics = this._custmetrics;
-		synchronized (custmetrics)
-		{
-			for (CustomMetric cm : __cms)
-				if (cm != null)
-				{
-					if (!cm.name().startsWith("@iopipe/"))
-						this.addLabel("@iopipe/metrics");
-					
-					custmetrics.add(cm);
-				}
-		}
+		IOpipeExecution exec = this.ref.get();
+		if (exec != null)
+			exec.customMetrics(__cms);
 	}
 	
 	/**
@@ -108,20 +84,20 @@ public final class IOpipeMeasurement
 	 *
 	 * @param __s The label to add.
 	 * @throws NullPointerException On null arguments.
+	 * @deprecated Use {@link IOpipeExecution.label(String)}
+	 * instead.
 	 * @since 2018/04/11
 	 */
+	@Deprecated
 	public void addLabel(String __s)
 		throws NullPointerException
 	{
 		if (__s == null)
 			throw new NullPointerException();
 		
-		// Add it
-		Set<String> labels = this._labels;
-		synchronized (labels)
-		{
-			labels.add(__s);
-		}
+		IOpipeExecution exec = this.ref.get();
+		if (exec != null)
+			exec.label(__s);
 	}
 	
 	/**
@@ -129,24 +105,20 @@ public final class IOpipeMeasurement
 	 *
 	 * @param __e The entry to add to the report.
 	 * @throws NullPointerException On null arguments.
+	 * @deprecated Use {@link IOpipeExecution.addPerformanceEntry(PerformanceEntry)}
+	 * instead.
 	 * @since 2018/01/19
 	 */
+	@Deprecated
 	public void addPerformanceEntry(PerformanceEntry __e)
 		throws NullPointerException
 	{
 		if (__e == null)
 			throw new NullPointerException();
 		
-		// Multiple threads could be adding entries
-		Set<PerformanceEntry> perfentries = this._perfentries;
-		synchronized (perfentries)
-		{
-			// Performance entry was defined, so just say that the plugin was
-			// used for tracing data
-			this.addLabel("@iopipe/plugin-trace");
-			
-			perfentries.add(__e);
-		}
+		IOpipeExecution exec = this.ref.get();
+		if (exec != null)
+			exec.addPerformanceEntry(__e);
 	}
 	
 	/**
@@ -158,15 +130,20 @@ public final class IOpipeMeasurement
 	 * @param __name The metric name.
 	 * @param __sv The string value.
 	 * @throws NullPointerException On null arguments.
+	 * @deprecated Use {@link IOpipeExecution.customMetric(String, String)}
+	 * instead.
 	 * @since 2018/01/20
 	 */
+	@Deprecated
 	public final void customMetric(String __name, String __sv)
 		throws NullPointerException
 	{
 		if (__name == null || __sv == null)
 			throw new NullPointerException();
 		
-		this.addCustomMetric(new CustomMetric(__name, __sv));
+		IOpipeExecution exec = this.ref.get();
+		if (exec != null)
+			exec.customMetric(__name, __sv);
 	}
 	
 	/**
@@ -178,31 +155,37 @@ public final class IOpipeMeasurement
 	 * @param __name The metric name.
 	 * @param __lv The long value.
 	 * @throws NullPointerException On null arguments.
+	 * @deprecated Use {@link IOpipeExecution.customMetric(String, long)}
+	 * instead.
 	 * @since 2018/01/20
 	 */
+	@Deprecated
 	public final void customMetric(String __name, long __lv)
 		throws NullPointerException
 	{
 		if (__name == null)
 			throw new NullPointerException();
 		
-		this.addCustomMetric(new CustomMetric(__name, __lv));
+		IOpipeExecution exec = this.ref.get();
+		if (exec != null)
+			exec.customMetric(__name, __lv);
 	}
 	
 	/**
 	 * Returns a copy of the custom metrics which were measured.
 	 *
 	 * @return The custom metrics which were measured.
+	 * @deprecated Use {@link IOpipeExecution.getCustomMetrics()}
+	 * instead.
 	 * @since 2018/03/15
 	 */
+	@Deprecated
 	public CustomMetric[] getCustomMetrics()
 	{
-		Collection<CustomMetric> custmetrics = this._custmetrics;
-		synchronized (custmetrics)
-		{
-			return custmetrics.<CustomMetric>toArray(
-				new CustomMetric[custmetrics.size()]);
-		}
+		IOpipeExecution exec = this.ref.get();
+		if (exec != null)
+			return exec.getCustomMetrics();
+		return new CustomMetric[0];
 	}
 
 	/**
@@ -226,64 +209,63 @@ public final class IOpipeMeasurement
 	 * execution.
 	 *
 	 * @return The labels which have been declared during execution.
+	 * @deprecated Use {@link IOpipeExecution.useLabels()}
+	 * instead.
 	 * @since 2018/04/11
 	 */
+	@Deprecated
 	public String[] getLabels()
 	{
-		Set<String> labels = this._labels;
-		synchronized (labels)
-		{
-			return labels.<String>toArray(new String[labels.size()]);
-		}
+		IOpipeExecution exec = this.ref.get();
+		if (exec != null)
+			return exec.getLabels();
+		return new String[0];
 	}
 	
 	/**
 	 * Returns a copy of the performance entries which were measured.
 	 *
 	 * @return The performance entries which were measured.
+	 * @deprecated Use {@link IOpipeExecution.getPerformanceEntries()}
+	 * instead.
 	 * @since 2018/03/15
 	 */
+	@Deprecated
 	public PerformanceEntry[] getPerformanceEntries()
 	{
-		Collection<PerformanceEntry> perfentries = this._perfentries;
-		synchronized (perfentries)
-		{
-			return perfentries.<PerformanceEntry>toArray(
-				new PerformanceEntry[perfentries.size()]);
-		}
+		IOpipeExecution exec = this.ref.get();
+		if (exec != null)
+			return exec.getPerformanceEntries();
+		return new PerformanceEntry[0];
 	}
 
 	/**
 	 * Returns the thrown throwable.
 	 *
-	 * @return The throwable which was thrown or {@code null} if none was
-	 * thrown.
+	 * @return Always returns {@code null}.
+	 * @deprecated This information is not known until execution has finished
+	 * and as such will always return {@code null}.
 	 * @since 2017/12/15
 	 */
+	@Deprecated
 	public Throwable getThrown()
 	{
-		return this._thrown.get();
+		return null;
 	}
 	
 	/**
 	 * Is this a coldstarted execution?
 	 *
 	 * @return If this is a coldstarted execution.
+	 * @deprecated Use {@link IOpipeExecution.isColdStarted()} instead.
 	 * @since 2018/03/15
 	 */
+	@Deprecated
 	public boolean isColdStarted()
 	{
-		return this.coldstart;
-	}
-	
-	/**
-	 * Sets the throwable generated during execution.
-	 *
-	 * @param __t The generated throwable, this may only be set once.
-	 * @since 2017/12/15
-	 */
-	void __setThrown(Throwable __t)
-	{
-		this._thrown.compareAndSet(null, __t);
+		IOpipeExecution exec = this.ref.get();
+		if (exec != null)
+			return exec.isColdStarted();
+		return false;
 	}
 }

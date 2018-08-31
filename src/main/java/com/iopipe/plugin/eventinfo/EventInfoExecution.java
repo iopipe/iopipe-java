@@ -96,7 +96,7 @@ public class EventInfoExecution
 		
 		// Add all custom metrics
 		IOpipeExecution execution = this.execution;
-		execution.measurement().addCustomMetrics(metrics);
+		execution.customMetrics(metrics);
 		execution.label("@iopipe/plugin-event-info");
 		execution.label("@iopipe/" + decoder.slugifiedEventType());
 	}
