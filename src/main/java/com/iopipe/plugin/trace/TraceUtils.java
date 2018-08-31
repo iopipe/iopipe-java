@@ -44,7 +44,7 @@ public final class TraceUtils
 			throw new NullPointerException();
 		
 		return new TraceMeasurement(__exec.<TraceExecution>optionalPlugin(
-			TraceExecution.class) != null, __exec.measurement(), __name);
+			TraceExecution.class) != null, __exec, __name);
 	}
 	
 	/**

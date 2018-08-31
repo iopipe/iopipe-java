@@ -1,8 +1,10 @@
 package com.iopipe.plugin.trace;
 
 import com.iopipe.IOpipeConstants;
-import com.iopipe.IOpipeMeasurement;
+import com.iopipe.IOpipeExecution;
 import com.iopipe.PerformanceEntry;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -20,14 +22,14 @@ public final class TraceMeasurement
 	/** Is this measurement to be enabled? */
 	protected final boolean enabled;
 	
-	/** The measurement to record to. */
-	protected final IOpipeMeasurement measurement;
-	
 	/** The name of this trace. */
 	protected final String name;
 	
 	/** The start time of this measurement, used to count duration. */
 	protected final long startns;
+	
+	/** Reference to the execution. */
+	protected final Reference<IOpipeExecution> execref;
 	
 	/** Has this been closed? */
 	private final AtomicBoolean _closed =
@@ -42,7 +44,7 @@ public final class TraceMeasurement
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/01/19
 	 */
-	public TraceMeasurement(boolean __enabled, IOpipeMeasurement __m,
+	public TraceMeasurement(boolean __enabled, IOpipeExecution __m,
 		String __name)
 		throws NullPointerException
 	{
@@ -50,7 +52,7 @@ public final class TraceMeasurement
 			throw new NullPointerException();
 		
 		this.enabled = __enabled;
-		this.measurement = __m;
+		this.execref = new WeakReference<>(__m);
 		this.name = __name;
 		
 		// Initialize start time
@@ -73,13 +75,16 @@ public final class TraceMeasurement
 		if (this.enabled)
 			if (this._closed.compareAndSet(false, true))
 			{
-				
 				// There are two end marks, one for the end mark and the
 				// actual duration but they end at the same time
 				long endns = System.nanoTime(),
 					endms = System.currentTimeMillis();
 				
-				IOpipeMeasurement measurement = this.measurement;
+				// Must be valid
+				IOpipeExecution measurement = this.execref.get();
+				if (measurement == null)
+					return;
+				
 				String name = this.name;
 				
 				measurement.addPerformanceEntry(new PerformanceEntry(

@@ -2,7 +2,6 @@ package com.iopipe.plugin.trace;
 
 import com.iopipe.IOpipeConstants;
 import com.iopipe.IOpipeExecution;
-import com.iopipe.IOpipeMeasurement;
 import com.iopipe.plugin.IOpipePlugin;
 import com.iopipe.plugin.IOpipePluginExecution;
 
@@ -35,7 +34,7 @@ public class TracePlugin
 		if (__e == null)
 			throw new NullPointerException();
 		
-		return new TraceExecution(__e.measurement());
+		return new TraceExecution();
 	}
 	
 	/**
@@ -75,7 +74,7 @@ public class TracePlugin
 	@Override
 	public String version()
 	{
-		return "1.2.0";
+		return "1.8.0";
 	}
 }
 
