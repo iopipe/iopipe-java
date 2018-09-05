@@ -761,9 +761,8 @@ __methodloop:
 				{
 				}
 				
-				// We found our class so we do not need to look elsewhere
-				// however something was wrong and we could not determine
-				// the actual type
+				// We found our class however if this was reached no type was
+				// found so since no other class will match we just stop
 				break;
 			}
 			
