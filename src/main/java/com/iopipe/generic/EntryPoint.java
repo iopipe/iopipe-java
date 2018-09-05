@@ -10,6 +10,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.MalformedParameterizedTypeException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
@@ -731,10 +732,43 @@ __methodloop:
 				if (!(maybe instanceof ParameterizedType))
 					continue;
 				
-				throw new Error("TODO A");
+				// Only look at an extend which is of our own class
+				ParameterizedType pt = (ParameterizedType)maybe;
+				if (!pivotclass.equals(ObjectTranslator.__rawClass(pt)))
+					continue;
+				
+				// This could fail
+				try
+				{
+					Type[] ptparms = pt.getActualTypeArguments();
+					int nptparms = ptparms.length;
+					
+					// This should not happen normally but if it does it means
+					// the parent class had a change to its type parameters
+					// which did not cause a compilation failure
+					if (j >= nptparms)
+						break;
+					
+					// Recursively resolve that parameter because it could just
+					// be another type parameter
+					// Remember to use our copy of the stack since we removed
+					// some elements from it
+					return __Target__.__resolve(stackcopy, ptparms[j]);
+				}
+				
+				// There is something wrong with the parameter, ignore
+				catch (TypeNotPresentException|MalformedParameterizedTypeException e)
+				{
+				}
+				
+				// We found our class so we do not need to look elsewhere
+				// however something was wrong and we could not determine
+				// the actual type
+				break;
 			}
 			
-			throw new Error("TODO B");
+			// Could not find a type for this, so use the original
+			return __t;
 		}
 	}
 }

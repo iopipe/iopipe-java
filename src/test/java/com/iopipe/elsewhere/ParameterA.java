@@ -12,7 +12,9 @@ public class ParameterA<A, B>
 	
 	public B handleRequest(A __a)
 	{
-		IOpipeExecution.currentExecution().label("squirrels");
+		IOpipeExecution.currentExecution().label("parameter-" +
+			this.getClass().getName() + "-" +
+			(__a == null ? "null" : __a.getClass().getName()));
 		IOpipeExecution.currentExecution().customMetric("class",
 			(__a == null ? "null" : __a.getClass().getName()));
 		

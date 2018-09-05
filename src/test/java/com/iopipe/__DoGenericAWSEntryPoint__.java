@@ -84,7 +84,7 @@ class __DoGenericAWSEntryPoint__
 		
 		for (String l : event.labels)
 			if (l.startsWith("static") || l.startsWith("instance") ||
-				l.equals("squirrels"))
+				l.startsWith("parameter"))
 				this.labelcount.increment();
 	}
 	
