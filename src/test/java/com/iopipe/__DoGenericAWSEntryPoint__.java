@@ -43,6 +43,7 @@ class __DoGenericAWSEntryPoint__
 	/** Labels counted. */
 	protected final IntegerValue labelcount =
 		new IntegerValue("labelcount");
+	
 	/**
 	 * Constructs the test.
 	 *
