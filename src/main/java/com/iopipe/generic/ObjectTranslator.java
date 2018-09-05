@@ -3,10 +3,12 @@ package com.iopipe.generic;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.MalformedParameterizedTypeException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.Arrays;
 import java.util.List;
 
@@ -275,8 +277,46 @@ public abstract class ObjectTranslator
 		else if (__t instanceof ParameterizedType)
 			return ObjectTranslator.__rawClass(((ParameterizedType)__t).getRawType());
 		
+		// Type variable, use its bound
+		else if (__t instanceof TypeVariable)
+			return ObjectTranslator.__rawClass(ObjectTranslator.__unbound(((TypeVariable)__t)));
+		
 		// Unknown, lets just call it object
 		return Object.class;
+	}
+		
+	/**
+	 * Unbounds the type variable.
+	 *
+	 * @param __tv The type variable to unbound.
+	 * @return The unbound type.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/09/04
+	 */
+	static Type __unbound(TypeVariable __tv)
+		throws NullPointerException
+	{
+		if (__tv == null)
+			throw new NullPointerException();
+		
+		// The bounds might not exist or may not even be valid
+		try
+		{
+			Type[] bounds = __tv.getBounds();
+			
+			// No bounds, just use object
+			if (bounds.length <= 0)
+				return Object.class;
+			
+			// Just use the first bound
+			return bounds[0];
+		}
+		
+		// If these happen just use Object
+		catch (TypeNotPresentException|MalformedParameterizedTypeException e)
+		{
+			return Object.class;
+		}
 	}
 }
 

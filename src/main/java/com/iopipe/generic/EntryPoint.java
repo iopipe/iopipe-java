@@ -12,6 +12,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.ArrayDeque;
@@ -653,18 +654,71 @@ __methodloop:
 			// parameterized type resolution as required
 			// The original parameters will always be used as the base
 			Type[] xargs = used.getGenericParameterTypes();
+__outerloop:
 			for (int i = 0; i < numargs; i++)
 			{
 				Type t = xargs[i];
 				
-				// Type variables are unknown in the given class and must be
-				// resolved in order for their types to be known
-				if (t instanceof TypeVariable)
-				{
-					TypeVariable tv = (TypeVariable)t;
-					
-					throw new Error("TODO");
-				}
+				// Infinite loop to go down the inheritence tree
+				// Type variables are unknown in the given class and must
+				// be resolved in order for their types to be known
+				Type rebound = null;
+				while (rebound != null)
+					if (t instanceof TypeVariable)
+					{
+						TypeVariable tv = (TypeVariable)t;
+						String tvname = tv.getName();
+						
+						// The class that declares this type parameter was the
+						// one the method was found in (it will be at the top)
+						Class<?> pivotclass = clstack.pop();
+						
+						// Determine which index our type variable is in, we
+						// need to look in the super class
+						TypeVariable<?>[] pivotvars = pivotclass.getTypeParameters();
+						int pivotdx = -1;
+						for (int j = 0, n = pivotvars.length; j < n; j++)
+							if (tvname.equals(pivotvars[j].getName()))
+							{
+								pivotdx = j;
+								break;
+							}
+						
+						// This should not happen normally (unless the class
+						// was modified to break it or we are trying to initialize
+						// a non-static inner class which cannot be initialized
+						// anyway)
+						if (pivotdx < 0)
+							break;
+						
+						// Peek the current class
+						Class<?> upperclass = clstack.peek();
+						
+						// Initializing a class which is just a type variable
+						if (upperclass == null)
+							break;
+						
+						// Need to go through all types and determine what this
+						// is
+						Type[] genints = upperclass.getGenericInterfaces();
+						for (int j = 0, n = genints.length; j <= n; j++)
+						{
+							Type maybe = (j == 0 ?
+								upperclass.getGenericSuperclass() :
+								genints[j - 1]);
+							
+							if (!(maybe instanceof ParameterizedType))
+								continue;
+							
+							throw new Error("TODO");
+						}
+						
+						throw new Error("TODO");
+					}
+				
+				// Use new type if one was found
+				if (rebound != null)
+					xargs[i] = rebound;
 			}
 			
 			// Initialize target information
