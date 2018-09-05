@@ -336,15 +336,70 @@ public final class EntryPoint
 			throw new InvalidEntryPointException("The entry point " + __m +
 				" in class " + __cl + " is not valid, no method was found.");
 		
-		// Need to potentially wrap the handle to this method, additionally
-		// the types need to be known by the generic handler
-		MethodHandle basehandle = target.basehandle;
-		Type[] passparameters = target.arguments;
+		// Extract all the details in the method to rebuild it
+		Type[] parms = target.arguments;
+		int pn = parms.length;
+		Type pa = (pn > 0 ? parms[0] : null),
+			pb = (pn > 1 ? parms[1] : null),
+			pc = (pn > 2 ? parms[2] : null);
+		
+		// Always normalize parameters to either be a stream type or non-stream
+		// type, with a context
+		Type[] passparameters;
+		switch (discovered)
+		{
+				// Parameter and context
+			case 0:
+			case 1:
+			case 2:
+				passparameters = new Type[]
+					{
+						(pa != null ? pa : Object.class),
+						Context.class,
+					};
+				break;
+				
+				// Starts from second argument
+			case 5:
+				passparameters = new Type[]
+					{
+						(pb != null ? pb : Object.class),
+						Context.class,
+					};
+				break;
+			
+				// Input and output streams
+			case 3:
+			case 4:
+				passparameters = new Type[]
+					{
+						(pa != null ? pa : InputStream.class),
+						(pb != null ? pb : OutputStream.class),
+						Context.class,
+					};
+				break;
+				
+				// Starts from second argument
+			case 6:
+				passparameters = new Type[]
+					{
+						(pb != null ? pb : InputStream.class),
+						(pc != null ? pc : OutputStream.class),
+						Context.class,
+					};
+				break;
+			
+				// This indicates the code is wrong
+			default:
+				throw new Error("If this has happened then something is " +
+					"very wrong.");
+		}
 		
 		// Static determines if we use an extra parameter to wrap or not
 		boolean isstatic = target.isstatic;
 		
 		// Build a compatible method handle and parameter set
+		MethodHandle basehandle = target.basehandle;
 		MethodHandle usedhandle;
 		MethodHandles.Lookup lookup = MethodHandles.lookup();
 		try
