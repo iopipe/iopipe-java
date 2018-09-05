@@ -13,6 +13,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -283,197 +284,65 @@ public final class EntryPoint
 		// 4: (I, O, Context)
 		// 5: (IOpipeExecution, A)
 		// 6: (IOpipeExecution, I, O)
-		Method[] entries = new Method[7];
-		
-		// Go through mappings and look for specific method types
-		int scancount = 0;
-__outer:
-		for (Class<?> look = __cl; look != null; look = look.getSuperclass())
+		__Target__ target = null;
+		int discovered;
+		for (discovered = 6; discovered >= 0; discovered--)
 		{
-			// A previous run through the loop found a match, so do not try
-			// to use any upper class methods
-			if (scancount > 0)
-				break;
-			
-			// Scan for methods
-			for (Method m : look.getDeclaredMethods())
+			switch (discovered)
 			{
-				// This is not what our method is called
-				if (!__m.equals(m.getName()))
-					continue;
-				
-				// Ignore abstract methods, they cannot be called
-				if ((m.getModifiers() & Modifier.ABSTRACT) != 0)
-					continue;
-				
-				int pn = m.getParameterCount();
-				Class<?>[] parms = m.getParameterTypes();
-				
-				Class<?> pa = (pn > 0 ? parms[0] : null),
-					pb = (pn > 1 ? parms[1] : null),
-					pc = (pn > 2 ? parms[2] : null);
-				
-				// Determine which kind of entry point type this is
-				int ehdx;
-				if (pn >= 1 && IOpipeExecution.class.equals(pa))
-					if (pn == 3 &&
-						InputStream.class.isAssignableFrom(pb) &&
-						OutputStream.class.isAssignableFrom(pc))
-						ehdx = 6;
-					else if (pn == 2)
-						ehdx = 5;
-					else
-						ehdx = -1;
-				else if (pn >= 2 && InputStream.class.isAssignableFrom(pa) &&
-					OutputStream.class.isAssignableFrom(pb))
-					if (pn == 3 && Context.class.isAssignableFrom(pc))
-						ehdx = 4;
-					else if (pn == 2)
-						ehdx = 3;
-					else
-						ehdx = -1;
-				else if (pn == 2 && Context.class.isAssignableFrom(pb))
-					ehdx = 2;
-				else if (pn == 1)
-					ehdx = 1;
-				else if (pn == 0)
-					ehdx = 0;
-				else
-					ehdx = -1;
-				
-				// Not a valid handle
-				if (ehdx < 0)
-					continue;
-				
-				// Record the method if nothing is already there
-				if (entries[ehdx] == null)
-				{
-					entries[ehdx] = m;
+				case 0:
+					target = __Target__.__locate(__cl, __m, Object.class);
+					break;
 					
-					// Found all method types, so stop
-					if (++scancount == 4)
-						break __outer;
-				}
+				case 1:
+					target = __Target__.__locate(__cl, __m, Object.class,
+						Object.class);
+					break;
+					
+				case 2:
+					target = __Target__.__locate(__cl, __m, Object.class,
+						Object.class, Context.class);
+					break;
+					
+				case 3:
+					target = __Target__.__locate(__cl, __m, void.class,
+						InputStream.class, OutputStream.class);
+					break;
+					
+				case 4:
+					target = __Target__.__locate(__cl, __m, void.class,
+						InputStream.class, OutputStream.class, Context.class);
+					break;
+					
+				case 5:
+					target = __Target__.__locate(__cl, __m, Object.class,
+						IOpipeExecution.class, Object.class);
+					break;
+					
+				case 6:
+					target = __Target__.__locate(__cl, __m, void.class,
+						IOpipeExecution.class, InputStream.class,
+						OutputStream.class);
+					break;
 			}
+			
+			// Found target
+			if (target != null)
+				break;
 		}
 		
-		// No methods were found
-		if (scancount == 0)
+		// One was not found
+		if (discovered < 0 || target == null)
 			throw new InvalidEntryPointException("The entry point " + __m +
 				" in class " + __cl + " is not valid, no method was found.");
 		
-		// Prefer ones with higher priority first
-		int discovered;
-		Method used = null;
-		for (discovered = 6; discovered >= 0; discovered--)
-		{
-			used = entries[discovered];
-			if (used != null)
-				break;
-		}
+		// Need to potentially wrap the handle to this method, additionally
+		// the types need to be known by the generic handler
+		MethodHandle basehandle = target.basehandle;
+		Type[] passparameters = target.arguments;
 		
-		// Allow us to call this method without performing any access checks
-		boolean access = used.isAccessible();
-		if (!access)
-			try
-			{
-				used.setAccessible(true);
-			}
-			catch (SecurityException e)
-			{
-			}
-		
-		// Get method handle from it, assuming the previous call worked
-		MethodHandle basehandle;
-		try
-		{
-			basehandle = MethodHandles.lookup().unreflect(used);
-		}
-		catch (IllegalAccessException e)
-		{
-			throw new InvalidEntryPointException("Could not access the " +
-				"generic entry point method.", e);
-		}
-		
-		// If this was not accessible, then we would have tried to make it so
-		// so just revert access to it
-		if (!access)
-			try
-			{
-				used.setAccessible(false);
-			}
-			catch (SecurityException e)
-			{
-			}
-		
-		
-		// Extract all the details in the method to rebuild it
-		int pn = used.getParameterCount();
-		Type[] parms = used.getGenericParameterTypes();
-		boolean isstatic = ((used.getModifiers() & Modifier.STATIC) != 0);
-		Type pa = (pn > 0 ? parms[0] : null),
-			pb = (pn > 1 ? parms[1] : null),
-			pc = (pn > 2 ? parms[2] : null);
-		
-		// Always normalize parameters to either be a stream type or non-stream
-		// type, with a context
-		Type[] passparameters;
-		switch (discovered)
-		{
-				// Parameter and context
-			case 0:
-			case 1:
-			case 2:
-				passparameters = new Type[]
-					{
-						(pa != null ? pa : Object.class),
-						Context.class,
-					};
-				break;
-				
-				// Starts from second argument
-			case 5:
-				passparameters = new Type[]
-					{
-						(pb != null ? pb : Object.class),
-						Context.class,
-					};
-				break;
-			
-				// Input and output streams
-			case 3:
-			case 4:
-				passparameters = new Type[]
-					{
-						(pa != null ? pa : InputStream.class),
-						(pb != null ? pb : OutputStream.class),
-						Context.class,
-					};
-				break;
-				
-				// Starts from second argument
-			case 6:
-				passparameters = new Type[]
-					{
-						(pb != null ? pb : InputStream.class),
-						(pc != null ? pc : OutputStream.class),
-						Context.class,
-					};
-				break;
-			
-				// This indicates the code is wrong
-			default:
-				throw new Error("If this has happened then something is " +
-					"very wrong.");
-		}
-		
-		// 0: ()
-		// 1: (A)
-		// 2: (A, Context)
-		// 3: (I, O)
-		// 4: (I, O, Context)
-		// 5: (IOpipeExecution, A)
-		// 6: (IOpipeExecution, I, O)
+		// Static determines if we use an extra parameter to wrap or not
+		boolean isstatic = target.isstatic;
 		
 		// Build a compatible method handle and parameter set
 		MethodHandle usedhandle;
@@ -594,15 +463,19 @@ __outer:
 		/** Arguments to the target. */
 		protected final Type[] arguments;
 		
+		/** Is the method static? */
+		protected final boolean isstatic;
+		
 		/**
 		 * Initializes the target information.
 		 *
 		 * @param __bh The base handle.
 		 * @param __args Arguments to the target.
+		 * @param __s Is the method static?
 		 * @throws NullPointerException On null arguments.
 		 * @since 2018/09/04
 		 */
-		private __Target__(MethodHandle __bh, Type[] __args)
+		private __Target__(MethodHandle __bh, Type[] __args, boolean __s)
 			throws NullPointerException
 		{
 			if (__bh == null || __args == null)
@@ -610,6 +483,7 @@ __outer:
 			
 			this.basehandle = __bh;
 			this.arguments = __args.clone();
+			this.isstatic = __s;
 		}
 		
 		/**
@@ -722,12 +596,25 @@ __methodloop:
 			
 			// Determine the types of arguments this takes, this will require
 			// parameterized type resolution as required
-			Type[] xargs = new Type[numargs];
-			if (true)
-				throw new Error("TODO");
+			// The original parameters will always be used as the base
+			Type[] xargs = used.getGenericParameterTypes();
+			for (int i = 0; i < numargs; i++)
+			{
+				Type t = xargs[i];
+				
+				// Type variables are unknown in the given class and must be
+				// resolved in order for their types to be known
+				if (t instanceof TypeVariable)
+				{
+					TypeVariable tv = (TypeVariable)t;
+					
+					throw new Error("TODO");
+				}
+			}
 			
 			// Initialize target information
-			return new __Target__(basehandle, xargs);
+			return new __Target__(basehandle, xargs,
+				((used.getModifiers() & Modifier.STATIC) != 0));
 		}
 	}
 }
