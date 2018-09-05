@@ -2,7 +2,7 @@ package com.iopipe.elsewhere;
 
 import com.iopipe.IOpipeExecution;
 
-public class ParameterA<A, B>
+public class ParameterA<A extends SomeType, B>
 {
 	public void normalCall(A __a)
 	{
