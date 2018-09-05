@@ -13,11 +13,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.Stack;
 
 /**
  * This represents an entry point to another method.
@@ -576,6 +578,157 @@ __outer:
 		}
 		
 		return new EntryPoint(__cl, usedhandle, isstatic, passparameters);
+	}
+	
+	/**
+	 * This class stores information on a target method which was discovered
+	 * in a class.
+	 *
+	 * @since 2018/09/04
+	 */
+	private static final class __Target__
+	{
+		/** The base method handle. */
+		protected final MethodHandle basehandle;
+		
+		/** Arguments to the target. */
+		protected final Type[] arguments;
+		
+		/**
+		 * Initializes the target information.
+		 *
+		 * @param __bh The base handle.
+		 * @param __args Arguments to the target.
+		 * @throws NullPointerException On null arguments.
+		 * @since 2018/09/04
+		 */
+		private __Target__(MethodHandle __bh, Type[] __args)
+			throws NullPointerException
+		{
+			if (__bh == null || __args == null)
+				throw new NullPointerException();
+			
+			this.basehandle = __bh;
+			this.arguments = __args.clone();
+		}
+		
+		/**
+		 * Locates a target for the given class and method.
+		 *
+		 * @param __cl The class to look in.
+		 * @param __name The name of the class.
+		 * @param __rv The return value.
+		 * @param __args The arguments to look for.
+		 * @return The target if one has matched or {@code null} if none has
+		 * matched.
+		 * @throws NullPointerException On null arguments.
+		 * @since 2018/09/04
+		 */
+		static __Target__ __locate(Class<?> __cl, String __name,
+			Class<?> __rv, Class<?>... __args)
+			throws NullPointerException
+		{
+			if (__cl == null || __name == null || __rv == null)
+				throw new NullPointerException();
+			
+			// Defensive copy
+			__args = (__args == null ? new Class<?>[0] : __args.clone());
+			int numargs = __args.length;
+			
+			// The used method
+			Method used = null;
+			
+			// Stack for class traversal when finding methods
+			Stack<Class<?>> clstack = new ArrayDeque<>();
+__outerloop:
+			for (Class<?> in = __cl; in != null; in = in.getSuperclass())
+			{
+				// Add our class to the stack, this is used to resolve type
+				// parameter as needed
+				clstack.push(__cl);
+				
+				// Scan for compatible methods with our name
+__methodloop:
+				for (Method m : look.getDeclaredMethods())
+				{
+					// This is not what our method is called
+					if (!__name.equals(m.getName()))
+						continue;
+						
+					// Ignore abstract methods, they cannot be called
+					if ((m.getModifiers() & Modifier.ABSTRACT) != 0)
+						continue;
+					
+					// If the parameter count does not match then it uses some
+					// other format
+					int pn = m.getParameterCount();
+					if (pn != numargs)
+						continue;
+					
+					// They will be checked against the arguments we want,
+					// they must all be a assignable to our method (compatible)
+					Class<?>[] parms = m.getParameterTypes();
+					for (int i = 0; i < pn; i++)
+						if (!__args[i].isAssignableFrom(parms[i]))
+							continue __methodloop;
+					
+					// Check return value also
+					if (!__rv.isAssignableFrom(m.getReturnType()))
+						continue;
+					
+					// This method has a signature and name match so use that
+					used = m;
+					break __outerloop;
+				}
+			}
+			
+			// No method was found
+			if (used == null)
+				return null;
+			
+			// Allow us to call this method without performing any access checks
+			boolean access = used.isAccessible();
+			if (!access)
+				try
+				{
+					used.setAccessible(true);
+				}
+				catch (SecurityException e)
+				{
+				}
+			
+			// Get method handle from it, assuming the previous call worked
+			MethodHandle basehandle;
+			try
+			{
+				basehandle = MethodHandles.lookup().unreflect(used);
+			}
+			catch (IllegalAccessException e)
+			{
+				throw new InvalidEntryPointException("Could not access the " +
+					"generic entry point method.", e);
+			}
+			
+			// If this was not accessible, then we would have tried to make it so
+			// so just revert access to it
+			if (!access)
+				try
+				{
+					used.setAccessible(false);
+				}
+				catch (SecurityException e)
+				{
+				}
+			
+			// Determine the types of arguments this takes, this will require
+			// parameterized type resolution as required
+			Type[] xargs = new Type[numargs];
+			if (true)
+				throw new Error("TODO");
+			
+			// Initialize target information
+			return new __Target__(basehandle);
+		}
 	}
 }
 
