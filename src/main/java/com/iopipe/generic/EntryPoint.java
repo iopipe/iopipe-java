@@ -16,10 +16,10 @@ import java.lang.reflect.Type;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.Stack;
 
 /**
  * This represents an entry point to another method.
@@ -639,7 +639,7 @@ __outer:
 			Method used = null;
 			
 			// Stack for class traversal when finding methods
-			Stack<Class<?>> clstack = new ArrayDeque<>();
+			Deque<Class<?>> clstack = new ArrayDeque<>();
 __outerloop:
 			for (Class<?> in = __cl; in != null; in = in.getSuperclass())
 			{
@@ -649,7 +649,7 @@ __outerloop:
 				
 				// Scan for compatible methods with our name
 __methodloop:
-				for (Method m : look.getDeclaredMethods())
+				for (Method m : in.getDeclaredMethods())
 				{
 					// This is not what our method is called
 					if (!__name.equals(m.getName()))
@@ -727,7 +727,7 @@ __methodloop:
 				throw new Error("TODO");
 			
 			// Initialize target information
-			return new __Target__(basehandle);
+			return new __Target__(basehandle, xargs);
 		}
 	}
 }
