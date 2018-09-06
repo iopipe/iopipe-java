@@ -90,35 +90,60 @@ public final class GenericAWSRequestHandler
 	@Override
 	public final Object handleRequest(Object __in, Context __context)
 	{
+		// Convert the object beforehand in the wrapper.
+		Object converted;
+		Throwable conversionfailed = null;
+		try
+		{
+			// Used to cache the last input since it may share common
+			// data although it may change
+			AtomicReference<ObjectTranslator> cachetrans =
+				this._cachetrans;
+			ObjectTranslator translator = cachetrans.get();
+			
+			// See if a new translator should be used
+			Type now = (__in == null ? Object.class : __in.getClass()),
+				was = (translator == null ? null : translator.from());
+			if (now != was && !now.equals(was))
+				cachetrans.set((translator =
+					ObjectTranslator.translator(now, this.targettype)));
+			
+			// Convert
+			converted = translator.translate(__in);
+			conversionfailed = null;
+		}
+		catch (RuntimeException|Error e)
+		{
+			converted = __in;
+			conversionfailed = e;
+		}
+		
+		// The variables above are not effectively final so make them
+		final Object xxconverted = converted;
+		final Throwable xxconversionfailed = conversionfailed;
+		
+		// Now call the wrapper with the converted input (if one was produced)
 		try
 		{
 			IOpipeService service = IOpipeService.instance();
 			return service.<Object>run(__context, (__exec) ->
 				{
-					// Used to cache the last input since it may share common
-					// data although it may change
-					AtomicReference<ObjectTranslator> cachetrans =
-						this._cachetrans;
-					ObjectTranslator translator = cachetrans.get();
-					
-					// See if a new translator should be used
-					Type now = (__in == null ? Object.class : __in.getClass()),
-						was = (translator == null ? null : translator.from());
-					if (now != was && !now.equals(was))
-						cachetrans.set((translator =
-							ObjectTranslator.translator(now, this.targettype)));
+					// If conversion failed report it in the wrapper so it is
+					// picked up
+					if (xxconversionfailed != null)
+						throw new IOpipeWrappedException(
+							xxconversionfailed.getMessage(), xxconversionfailed);
 					
 					// Execute
 					try
 					{
-						return this.handle.invoke(translator.translate(__in),
-							__context);
+						return this.handle.invoke(xxconverted, __context);
 					}
 					catch (Throwable e)
 					{
 						throw new IOpipeWrappedException(e.getMessage(), e);
 					}
-				}, __in);
+				}, converted);
 		}
 		catch (IOpipeWrappedException e)
 		{
