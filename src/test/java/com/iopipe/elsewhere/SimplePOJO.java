@@ -6,6 +6,7 @@ package com.iopipe.elsewhere;
  * @since 2018/08/20
  */
 public class SimplePOJO
+	extends SomeType
 {
 	private String favoriteanimal;
 	

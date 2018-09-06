@@ -2,6 +2,10 @@ package com.iopipe;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.iopipe.elsewhere.AWSEntries;
+import com.iopipe.elsewhere.ParameterA;
+import com.iopipe.elsewhere.ParameterB;
+import com.iopipe.elsewhere.ParameterC;
+import com.iopipe.elsewhere.ParameterD;
 import com.iopipe.generic.EntryPoint;
 import com.iopipe.generic.GenericAWSRequestHandler;
 import com.iopipe.generic.GenericAWSRequestStreamHandler;
@@ -14,6 +18,7 @@ import java.io.OutputStream;
 import java.io.IOException;
 import java.lang.invoke.MethodHandle;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 
 /**
  * Tests all of the AWS entry point types.
@@ -38,6 +43,7 @@ class __DoGenericAWSEntryPoint__
 	/** Labels counted. */
 	protected final IntegerValue labelcount =
 		new IntegerValue("labelcount");
+	
 	/**
 	 * Constructs the test.
 	 *
@@ -59,8 +65,8 @@ class __DoGenericAWSEntryPoint__
 		super.assertTrue(this.remoterecvokay);
 		super.assertTrue(this.noerror);
 		
-		super.assertEquals(14, this.count);
-		super.assertEquals(14, this.labelcount);
+		super.assertEquals(18, this.count);
+		super.assertEquals(18, this.labelcount);
 	}
 	
 	/**
@@ -77,7 +83,8 @@ class __DoGenericAWSEntryPoint__
 			this.noerror.set(true);
 		
 		for (String l : event.labels)
-			if (l.startsWith("static") || l.startsWith("instance"))
+			if (l.startsWith("static") || l.startsWith("instance") ||
+				l.startsWith("parameter"))
 				this.labelcount.increment();
 	}
 	
@@ -192,6 +199,23 @@ class __DoGenericAWSEntryPoint__
 				handleRequest(in, out, context);
 			if (Arrays.equals(bytes, out.toByteArray()))
 				count.increment();
+			
+			// Test with generic parameters
+			new GenericAWSRequestHandler(ParameterA.class, "handleRequest").
+				handleRequest(new LinkedHashMap<>(), context);
+			count.increment();
+			
+			new GenericAWSRequestHandler(ParameterB.class, "handleRequest").
+				handleRequest(new LinkedHashMap<>(), context);
+			count.increment();
+			
+			new GenericAWSRequestHandler(ParameterC.class, "handleRequest").
+				handleRequest(new LinkedHashMap<>(), context);
+			count.increment();
+			
+			new GenericAWSRequestHandler(ParameterD.class, "handleRequest").
+				handleRequest(new LinkedHashMap<>(), context);
+			count.increment();
 		}
 		catch (IOException e)
 		{

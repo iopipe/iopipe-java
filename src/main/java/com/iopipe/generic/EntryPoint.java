@@ -10,11 +10,16 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.MalformedParameterizedTypeException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -281,134 +286,61 @@ public final class EntryPoint
 		// 4: (I, O, Context)
 		// 5: (IOpipeExecution, A)
 		// 6: (IOpipeExecution, I, O)
-		Method[] entries = new Method[7];
-		
-		// Go through mappings and look for specific method types
-		int scancount = 0;
-__outer:
-		for (Class<?> look = __cl; look != null; look = look.getSuperclass())
+		__Target__ target = null;
+		int discovered;
+		for (discovered = 6; discovered >= 0; discovered--)
 		{
-			// A previous run through the loop found a match, so do not try
-			// to use any upper class methods
-			if (scancount > 0)
-				break;
-			
-			// Scan for methods
-			for (Method m : look.getDeclaredMethods())
+			switch (discovered)
 			{
-				// This is not what our method is called
-				if (!__m.equals(m.getName()))
-					continue;
-				
-				// Ignore abstract methods, they cannot be called
-				if ((m.getModifiers() & Modifier.ABSTRACT) != 0)
-					continue;
-				
-				int pn = m.getParameterCount();
-				Class<?>[] parms = m.getParameterTypes();
-				
-				Class<?> pa = (pn > 0 ? parms[0] : null),
-					pb = (pn > 1 ? parms[1] : null),
-					pc = (pn > 2 ? parms[2] : null);
-				
-				// Determine which kind of entry point type this is
-				int ehdx;
-				if (pn >= 1 && IOpipeExecution.class.equals(pa))
-					if (pn == 3 &&
-						InputStream.class.isAssignableFrom(pb) &&
-						OutputStream.class.isAssignableFrom(pc))
-						ehdx = 6;
-					else if (pn == 2)
-						ehdx = 5;
-					else
-						ehdx = -1;
-				else if (pn >= 2 && InputStream.class.isAssignableFrom(pa) &&
-					OutputStream.class.isAssignableFrom(pb))
-					if (pn == 3 && Context.class.isAssignableFrom(pc))
-						ehdx = 4;
-					else if (pn == 2)
-						ehdx = 3;
-					else
-						ehdx = -1;
-				else if (pn == 2 && Context.class.isAssignableFrom(pb))
-					ehdx = 2;
-				else if (pn == 1)
-					ehdx = 1;
-				else if (pn == 0)
-					ehdx = 0;
-				else
-					ehdx = -1;
-				
-				// Not a valid handle
-				if (ehdx < 0)
-					continue;
-				
-				// Record the method if nothing is already there
-				if (entries[ehdx] == null)
-				{
-					entries[ehdx] = m;
+				case 0:
+					target = __Target__.__locate(__cl, __m, Object.class);
+					break;
 					
-					// Found all method types, so stop
-					if (++scancount == 4)
-						break __outer;
-				}
+				case 1:
+					target = __Target__.__locate(__cl, __m, Object.class,
+						Object.class);
+					break;
+					
+				case 2:
+					target = __Target__.__locate(__cl, __m, Object.class,
+						Object.class, Context.class);
+					break;
+					
+				case 3:
+					target = __Target__.__locate(__cl, __m, void.class,
+						InputStream.class, OutputStream.class);
+					break;
+					
+				case 4:
+					target = __Target__.__locate(__cl, __m, void.class,
+						InputStream.class, OutputStream.class, Context.class);
+					break;
+					
+				case 5:
+					target = __Target__.__locate(__cl, __m, Object.class,
+						IOpipeExecution.class, Object.class);
+					break;
+					
+				case 6:
+					target = __Target__.__locate(__cl, __m, void.class,
+						IOpipeExecution.class, InputStream.class,
+						OutputStream.class);
+					break;
 			}
+			
+			// Found target
+			if (target != null)
+				break;
 		}
 		
-		// No methods were found
-		if (scancount == 0)
+		// One was not found
+		if (discovered < 0 || target == null)
 			throw new InvalidEntryPointException("The entry point " + __m +
 				" in class " + __cl + " is not valid, no method was found.");
 		
-		// Prefer ones with higher priority first
-		int discovered;
-		Method used = null;
-		for (discovered = 6; discovered >= 0; discovered--)
-		{
-			used = entries[discovered];
-			if (used != null)
-				break;
-		}
-		
-		// Allow us to call this method without performing any access checks
-		boolean access = used.isAccessible();
-		if (!access)
-			try
-			{
-				used.setAccessible(true);
-			}
-			catch (SecurityException e)
-			{
-			}
-		
-		// Get method handle from it, assuming the previous call worked
-		MethodHandle basehandle;
-		try
-		{
-			basehandle = MethodHandles.lookup().unreflect(used);
-		}
-		catch (IllegalAccessException e)
-		{
-			throw new InvalidEntryPointException("Could not access the " +
-				"generic entry point method.", e);
-		}
-		
-		// If this was not accessible, then we would have tried to make it so
-		// so just revert access to it
-		if (!access)
-			try
-			{
-				used.setAccessible(false);
-			}
-			catch (SecurityException e)
-			{
-			}
-		
-		
 		// Extract all the details in the method to rebuild it
-		int pn = used.getParameterCount();
-		Type[] parms = used.getGenericParameterTypes();
-		boolean isstatic = ((used.getModifiers() & Modifier.STATIC) != 0);
+		Type[] parms = target.arguments;
+		int pn = parms.length;
 		Type pa = (pn > 0 ? parms[0] : null),
 			pb = (pn > 1 ? parms[1] : null),
 			pc = (pn > 2 ? parms[2] : null);
@@ -465,15 +397,11 @@ __outer:
 					"very wrong.");
 		}
 		
-		// 0: ()
-		// 1: (A)
-		// 2: (A, Context)
-		// 3: (I, O)
-		// 4: (I, O, Context)
-		// 5: (IOpipeExecution, A)
-		// 6: (IOpipeExecution, I, O)
+		// Static determines if we use an extra parameter to wrap or not
+		boolean isstatic = target.isstatic;
 		
 		// Build a compatible method handle and parameter set
+		MethodHandle basehandle = target.basehandle;
 		MethodHandle usedhandle;
 		MethodHandles.Lookup lookup = MethodHandles.lookup();
 		try
@@ -576,6 +504,271 @@ __outer:
 		}
 		
 		return new EntryPoint(__cl, usedhandle, isstatic, passparameters);
+	}
+	
+	/**
+	 * This class stores information on a target method which was discovered
+	 * in a class.
+	 *
+	 * @since 2018/09/04
+	 */
+	private static final class __Target__
+	{
+		/** The base method handle. */
+		protected final MethodHandle basehandle;
+		
+		/** Arguments to the target. */
+		protected final Type[] arguments;
+		
+		/** Is the method static? */
+		protected final boolean isstatic;
+		
+		/**
+		 * Initializes the target information.
+		 *
+		 * @param __bh The base handle.
+		 * @param __args Arguments to the target.
+		 * @param __s Is the method static?
+		 * @throws NullPointerException On null arguments.
+		 * @since 2018/09/04
+		 */
+		private __Target__(MethodHandle __bh, Type[] __args, boolean __s)
+			throws NullPointerException
+		{
+			if (__bh == null || __args == null)
+				throw new NullPointerException();
+			
+			this.basehandle = __bh;
+			this.arguments = __args.clone();
+			this.isstatic = __s;
+		}
+		
+		/**
+		 * Locates a target for the given class and method.
+		 *
+		 * @param __cl The class to look in.
+		 * @param __name The name of the class.
+		 * @param __rv The return value.
+		 * @param __args The arguments to look for.
+		 * @return The target if one has matched or {@code null} if none has
+		 * matched.
+		 * @throws NullPointerException On null arguments.
+		 * @since 2018/09/04
+		 */
+		static __Target__ __locate(Class<?> __cl, String __name,
+			Class<?> __rv, Class<?>... __args)
+			throws NullPointerException
+		{
+			if (__cl == null || __name == null || __rv == null)
+				throw new NullPointerException();
+			
+			// Defensive copy
+			__args = (__args == null ? new Class<?>[0] : __args.clone());
+			int numargs = __args.length;
+			
+			// The used method
+			Method used = null;
+			
+			// Stack for class traversal when finding methods
+			Deque<Class<?>> clstack = new ArrayDeque<>();
+__outerloop:
+			for (Class<?> in = __cl; in != null; in = in.getSuperclass())
+			{
+				// Add our class to the stack, this is used to resolve type
+				// parameter as needed
+				clstack.push(in);
+				
+				// Scan for compatible methods with our name
+__methodloop:
+				for (Method m : in.getDeclaredMethods())
+				{
+					// This is not what our method is called
+					if (!__name.equals(m.getName()))
+						continue;
+						
+					// Ignore abstract methods, they cannot be called
+					if ((m.getModifiers() & Modifier.ABSTRACT) != 0)
+						continue;
+					
+					// If the parameter count does not match then it uses some
+					// other format
+					int pn = m.getParameterCount();
+					if (pn != numargs)
+						continue;
+					
+					// They will be checked against the arguments we want,
+					// they must all be a assignable to our method (compatible)
+					Class<?>[] parms = m.getParameterTypes();
+					for (int i = 0; i < pn; i++)
+						if (!__args[i].isAssignableFrom(parms[i]))
+							continue __methodloop;
+					
+					// Check return value also
+					if (!__rv.isAssignableFrom(m.getReturnType()))
+						continue;
+					
+					// This method has a signature and name match so use that
+					used = m;
+					break __outerloop;
+				}
+			}
+			
+			// No method was found
+			if (used == null)
+				return null;
+			
+			// Allow us to call this method without performing any access checks
+			boolean access = used.isAccessible();
+			if (!access)
+				try
+				{
+					used.setAccessible(true);
+				}
+				catch (SecurityException e)
+				{
+				}
+			
+			// Get method handle from it, assuming the previous call worked
+			MethodHandle basehandle;
+			try
+			{
+				basehandle = MethodHandles.lookup().unreflect(used);
+			}
+			catch (IllegalAccessException e)
+			{
+				throw new InvalidEntryPointException("Could not access the " +
+					"generic entry point method.", e);
+			}
+			
+			// If this was not accessible, then we would have tried to make it so
+			// so just revert access to it
+			if (!access)
+				try
+				{
+					used.setAccessible(false);
+				}
+				catch (SecurityException e)
+				{
+				}
+			
+			// Determine the types of arguments this takes, this will require
+			// parameterized type resolution as required
+			// The original parameters will always be used as the base
+			Type[] xargs = used.getGenericParameterTypes();
+			for (int i = 0; i < numargs; i++)
+			{
+				Type t = __Target__.__resolve(clstack, xargs[i]);
+				if (t != null)
+					xargs[i] = t;
+			}
+			
+			// Initialize target information
+			return new __Target__(basehandle, xargs,
+				((used.getModifiers() & Modifier.STATIC) != 0));
+		}
+		
+		/**
+		 * Resolves the given type variable for a class.
+		 *
+		 * @param __cls The class stack.
+		 * @param __t The type to resolve.
+		 * @throws NullPointerException On null arguments.
+		 * @since 2018/09/05
+		 */
+		static Type __resolve(Deque<Class<?>> __cls, Type __t)
+			throws NullPointerException
+		{
+			if (__cls == null || __t == null)
+				throw new NullPointerException();
+			
+			// If it is not a type variable, just return self
+			if (!(__t instanceof TypeVariable))
+				return __t;
+			
+			// Make a copy of the stack
+			Deque<Class<?>> stackcopy = new ArrayDeque<>(__cls);
+			
+			TypeVariable tv = (TypeVariable)__t;
+			String tvname = tv.getName();
+			
+			// The class that declares this type parameter was the
+			// one the method was found in (it will be at the top)
+			Class<?> pivotclass = stackcopy.pop();
+			
+			// Determine which index our type variable is in, we
+			// need to look in the super class
+			TypeVariable<?>[] pivotvars = pivotclass.getTypeParameters();
+			int pivotdx = -1;
+			for (int j = 0, n = pivotvars.length; j < n; j++)
+				if (tvname.equals(pivotvars[j].getName()))
+				{
+					pivotdx = j;
+					break;
+				}
+			
+			// This should not happen normally (unless the class
+			// was modified to break it or we are trying to initialize
+			// a non-static inner class which cannot be initialized
+			// anyway)
+			if (pivotdx < 0)
+				return __t;
+			
+			// Peek the current class
+			Class<?> upperclass = stackcopy.peek();
+			
+			// Initializing a class which is just a type variable
+			if (upperclass == null)
+				return __t;
+			
+			// Need to go through all types and determine what this
+			// is
+			Type[] genints = upperclass.getGenericInterfaces();
+			for (int j = 0, n = genints.length; j <= n; j++)
+			{
+				Type maybe = (j == 0 ?
+					upperclass.getGenericSuperclass() :
+					genints[j - 1]);
+				
+				if (!(maybe instanceof ParameterizedType))
+					continue;
+				
+				// Only look at an extend which is of our own class
+				ParameterizedType pt = (ParameterizedType)maybe;
+				if (!pivotclass.equals(ObjectTranslator.__rawClass(pt)))
+					continue;
+				
+				// This could fail
+				try
+				{
+					Type[] ptparms = pt.getActualTypeArguments();
+					int nptparms = ptparms.length;
+					
+					// This should not happen normally but if it does it means
+					// the parent class had a change to its type parameters
+					// which did not cause a compilation failure
+					if (j >= nptparms)
+						break;
+					
+					// Recursively resolve that parameter because it could just
+					// be another type parameter
+					// Remember to use our copy of the stack since we removed
+					// some elements from it
+					return __Target__.__resolve(stackcopy, ptparms[j]);
+				}
+				
+				// There is something wrong with the parameter, ignore
+				catch (TypeNotPresentException|MalformedParameterizedTypeException e)
+				{
+				}
+				
+				// We found our class however if this was reached no type was
+				// found so since no other class will match we just stop
+				break;
+			}
+			
+			// Could not find a type for this, so use the original
+			return __t;
+		}
 	}
 }
 
