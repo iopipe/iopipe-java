@@ -149,5 +149,43 @@ public final class EventInfoDecoders
 				new Class<?>[decoders.size()]);
 		}
 	}
+	
+	/**
+	 * Registers the given class as an event info decoder.
+	 *
+	 * @param __cl The class which implements the decoder.
+	 * @throws IllegalStateException If the decoder decodes no class.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/09/18
+	 */
+	public final void register(Class<? extends EventInfoDecoder> __cl)
+		throws IllegalStateException, NullPointerException
+	{
+		if (__cl == null)
+			throw new NullPointerException();
+		
+		throw new Error("TODO");
+	}
+	
+	/**
+	 * Registers the given class, which is dynamically looked up, as an event
+	 * info decoder.
+	 *
+	 * @param __cl The class which implements the decoder.
+	 * @throws ClassNotFoundException If the class could not be found or it
+	 * could not be initialized properly.
+	 * @throws IllegalStateException If the decoder decodes no class.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/09/18
+	 */
+	public final void register(String __cl)
+		throws ClassNotFoundException, IllegalStateException,
+			NullPointerException
+	{
+		if (__cl == null)
+			throw new NullPointerException();
+		
+		throw new Error("TODO");
+	}
 }
 
