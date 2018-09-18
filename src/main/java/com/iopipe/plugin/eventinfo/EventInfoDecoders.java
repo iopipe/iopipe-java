@@ -20,6 +20,7 @@ import javax.json.JsonStructure;
 import javax.json.JsonString;
 import javax.json.JsonValue;
 import javax.json.JsonWriter;
+import org.pmw.tinylog.Logger;
 
 /**
  * This class manages and initializes the decoders for event information
@@ -44,14 +45,30 @@ public final class EventInfoDecoders
 	 */
 	public EventInfoDecoders()
 	{
-		this.register(new APIGatewayDecoder());
-		this.register(new CloudFrontDecoder());
-		this.register(new KinesisDecoder());
-		this.register(new FirehoseDecoder());
-		this.register(new S3Decoder());
-		this.register(new ScheduledDecoder());
-		this.register(new SNSDecoder());
-		this.register(new SQSDecoder());
+		// Register every internal test, but allow for a means so the internal
+		// tests are only included if their classes load properly. This is
+		// to prevent for cases where the client has shaded their JAR
+		// incorrectly due to AWS changes, to prevent the lambda not executing
+		// with an exception.
+		for (String i : new String[]{
+			"com.iopipe.plugin.eventinfo.APIGatewayDecoder",
+			"com.iopipe.plugin.eventinfo.CloudFrontDecoder",
+			"com.iopipe.plugin.eventinfo.KinesisDecoder",
+			"com.iopipe.plugin.eventinfo.FirehoseDecoder",
+			"com.iopipe.plugin.eventinfo.S3Decoder",
+			"com.iopipe.plugin.eventinfo.ScheduledDecoder",
+			"com.iopipe.plugin.eventinfo.SNSDecoder",
+			"com.iopipe.plugin.eventinfo.SQSDecoder"})
+			try
+			{
+				this.register(i);
+			}
+			catch (ClassNotFoundException e)
+			{
+				Logger.error(e, "Failed to register event info decoder " + i +
+					", some events might not be decodeable by the event-info" +
+					"plugin.");
+			}
 	}
 	
 	/**
@@ -147,6 +164,64 @@ public final class EventInfoDecoders
 			// Update class cache
 			this._classes = decoders.keySet().<Class<?>>toArray(
 				new Class<?>[decoders.size()]);
+		}
+	}
+	
+	/**
+	 * Registers the given class as an event info decoder.
+	 *
+	 * @param __cl The class which implements the decoder.
+	 * @throws ClassNotFoundException If the class could not be found or
+	 * initialized.
+	 * @throws IllegalStateException If the decoder decodes no class.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/09/18
+	 */
+	public final void register(Class<? extends EventInfoDecoder> __cl)
+		throws ClassNotFoundException, IllegalStateException,
+			NullPointerException
+	{
+		if (__cl == null)
+			throw new NullPointerException();
+		
+		try
+		{
+			this.register(__cl.newInstance());
+		}
+		catch (LinkageError|IllegalAccessException|InstantiationException e)
+		{
+			throw new ClassNotFoundException(
+				"Failed to load class " + __cl + ".", e);
+		}
+	}
+	
+	/**
+	 * Registers the given class, which is dynamically looked up, as an event
+	 * info decoder.
+	 *
+	 * @param __cl The class which implements the decoder.
+	 * @throws ClassNotFoundException If the class could not be found or it
+	 * could not be initialized properly.
+	 * @throws IllegalStateException If the decoder decodes no class.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/09/18
+	 */
+	public final void register(String __cl)
+		throws ClassNotFoundException, IllegalStateException,
+			NullPointerException
+	{
+		if (__cl == null)
+			throw new NullPointerException();
+		
+		try
+		{
+			this.register(Class.forName(__cl).<EventInfoDecoder>asSubclass(
+				EventInfoDecoder.class));
+		}
+		catch (ClassCastException|ClassNotFoundException|LinkageError e)
+		{
+			throw new ClassNotFoundException(
+				"Failed to load class " + __cl + ".", e);
 		}
 	}
 }
