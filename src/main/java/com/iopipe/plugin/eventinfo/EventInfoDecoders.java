@@ -42,6 +42,9 @@ public final class EventInfoDecoders
 	private volatile EventInfoDecoder[] _decache =
 		new EventInfoDecoder[0];
 	
+	/** The last decoder which was used. */
+	private EventInfoDecoder _last;
+	
 	/**
 	 * Initializes the event decoders with the default decoders.
 	 *
@@ -104,23 +107,45 @@ public final class EventInfoDecoders
 		if (__o == null)
 			return new CustomMetric[0];
 		
+		EventInfoDecoder decoder = null;
+		
 		// The class type of the input object
 		Class<?> oftype = __o.getClass();
 		
+		// Check to see if the last decoder used is the one we want
+		EventInfoDecoder last = this._last;
+		if (last != null)
+		{
+			Class<?> decodestype = last.decodes();
+			
+			// Same as or assignable from the last class
+			if (decodestype == oftype || decodestype.isAssignableFrom(oftype))
+				decoder = last;
+		}
+		
 		// Go through the cached set of classes and decoders and check each
 		// individual class
-		EventInfoDecoder decoder = null;
-		Class<?>[] clcache = this._clcache;
-		EventInfoDecoder[] decache = this._decache;
-		for (int i = 0, n = Math.min(clcache.length, decache.length);
-			i < n && decoder == null; i++)
+		if (decoder == null)
 		{
-			Class<?> maybe = clcache[i];
-			
-			if (maybe != null && maybe.isAssignableFrom(oftype))
+			Class<?>[] clcache = this._clcache;
+			EventInfoDecoder[] decache = this._decache;
+			for (int i = 0, n = Math.min(clcache.length, decache.length);
+				i < n && decoder == null; i++)
 			{
-				decoder = decache[i];
-				break;
+				Class<?> maybe = clcache[i];
+				
+				// Same as or is assignable from the clas to check
+				if (maybe != null && (maybe == oftype ||
+					maybe.isAssignableFrom(oftype)))
+				{
+					decoder = decache[i];
+					
+					// Set the last here because this was the last detected
+					// event and if it remains the same it will be end up being
+					// set to the same value anyway
+					this._last = decoder;
+					break;
+				}
 			}
 		}
 		
