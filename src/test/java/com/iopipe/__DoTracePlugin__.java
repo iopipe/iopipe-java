@@ -28,9 +28,6 @@ class __DoTracePlugin__
 	private static final String[] _ORDER =
 		new String[]
 		{
-			"start:byplugin", "mark",
-			"end:byplugin", "mark",
-			"measure:byplugin", "measure",
 			"start:byutils", "mark",
 			"end:byutils", "mark",
 			"measure:byutils", "measure",
@@ -49,10 +46,6 @@ class __DoTracePlugin__
 	/** Got a result from the server okay? */
 	protected final BooleanValue remoterecvokay =
 		new BooleanValue("remoterecvokay");
-		
-	/** Was the trace plugin body executed? */
-	protected final BooleanValue tracepluginexecuted =
-		new BooleanValue("tracepluginexecuted");
 		
 	/** Was the trace plugin specified? */
 	protected final BooleanValue tracepluginspecified =
@@ -98,7 +91,6 @@ class __DoTracePlugin__
 		// Depends on the enabled state of the plugin
 		boolean enabled = this.enabled;
 		
-		super.assertEquals(enabled, this.tracepluginexecuted);
 		super.assertEquals((enabled ? ((1 << (_ORDER.length / 2)) - 1) : 0), this.orderdepth);
 		super.assertEquals(enabled, this.hasautolabel);
 	}
@@ -176,25 +168,6 @@ class __DoTracePlugin__
 	public void run(IOpipeExecution __e)
 		throws Throwable
 	{
-		// Via plugin state
-		__e.<TraceExecution>plugin(TraceExecution.class, (__p) ->
-			{
-				this.tracepluginexecuted.set(true);
-				
-				// Make a measurement
-				try (TraceMeasurement c = __p.measure("byplugin"))
-				{
-					// Small delay to skew time
-					try
-					{
-						Thread.sleep(10);
-					}
-					catch (InterruptedException e)
-					{
-					}
-				}
-			});
-		
 		// Make a measurement via TraceUtils
 		try (TraceMeasurement c = (this.derived ?
 			TraceUtils.measure("byutils") :
