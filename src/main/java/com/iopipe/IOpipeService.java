@@ -15,6 +15,7 @@ import com.iopipe.plugin.IOpipePlugin;
 import com.iopipe.plugin.IOpipePluginExecution;
 import com.iopipe.plugin.IOpipePluginPostExecutable;
 import com.iopipe.plugin.IOpipePluginPreExecutable;
+import com.iopipe.plugin.NoSuchPluginException;
 import java.io.Closeable;
 import java.io.InputStream;
 import java.io.IOException;
@@ -377,19 +378,18 @@ public final class IOpipeService
 		// Run pre-execution plugins
 		__Plugins__.__Info__[] plugins = this._plugins.__info();
 		for (__Plugins__.__Info__ i : plugins)
-		{
-			IOpipePluginPreExecutable l = i.getPreExecutable();
-			if (l != null)
+			if (i.isEnabled())
 				try
 				{
-					exec.plugin(i.executionClass(), l::preExecute);
+					IOpipePluginPreExecutable l = i.getPreExecutable();
+					if (l != null)
+						l.preExecute(exec.plugin(i.executionClass()));
 				}
-				catch (RuntimeException e)
+				catch (RuntimeException|NoSuchPluginException e)
 				{
 					Logger.error(e, "Could not run pre-executable plugin {}.",
 						i);
 				}
-		}
 		
 		// Register timeout with this execution number so if execution takes
 		// longer than expected a timeout is generated
@@ -427,19 +427,18 @@ public final class IOpipeService
 		
 		// Run post-execution plugins
 		for (__Plugins__.__Info__ i : plugins)
-		{
-			IOpipePluginPostExecutable l = i.getPostExecutable();
-			if (l != null)
+			if (i.isEnabled())
 				try
 				{
-					exec.plugin(i.executionClass(), l::postExecute);
+					IOpipePluginPostExecutable l = i.getPostExecutable();
+					if (l != null)
+						l.postExecute(exec.plugin(i.executionClass()));
 				}
-				catch (RuntimeException e)
+				catch (RuntimeException|NoSuchPluginException e)
 				{
 					Logger.error(e, "Could not run post-executable plugin {}.",
 						i);
 				}
-		}
 		
 		// Generate and send result to server
 		if (watchdog == null || !watchdog._generated.getAndSet(true))
