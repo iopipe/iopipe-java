@@ -35,8 +35,12 @@ public final class EventInfoDecoders
 		new LinkedHashMap<>();
 	
 	/** Cache of classes that have been registered for type lookup. */
-	private Class<?>[] _classes =
+	private volatile Class<?>[] _clcache =
 		new Class<?>[0];
+	
+	/** Cache of decoders that are available based on the class. */
+	private volatile EventInfoDecoder[] _decache =
+		new EventInfoDecoder[0];
 	
 	/**
 	 * Initializes the event decoders with the default decoders.
@@ -100,30 +104,29 @@ public final class EventInfoDecoders
 		if (__o == null)
 			return new CustomMetric[0];
 		
+		// The class type of the input object
 		Class<?> oftype = __o.getClass();
 		
-		// Go through
-		Class<?> match = null;
-		for (Class<?> maybe : this._classes)
+		// Go through the cached set of classes and decoders and check each
+		// individual class
+		EventInfoDecoder decoder = null;
+		Class<?>[] clcache = this._clcache;
+		EventInfoDecoder[] decache = this._decache;
+		for (int i = 0, n = Math.min(clcache.length, decache.length);
+			i < n && decoder == null; i++)
 		{
-			if (oftype.isAssignableFrom(maybe))
+			Class<?> maybe = clcache[i];
+			
+			if (maybe != null && maybe.isAssignableFrom(oftype))
 			{
-				match = maybe;
+				decoder = decache[i];
 				break;
 			}
 		}
 		
 		// Unmatched, do nothing
-		if (match == null)
+		if (decoder == null)
 			return new CustomMetric[0];
-		
-		// Obtain the decoder that should be used
-		EventInfoDecoder decoder;
-		Map<Class<?>, EventInfoDecoder> decoders = this._decoders;
-		synchronized (decoders)
-		{
-			decoder = decoders.get(match);
-		}
 		
 		// Record the used decoder
 		if (__d != null && __d.length > 0)
@@ -162,8 +165,11 @@ public final class EventInfoDecoders
 			decoders.put(decodes, __d);
 			
 			// Update class cache
-			this._classes = decoders.keySet().<Class<?>>toArray(
-				new Class<?>[decoders.size()]);
+			int ds = decoders.size();
+			this._clcache = decoders.keySet().<Class<?>>toArray(
+				new Class<?>[ds]);
+			this._decache = _decoders.values().<EventInfoDecoder>toArray(
+				new EventInfoDecoder[ds]);
 		}
 	}
 	
