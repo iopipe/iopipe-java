@@ -35,8 +35,15 @@ public final class EventInfoDecoders
 		new LinkedHashMap<>();
 	
 	/** Cache of classes that have been registered for type lookup. */
-	private Class<?>[] _classes =
+	private volatile Class<?>[] _clcache =
 		new Class<?>[0];
+	
+	/** Cache of decoders that are available based on the class. */
+	private volatile EventInfoDecoder[] _decache =
+		new EventInfoDecoder[0];
+	
+	/** The last decoder which was used. */
+	private EventInfoDecoder _last;
 	
 	/**
 	 * Initializes the event decoders with the default decoders.
@@ -100,30 +107,12 @@ public final class EventInfoDecoders
 		if (__o == null)
 			return new CustomMetric[0];
 		
-		Class<?> oftype = __o.getClass();
+		// Search for the decoder to use for the input object's class
+		EventInfoDecoder decoder = this.getDecoder(__o.getClass());
 		
-		// Go through
-		Class<?> match = null;
-		for (Class<?> maybe : this._classes)
-		{
-			if (oftype.isAssignableFrom(maybe))
-			{
-				match = maybe;
-				break;
-			}
-		}
-		
-		// Unmatched, do nothing
-		if (match == null)
+		// None found, has no result
+		if (decoder == null)
 			return new CustomMetric[0];
-		
-		// Obtain the decoder that should be used
-		EventInfoDecoder decoder;
-		Map<Class<?>, EventInfoDecoder> decoders = this._decoders;
-		synchronized (decoders)
-		{
-			decoder = decoders.get(match);
-		}
 		
 		// Record the used decoder
 		if (__d != null && __d.length > 0)
@@ -134,6 +123,62 @@ public final class EventInfoDecoders
 		decoder.accept(a, __o);
 		
 		return a.get();
+	}
+	
+	/**
+	 * Returns the the decoder which can decode the given class.
+	 *
+	 * @param __cl The input class to check.
+	 * @return The decoder which was found for the class or {@code null} if
+	 * none is available.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/09/20
+	 */
+	public final EventInfoDecoder getDecoder(Class<?> __cl)
+		throws NullPointerException
+	{
+		if (__cl == null)
+			throw new NullPointerException();
+		
+		// Check to see if the last decoder which was found matches this
+		// type so we do not need to look at every single class again if it is
+		// the same
+		EventInfoDecoder last = this._last;
+		if (last != null)
+		{
+			Class<?> decodestype = last.decodes();
+			
+			// Same as or assignable from the last class
+			if (decodestype == __cl || decodestype.isAssignableFrom(__cl))
+				return last;
+		}
+		
+		// Go through the cached set of classes and decoders and check each
+		// individual class
+		Class<?>[] clcache = this._clcache;
+		EventInfoDecoder[] decache = this._decache;
+		for (int n = Math.min(clcache.length, decache.length),
+			i = 0; i < n; i++)
+		{
+			Class<?> maybe = clcache[i];
+			
+			// Same as or is assignable from the class to check
+			if (maybe != null && (maybe == __cl ||
+				maybe.isAssignableFrom(__cl)))
+			{
+				EventInfoDecoder decoder = decache[i];
+				
+				// Cache this result so that if the same request is made it
+				// more quickly recycles it rather than searching through the
+				// arrays
+				this._last = decoder;
+				
+				return decoder;
+			}
+		}
+		
+		// Not found
+		return null;
 	}
 	
 	/**
@@ -162,8 +207,11 @@ public final class EventInfoDecoders
 			decoders.put(decodes, __d);
 			
 			// Update class cache
-			this._classes = decoders.keySet().<Class<?>>toArray(
-				new Class<?>[decoders.size()]);
+			int ds = decoders.size();
+			this._clcache = decoders.keySet().<Class<?>>toArray(
+				new Class<?>[ds]);
+			this._decache = _decoders.values().<EventInfoDecoder>toArray(
+				new EventInfoDecoder[ds]);
 		}
 	}
 	
