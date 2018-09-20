@@ -330,13 +330,14 @@ import com.iopipe.plugin.trace.TraceUtils;
 Marks and measurements can be made by calling:
 
 ```java
+TraceUtils.measure(String __name)
 TraceUtils.measure(IOpipeExecution execution, String __name)
 ```
 
 `TraceMeasurement` can be used with try-with-resources like the following:
 
 ```java
-try (TraceMeasurement m = TraceUtils.measurement(execution, "watchthis"))
+try (TraceMeasurement m = TraceUtils.measurement("watchthis"))
 {
     // Perform a lengthy operation
 }
