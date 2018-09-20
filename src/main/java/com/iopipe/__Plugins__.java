@@ -47,8 +47,7 @@ final class __Plugins__
 		// Load plugins from services
 		Map<Class<? extends IOpipePluginExecution>, __Info__> info =
 			this._info;
-		for (IOpipePlugin p : ServiceLoader.<IOpipePlugin>load(
-			IOpipePlugin.class))
+		for (IOpipePlugin p : __Plugins__.__searchPlugins())
 			try
 			{
 				__Info__ i = new __Info__(__enable, p, __conf);
@@ -100,6 +99,9 @@ final class __Plugins__
 	/**
 	 * This searches for plugins which are available being built-in and
 	 * made available by the service load.
+	 *
+	 * @return An iterable over plugins used.
+	 * @since 2018/02/28
 	 */
 	private static final Iterable<IOpipePlugin> __searchPlugins()
 	{
