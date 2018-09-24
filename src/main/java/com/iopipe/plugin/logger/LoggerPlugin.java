@@ -24,7 +24,7 @@ public final class LoggerPlugin
 		if (__e == null)
 			throw new NullPointerException();
 		
-		throw new Error("TODO");
+		return new LoggerExecution();
 	}
 	
 	/**

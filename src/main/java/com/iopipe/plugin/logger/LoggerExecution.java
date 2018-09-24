@@ -15,6 +15,15 @@ public final class LoggerExecution
 	implements IOpipePluginExecution
 {
 	/**
+	 * Initializes the logger plugin collector.
+	 *
+	 * @since 2018/09/24
+	 */
+	public LoggerExecution()
+	{
+	}
+	
+	/**
 	 * {@inheritDoc}
 	 * @since 2018/09/24
 	 */

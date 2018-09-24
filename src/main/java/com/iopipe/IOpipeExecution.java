@@ -110,6 +110,18 @@ public abstract class IOpipeExecution
 	public abstract IOpipeService service();
 	
 	/**
+	 * Returns an instance of the signer which is used to obtain a URL for
+	 * uploading.
+	 *
+	 * @param __ext The extension of the file to upload, if {@code null} then
+	 * it is not specified.
+	 * @return The signer for uploading or {@code null} if no signer is
+	 * available for usage.
+	 * @since 2018/09/24
+	 */
+	public abstract IOpipeSigner signer(String __ext);
+	
+	/**
 	 * Returns the starting time of the execution on the wall clock.
 	 *
 	 * @return The starting time in milliseconds.
