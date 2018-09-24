@@ -1,9 +1,22 @@
 package com.iopipe;
 
+import com.iopipe.http.RemoteBody;
+import com.iopipe.http.RemoteConnection;
+import com.iopipe.http.RemoteConnectionFactory;
 import com.iopipe.http.RemoteException;
+import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RemoteResult;
-import org.pmw.tinylog.Logger;
+import com.iopipe.http.RequestType;
+import java.io.StringWriter;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.json.Json;
+import javax.json.JsonException;
+import javax.json.JsonObject;
+import javax.json.JsonString;
+import javax.json.JsonStructure;
+import javax.json.JsonValue;
+import javax.json.stream.JsonGenerator;
+import org.pmw.tinylog.Logger;
 
 /**
  * This class handles signed requests which are used to upload data to IOpipe.
@@ -60,7 +73,7 @@ public final class IOpipeSigner
 		
 		// Need to determine which server to send to, can be done in another
 		// thread
-		Thread getter = new Thread(_SERVICE_GROUP._SERVICE_GROUP,
+		Thread getter = new Thread(__Shared__._SERVICE_THREAD_GROUP,
 			this::__getRemote, "IOpipe-SignerGetURL");
 		getter.setDaemon(true);
 		getter.start();
@@ -137,7 +150,7 @@ public final class IOpipeSigner
 		AtomicReference<__SignerRemote__> atom = this._remote;
 		
 		// Burn CPU for a bit waiting for the remote
-		__Remote__ rv;
+		__SignerRemote__ rv;
 		while ((rv = atom.get()) == null)
 			continue;
 		
@@ -158,7 +171,7 @@ public final class IOpipeSigner
 		// type as the other.
 		try
 		{
-			IOpipeConfiguration conf = this.config();
+			IOpipeConfiguration conf = this.config;
 			
 			// Use URL from the signer
 			String desiredurl = conf.getSignerUrl();
