@@ -37,8 +37,8 @@ public class IOpipeConfigurationBuilder
 	/** The URL to send service requests to. */
 	volatile String _serviceurl;
 	
-	/** The URL to send profiler requests to. */
-	volatile String _profilerurl;
+	/** The URL to send signer requests to. */
+	volatile String _signerurl;
 	
 	/** Use local coldstarts per service. */
 	volatile boolean _localcoldstart;
@@ -72,7 +72,7 @@ public class IOpipeConfigurationBuilder
 		this._timeoutwindow = __c.getTimeOutWindow();
 		this._installmethod = __c.getInstallMethod();
 		this._serviceurl = __c.getServiceUrl();
-		this._profilerurl = __c.getProfilerUrl();
+		this._signerurl = __c.getSignerUrl();
 		this._localcoldstart = __c.getUseLocalColdStart();
 	}
 	
@@ -149,9 +149,10 @@ public class IOpipeConfigurationBuilder
 	 * @param __u The URL to use to send profiler requests to.
 	 * @since 2018/02/24
 	 */
+	@Deprecated
 	public final void setProfilerUrl(String __u)
 	{
-		this._profilerurl = __u;
+		this.setSignerUrl(__u);
 	}
 	
 	/**
@@ -188,6 +189,17 @@ public class IOpipeConfigurationBuilder
 	public final void setServiceUrl(String __u)
 	{
 		this._serviceurl = __u;
+	}
+	
+	/**
+	 * Sets the URL to use when connecting to the signer service.
+	 *
+	 * @param __u The URL to use to send signer requests to.
+	 * @since 2018/09/24
+	 */
+	public final void setSignerUrl(String __u)
+	{
+		this._signerurl = __u;
 	}
 	
 	/**
