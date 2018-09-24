@@ -1,4 +1,4 @@
-package com.iopipe.plugin.profiler;
+package com.iopipe;
 
 /**
  * This contains information on the remote.
