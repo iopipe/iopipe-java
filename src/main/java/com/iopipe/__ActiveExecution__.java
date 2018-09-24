@@ -202,12 +202,12 @@ final class __ActiveExecution__
 	public final IOpipeSigner signer(String __ext)
 	{
 		Context context = this.context;
-		
-		throw new Error("TODO");
-		/*return new IOpipeSigner(context.getInvokedFunctionArn(),
+		return new IOpipeSigner(
+			__ext,
+			context.getInvokedFunctionArn(),
 			context.getAwsRequestId(),
 			this.startTimestamp(),
-			__exit);*/
+			this.config());
 	}
 	
 	/**
