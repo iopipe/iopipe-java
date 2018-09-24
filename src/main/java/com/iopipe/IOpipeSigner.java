@@ -22,6 +22,19 @@ public final class IOpipeSigner
 	}
 	
 	/**
+	 * Returns the access token which is used to access the uploaded data,
+	 * this will block until one is available or if none is available.
+	 *
+	 * @return The access token or {@code null} if it is not valid or not
+	 * available.
+	 * @since 2018/09/24
+	 */
+	public final String accessToken()
+	{
+		throw new Error("TODO");
+	}
+	
+	/**
 	 * Posts the given bytes to the signer.
 	 *
 	 * @param __b The bytes to post.
