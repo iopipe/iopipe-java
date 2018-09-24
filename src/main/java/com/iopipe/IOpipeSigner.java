@@ -135,7 +135,23 @@ public final class IOpipeSigner
 		if (__o < 0 || __l < 0 || (__o + __l) > __b.length)
 			throw new IndexOutOfBoundsException();
 		
-		throw new Error("TODO");
+		// Await remote data to send to
+		__SignerRemote__ remote = this.__awaitRemote();
+		if (remote == null)
+			throw new RemoteException("Could not access the signer.");
+		
+		// Build request to send to server
+		RemoteRequest request = new RemoteRequest("", __b, __o, __l);
+		
+		// Send request
+		RemoteResult result = this.config.getRemoteConnectionFactory().connect(
+			remote.url, null).send(RequestType.PUT,
+			request);
+		
+		// Debug result
+		Logger.debug("Signer upload returned result {}.", result);
+		
+		return result;
 	}
 	
 	/**
