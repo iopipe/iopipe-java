@@ -11,6 +11,7 @@ import com.iopipe.http.RequestType;
 import com.iopipe.IOpipeConfiguration;
 import com.iopipe.IOpipeConstants;
 import com.iopipe.IOpipeExecution;
+import com.iopipe.IOpipeSigner;
 import com.iopipe.plugin.IOpipePluginExecution;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -72,9 +73,8 @@ public class ProfilerExecution
 	private final Tracker _tracker =
 		new Tracker();
 	
-	/** The remote to access. */
-	private final AtomicReference<__Remote__> _remote =
-		new AtomicReference<>();
+	/** The signer. */
+	private final IOpipeSigner _signer;
 	
 	/** The tread which is pollng for profiling (only in lambda thread). */
 	private Thread _pollthread;
@@ -153,6 +153,9 @@ public class ProfilerExecution
 			throw new NullPointerException();
 		
 		this.execution = __e;
+		
+		// Setup signer to upload a ZIP
+		this._signer = __e.signer(".zip");
 	}
 	
 	/**
@@ -162,13 +165,13 @@ public class ProfilerExecution
 	@Override
 	public JsonObject extraReport()
 	{
-		// No remote, ignore
-		__Remote__ remote = this._remote.get();
-		if (remote == null)
+		// Signer was not used
+		IOpipeSigner signer = this._signer;
+		if (signer == null)
 			return null;
 		
 		// If no access token was specified then just ignore it
-		String jwtaccesstoken = remote.jwtaccesstoken;
+		String jwtaccesstoken = signer.accessToken();
 		if (jwtaccesstoken == null)
 			return null;
 		
@@ -283,127 +286,26 @@ public class ProfilerExecution
 					e.printStackTrace();
 				}
 			
-			// Await remote URL to send to
-			String remote = __awaitRemote();
-			if (remote == null)
-			{
-				Logger.error("Could not obtain the profiler upload URL.");
+			// Signer was not used?
+			IOpipeSigner signer = this._signer;
+			if (signer == null)
 				return;
-			}
 			
-			// Build request to send to server
-			RemoteRequest request = new RemoteRequest("", exported);
-			
-			// Send request
-			RemoteResult result = conf.getRemoteConnectionFactory().connect(
-				remote, null).send(RequestType.PUT,
-				request);
-			
-			// Debug result
-			Logger.debug("Profiler upload returned result {}.", result);
-			
-			// Add auto-label
-			execution.label("@iopipe/plugin-profiler");
-		}
-	}
-	
-	/**
-	 * Awaits the remote URL.
-	 *
-	 * @return The remote URL.
-	 * @since 2018/02/22
-	 */
-	private final String __awaitRemote()
-	{
-		AtomicReference<__Remote__> atom = this._remote;
-		
-		// Burn CPU for a bit waiting for the remote
-		__Remote__ rv;
-		while ((rv = atom.get()) == null)
-			continue;
-		
-		return rv.url;
-	}
-	
-	/**
-	 * Obtains the remote URL to send a report to.
-	 *
-	 * @since 2018/02/22
-	 */
-	private final void __getRemote()
-	{
-		// Use a connection to an alternative URL using the same connection
-		// type as the other.
-		try
-		{
-			IOpipeExecution execution = this.execution;
-			IOpipeConfiguration conf = execution.config();
-			
-			// Use URL from the profiler
-			String desiredurl = conf.getProfilerUrl();
-			if (desiredurl == null)
-				throw new RuntimeException("No profiler URL specified.");
-			
-			// Indicate where the profiler is uploading to
-			Logger.debug("Requesting profiler upload URL from {}.",
-				desiredurl);
-			
-			// Setup connection to the signed service to determine which
-			// URL we upload to
-			Context context = execution.context();
-			RemoteConnectionFactory fact = conf.getRemoteConnectionFactory();
-			RemoteConnection con = fact.connect(desiredurl,
-				conf.getProjectToken());
-			
-			// Build request to remote end
-			StringWriter out = new StringWriter();
-			try (JsonGenerator gen = Json.createGenerator(out))
+			// Upload
+			try
 			{
-				gen.writeStartObject();
+				RemoteResult result = signer.put(exported);
 				
-				gen.write("arn", context.getInvokedFunctionArn());
-				gen.write("requestId", context.getAwsRequestId());
-				gen.write("timestamp", execution.startTimestamp());
-				gen.write("extension", ".zip");
+				// Debug result
+				Logger.debug("Profiler upload returned result {}.", result);
 				
-				// Finished
-				gen.writeEnd();
-				gen.flush();
+				// Add auto-label
+				execution.label("@iopipe/plugin-profiler");
 			}
-			
-			// Ask which URL to send to
-			RemoteResult resp = con.send(RequestType.POST,
-				new RemoteRequest(RemoteBody.MIMETYPE_JSON, out.toString()));
-			
-			// Decode response
-			JsonObject jo = (JsonObject)resp.bodyAsJsonStructure();
-			JsonValue jv = jo.get("signedRequest");
-			if (jv == null)
-				throw new RuntimeException("Server did not respond with URL.");
-			String url = ((JsonString)jv).getString();
-			
-			// Need access token to tell the dashboard where to find the
-			// uploaded file
-			JsonValue atv = jo.get("jwtAccess");
-			if (atv == null)
-				throw new RuntimeException("Server did not access token.");
-			String jwtaccesstoken = ((JsonString)atv).getString();
-			
-			// Debug
-			Logger.debug("Signer upload to `{}` with access token `{}`.",
-				url, jwtaccesstoken);
-			
-			// Return it
-			this._remote.set(new __Remote__(true, url, jwtaccesstoken));
-		}
-		
-		// Could not send to the remote end
-		catch (Throwable e)
-		{
-			Logger.error(e, "Could not determine the profiler upload URL.");
-			
-			// Mark invalid
-			this._remote.set(new __Remote__(false, null, null));
+			catch (RemoteException e)
+			{
+				Logger.debug(e, "Could not upload prorifler data.");
+			}
 		}
 	}
 	
@@ -414,13 +316,6 @@ public class ProfilerExecution
 	 */
 	final void __pre()
 	{
-		// Need to determine which server to send to, can be done in another
-		// thread
-		Thread getter = new Thread(_SERVICE_GROUP, this::__getRemote,
-			"IOpipe-ProfilerGetURL");
-		getter.setDaemon(true);
-		getter.start();
-		
 		// Statistics at the start of method execution
 		this._beginstats = ManagementStatistics.snapshot(0);
 		
