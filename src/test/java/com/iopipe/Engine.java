@@ -100,6 +100,7 @@ public abstract class Engine
 			__DoGenericStreamHandler__::new,
 			__DoGenericHandler__::new,
 			__DoGenericAWSEntryPoint__::new,
+			__DoLoggerTest__::new,
 			
 			// Event Info
 			(__e) -> new __DoEventInfoPlugin__(__e,
