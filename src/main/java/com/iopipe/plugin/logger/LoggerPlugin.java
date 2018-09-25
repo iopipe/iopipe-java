@@ -11,7 +11,7 @@ import com.iopipe.plugin.IOpipePluginPostExecutable;
  * @since 2018/09/24
  */
 public final class LoggerPlugin
-	implements IOpipePlugin
+	implements IOpipePlugin, IOpipePluginPostExecutable
 {
 	/**
 	 * {@inheritDoc}
@@ -45,6 +45,20 @@ public final class LoggerPlugin
 	public final String name()
 	{
 		return "logger";
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @since 2018/09/25
+	 */
+	@Override
+	public void postExecute(IOpipePluginExecution __e)
+		throws NullPointerException
+	{
+		if (__e == null)
+			throw new NullPointerException();
+		
+		((LoggerExecution)__e).__post();
 	}
 	
 	/**
