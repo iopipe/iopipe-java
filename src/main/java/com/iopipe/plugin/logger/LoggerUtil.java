@@ -1,6 +1,7 @@
 package com.iopipe.plugin.logger;
 
 import com.iopipe.IOpipeExecution;
+import com.iopipe.plugin.NoSuchPluginException;
 
 /**
  * These are helper methods to add log messages to the current execution
@@ -224,7 +225,18 @@ public final class LoggerUtil
 	 */
 	private static final LoggerExecution __exec()
 	{
-		throw new Error("TODO");
+		IOpipeExecution exec = IOpipeExecution.currentExecution();
+		if (exec == null)
+			return null;
+		
+		try
+		{
+			return exec.<LoggerExecution>plugin(LoggerExecution.class);
+		}
+		catch (ClassCastException|NoSuchPluginException e)
+		{
+			return null;
+		}
 	}
 }
 
