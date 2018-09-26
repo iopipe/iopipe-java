@@ -252,7 +252,7 @@ public final class LoggerExecution
 		if (__msg == null)
 			__msg = "No message.";
 		
-		throw new Error("TODO");
+		throw new RuntimeException("TODO");
 	}
 	
 	/**
@@ -274,7 +274,7 @@ public final class LoggerExecution
 	{
 		try
 		{
-			throw new Error("TODO");
+			throw new RuntimeException("TODO");
 		}
 		
 		// No matter what happens during the post operation, delete the

@@ -100,7 +100,6 @@ public abstract class Engine
 			__DoGenericStreamHandler__::new,
 			__DoGenericHandler__::new,
 			__DoGenericAWSEntryPoint__::new,
-			__DoLoggerTest__::new,
 			
 			// Event Info
 			(__e) -> new __DoEventInfoPlugin__(__e,
@@ -199,6 +198,10 @@ public abstract class Engine
 			(__e) -> new __DoGenericObjectTranslate__(__e,
 				"arraysimplepojo.json",
 				SimplePOJO[].class),
+			
+			// Logging
+			(__e) -> new __DoLoggerTest__(__e, true),
+			(__e) -> new __DoLoggerTest__(__e, false),
 		};
 	
 	/** The base name for this engine. */
