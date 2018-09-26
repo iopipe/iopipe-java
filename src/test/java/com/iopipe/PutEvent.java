@@ -28,6 +28,17 @@ public final class PutEvent
 	}
 	
 	/**
+	 * Returns the data that was put.
+	 *
+	 * @return The data which was put.
+	 * @since 2018/09/26
+	 */
+	public final byte[] data()
+	{
+		return this._data.clone();
+	}
+	
+	/**
 	 * The length of the put data.
 	 *
 	 * @return The length of the data.

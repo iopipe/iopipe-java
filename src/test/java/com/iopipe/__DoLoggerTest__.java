@@ -5,6 +5,10 @@ import com.iopipe.http.RemoteResult;
 import com.iopipe.http.RequestType;
 import com.iopipe.IOpipeMeasurement;
 import com.iopipe.plugin.logger.LoggerUtil;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
+import java.io.IOException;
 import java.util.Map;
 import javax.json.JsonString;
 import javax.json.JsonNumber;
@@ -119,6 +123,23 @@ class __DoLoggerTest__
 		{
 			if (__r.type == RequestType.PUT)
 				this.gotput.set(true);
+			
+			try (BufferedReader br = new BufferedReader(new InputStreamReader(
+				new ByteArrayInputStream(((PutEvent)rawevent).data()), "utf-8")))
+			{
+				for (;;)
+				{
+					String ln = br.readLine();
+					
+					if (ln == null)
+						break;
+					
+					this.lines.increment();
+				}
+			}
+			catch (IOException e)
+			{
+			}
 		}
 		
 		// A request made by the signer
