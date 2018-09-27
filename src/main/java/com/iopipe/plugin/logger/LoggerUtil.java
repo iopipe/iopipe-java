@@ -24,14 +24,15 @@ public final class LoggerUtil
 	 * Logs the given message.
 	 *
 	 * @param __v The logging level.
+	 * @param __n The name of the log source.
 	 * @param __c The message used.
 	 * @since 2018/09/26
 	 */
-	public static final void log(Enum<?> __v, char[] __c)
+	public static final void log(Enum<?> __v, String __n, char[] __c)
 	{
 		LoggerExecution exec = LoggerUtil.__exec();
 		if (exec != null)
-			exec.log(__v, __c);
+			exec.log(__v, __n, __c);
 	}
 	
 	/**
@@ -39,20 +40,22 @@ public final class LoggerUtil
 	 *
 	 * @param __utcms The current time in UTC milliseconds.
 	 * @param __v The logging level.
+	 * @param __n The name of the log source.
 	 * @param __c The message used.
 	 * @since 2018/09/26
 	 */
-	public static final void log(long __utcms, Enum<?> __v, char[] __c)
+	public static final void log(long __utcms, Enum<?> __v, String __n, char[] __c)
 	{
 		LoggerExecution exec = LoggerUtil.__exec();
 		if (exec != null)
-			exec.log(__utcms, __v, __c);
+			exec.log(__utcms, __v, __n, __c);
 	}
 	
 	/**
 	 * Logs the given message.
 	 *
 	 * @param __v The logging level.
+	 * @param __n The name of the log source.
 	 * @param __c The message used.
 	 * @param __o The offset.
 	 * @param __l The length.
@@ -60,12 +63,12 @@ public final class LoggerUtil
 	 * negative or exceed the array bounds.
 	 * @since 2018/09/26
 	 */
-	public static final void log(Enum<?> __v, char[] __c, int __o, int __l)
+	public static final void log(Enum<?> __v, String __n, char[] __c, int __o, int __l)
 		throws IndexOutOfBoundsException
 	{
 		LoggerExecution exec = LoggerUtil.__exec();
 		if (exec != null)
-			exec.log(__v, __c, __o, __l);
+			exec.log(__v, __n, __c, __o, __l);
 	}
 	
 	/**
@@ -73,6 +76,7 @@ public final class LoggerUtil
 	 *
 	 * @param __utcms The current time in UTC milliseconds.
 	 * @param __v The logging level.
+	 * @param __n The name of the log source.
 	 * @param __c The message used.
 	 * @param __o The offset.
 	 * @param __l The length.
@@ -80,27 +84,28 @@ public final class LoggerUtil
 	 * negative or exceed the array bounds.
 	 * @since 2018/09/26
 	 */
-	public static final void log(long __utcms, Enum<?> __v, char[] __c, int __o,
+	public static final void log(long __utcms, Enum<?> __v, String __n, char[] __c, int __o,
 		int __l)
 		throws IndexOutOfBoundsException
 	{
 		LoggerExecution exec = LoggerUtil.__exec();
 		if (exec != null)
-			exec.log(__utcms, __v, __c, __o, __l);
+			exec.log(__utcms, __v, __n, __c, __o, __l);
 	}
 	
 	/**
 	 * Logs the given message.
 	 *
 	 * @param __v The logging level.
+	 * @param __n The name of the log source.
 	 * @param __msg The message used.
 	 * @since 2018/09/26
 	 */
-	public static final void log(Enum<?> __v, CharSequence __msg)
+	public static final void log(Enum<?> __v, String __n, CharSequence __msg)
 	{
 		LoggerExecution exec = LoggerUtil.__exec();
 		if (exec != null)
-			exec.log(__v, __msg);
+			exec.log(__v, __n, __msg);
 	}
 	
 	/**
@@ -111,11 +116,11 @@ public final class LoggerUtil
 	 * @param __msg The message used.
 	 * @since 2018/09/26
 	 */
-	public static final void log(long __utcms, Enum<?> __v, CharSequence __msg)
+	public static final void log(long __utcms, Enum<?> __v, String __n, CharSequence __msg)
 	{
 		LoggerExecution exec = LoggerUtil.__exec();
 		if (exec != null)
-			exec.log(__utcms, __v, __msg);
+			exec.log(__utcms, __v, __n, __msg);
 	}
 	
 	/**
@@ -125,11 +130,11 @@ public final class LoggerUtil
 	 * @param __c The message used.
 	 * @since 2018/09/26
 	 */
-	public static final void log(String __v, char[] __c)
+	public static final void log(String __v, String __n, char[] __c)
 	{
 		LoggerExecution exec = LoggerUtil.__exec();
 		if (exec != null)
-			exec.log(__v, __c);
+			exec.log(__v, __n, __c);
 	}
 	
 	/**
@@ -140,11 +145,11 @@ public final class LoggerUtil
 	 * @param __c The message used.
 	 * @since 2018/09/26
 	 */
-	public static final void log(long __utcms, String __v, char[] __c)
+	public static final void log(long __utcms, String __v, String __n, char[] __c)
 	{
 		LoggerExecution exec = LoggerUtil.__exec();
 		if (exec != null)
-			exec.log(__utcms, __v, __c);
+			exec.log(__utcms, __v, __n, __c);
 	}
 	
 	/**
@@ -158,12 +163,12 @@ public final class LoggerUtil
 	 * negative or exceed the array bounds.
 	 * @since 2018/09/26
 	 */
-	public static final void log(String __v, char[] __c, int __o, int __l)
+	public static final void log(String __v, String __n, char[] __c, int __o, int __l)
 		throws IndexOutOfBoundsException
 	{
 		LoggerExecution exec = LoggerUtil.__exec();
 		if (exec != null)
-			exec.log(__v, __c, __o, __l);
+			exec.log(__v, __n, __c, __o, __l);
 	}
 	
 	/**
@@ -178,13 +183,13 @@ public final class LoggerUtil
 	 * negative or exceed the array bounds.
 	 * @since 2018/09/26
 	 */
-	public static final void log(long __utcms, String __v, char[] __c, int __o,
+	public static final void log(long __utcms, String __v, String __n, char[] __c, int __o,
 		int __l)
 		throws IndexOutOfBoundsException
 	{
 		LoggerExecution exec = LoggerUtil.__exec();
 		if (exec != null)
-			exec.log(__utcms, __v, __c, __o, __l);
+			exec.log(__utcms, __v, __n, __c, __o, __l);
 	}
 	
 	/**
@@ -194,11 +199,11 @@ public final class LoggerUtil
 	 * @param __msg The message used.
 	 * @since 2018/09/26
 	 */
-	public static final void log(String __v, CharSequence __msg)
+	public static final void log(String __v, String __n, CharSequence __msg)
 	{
 		LoggerExecution exec = LoggerUtil.__exec();
 		if (exec != null)
-			exec.log(__v, __msg);
+			exec.log(__v, __n, __msg);
 	}
 	
 	/**
@@ -209,11 +214,11 @@ public final class LoggerUtil
 	 * @param __msg The message used.
 	 * @since 2018/09/26
 	 */
-	public static final void log(long __utcms, String __v, CharSequence __msg)
+	public static final void log(long __utcms, String __v, String __n, CharSequence __msg)
 	{
 		LoggerExecution exec = LoggerUtil.__exec();
 		if (exec != null)
-			exec.log(__utcms, __v, __msg);
+			exec.log(__utcms, __v, __n, __msg);
 	}
 	
 	/**

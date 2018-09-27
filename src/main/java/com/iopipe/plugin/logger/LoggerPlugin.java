@@ -24,7 +24,7 @@ public final class LoggerPlugin
 		if (__e == null)
 			throw new NullPointerException();
 		
-		return new LoggerExecution();
+		return new LoggerExecution(__e);
 	}
 	
 	/**

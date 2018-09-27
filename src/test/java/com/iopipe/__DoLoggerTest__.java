@@ -207,29 +207,29 @@ class __DoLoggerTest__
 	public void run(IOpipeExecution __e)
 		throws Throwable
 	{
-		LoggerUtil.log(FakeLevel.ENUM,
+		LoggerUtil.log(FakeLevel.ENUM, "test",
 			"Squirrels are quick!".toCharArray());
-		LoggerUtil.log(1520541000000L, FakeLevel.ENUM,
+		LoggerUtil.log(1520541000000L, FakeLevel.ENUM, "test",
 			"Squirrels are cautious!".toCharArray());
-		LoggerUtil.log(FakeLevel.ENUM,
+		LoggerUtil.log(FakeLevel.ENUM, "test",
 			"Squirrels are beautiful!".toCharArray(), 2, 17);
-		LoggerUtil.log(1520541000000L, FakeLevel.ENUM,
+		LoggerUtil.log(1520541000000L, FakeLevel.ENUM, "test",
 			"Squirrels are sleepy!".toCharArray(), 7, 14);
-		LoggerUtil.log(FakeLevel.ENUM,
+		LoggerUtil.log(FakeLevel.ENUM, "test",
 			"Squirrels are cute!");
-		LoggerUtil.log(1520541000000L, FakeLevel.ENUM,
+		LoggerUtil.log(1520541000000L, FakeLevel.ENUM, "test",
 			"Squirrels are adorable!");
-		LoggerUtil.log("STRING",
+		LoggerUtil.log("STRING", "test",
 			"Squirrels are curious!".toCharArray());
-		LoggerUtil.log(1520541000000L, "STRING",
+		LoggerUtil.log(1520541000000L, "STRING", "test",
 			"Squirrels are energetic!".toCharArray());
-		LoggerUtil.log("STRING",
+		LoggerUtil.log("STRING", "test",
 			"Squirrels are loving!".toCharArray(), 0, 13);
-		LoggerUtil.log(1520541000000L, "STRING",
+		LoggerUtil.log(1520541000000L, "STRING", "test",
 			"Squirrels are hungry!".toCharArray(), 19, 2);
-		LoggerUtil.log("STRING",
+		LoggerUtil.log("STRING", "test",
 			"Squirrels are sweet!");
-		LoggerUtil.log(1520541000000L, "STRING",
+		LoggerUtil.log(1520541000000L, "STRING", "test",
 			"Squirrels are fluffy!");
 	}
 	
