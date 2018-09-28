@@ -476,7 +476,9 @@ public final class LoggerExecution
 		}
 		
 		// Report it
-		execution.label("@iopipe/plugin-logger");
+		IOpipeExecution exec = IOpipeExecution.currentExecution();
+		if (exec != null)
+			exec.label("@iopipe/plugin-logger");
 	}
 	
 	/**
