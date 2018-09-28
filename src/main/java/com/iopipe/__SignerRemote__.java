@@ -1,11 +1,11 @@
-package com.iopipe.plugin.profiler;
+package com.iopipe;
 
 /**
  * This contains information on the remote.
  *
  * @since 2018/07/27
  */
-final class __Remote__
+final class __SignerRemote__
 {
 	/** Is this remote valid? */
 	public final boolean valid;
@@ -24,7 +24,7 @@ final class __Remote__
 	 * @param __at The access token.
 	 * @since 2018/07/22
 	 */
-	__Remote__(boolean __valid, String __url, String __at)
+	__SignerRemote__(boolean __valid, String __url, String __at)
 	{
 		this.valid = __valid;
 		this.url = __url;

@@ -86,6 +86,17 @@ final class __NoOpExecution__
 	
 	/**
 	 * {@inheritDoc}
+	 * @since 2018/09/24
+	 */
+	@Override
+	public final IOpipeSigner signer(String __ext)
+	{
+		// No signer is used here
+		return null;
+	}
+	
+	/**
+	 * {@inheritDoc}
 	 * @since 2018/08/28
 	 */
 	@Override

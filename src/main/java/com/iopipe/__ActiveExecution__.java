@@ -196,6 +196,22 @@ final class __ActiveExecution__
 	
 	/**
 	 * {@inheritDoc}
+	 * @since 2018/09/24
+	 */
+	@Override
+	public final IOpipeSigner signer(String __ext)
+	{
+		Context context = this.context;
+		return new IOpipeSigner(
+			__ext,
+			context.getInvokedFunctionArn(),
+			context.getAwsRequestId(),
+			this.startTimestamp(),
+			this.config());
+	}
+	
+	/**
+	 * {@inheritDoc}
 	 * @since 2018/02/16
 	 */
 	@Override

@@ -5,6 +5,7 @@ import com.iopipe.plugin.IOpipePlugin;
 import com.iopipe.plugin.IOpipePluginExecution;
 import com.iopipe.plugin.IOpipePluginPostExecutable;
 import com.iopipe.plugin.IOpipePluginPreExecutable;
+import com.iopipe.plugin.logger.LoggerPlugin;
 import com.iopipe.plugin.profiler.ProfilerPlugin;
 import com.iopipe.plugin.trace.TracePlugin;
 import java.lang.ref.Reference;
@@ -114,6 +115,7 @@ final class __Plugins__
 		rv.add(new TracePlugin());
 		rv.add(new ProfilerPlugin());
 		rv.add(new EventInfoPlugin());
+		rv.add(new LoggerPlugin());
 		
 		// Use plugins provided by the service loader
 		try

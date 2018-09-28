@@ -109,8 +109,8 @@ public final class IOpipeConfiguration
 	/** The URL to the service. */
 	protected final String serviceurl;
 	
-	/** The URL to the profiler. */
-	protected final String profilerurl;
+	/** The URL to the signer. */
+	protected final String signerurl;
 	
 	/** Use local coldstarts. */
 	protected final boolean localcoldstart;
@@ -138,7 +138,7 @@ public final class IOpipeConfiguration
 		cb.setRemoteConnectionFactory(new NullConnectionFactory());
 		cb.setTimeOutWindow(0);
 		cb.setServiceUrl(IOpipeConstants.DEFAULT_SERVICE_URL);
-		cb.setProfilerUrl(IOpipeConstants.DEFAULT_PROFILER_URL);
+		cb.setSignerUrl(IOpipeConstants.DEFAULT_SIGNER_URL);
 		
 		DISABLED_CONFIG = cb.build();
 		
@@ -210,11 +210,11 @@ public final class IOpipeConfiguration
 		this.installmethod = installmethod;
 		
 		// Optional
-		String profilerurl = __builder._profilerurl;
-		if (profilerurl == null)
-			this.profilerurl = IOpipeConstants.DEFAULT_PROFILER_URL;
+		String signerurl = __builder._signerurl;
+		if (signerurl == null)
+			this.signerurl = IOpipeConstants.DEFAULT_SIGNER_URL;
 		else
-			this.profilerurl = profilerurl;
+			this.signerurl = signerurl;
 		
 		this.localcoldstart = __builder._localcoldstart;
 		this._pluginstate.putAll(__builder._pluginstate);
@@ -241,7 +241,7 @@ public final class IOpipeConfiguration
 			Objects.equals(this.installmethod, o.installmethod) &&
 			this._pluginstate.equals(o._pluginstate) &&
 			Objects.equals(this.serviceurl, o.serviceurl) &&
-			Objects.equals(this.profilerurl, o.profilerurl);
+			Objects.equals(this.signerurl, o.signerurl);
 	}
 	
 	/**
@@ -272,9 +272,10 @@ public final class IOpipeConfiguration
 	 * @return The URL to use for profiler requests.
 	 * @since 2018/02/24
 	 */
+	@Deprecated
 	public final String getProfilerUrl()
 	{
-		return this.profilerurl;
+		return this.getSignerUrl();
 	}
 	
 	/**
@@ -297,6 +298,17 @@ public final class IOpipeConfiguration
 	public final String getServiceUrl()
 	{
 		return this.serviceurl;
+	}
+	
+	/**
+	 * Returns the URL to use for sending signer requests.
+	 *
+	 * @return The URL to use for signer requests.
+	 * @since 2018/08/24
+	 */
+	public final String getSignerUrl()
+	{
+		return this.signerurl;
 	}
 	
 	/**
@@ -325,7 +337,7 @@ public final class IOpipeConfiguration
 			Objects.hashCode(this.installmethod) ^
 			this._pluginstate.hashCode() ^
 			Objects.hashCode(this.serviceurl) ^
-			Objects.hashCode(this.profilerurl);
+			Objects.hashCode(this.signerurl);
 	}
 	
 	/**
@@ -378,12 +390,12 @@ public final class IOpipeConfiguration
 				String.format("{enabled=%s, token=%s, " +
 					"connectionfactory=%s, timeoutwindow=%d, " +
 					"installmethod=%s, " +
-					"pluginstate=%s, serviceurl=%s, profilerurl=%s, " +
+					"pluginstate=%s, serviceurl=%s, signerurl=%s, " +
 					"localcoldstart=%b}",
 					this.enabled,
 					this.token, this.connectionfactory, this.timeoutwindow,
 					this.installmethod,
-					this._pluginstate, this.serviceurl, this.profilerurl,
+					this._pluginstate, this.serviceurl, this.signerurl,
 					this.localcoldstart)));
 		
 		return rv;
@@ -501,7 +513,7 @@ public final class IOpipeConfiguration
 			Logger.debug("Remote URL: {}", surl);
 			
 			// And the profiler URL
-			rv.setProfilerUrl(IOpipeConstants.DEFAULT_PROFILER_URL);
+			rv.setSignerUrl(IOpipeConstants.DEFAULT_SIGNER_URL);
 			
 			return rv.build();
 		}

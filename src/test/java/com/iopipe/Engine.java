@@ -198,6 +198,10 @@ public abstract class Engine
 			(__e) -> new __DoGenericObjectTranslate__(__e,
 				"arraysimplepojo.json",
 				SimplePOJO[].class),
+			
+			// Logging
+			(__e) -> new __DoLoggerTest__(__e, true),
+			(__e) -> new __DoLoggerTest__(__e, false),
 		};
 	
 	/** The base name for this engine. */

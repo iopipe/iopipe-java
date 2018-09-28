@@ -45,8 +45,13 @@ public interface IOpipeConstants
 		IOpipeConstants.defaultServiceUrl();
 	
 	/** The default URL to request profiler snapshot uploads to. */
+	@Deprecated
 	public static final String DEFAULT_PROFILER_URL =
-		IOpipeConstants.defaultProfilerUrl();
+		IOpipeConstants.defaultSignerUrl();
+	
+	/** The default URL to use for the signer. */
+	public static final String DEFAULT_SIGNER_URL =
+		IOpipeConstants.defaultSignerUrl();
 	
 	/** The length limit for how long custom metric and label names may be. */
 	public static final int NAME_CODEPOINT_LIMIT =
@@ -88,10 +93,10 @@ public interface IOpipeConstants
 	 * @return The default profiler URL.
 	 * @since 2018/03/10
 	 */
+	@Deprecated	
 	public static String defaultProfilerUrl()
 	{
-		return "https://signer." + IOpipeConstants.chosenRegion() +
-			".iopipe.com/";
+		return IOpipeConstants.defaultSignerUrl();
 	}
 	
 	/**
@@ -107,6 +112,18 @@ public interface IOpipeConstants
 			return "https://metrics-api.iopipe.com/v0/event";
 		return "https://metrics-api." + IOpipeConstants.chosenRegion() +
 			".iopipe.com/v0/event";
+	}
+	
+	/**
+	 * Returns the default signer URL.
+	 *
+	 * @return The default signer URL.
+	 * @since 2018/09/24
+	 */
+	public static String defaultSignerUrl()
+	{
+		return "https://signer." + IOpipeConstants.chosenRegion() +
+			".iopipe.com/";
 	}
 }
 
