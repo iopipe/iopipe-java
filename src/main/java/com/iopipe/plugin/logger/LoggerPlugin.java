@@ -88,7 +88,7 @@ public final class LoggerPlugin
 	@Override
 	public final String version()
 	{
-		return "1.9.0";
+		return "1.0.0";
 	}
 }
 
