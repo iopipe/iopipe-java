@@ -474,6 +474,9 @@ public final class LoggerExecution
 			{
 			}
 		}
+		
+		// Report it
+		execution.label("@iopipe/plugin-logger");
 	}
 	
 	/**
