@@ -18,6 +18,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.Instant;
+import javax.json.Json;
 import javax.json.JsonObject;
 import org.pmw.tinylog.Logger;
 
@@ -395,7 +396,21 @@ public final class LoggerExecution
 	@Override
 	public final JsonObject extraReport()
 	{
-		return null;
+		// Signer was not used
+		IOpipeSigner signer = this._signer;
+		if (signer == null)
+			return null;
+		
+		// If no access token was specified then just ignore it
+		String jwtaccesstoken = signer.accessToken();
+		if (jwtaccesstoken == null)
+			return null;
+		
+		// Otherwise build object
+		return Json.createObjectBuilder().add("uploads",
+			Json.createArrayBuilder().
+				add(jwtaccesstoken).
+			build()).build();
 	}
 	
 	/**

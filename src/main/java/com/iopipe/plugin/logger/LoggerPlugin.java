@@ -32,9 +32,29 @@ public final class LoggerPlugin
 	 * @since 2018/09/24
 	 */
 	@Override
+	public final boolean enabledByDefault()
+	{
+		return false;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @since 2018/09/24
+	 */
+	@Override
 	public final Class<? extends IOpipePluginExecution> executionClass()
 	{
 		return LoggerExecution.class;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @since 2018/09/24
+	 */
+	@Override
+	public final String homepage()
+	{
+		return "https://github.com/iopipe/iopipe-java/";
 	}
 	
 	/**
@@ -69,26 +89,6 @@ public final class LoggerPlugin
 	public final String version()
 	{
 		return "1.9.0";
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * @since 2018/09/24
-	 */
-	@Override
-	public final boolean enabledByDefault()
-	{
-		return false;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * @since 2018/09/24
-	 */
-	@Override
-	public final String homepage()
-	{
-		return "https://github.com/iopipe/iopipe-java/";
 	}
 }
 
