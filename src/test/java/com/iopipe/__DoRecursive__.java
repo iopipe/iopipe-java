@@ -2,7 +2,6 @@ package com.iopipe;
 
 import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RemoteResult;
-import com.iopipe.IOpipeMeasurement;
 
 /**
  * This checks to make sure that recursive calls operate correctly.

@@ -3,7 +3,6 @@ package com.iopipe;
 import com.iopipe.CustomMetric;
 import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RemoteResult;
-import com.iopipe.IOpipeMeasurement;
 import java.util.Collections;
 import java.util.Map;
 import javax.json.JsonString;
@@ -101,11 +100,9 @@ class __DoLongNameCustomMetric__
 	public void run(IOpipeExecution __e)
 		throws Throwable
 	{
-		IOpipeMeasurement m = __e.measurement();
-		
-		m.customMetric(String.join("", Collections.nCopies(
+		__e.customMetric(String.join("", Collections.nCopies(
 			IOpipeConstants.NAME_CODEPOINT_LIMIT + 32, "a")), "Very long!");
-		m.customMetric(String.join("", Collections.nCopies(
+		__e.customMetric(String.join("", Collections.nCopies(
 			IOpipeConstants.NAME_CODEPOINT_LIMIT + 32, "b")), 12345678);
 	}
 }

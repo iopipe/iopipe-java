@@ -3,7 +3,6 @@ package com.iopipe;
 import com.iopipe.generic.ObjectTranslator;
 import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RemoteResult;
-import com.iopipe.IOpipeMeasurement;
 import java.lang.reflect.Type;
 import java.util.Map;
 import javax.json.JsonString;
