@@ -3,7 +3,6 @@ package com.iopipe;
 import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RemoteResult;
 import com.iopipe.http.RequestType;
-import com.iopipe.IOpipeMeasurement;
 import com.iopipe.plugin.logger.LoggerUtil;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;

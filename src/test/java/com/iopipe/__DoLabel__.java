@@ -2,7 +2,6 @@ package com.iopipe;
 
 import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RemoteResult;
-import com.iopipe.IOpipeMeasurement;
 import java.util.Map;
 import javax.json.JsonString;
 import javax.json.JsonNumber;

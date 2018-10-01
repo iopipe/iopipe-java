@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RemoteResult;
-import com.iopipe.IOpipeMeasurement;
 
 /**
  * Checks to ensure the generic handler works.

@@ -20,7 +20,6 @@ import com.iopipe.CustomMetric;
 import com.iopipe.elsewhere.SimplePOJO;
 import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RemoteResult;
-import com.iopipe.IOpipeMeasurement;
 import com.iopipe.plugin.eventinfo.APIGatewayDecoder;
 import com.iopipe.plugin.eventinfo.CloudFrontDecoder;
 import com.iopipe.plugin.eventinfo.EventInfoDecoder;
