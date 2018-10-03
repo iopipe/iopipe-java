@@ -1,6 +1,7 @@
 package com.iopipe.plugin.trace;
 
 import com.iopipe.IOpipeExecution;
+import java.util.function.Supplier;
 
 /**
  * This is a convenience class which contains static methods for creating marks
@@ -75,6 +76,49 @@ public final class TraceUtils
 			return null;
 		
 		return TraceUtils.measure(exec, __name);
+	}
+	
+	/**
+	 * Measures the given function.
+	 *
+	 * @param __name The name of the measurement.
+	 * @param __func The function to call.
+	 * @return The return value of the function.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/10/03
+	 */
+	public static void measure(String __name, Runnable __func)
+		throws NullPointerException
+	{
+		if (__name == null || __func == null)
+			throw new NullPointerException();
+		
+		try (TraceMeasurement trace = TraceUtils.measure(__name))
+		{
+			__func.run();
+		}
+	}
+	
+	/**
+	 * Measures the given function and returns the value from it.
+	 *
+	 * @param <R> The type of value to return.
+	 * @param __name The name of the measurement.
+	 * @param __func The function to call.
+	 * @return The return value of the function.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/10/03
+	 */
+	public static <R> R measure(String __name, Supplier<R> __func)
+		throws NullPointerException
+	{
+		if (__name == null || __func == null)
+			throw new NullPointerException();
+		
+		try (TraceMeasurement trace = TraceUtils.measure(__name))
+		{
+			return __func.get();
+		}
 	}
 }
 
