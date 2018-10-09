@@ -15,7 +15,7 @@ public interface IOpipeConstants
 {
 	/** The version for this agent. */
 	public static final String AGENT_VERSION =
-		"1.8.0";
+		"1.9.0";
 	
 	/** This is used to determine the load time of the service. */
 	public static final long LOAD_TIME =
