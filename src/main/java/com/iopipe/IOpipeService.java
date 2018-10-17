@@ -292,7 +292,8 @@ public final class IOpipeService
 	 * Runs the specified function and generates a report.
 	 *
 	 * @param <R> The value to return.
-	 * @param __context The context provided by the AWS service.
+	 * @param __context The context provided by the AWS service, if one is
+	 * not provided then one will be generated.
 	 * @param __func The lambda function to execute, measure, and generate a
 	 * report for.
 	 * @param __input An object which should specify the object which was
@@ -307,8 +308,12 @@ public final class IOpipeService
 		Function<IOpipeExecution, R> __func, Object __input)
 		throws Error, NullPointerException, RuntimeException
 	{
-		if (__context == null || __func == null)
+		if (__func == null)
 			throw new NullPointerException();
+		
+		// If no context is specified, generate one
+		if (__context == null)
+			__context = new __PseudoContext__();
 		
 		// If an execution is already running, just ignore wrapping and
 		// generating events and just call it directly
@@ -367,9 +372,6 @@ public final class IOpipeService
 				lastexec.compareAndSet(refexec, null);
 			}
 		}
-		
-		Logger.debug("Invoking context {}.",
-			() -> System.identityHashCode(__context));
 		
 		// Add auto-label for coldstart
 		if (coldstarted)
