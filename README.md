@@ -221,6 +221,9 @@ environment variables.
      generic handler to wrap with IOpipe.
    * `com.example`, implies that the `requestHandler` method be used.
    * `com.example::requestHandler` specifies both a class and method.
+ * `com.iopipe.collectorurl` or `IOPIPE_COLLECTOR_URL`
+   * Alternative URL for the collector, this is mostly used for debugging and
+     experimentation with newer collectors.
 
 IOpipe uses tinylog for its internal logging, to make debug output from IOpipe
 easier to see tinylog can be configured using the following information located
