@@ -499,17 +499,11 @@ public final class IOpipeConfiguration
 			// Just use the standard service connction
 			rv.setRemoteConnectionFactory(new ServiceConnectionFactory());
 			
-			// Determine the URI which is used to collect resources, use the
-			// same region as the AWS service if it is supported.
-			String awsregion = Objects.toString(System.getenv("AWS_REGION"),
-				IOpipeConstants.DEFAULT_REGION),
-				origawsregion = awsregion;
-			if (!IOpipeConstants.SUPPORTED_REGIONS.contains(awsregion))
-				awsregion = IOpipeConstants.DEFAULT_REGION;
-			
 			// Setup service URL
-			String surl;
-			rv.setServiceUrl((surl = IOpipeConstants.DEFAULT_SERVICE_URL));
+			String surl = System.getProperty("com.iopipe.collectorurl",
+				Objects.toString(System.getenv("IOPIPE_COLLECTOR_URL"),
+					IOpipeConstants.DEFAULT_SERVICE_URL));
+			rv.setServiceUrl(surl);
 			Logger.debug("Remote URL: {}", surl);
 			
 			// And the profiler URL
