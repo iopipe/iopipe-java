@@ -4,6 +4,7 @@ import com.amazonaws.services.lambda.runtime.CognitoIdentity;
 import com.amazonaws.services.lambda.runtime.ClientContext;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
+import java.util.Objects;
 
 /**
  * Pseudo AWS context if one was not specified, this is derived from
@@ -41,7 +42,8 @@ final class __PseudoContext__
 	@Override
 	public final ClientContext getClientContext()
 	{
-		throw new Error("TODO");
+		// This is only valid if the context is called from the mobile SDK
+		return null;
 	}
 	
 	/**
@@ -51,7 +53,7 @@ final class __PseudoContext__
 	@Override
 	public final String getFunctionName()
 	{
-		throw new Error("TODO");
+		return __env("AWS_LAMBDA_FUNCTION_NAME", "null");
 	}
 	
 	/**
@@ -61,7 +63,7 @@ final class __PseudoContext__
 	@Override
 	public final String getFunctionVersion()
 	{
-		throw new Error("TODO");
+		return __env("AWS_LAMBDA_FUNCTION_VERSION", "null");
 	}
 	
 	/**
@@ -71,7 +73,8 @@ final class __PseudoContext__
 	@Override
 	public final CognitoIdentity getIdentity()
 	{
-		throw new Error("TODO");
+		// This is only valid if the context is called from the mobile SDK
+		return null;
 	}
 	
 	/**
@@ -91,7 +94,7 @@ final class __PseudoContext__
 	@Override
 	public final LambdaLogger getLogger()
 	{
-		throw new Error("TODO");
+		return null;
 	}
 	
 	/**
@@ -101,7 +104,7 @@ final class __PseudoContext__
 	@Override
 	public final String getLogGroupName()
 	{
-		throw new Error("TODO");
+		return __env("AWS_LAMBDA_LOG_GROUP_NAME", "null");
 	}
 	
 	/**
@@ -111,7 +114,7 @@ final class __PseudoContext__
 	@Override
 	public final String getLogStreamName()
 	{
-		throw new Error("TODO");
+		return __env("AWS_LAMBDA_LOG_STREAM_NAME", "null");
 	}
 	
 	/**
@@ -121,7 +124,25 @@ final class __PseudoContext__
 	@Override
 	public final int getMemoryLimitInMB()
 	{
-		throw new Error("TODO");
+		// Current VM max memory used, if no maximum memory is defined then
+		// just report the memory the VM is using itself
+		long runmax = Runtime.getRuntime().maxMemory();
+		if (runmax <= 0 || runmax == Long.MAX_VALUE)
+			runmax = Runtime.getRuntime().totalMemory();
+		
+		// Convert this to MiB
+		int vmmax = (int)Math.min(Integer.MAX_VALUE, runmax / 1048576);
+		
+		// The environment variable could be an invalid integer
+		try
+		{
+			return Integer.parseInt(__env("AWS_LAMBDA_FUNCTION_MEMORY_SIZE",
+				Integer.toString(vmmax)));
+		}
+		catch (NumberFormatException e)
+		{
+			return vmmax;
+		}
 	}
 	
 	/**
@@ -132,6 +153,33 @@ final class __PseudoContext__
 	public final int getRemainingTimeInMillis()
 	{
 		throw new Error("TODO");
+	}
+	
+	/**
+	 * Gets the given environment variable or returns {@code __v} if it does
+	 * not exist.
+	 *
+	 * @param __k The key to get.
+	 * @param __v The default value to use.
+	 * @return The value for the given key or the default value.
+	 * @since 2018/10/18
+	 */
+	private static final String __env(String __k, String __v)
+	{
+		if (__k == null)
+			return __v;
+		
+		try
+		{
+			String rv = System.getenv(__k);
+			if (rv != null)
+				return rv;
+			return __v;
+		}
+		catch (SecurityException e)
+		{
+			return __v;
+		}
 	}
 }
 
