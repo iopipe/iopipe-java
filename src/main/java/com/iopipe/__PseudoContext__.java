@@ -157,7 +157,8 @@ final class __PseudoContext__
 	@Override
 	public final int getRemainingTimeInMillis()
 	{
-		throw new Error("TODO");
+		// Just timeout in thirty minutes
+		return 1800000;
 	}
 	
 	/**
