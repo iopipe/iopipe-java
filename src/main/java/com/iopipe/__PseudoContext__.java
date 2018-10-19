@@ -15,14 +15,19 @@ import java.util.Objects;
 final class __PseudoContext__
 	implements Context
 {
+	/** The shortened request ID. */
+	protected final int requestid;
+	
 	/**
 	 * Initializes the pseudo context.
 	 *
+	 * @param __in The input object to generate a request ID with, which might
+	 * be unique.
 	 * @since 2018/10/17
 	 */
-	public __PseudoContext__()
+	public __PseudoContext__(Object __in)
 	{
-		throw new Error("TODO");
+		this.requestid = (__in == null ? 0 : __in.hashCode());
 	}
 	
 	/**
@@ -32,7 +37,7 @@ final class __PseudoContext__
 	@Override
 	public final String getAwsRequestId()
 	{
-		throw new Error("TODO");
+		return String.format("%08x", this.requestid);
 	}
 	
 	/**

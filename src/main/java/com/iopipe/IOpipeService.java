@@ -313,7 +313,7 @@ public final class IOpipeService
 		
 		// If no context is specified, generate one
 		if (__context == null)
-			__context = new __PseudoContext__();
+			__context = new __PseudoContext__(__input);
 		
 		// If an execution is already running, just ignore wrapping and
 		// generating events and just call it directly
