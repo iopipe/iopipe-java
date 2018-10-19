@@ -398,9 +398,10 @@ public final class IOpipeService
 		// Timeouts can be disabled if the timeout window is zero, but they
 		// may also be unsupported if the time remaining in the context is zero
 		__TimeOutWatchDog__ watchdog = null;
-		int windowtime;
+		int windowtime,
+			remainingtime = __context.getRemainingTimeInMillis();
 		if ((windowtime = config.getTimeOutWindow()) > 0 &&
-			__context.getRemainingTimeInMillis() > 0)
+			remainingtime > 0 && remainingtime < Integer.MAX_VALUE)
 			watchdog = new __TimeOutWatchDog__(this, __context,
 				Thread.currentThread(), windowtime, coldstarted, exec);
 		

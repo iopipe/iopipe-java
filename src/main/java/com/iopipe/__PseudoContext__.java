@@ -162,8 +162,10 @@ final class __PseudoContext__
 	@Override
 	public final int getRemainingTimeInMillis()
 	{
-		// Just timeout in thirty minutes
-		return 1800000;
+		// Just use zero so 
+		// Some long arbitrary value to signify that it is not valid and it
+		// might not eve time out
+		return Integer.MAX_VALUE;
 	}
 	
 	/**
