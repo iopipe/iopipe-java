@@ -89,7 +89,12 @@ final class __PseudoContext__
 	@Override
 	public final String getInvokedFunctionArn()
 	{
-		throw new Error("TODO");
+		// The format is generally in:
+		// arn:partition:service:region:account-id:resourcetype:resource
+		// Note that account-id is unknown from the run-time but it may be
+		// ommitted according to the documentation.
+		return "arn:aws:lambda:" + IOpipeConstants.chosenRegion() +
+			"::function:" + this.getFunctionName();
 	}
 	
 	/**
