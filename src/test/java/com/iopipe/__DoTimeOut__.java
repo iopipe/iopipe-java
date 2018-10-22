@@ -124,17 +124,18 @@ class __DoTimeOut__
 			int sleepdur = c.getRemainingTimeInMillis();
 			
 			// Finished sleeping
-			if (sleepdur <= 0)
+			if (sleepdur <= 0 || sleepdur == Integer.MAX_VALUE)
 				break;
 			
 			// Sleep
-			try
-			{
-				Thread.sleep(sleepdur + _EXTRA_SLEEP_TIME);
-			}
-			catch (InterruptedException e)
-			{
-			}
+			if ((sleepdur += _EXTRA_SLEEP_TIME) > 0)
+				try
+				{
+					Thread.sleep(sleepdur);
+				}
+				catch (InterruptedException e)
+				{
+				}
 		}
 		
 		// For for some more to make sure it does actually time out

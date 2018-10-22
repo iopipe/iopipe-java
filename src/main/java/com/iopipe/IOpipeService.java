@@ -292,7 +292,8 @@ public final class IOpipeService
 	 * Runs the specified function and generates a report.
 	 *
 	 * @param <R> The value to return.
-	 * @param __context The context provided by the AWS service.
+	 * @param __context The context provided by the AWS service, if one is
+	 * not provided then one will be generated.
 	 * @param __func The lambda function to execute, measure, and generate a
 	 * report for.
 	 * @param __input An object which should specify the object which was
@@ -307,8 +308,12 @@ public final class IOpipeService
 		Function<IOpipeExecution, R> __func, Object __input)
 		throws Error, NullPointerException, RuntimeException
 	{
-		if (__context == null || __func == null)
+		if (__func == null)
 			throw new NullPointerException();
+		
+		// If no context is specified, generate one
+		if (__context == null)
+			__context = new __PseudoContext__(__input);
 		
 		// If an execution is already running, just ignore wrapping and
 		// generating events and just call it directly
@@ -368,9 +373,6 @@ public final class IOpipeService
 			}
 		}
 		
-		Logger.debug("Invoking context {}.",
-			() -> System.identityHashCode(__context));
-		
 		// Add auto-label for coldstart
 		if (coldstarted)
 			exec.label("@iopipe/coldstart");
@@ -396,9 +398,10 @@ public final class IOpipeService
 		// Timeouts can be disabled if the timeout window is zero, but they
 		// may also be unsupported if the time remaining in the context is zero
 		__TimeOutWatchDog__ watchdog = null;
-		int windowtime;
+		int windowtime,
+			remainingtime = __context.getRemainingTimeInMillis();
 		if ((windowtime = config.getTimeOutWindow()) > 0 &&
-			__context.getRemainingTimeInMillis() > 0)
+			remainingtime > 0 && remainingtime < Integer.MAX_VALUE)
 			watchdog = new __TimeOutWatchDog__(this, __context,
 				Thread.currentThread(), windowtime, coldstarted, exec);
 		
