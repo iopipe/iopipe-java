@@ -145,6 +145,14 @@
         </executions>
       </plugin>
     </plugins>
+    
+    <!-- Allow the current version to be stored in resources. -->
+    <resources>
+      <resource>
+        <directory>${basedir}/src/main/resources/</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
   </build>
 
   <reporting>
