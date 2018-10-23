@@ -3,14 +3,14 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.iopipe</groupId>
   <artifactId>iopipe</artifactId>
-  <version>1.10.0-SNAPSHOT</version>
+  <version>${revision}</version>
   <packaging>jar</packaging>
   <name>${project.groupId}:${project.artifactId}</name>
   <url>https://www.iopipe.com/</url>
   <scm>
     <connection>scm:git:https://github.com/iopipe/iopipe-java.git</connection>
     <url>https://github.com/iopipe/iopipe-java</url>
-    <tag>HEAD</tag>
+    <tag>1.10.0</tag>
   </scm>
   <developers>
    <developer>
@@ -46,6 +46,7 @@
   </distributionManagement>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <revision>1.10.0</revision>
   </properties>
   <build>
     <plugins>
