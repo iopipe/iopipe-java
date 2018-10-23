@@ -267,18 +267,6 @@ public final class IOpipeConfiguration
 	}
 	
 	/**
-	 * Returns the URL to use for sending profiler requests.
-	 *
-	 * @return The URL to use for profiler requests.
-	 * @since 2018/02/24
-	 */
-	@Deprecated
-	public final String getProfilerUrl()
-	{
-		return this.getSignerUrl();
-	}
-	
-	/**
 	 * Returns the token for the project to write statistics for.
 	 *
 	 * @return The project's token.
