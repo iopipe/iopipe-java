@@ -48,11 +48,6 @@ public interface IOpipeConstants
 	public static final String DEFAULT_SERVICE_URL =
 		IOpipeConstants.defaultServiceUrl();
 	
-	/** The default URL to request profiler snapshot uploads to. */
-	@Deprecated
-	public static final String DEFAULT_PROFILER_URL =
-		IOpipeConstants.defaultSignerUrl();
-	
 	/** The default URL to use for the signer. */
 	public static final String DEFAULT_SIGNER_URL =
 		IOpipeConstants.defaultSignerUrl();
