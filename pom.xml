@@ -10,7 +10,7 @@
   <scm>
     <connection>scm:git:https://github.com/iopipe/iopipe-java.git</connection>
     <url>https://github.com/iopipe/iopipe-java</url>
-    <tag>1.10.0</tag>
+    <tag>${revision}</tag>
   </scm>
   <developers>
    <developer>
@@ -46,7 +46,7 @@
   </distributionManagement>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <revision>1.10.0</revision>
+    <revision>1.10.0-SNAPSHOT</revision>
   </properties>
   <build>
     <plugins>
