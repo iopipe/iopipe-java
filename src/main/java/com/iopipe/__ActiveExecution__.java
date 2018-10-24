@@ -157,11 +157,28 @@ final class __ActiveExecution__
 				// Was pre-cached to not exist
 				if (active.containsKey(__cl))
 					throw new NoSuchPluginException(String.format(
-						"No plugin exists for %s or it is disabled.", __cl));
+						"No plugin exists for %s, it is disabled, or it " +
+						"failed to be initialized.", __cl));
+				
+				// If the plugin fails to initialize due to some exception
+				// instead of just trying again treat it as if it were
+				// disabled.
+				__Plugins__.__Info__ info;
+				try
+				{
+					info = this.service._plugins.__get(__cl);
+				}
+				catch (Exception e)
+				{
+					info = null;
+					
+					// Just log it
+					Logger.error(e, "Failed to initialize plugin.");
+				}
 				
 				// It is possible that the plugin does not exist or is
 				// disabled, it could be requested multiple times so cache it
-				__Plugins__.__Info__ info =  this.service._plugins.__get(__cl);
+				// Or initialization failed
 				if (info == null || !info.isEnabled())
 				{
 					active.put(__cl, null);
