@@ -53,7 +53,7 @@ public class MockEngine
 		rv.setProjectToken(MockConnection.VALID_TOKEN);
 		rv.setTimeOutWindow(150);
 		rv.setServiceUrl(EVENT_URL);
-		rv.setProfilerUrl(PROFILER_URL);
+		rv.setSignerUrl(PROFILER_URL);
 		
 		// Use the request handler from the single test
 		rv.setRemoteConnectionFactory(new MockConnectionFactory());

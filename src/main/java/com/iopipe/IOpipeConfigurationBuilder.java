@@ -144,18 +144,6 @@ public class IOpipeConfigurationBuilder
 	}
 	
 	/**
-	 * Sets the URL to use when connecting to the profiler service.
-	 *
-	 * @param __u The URL to use to send profiler requests to.
-	 * @since 2018/02/24
-	 */
-	@Deprecated
-	public final void setProfilerUrl(String __u)
-	{
-		this.setSignerUrl(__u);
-	}
-	
-	/**
 	 * Sets the project token.
 	 *
 	 * @param __token The token which specifies the project to measure
