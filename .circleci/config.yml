@@ -29,10 +29,6 @@ jobs:
       - run:
           name: Run tests
           command: mvn integration-test
-          
-      - run:
-          name: Mocking release
-          command: .circleci/circlescript.sh
 
   release:
     docker:
@@ -44,7 +40,7 @@ jobs:
       - checkout
       - run:
           name: Maven release
-          command: .circleci/circlescript.sh
+          command: mvn deploy -Drevision=$CIRCLE_TAG
 
 workflows:
   version: 2
@@ -52,8 +48,11 @@ workflows:
     jobs:
       - build
       - release:
-          requires:
-            - build
           filters:
+            tags:
+              only:
+                - /^\d\.\d\.\d\w{0,5}$/
             branches:
-              only: master
+              ignore:
+                - /.*/
+

@@ -1,5 +1,9 @@
 package com.iopipe;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -15,7 +19,7 @@ public interface IOpipeConstants
 {
 	/** The version for this agent. */
 	public static final String AGENT_VERSION =
-		"1.9.0";
+		IOpipeConstants.currentVersion();
 	
 	/** This is used to determine the load time of the service. */
 	public static final long LOAD_TIME =
@@ -84,6 +88,31 @@ public interface IOpipeConstants
 		catch (SecurityException e)
 		{
 			return IOpipeConstants.DEFAULT_REGION;
+		}
+	}
+	
+	/**
+	 * This reads the current version from the resources and returns it.
+	 *
+	 * @return The current version of the agent.
+	 * @since 2018/10/23
+	 */
+	public static String currentVersion()
+	{
+		try (BufferedReader br = new BufferedReader(new InputStreamReader(
+			IOpipeConstants.class.getResourceAsStream("currentversion"), "utf-8")))
+		{
+			String rv = br.readLine();
+			
+			// Development versions will have snapshot on them, so make this
+			// go away
+			if (rv.endsWith("-SNAPSHOT"))
+				return rv.substring(0, rv.length() - 9);
+			return rv;
+		}
+		catch (IOException e)
+		{
+			return "Unknown";
 		}
 	}
 	
