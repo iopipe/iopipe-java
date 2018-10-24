@@ -3,6 +3,8 @@ package com.iopipe;
 import com.iopipe.http.NullConnectionFactory;
 import com.iopipe.http.RemoteConnectionFactory;
 import com.iopipe.http.ServiceConnectionFactory;
+import java.io.InputStream;
+import java.io.IOException;
 import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
@@ -86,6 +88,9 @@ public final class IOpipeConfiguration
 	private static final String _ENVIRONMENT_PLUGIN_SUFFIX =
 		"_ENABLED";
 	
+	/** System properties file. */
+	private static final Properties _PROPERTIES;
+	
 	/** The disabled configuration. */
 	public static final IOpipeConfiguration DISABLED_CONFIG;
 	
@@ -131,6 +136,19 @@ public final class IOpipeConfiguration
 	 */
 	static
 	{
+		// Load default properties
+		Properties props = new Properties();
+		try (InputStream in = ClassLoader.getSystemClassLoader().
+			getResourceAsStream("/iopipe.properties"))
+		{
+			if (in != null)
+				props.load(in);
+		}
+		catch (IOException|SecurityException e)
+		{
+		}
+		_PROPERTIES = props;
+		
 		// Initialize disabled configuration
 		IOpipeConfigurationBuilder cb = new IOpipeConfigurationBuilder();
 		
