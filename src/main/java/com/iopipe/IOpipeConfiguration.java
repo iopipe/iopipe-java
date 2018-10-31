@@ -529,5 +529,46 @@ public final class IOpipeConfiguration
 			return IOpipeConfiguration.DISABLED_CONFIG;
 		}
 	}
+	
+	/**
+	 * Gets the given variable.
+	 *
+	 * @param __prop The property to read from.
+	 * @param __env The environment variable to check.
+	 * @param __def The default value.
+	 * @return The value from the system property, the environment, or the
+	 * configuration.
+	 * @since 2018/10/31
+	 */
+	public static String getVariable(String __prop, String __env, String __def)
+	{
+		// Check property first
+		String rv;
+		if (__prop != null)
+		{
+			rv = System.getProperty(__prop);
+			if (rv != null)
+				return rv;
+		}
+		
+		// Check environment
+		if (__env != null)
+		{
+			rv = System.getenv(__env);
+			if (rv != null)
+				return rv;
+		}
+		
+		// Check files
+		if (__prop != null)
+		{
+			rv = _PROPERTIES.getProperty(__prop);
+			if (rv != null)
+				return rv;
+		}
+		
+		// Default value
+		return __def;
+	}
 }
 
