@@ -4,6 +4,7 @@ import com.iopipe.http.NullConnectionFactory;
 import com.iopipe.http.RemoteConnectionFactory;
 import com.iopipe.http.ServiceConnectionFactory;
 import java.lang.ref.Reference;
+import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -89,6 +90,7 @@ public final class IOpipeConfiguration
 	public static final IOpipeConfiguration DISABLED_CONFIG;
 	
 	/** Default configuration to use. */
+	@Deprecated
 	public static final IOpipeConfiguration DEFAULT_CONFIG;
 	
 	/** Should the service be enabled? */
