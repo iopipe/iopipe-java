@@ -42,12 +42,11 @@ Your `pom.xml` file may be modified to include the following dependency:
 <dependency>
   <groupId>com.iopipe</groupId>
   <artifactId>iopipe</artifactId>
-  <version>(replace with latest version of IOpipe)</version>
+  <version>${com.iopipe.version}</version>
 </dependency>
 ```
 
-To obtain the latest version you may check it at these locations, the format
-of the version will be `n.n.n`:
+Find the latest version here (the format of the version will be `n.n.n`):
 
  * <https://github.com/iopipe/iopipe-java/releases>
  * <https://search.maven.org/artifact/com.iopipe/iopipe>
