@@ -42,9 +42,16 @@ Your `pom.xml` file may be modified to include the following dependency:
 <dependency>
   <groupId>com.iopipe</groupId>
   <artifactId>iopipe</artifactId>
-  <version>1.9.0</version>
+  <version>(replace with latest version of IOpipe)</version>
 </dependency>
 ```
+
+To obtain the latest version you may check it at these locations, the format
+of the version will be `n.n.n`:
+
+ * <https://github.com/iopipe/iopipe-java/releases>
+ * <https://search.maven.org/artifact/com.iopipe/iopipe>
+ * <https://bintray.com/iopipe/iopipe/iopipe/_latestVersion>
 
 It is highly recommended that you use the [Shade Plugin](https://maven.apache.org/plugins/maven-shade-plugin/index.html)
 for Maven since AWS requires that all classes and files are packed into a
