@@ -225,6 +225,13 @@ environment variables.
    * Alternative URL for the collector, this is mostly used for debugging and
      experimentation with newer collectors.
 
+Alternatively a configuration may be specified in the root of the JAR with a
+standard properties format (`key=value`) which is named `iopipe.properties`.
+The configuration values are only used if they have not been specified by
+system properties or environment variables. Generally using this is not
+recommended because it would require a redeploy to change the settings. Also
+the token itself is sensitive and should not be placed in the configuration.
+
 IOpipe uses tinylog for its internal logging, to make debug output from IOpipe
 easier to see tinylog can be configured using the following information located
 at:
