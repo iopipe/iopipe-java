@@ -42,7 +42,7 @@ Your `pom.xml` file may be modified to include the following dependency:
 <dependency>
   <groupId>com.iopipe</groupId>
   <artifactId>iopipe</artifactId>
-  <version>${com.iopipe.version}</version>
+  <version>${iopipe.version}</version>
 </dependency>
 ```
 
