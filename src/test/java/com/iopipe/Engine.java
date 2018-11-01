@@ -201,6 +201,7 @@ public abstract class Engine
 			// Logging
 			(__e) -> new __DoLoggerTest__(__e, true),
 			(__e) -> new __DoLoggerTest__(__e, false),
+			__DoConfigFileTest__::new,
 		};
 	
 	/** The base name for this engine. */

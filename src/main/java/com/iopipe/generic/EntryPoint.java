@@ -1,6 +1,7 @@
 package com.iopipe.generic;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import com.iopipe.IOpipeConfiguration;
 import com.iopipe.IOpipeExecution;
 import com.iopipe.IOpipeFatalError;
 import java.io.InputStream;
@@ -223,7 +224,8 @@ public final class EntryPoint
 	public static final EntryPoint defaultAWSEntryPoint()
 	{
 		// This variable is very important
-		String pair = System.getenv("IOPIPE_GENERIC_HANDLER");
+		String pair = IOpipeConfiguration.getVariable("com.iopipe.generichandler",
+			"IOPIPE_GENERIC_HANDLER", null);
 		if (pair == null)
 			throw new InvalidEntryPointException("The environment variable " +
 				"IOPIPE_GENERIC_HANDLER has not been set, execution cannot " +
