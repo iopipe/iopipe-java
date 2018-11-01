@@ -450,29 +450,27 @@ public final class IOpipeConfiguration
 			// Enabled if not specified is "true" by default
 			boolean enabled;
 			rv.setEnabled((enabled = Boolean.valueOf(Objects.toString(
-				System.getProperty("com.iopipe.enabled",
-				System.getenv("IOPIPE_ENABLED")), "true"))));
+				IOpipeConfiguration.getVariable("com.iopipe.enabled",
+				"IOPIPE_ENABLED", "true")))));
 			
 			// If the configuration is not enabled, then use the disabled one
 			if (!enabled)
 				return IOpipeConfiguration.DISABLED_CONFIG;
 			
 			// Token
-			rv.setProjectToken(System.getProperty("com.iopipe.token",
-				Objects.toString(System.getenv("IOPIPE_TOKEN"),
-					System.getenv("IOPIPE_CLIENTID"))));
+			rv.setProjectToken(IOpipeConfiguration.getVariable("com.iopipe.token",
+				"IOPIPE_TOKEN", System.getenv("IOPIPE_CLIENTID")));
 			
 			// Installation method
-			rv.setInstallMethod(System.getProperty("com.iopipe.installmethod",
-				Objects.toString(System.getenv("IOPIPE_INSTALL_METHOD"),
-				"manual")));
+			rv.setInstallMethod(IOpipeConfiguration.getVariable("com.iopipe.installmethod",
+				"IOPIPE_INSTALL_METHOD", "manual"));
 			
 			// Timeout window
 			try
 			{
 				rv.setTimeOutWindow(Integer.valueOf(Objects.toString(
-					System.getProperty("com.iopipe.timeoutwindow",
-					System.getenv("IOPIPE_TIMEOUT_WINDOW")), "150")));
+					IOpipeConfiguration.getVariable("com.iopipe.timeoutwindow",
+					"IOPIPE_TIMEOUT_WINDOW", "150"))));
 			}
 			catch (NumberFormatException e)
 			{
@@ -481,17 +479,18 @@ public final class IOpipeConfiguration
 			
 			// Go through system properties to get the enabled state of
 			// plugins
-			for (Map.Entry<Object, Object> e : System.getProperties().
-				entrySet())
-			{
-				String k = Objects.toString(e.getKey(), ""),
-					v = Objects.toString(e.getValue(), "");
-				
-				if (k.startsWith(_PROPERTY_PLUGIN_PREFIX))
-					rv.setPluginEnabled(
-						k.substring(_PROPERTY_PLUGIN_PREFIX.length()),
-						Boolean.valueOf(v));
-			}
+			for (int z = 0; z < 2; z++)
+				for (Map.Entry<Object, Object> e : (z == 0 ? System.getProperties() :
+					_PROPERTIES).entrySet())
+				{
+					String k = Objects.toString(e.getKey(), ""),
+						v = Objects.toString(e.getValue(), "");
+					
+					if (k.startsWith(_PROPERTY_PLUGIN_PREFIX))
+						rv.setPluginEnabled(
+							k.substring(_PROPERTY_PLUGIN_PREFIX.length()),
+							Boolean.valueOf(v));
+				}
 			
 			// Go through environment variables to find plugins which are
 			// enabled
@@ -514,9 +513,8 @@ public final class IOpipeConfiguration
 			rv.setRemoteConnectionFactory(new ServiceConnectionFactory());
 			
 			// Setup service URL
-			String surl = System.getProperty("com.iopipe.collectorurl",
-				Objects.toString(System.getenv("IOPIPE_COLLECTOR_URL"),
-					IOpipeConstants.DEFAULT_SERVICE_URL));
+			String surl = IOpipeConfiguration.getVariable("com.iopipe.collectorurl",
+				"IOPIPE_COLLECTOR_URL", IOpipeConstants.DEFAULT_SERVICE_URL);
 			rv.setServiceUrl(surl);
 			Logger.debug("Remote URL: {}", surl);
 			
