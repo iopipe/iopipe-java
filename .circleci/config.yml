@@ -44,9 +44,11 @@ jobs:
 
 workflows:
   version: 2
-  build-all:
+  build:
     jobs:
       - build
+  release:
+    jobs:
       - release:
           filters:
             tags:
