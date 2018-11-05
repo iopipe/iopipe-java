@@ -53,7 +53,7 @@ workflows:
           filters:
             tags:
               only:
-                - /^\d\.\d\.\d\w{0,5}$/
+                - /^\d{1,}\.\d{1,}\.\d{1,}\w{0,}$/
             branches:
               ignore:
                 - /.*/
