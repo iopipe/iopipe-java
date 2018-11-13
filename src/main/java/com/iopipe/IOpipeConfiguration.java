@@ -151,8 +151,12 @@ public final class IOpipeConfiguration
 						props.load(intwo);
 				}
 		}
-		catch (IOException|SecurityException e)
+		
+		// Ignore all exceptions that may occur during this process
+		catch (Throwable e)
 		{
+			Logger.error(e, "Could not load the configuration due " +
+				"to an exception.");
 		}
 		_PROPERTIES = props;
 		
