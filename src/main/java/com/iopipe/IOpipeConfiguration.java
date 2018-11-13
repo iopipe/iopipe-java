@@ -147,7 +147,8 @@ public final class IOpipeConfiguration
 				try (InputStream intwo = IOpipeConfiguration.class.
 					getResourceAsStream("/iopipe.properties"))
 				{
-					props.load(intwo);
+					if (intwo != null)
+						props.load(intwo);
 				}
 		}
 		catch (IOException|SecurityException e)
