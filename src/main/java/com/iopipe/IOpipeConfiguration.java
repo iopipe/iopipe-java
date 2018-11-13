@@ -147,11 +147,16 @@ public final class IOpipeConfiguration
 				try (InputStream intwo = IOpipeConfiguration.class.
 					getResourceAsStream("/iopipe.properties"))
 				{
-					props.load(intwo);
+					if (intwo != null)
+						props.load(intwo);
 				}
 		}
-		catch (IOException|SecurityException e)
+		
+		// Ignore all exceptions that may occur during this process
+		catch (Throwable e)
 		{
+			Logger.error(e, "Could not load the configuration due " +
+				"to an exception.");
 		}
 		_PROPERTIES = props;
 		
