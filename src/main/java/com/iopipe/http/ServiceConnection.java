@@ -94,8 +94,6 @@ public final class ServiceConnection
 					os.write(data);
 				}
 				
-				Logger.debug("Sent so now waiting!");
-				
 				// Read the response the server gave us, it is likely to be very
 				// short
 				byte[] read;
