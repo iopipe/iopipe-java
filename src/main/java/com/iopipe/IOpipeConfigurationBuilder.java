@@ -4,7 +4,6 @@ import com.iopipe.http.RemoteConnectionFactory;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
-import okhttp3.HttpUrl;
 
 /**
  * This class is used to initialize instances of {@link IOpipeConfiguration}
