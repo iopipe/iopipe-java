@@ -1,9 +1,15 @@
 package com.iopipe.http;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Objects;
+import org.pmw.tinylog.Logger;
 
 /**
  * This class sends requests to the remote server.
@@ -55,7 +61,85 @@ public final class ServiceConnection
 		if (__t == null || __r == null)
 			throw new NullPointerException();
 		
-		throw new Error("TODO");
+		try
+		{
+			HttpURLConnection con = null;
+			
+			// Open connection
+			try
+			{
+				con = (HttpURLConnection)this.url.openConnection();
+				
+				// Set parameters
+				con.setDoInput(true);
+				con.setDoOutput(true);
+				con.setUseCaches(false);
+				con.setRequestMethod(__t.name());
+				con.setConnectTimeout(3000);
+				con.setReadTimeout(1500);
+				
+				String auth = this.auth;
+				if (auth != null)
+					con.setRequestProperty("Authorization", auth);
+				
+				String mime = __r.mimeType();
+				if (mime != null)
+					con.setRequestProperty("Content-Type", mime);
+				
+				// Write the request body
+				byte[] data = __r.body();
+				con.setRequestProperty("Content-Length", Integer.toString(data.length));
+				try (OutputStream os = con.getOutputStream())
+				{
+					os.write(data);
+				}
+				
+				Logger.debug("Sent so now waiting!");
+				
+				// Read the response the server gave us, it is likely to be very
+				// short
+				byte[] read;
+				try (InputStream is = con.getInputStream())
+				{
+					// Get available bytes
+					int avail = Math.max(256, is.available());
+					
+					// Copy
+					try (ByteArrayOutputStream baos =
+						new ByteArrayOutputStream(avail))
+					{
+						byte[] buf = new byte[avail];
+						for (;;)
+						{
+							int rc = 0;
+							
+							if (rc < 0)
+								break;
+							
+							baos.write(buf, 0, rc);
+						}
+						
+						// Use this response
+						read = baos.toByteArray();
+					}
+				}
+				
+				// Build response
+				return new RemoteResult(
+					con.getResponseCode(),
+					"application/octet-stream",
+					read);
+			}
+			finally
+			{
+				if (con != null)
+					con.disconnect();
+			}
+		}
+		catch (IOException e)
+		{
+			throw new RemoteException("Could not send request.", e);
+		}
 	}
 }
 
