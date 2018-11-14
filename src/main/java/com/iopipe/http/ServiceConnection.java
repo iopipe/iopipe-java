@@ -122,8 +122,22 @@ public final class ServiceConnection
 					}
 				}
 				
-				Logger.debug("code=" + con.getResponseCode() + ", data=" +
-					new String(read));
+				// If read threw an exception, it is possible that the
+				// server returned some bad response so return that instead
+				// of throwing some exception
+				catch (IOException e)
+				{
+					int rcode = con.getResponseCode();
+					if (rcode > 0)
+						return new RemoteResult(
+							rcode,
+							"application/octet-stream",
+							new byte[0]);
+					
+					// Otherwise propogate it up!
+					else
+						throw e;
+				}
 				
 				// Build response
 				return new RemoteResult(
