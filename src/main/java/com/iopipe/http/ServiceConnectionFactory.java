@@ -6,7 +6,7 @@ package com.iopipe.http;
  *
  * @since 2018/11/14
  */
-public final class LighterServiceConnectionFactory
+public final class ServiceConnectionFactory
 	implements RemoteConnectionFactory
 {
 	/**
@@ -20,7 +20,7 @@ public final class LighterServiceConnectionFactory
 		if (__url == null)
 			throw new NullPointerException();
 		
-		throw new Error("TODO");
+		return new ServiceConnection(__url, __auth);
 	}
 }
 
