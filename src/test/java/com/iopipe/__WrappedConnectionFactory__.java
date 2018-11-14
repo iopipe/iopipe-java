@@ -115,8 +115,8 @@ final class __WrappedConnectionFactory__
 			throws NullPointerException, RemoteException
 		{
 			// Debug
-			Logger.debug("Snooped request ({}): {}.", __t,
-				__r.bodyAsString());
+			/*Logger.debug("Snooped request ({}): {}.", __t,
+				__r.bodyAsString());*/
 			
 			// Snoop the request being sent to the server to make sure it is
 			// being formed correctly
