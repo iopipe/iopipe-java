@@ -29,15 +29,15 @@ public final class ServiceConnection
 	 * Initializes the service connection.
 	 *
 	 * @param __url The URL to connect to.
-	 * @param __auth The authentication code.
+	 * @param __auth The authentication code, is optional.
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/11/14
 	 */
 	public ServiceConnection(String __url, String __auth)
 		throws NullPointerException
 	{
-		if (__url == null || __auth == null)
-			throw new NullPointerException("NARG");
+		if (__url == null)
+			throw new NullPointerException();
 		
 		try
 		{
@@ -111,7 +111,7 @@ public final class ServiceConnection
 						byte[] buf = new byte[avail];
 						for (;;)
 						{
-							int rc = 0;
+							int rc = is.read(buf);
 							
 							if (rc < 0)
 								break;
