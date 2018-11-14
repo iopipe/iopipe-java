@@ -1,6 +1,7 @@
 package com.iopipe.http;
 
 import java.io.IOException;
+import java.net.URL;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -12,11 +13,11 @@ import java.net.URISyntaxException;
 public final class ServiceConnection
 	implements RemoteConnection
 {
-	/** UTF-8 Encoded URL. */
-	private final byte[] _url;
+	/** The URL to send to. */
+	protected final URL url;
 	
-	/** UTF-8 Encoded Authorization code. */
-	private final byte[] _auth;
+	/** The authentication token. */
+	protected final String auth;
 	
 	/**
 	 * Initializes the service connection.
@@ -34,21 +35,10 @@ public final class ServiceConnection
 		
 		try
 		{
-			// Check token for invalid characters
-			for (int i = 0, n = __auth.length(); i < n; i++)
-				switch (__auth.charAt(i))
-				{
-					case '\r':
-					case '\n':
-						throw new RemoteException(
-							"Authentication token contains invalid character: " + __auth);
-				}
-			
-			// Decode as bytes for easier writing
-			this._url = URI.create(__url).toString().getBytes("utf-8");
-			this._auth = __auth.toString().getBytes("utf-8");
+			this.url = URI.create(__url).toURL();
+			this.auth = __auth;
 		}
-		catch (IOException e)
+		catch (NullPointerException|IllegalArgumentException|IOException e)
 		{
 			throw new RemoteException("Could not parse URL or authentication code.", e);
 		}
