@@ -9,7 +9,6 @@ import java.net.URL;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Objects;
-import org.pmw.tinylog.Logger;
 
 /**
  * This class sends requests to the remote server.
@@ -153,7 +152,6 @@ public final class ServiceConnection
 		}
 		catch (IOException e)
 		{
-			Logger.error(e, "OH NO");
 			throw new RemoteException("Could not send request.", e);
 		}
 	}
