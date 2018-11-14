@@ -1,24 +1,17 @@
 package com.iopipe.http;
 
-import okhttp3.HttpUrl;
-import okhttp3.OkHttpClient;
-
 /**
  * This is a factory which can create connections to the remote IOpipe service
  * to send reports.
  *
- * @since 2017/12/17
+ * @since 2018/11/14
  */
-public final class ServiceConnectionFactory
+public final class LighterServiceConnectionFactory
 	implements RemoteConnectionFactory
 {
-	/** The OkHttp client manager. */
-	protected final OkHttpClient client =
-		new OkHttpClient.Builder().build();
-	
 	/**
 	 * {@inheritDoc}
-	 * @since 2018/02/24
+	 * @since 2018/11/14
 	 */
 	@Override
 	public RemoteConnection connect(String __url, String __auth)
@@ -27,10 +20,7 @@ public final class ServiceConnectionFactory
 		if (__url == null)
 			throw new NullPointerException();
 		
-		HttpUrl url = HttpUrl.parse(__url);
-		if (url == null)
-			throw new RemoteException("Invalid URL: " + __url);
-		return new ServiceConnection(this.client, url, __auth);
+		throw new Error("TODO");
 	}
 }
 
