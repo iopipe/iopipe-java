@@ -122,6 +122,9 @@ public final class ServiceConnection
 					}
 				}
 				
+				Logger.debug("code=" + con.getResponseCode() + ", data=" +
+					new String(read));
+				
 				// Build response
 				return new RemoteResult(
 					con.getResponseCode(),
@@ -136,6 +139,7 @@ public final class ServiceConnection
 		}
 		catch (IOException e)
 		{
+			Logger.error(e, "OH NO");
 			throw new RemoteException("Could not send request.", e);
 		}
 	}
