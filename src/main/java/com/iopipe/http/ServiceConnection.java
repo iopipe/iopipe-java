@@ -39,7 +39,17 @@ public final class ServiceConnection
 	/** Execution pool, used to perform long running tasks. */
 	private static final ThreadPoolExecutor _THREAD_POOL =
 		new ThreadPoolExecutor(250, 2000, 25, TimeUnit.SECONDS,
-			new LinkedBlockingQueue<Runnable>());
+			new LinkedBlockingQueue<Runnable>(),
+			(__r) ->
+			{
+				// We need to create daemon threads here because otherwise
+				// the VM will just wait until our thread pools go away but
+				// that will never happen at all really so the VM will never
+				// exit ever
+				Thread boop = new Thread(__r);
+				boop.setDaemon(true);
+				return boop;
+			});
 	
 	/** The socket address. */
 	protected final InetSocketAddress sockaddr;
