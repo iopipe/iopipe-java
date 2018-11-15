@@ -246,6 +246,11 @@
       <artifactId>jackson-datatype-joda</artifactId>
       <version>2.9.6</version>
     </dependency>
+    <dependency>
+      <groupId>org.baswell</groupId>
+      <artifactId>niossl</artifactId>
+      <version>0.2</version>
+    </dependency>
   </dependencies>
   <!-- Note that there are no build steps for deployment because this is a
        supporting library and NOT a deployment library. -->

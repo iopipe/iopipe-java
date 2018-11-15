@@ -15,10 +15,18 @@ import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.SocketChannel;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.Objects;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import org.pmw.tinylog.Logger;
+import org.baswell.niossl.SSLSocketChannel;
 
 /**
  * This class sends requests to the remote server.
@@ -28,6 +36,11 @@ import org.pmw.tinylog.Logger;
 public final class ServiceConnection
 	implements RemoteConnection
 {
+	/** Execution pool, used to perform long running tasks. */
+	private static final ThreadPoolExecutor _THREAD_POOL =
+		new ThreadPoolExecutor(250, 2000, 25, TimeUnit.SECONDS,
+			new LinkedBlockingQueue<Runnable>());
+	
 	/** The socket address. */
 	protected final InetSocketAddress sockaddr;
 	
@@ -105,77 +118,91 @@ public final class ServiceConnection
 		if (__t == null || __r == null)
 			throw new NullPointerException();
 		
-		// Open connection to server
-		try (SocketChannel chan = SocketChannel.open(this.sockaddr))
+		try (SocketChannel basechan = SocketChannel.open(this.sockaddr))
 		{
-			// Build request to send to the server
-			byte[] sendy;
-			try (ByteArrayOutputStream baos =
-				new ByteArrayOutputStream(1048576);
-				PrintStream out = new PrintStream(baos, true, "utf-8"))
+			SSLContext sslc = SSLContext.getInstance("TLSv1.2");
+			
+			// Needs to explicitly be initialized!!
+			sslc.init(null, null, null);
+			
+			SSLEngine ssle = sslc.createSSLEngine();
+			
+			// We are NOT a server
+			ssle.setUseClientMode(true);
+			
+			// Open SSL connection to server
+			try (SocketChannel chan = new SSLSocketChannel(basechan, ssle,
+				_THREAD_POOL, null))
 			{
-				// Start HTTP request
-				out.print(__t.name());
-				out.print(' ');
-				out.write(this._pathy);
-				out.print(" HTTP/1.1\r\n");
-				
-				// Our user agent
-				out.print("User-Agent: IOpipeJavaAgent/");
-				out.print(IOpipeConstants.AGENT_VERSION);
-				out.print("\r\n");
-				
-				// The remote host
-				out.print("Host: ");
-				out.write(this._hosty);
-				out.print("\r\n");
-				
-				// Authorization token?
-				byte[] auth = this._auth;
-				if (auth != null)
+				// Build request to send to the server
+				byte[] sendy;
+				try (ByteArrayOutputStream baos =
+					new ByteArrayOutputStream(1048576);
+					PrintStream out = new PrintStream(baos, true, "utf-8"))
 				{
-					out.print("Authorization: ");
-					out.write(auth);
+					// Start HTTP request
+					out.print(__t.name());
+					out.print(' ');
+					out.write(this._pathy);
+					out.print(" HTTP/1.1\r\n");
+					
+					// Our user agent
+					out.print("User-Agent: IOpipeJavaAgent/");
+					out.print(IOpipeConstants.AGENT_VERSION);
 					out.print("\r\n");
+					
+					// The remote host
+					out.print("Host: ");
+					out.write(this._hosty);
+					out.print("\r\n");
+					
+					// Authorization token?
+					byte[] auth = this._auth;
+					if (auth != null)
+					{
+						out.print("Authorization: ");
+						out.write(auth);
+						out.print("\r\n");
+					}
+					
+					// Content type
+					String mime = __r.mimeType();
+					if (mime != null)
+					{
+						out.print("Content-Type: ");
+						out.print(mime);
+						out.print("\r\n");
+					}
+					
+					// Write content length
+					byte[] content = __r.body();
+					out.print("Content-Length: ");
+					out.print(content.length);
+					out.print("\r\n");
+					
+					// End of properties
+					out.print("\r\n");
+					
+					// Send the body
+					out.write(content);
+					
+					// Flush to send it
+					out.flush();
+					sendy = baos.toByteArray();
 				}
 				
-				// Content type
-				String mime = __r.mimeType();
-				if (mime != null)
-				{
-					out.print("Content-Type: ");
-					out.print(mime);
-					out.print("\r\n");
-				}
+				// Debug
+				Logger.debug("HTTP Request: {}", new String(sendy, "utf-8"));
 				
-				// Write content length
-				byte[] content = __r.body();
-				out.print("Content-Length: ");
-				out.print(content.length);
-				out.print("\r\n");
+				// Send data
+				chan.write(ByteBuffer.wrap(sendy));
 				
-				// End of properties
-				out.print("\r\n");
-				
-				// Send the body
-				out.write(content);
-				
-				// Flush to send it
-				out.flush();
-				sendy = baos.toByteArray();
+				throw new Error("TODO");
 			}
-			
-			// Debug
-			Logger.debug("HTTP Request: {}", new String(sendy, "utf-8"));
-			
-			// Send data
-			chan.write(ByteBuffer.wrap(sendy));
-			
-			throw new Error("TODO");
 		}
 		
 		// Failed to read/write
-		catch (IOException e)
+		catch (IOException|NoSuchAlgorithmException|KeyManagementException e)
 		{
 			System.err.println("************** OOPS! ***************");
 			e.printStackTrace();
