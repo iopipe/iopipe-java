@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.Proxy;
 import java.net.URL;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -67,7 +68,8 @@ public final class ServiceConnection
 			// Open connection
 			try
 			{
-				con = (HttpURLConnection)this.url.openConnection();
+				con = (HttpURLConnection)this.url.openConnection(
+					Proxy.NO_PROXY);
 				
 				// Set parameters
 				con.setDoInput(true);
@@ -76,6 +78,7 @@ public final class ServiceConnection
 				con.setRequestMethod(__t.name());
 				con.setConnectTimeout(3000);
 				con.setReadTimeout(1500);
+				con.setRequestProperty("Connection", "close");
 				
 				String auth = this.auth;
 				if (auth != null)
