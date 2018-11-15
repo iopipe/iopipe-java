@@ -167,6 +167,9 @@ public final class ServiceConnection
 					out.write(this._hosty);
 					out.print("\r\n");
 					
+					// Close the conection
+					out.print("Connection: close\r\n");
+					
 					// Authorization token?
 					byte[] auth = this._auth;
 					if (auth != null)
