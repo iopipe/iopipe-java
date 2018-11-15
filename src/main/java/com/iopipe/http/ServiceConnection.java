@@ -120,6 +120,9 @@ public final class ServiceConnection
 		
 		try (SocketChannel basechan = SocketChannel.open(this.sockaddr))
 		{
+			// Make it non-blocking
+			basechan.configureBlocking(false);
+			
 			// Needs to explicitly be initialized!!
 			SSLContext sslc = SSLContext.getInstance("TLSv1.2");
 			sslc.init(null, null, null);
