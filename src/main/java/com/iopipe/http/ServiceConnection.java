@@ -120,11 +120,9 @@ public final class ServiceConnection
 		
 		try (SocketChannel basechan = SocketChannel.open(this.sockaddr))
 		{
-			SSLContext sslc = SSLContext.getInstance("TLSv1.2");
-			
 			// Needs to explicitly be initialized!!
+			SSLContext sslc = SSLContext.getInstance("TLSv1.2");
 			sslc.init(null, null, null);
-			
 			SSLEngine ssle = sslc.createSSLEngine();
 			
 			// We are NOT a server
@@ -134,6 +132,10 @@ public final class ServiceConnection
 			try (SocketChannel chan = new SSLSocketChannel(basechan, ssle,
 				_THREAD_POOL, null))
 			{
+				// Finish connecting now
+				Logger.debug("Will finish connecting");
+				chan.finishConnect();
+				
 				// Build request to send to the server
 				byte[] sendy;
 				try (ByteArrayOutputStream baos =
@@ -194,8 +196,13 @@ public final class ServiceConnection
 				// Debug
 				Logger.debug("HTTP Request: {}", new String(sendy, "utf-8"));
 				
-				// Send data and force it to go through
-				chan.write(ByteBuffer.wrap(sendy));
+				// Send all the bytes to the remote end
+				ByteBuffer bbsendy = ByteBuffer.wrap(sendy);
+				while (bbsendy.hasRemaining())
+				{
+					Logger.debug("Sending: {}", bbsendy);
+					chan.write(bbsendy);
+				}
 				
 				// We no longer need to send to the remote side
 				Logger.debug("Shutting down");
