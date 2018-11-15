@@ -194,10 +194,30 @@ public final class ServiceConnection
 				// Debug
 				Logger.debug("HTTP Request: {}", new String(sendy, "utf-8"));
 				
-				// Send data
+				// Send data and force it to go through
 				chan.write(ByteBuffer.wrap(sendy));
 				
-				throw new Error("TODO");
+				// We no longer need to send to the remote side
+				Logger.debug("Shutting down");
+				chan.shutdownOutput();
+				Logger.debug("Shut down");
+				
+				// Just try to read a bunch into some byte buffer
+				byte[] rawread = new byte[16916];
+				ByteBuffer read = ByteBuffer.wrap(rawread);
+				chan.read(read);
+				
+				Logger.debug("BB got: {}", read);
+				
+				// Flip it because we want to actually read it now
+				read.flip();
+				
+				Logger.debug("BB said: {}", new String(rawread, "utf-8"));
+				
+				return new RemoteResult(
+					999,
+					"nothing-yet",
+					rawread);
 			}
 		}
 		
