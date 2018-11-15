@@ -135,10 +135,6 @@ public final class ServiceConnection
 			try (SocketChannel chan = new SSLSocketChannel(basechan, ssle,
 				_THREAD_POOL, null))
 			{
-				// Finish connecting now
-				Logger.debug("Will finish connecting");
-				chan.finishConnect();
-				
 				// Build request to send to the server
 				byte[] sendy;
 				try (ByteArrayOutputStream baos =
@@ -196,26 +192,39 @@ public final class ServiceConnection
 					sendy = baos.toByteArray();
 				}
 				
-				// Debug
-				Logger.debug("HTTP Request: {}", new String(sendy, "utf-8"));
+				// Since we are in non-blocking mode, the connect might not
+				// yet be finished at this point, so make sure that it happens
+				// before we send a bunch of data over the socket
+				chan.finishConnect();
 				
-				// Send all the bytes to the remote end
+				// Send all the bytes to the remote end, this is a non-blocking
+				// write so this method may be called thousands of times
 				ByteBuffer bbsendy = ByteBuffer.wrap(sendy);
 				while (bbsendy.hasRemaining())
-				{
-					Logger.debug("Sending: {}", bbsendy);
 					chan.write(bbsendy);
-				}
 				
 				// We no longer need to send to the remote side
-				Logger.debug("Shutting down");
-				chan.shutdownOutput();
-				Logger.debug("Shut down");
+				chan.shutdownInput();
 				
-				// Just try to read a bunch into some byte buffer
+				// Since we are in non-blocking mode, we need to wait until
+				// the server responds with data before we discontinue...
+				// However since we are not blocking we may end up just
+				// infinite looping
+				long timeoutat = System.nanoTime() + 1_500_000_000L;
 				byte[] rawread = new byte[16916];
 				ByteBuffer read = ByteBuffer.wrap(rawread);
-				chan.read(read);
+				for (;;)
+				{
+					int rc = chan.read(read);
+					
+					// EOF was reached?
+					if (rc < 0)
+						break;
+					
+					// Spent too long trying to read
+					if (System.nanoTime() >= timeoutat)
+						throw new RemoteException("Request timed out.");
+				}
 				
 				Logger.debug("BB got: {}", read);
 				
