@@ -1,15 +1,24 @@
 package com.iopipe.http;
 
+import com.iopipe.IOpipeConstants;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URL;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.SocketChannel;
 import java.util.Objects;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+import org.pmw.tinylog.Logger;
 
 /**
  * This class sends requests to the remote server.
@@ -19,11 +28,17 @@ import java.util.Objects;
 public final class ServiceConnection
 	implements RemoteConnection
 {
-	/** The URL to send to. */
-	protected final URL url;
+	/** The socket address. */
+	protected final InetSocketAddress sockaddr;
 	
-	/** The authentication token. */
-	protected final String auth;
+	/** The host to send to (in the request). */
+	private final byte[] _hosty;
+	
+	/** The path and query used. */
+	private final byte[] _pathy;
+	
+	/** The authentication token, pre-encoded as bytes. */
+	private final byte[] _auth;
 	
 	/**
 	 * Initializes the service connection.
@@ -41,8 +56,37 @@ public final class ServiceConnection
 		
 		try
 		{
-			this.url = URI.create(__url).toURL();
-			this.auth = __auth;
+			// Parse URI to extract all the needed bits, assumes HTTPS
+			URI uri = URI.create(__url);
+			
+			// Initialize connection address
+			String host = uri.getHost();
+			int port = uri.getPort();
+			this.sockaddr = new InetSocketAddress(host, (port < 0 ? 443 : port));
+			this._hosty = host.getBytes("utf-8");
+			
+			// Obtain the raw values because we want to keep stuff such as
+			// %20, it has to be kept how it is
+			String path = uri.getRawPath(),
+				query = uri.getRawQuery();
+			this._pathy = (path + (query == null ? "" :
+				"?" + query)).getBytes("utf-8");
+			
+			// This needs to be checked to make sure it does not contain
+			// newlines and such
+			if (__auth != null)
+			{
+				for (int i = 0, n = __auth.length(); i < n; i++)
+					switch (__auth.charAt(i))
+					{
+						case '\r':
+						case '\n':
+							throw new RemoteException("Authorization token has newline character.");
+					}
+				this._auth = __auth.getBytes("utf-8");
+			}
+			else
+				this._auth = null;
 		}
 		catch (NullPointerException|IllegalArgumentException|IOException e)
 		{
@@ -61,100 +105,82 @@ public final class ServiceConnection
 		if (__t == null || __r == null)
 			throw new NullPointerException();
 		
-		try
+		// Open connection to server
+		try (SocketChannel chan = SocketChannel.open(this.sockaddr))
 		{
-			HttpURLConnection con = null;
-			
-			// Open connection
-			try
+			// Build request to send to the server
+			byte[] sendy;
+			try (ByteArrayOutputStream baos =
+				new ByteArrayOutputStream(1048576);
+				PrintStream out = new PrintStream(baos, true, "utf-8"))
 			{
-				con = (HttpURLConnection)this.url.openConnection(
-					Proxy.NO_PROXY);
+				// Start HTTP request
+				out.print(__t.name());
+				out.print(' ');
+				out.write(this._pathy);
+				out.print(" HTTP/1.1\r\n");
 				
-				// Set parameters
-				con.setDoInput(true);
-				con.setDoOutput(true);
-				con.setUseCaches(false);
-				con.setRequestMethod(__t.name());
-				con.setConnectTimeout(3000);
-				con.setReadTimeout(1500);
-				con.setRequestProperty("Connection", "close");
+				// Our user agent
+				out.print("User-Agent: IOpipeJavaAgent/");
+				out.print(IOpipeConstants.AGENT_VERSION);
+				out.print("\r\n");
 				
-				String auth = this.auth;
+				// The remote host
+				out.print("Host: ");
+				out.write(this._hosty);
+				out.print("\r\n");
+				
+				// Authorization token?
+				byte[] auth = this._auth;
 				if (auth != null)
-					con.setRequestProperty("Authorization", auth);
+				{
+					out.print("Authorization: ");
+					out.write(auth);
+					out.print("\r\n");
+				}
 				
+				// Content type
 				String mime = __r.mimeType();
 				if (mime != null)
-					con.setRequestProperty("Content-Type", mime);
-				
-				// Write the request body
-				byte[] data = __r.body();
-				con.setRequestProperty("Content-Length", Integer.toString(data.length));
-				try (OutputStream os = con.getOutputStream())
 				{
-					os.write(data);
+					out.print("Content-Type: ");
+					out.print(mime);
+					out.print("\r\n");
 				}
 				
-				// Read the response the server gave us, it is likely to be very
-				// short
-				byte[] read;
-				try (InputStream is = con.getInputStream())
-				{
-					// Get available bytes
-					int avail = Math.max(256, is.available());
-					
-					// Copy
-					try (ByteArrayOutputStream baos =
-						new ByteArrayOutputStream(avail))
-					{
-						byte[] buf = new byte[avail];
-						for (;;)
-						{
-							int rc = is.read(buf);
-							
-							if (rc < 0)
-								break;
-							
-							baos.write(buf, 0, rc);
-						}
-						
-						// Use this response
-						read = baos.toByteArray();
-					}
-				}
+				// Write content length
+				byte[] content = __r.body();
+				out.print("Content-Length: ");
+				out.print(content.length);
+				out.print("\r\n");
 				
-				// If read threw an exception, it is possible that the
-				// server returned some bad response so return that instead
-				// of throwing some exception
-				catch (IOException e)
-				{
-					int rcode = con.getResponseCode();
-					if (rcode > 0)
-						return new RemoteResult(
-							rcode,
-							"application/octet-stream",
-							new byte[0]);
-					
-					// Otherwise propogate it up!
-					else
-						throw e;
-				}
+				// End of properties
+				out.print("\r\n");
 				
-				// Build response
-				return new RemoteResult(
-					con.getResponseCode(),
-					"application/octet-stream",
-					read);
+				// Send the body
+				out.write(content);
+				
+				// Flush to send it
+				out.flush();
+				sendy = baos.toByteArray();
 			}
-			finally
-			{
-				if (con != null)
-					con.disconnect();
-			}
+			
+			// Debug
+			Logger.debug("HTTP Request: {}", new String(sendy, "utf-8"));
+			
+			// Send data
+			chan.write(ByteBuffer.wrap(sendy));
+			
+			throw new Error("TODO");
 		}
+		
+		// Failed to read/write
 		catch (IOException e)
 		{
+			System.err.println("************** OOPS! ***************");
+			e.printStackTrace();
+			System.err.println("************************************");
+			
 			throw new RemoteException("Could not send request.", e);
 		}
 	}
