@@ -126,14 +126,20 @@ final class __TimeOutTracker__
 		@Override
 		public final void run()
 		{
-			// Infinite loop
+			Thread selfthread = Thread.currentThread();
 			__RequestSender__ rsender = this._rsender;
+			
+			// Infinite loop
 			for (;;)
 			{
 				// Wait until we get something to keep track of
 				__Track__ track;
 				synchronized (this)
 				{
+					// Clear our own interrupted flag since it cannot be
+					// raised while we own the lock
+					Thread.interrupted();
+					
 					// Are we tracking this?
 					track = this._track;
 					
