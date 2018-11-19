@@ -92,10 +92,12 @@ public final class IOpipeService
 	final __Plugins__ _plugins;
 	
 	/** The number of times this context has been executed. */
+	@Deprecated
 	private final AtomicInteger _execcount =
 		new AtomicInteger();
 	
 	/** The number of times the server replied with a code other than 2xx. */
+	@Deprecated
 	private final AtomicInteger _badresultcount =
 		new AtomicInteger();
 	
@@ -176,6 +178,7 @@ public final class IOpipeService
 	 * server.
 	 * @since 2017/12/18
 	 */
+	@Deprecated
 	public final int getBadResultCount()
 	{
 		return this._badresultcount.get();
