@@ -88,6 +88,9 @@ public final class IOpipeService
 	/** The sender where requests go. */
 	final __RequestSender__ _rsender;
 	
+	/** The manager for timeouts. */
+	final __TimeOutTracker__ _timeout;
+	
 	/** Plugin state. */
 	final __Plugins__ _plugins;
 	
@@ -137,8 +140,13 @@ public final class IOpipeService
 			connection = new NullConnection();
 		
 		// This class manages sending all our requests
-		this._rsender = new __RequestSender__(connection);
+		__RequestSender__ rsender;
+		this._rsender = (rsender = new __RequestSender__(connection));
 		
+		// Setup timeout tracker
+		this._timeout = new __TimeOutTracker__(rsender);
+		
+		// Store config and such
 		this.enabled = enabled;
 		this.config = __config;
 		
@@ -349,6 +357,12 @@ public final class IOpipeService
 			}
 		}
 		
+		// Keep track of this execution and make sure that timeouts trigger
+		// if they occur, the atomic is so that only a single event is sent
+		AtomicBoolean execsent = new AtomicBoolean();
+		this._timeout.__track(__context, exec, execsent,
+			Thread.currentThread());
+		
 		// Add auto-label for coldstart
 		if (coldstarted)
 			exec.label("@iopipe/coldstart");
@@ -369,19 +383,6 @@ public final class IOpipeService
 						i);
 				}
 		
-		// Register timeout with this execution number so if execution takes
-		// longer than expected a timeout is generated
-		// Timeouts can be disabled if the timeout window is zero, but they
-		// may also be unsupported if the time remaining in the context is zero
-		__TimeOutWatchDog__ watchdog = null;
-		int windowtime,
-			remainingtime = __context.getRemainingTimeInMillis();
-		if ((windowtime = config.getTimeOutWindow()) > 0 &&
-			remainingtime > 0 && remainingtime < Integer.MAX_VALUE)
-			watchdog = new __TimeOutWatchDog__(this, __context,
-				Thread.currentThread(), windowtime, coldstarted, exec,
-				this._rsender);
-		
 		// Run the function
 		R value = null;
 		Throwable exception = null;
@@ -401,10 +402,6 @@ public final class IOpipeService
 			exec.label("@iopipe/error");
 		}
 		
-		// It died, so stop the watchdog
-		if (watchdog != null)
-			watchdog.__finished();
-		
 		// Run post-execution plugins
 		for (__Plugins__.__Info__ i : plugins)
 			if (i.isEnabled())
@@ -420,8 +417,8 @@ public final class IOpipeService
 						i);
 				}
 		
-		// Generate and send result to server
-		if (watchdog == null || !watchdog._generated.getAndSet(true))
+		// Only send the request if the watchdog did not
+		if (execsent.compareAndSet(false, true))
 			if (exec instanceof __ActiveExecution__)
 				this._rsender.__send(((__ActiveExecution__)exec).__buildRequest());
 		

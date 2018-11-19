@@ -8,6 +8,7 @@ import com.iopipe.http.RemoteException;
 import com.iopipe.http.RemoteRequest;
 import com.iopipe.http.RemoteResult;
 import com.iopipe.http.RequestType;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.pmw.tinylog.Logger;
 
 /**
@@ -37,7 +38,7 @@ final class __RequestSender__
 	}
 	
 	/**
-	 * Sends the specified request to the server.
+	 * Sends the specified request to the server, using the request ID.
 	 *
 	 * @param __r The request to send to the server.
 	 * @return The result of the report.
@@ -50,7 +51,7 @@ final class __RequestSender__
 		if (__r == null)
 			throw new NullPointerException();
 		
-		// Generate report
+		// Send request
 		try
 		{
 			RemoteResult result = this.connection.send(RequestType.POST, __r);
