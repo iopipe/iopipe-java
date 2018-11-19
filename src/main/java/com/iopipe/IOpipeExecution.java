@@ -36,11 +36,11 @@ public abstract class IOpipeExecution
 	 * field is locked since multiple threads may be adding entries.
 	 */
 	private final Set<PerformanceEntry> _perfentries =
-		new TreeSet<>();
+		new LinkedHashSet<>();
 	
 	/** Custom metrics that have been added, locked for thread safety. */
 	private final Set<CustomMetric> _custmetrics =
-		new TreeSet<>();
+		new LinkedHashSet<>();
 	
 	/** Labels which have been added, locked for threading. */
 	private final Set<String> _labels =
