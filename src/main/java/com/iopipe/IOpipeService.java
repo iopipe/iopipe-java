@@ -106,7 +106,7 @@ public final class IOpipeService
 	 */
 	public IOpipeService()
 	{
-		this(IOpipeConfiguration.DEFAULT_CONFIG);
+		this(IOpipeConfiguration.byDefault());
 	}
 	
 	/**
