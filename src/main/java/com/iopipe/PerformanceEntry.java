@@ -26,6 +26,9 @@ public final class PerformanceEntry
 	/** The duration of the entry in nanoseconds. */
 	protected final long durationns;
 	
+	/** Hashcode. */
+	private int _hashcode;
+	
 	/**
 	 * Initializes the performance entry.
 	 *
@@ -108,7 +111,12 @@ public final class PerformanceEntry
 		if (!(__o instanceof PerformanceEntry))
 			return false;
 		
-		return 0 == this.compareTo((PerformanceEntry)__o);
+		// Equal objects will have the same hashcode
+		PerformanceEntry o = (PerformanceEntry)__o;
+		if (this.hashCode() != o.hashCode())
+			return false;
+		
+		return 0 == this.compareTo(o);
 	}
 	
 	/**
@@ -118,11 +126,18 @@ public final class PerformanceEntry
 	@Override
 	public final int hashCode()
 	{
-		return this.name.hashCode() ^
+		// Pre-cached?
+		int rv = this._hashcode;
+		if (rv != 0)
+			return rv;
+		
+		// Cache it
+		this._hashcode = (rv = this.name.hashCode() ^
 			this.type.hashCode() ^
 			Long.hashCode(this.startns) ^
 			Long.hashCode(this.startms) ^
-			Long.hashCode(this.durationns);
+			Long.hashCode(this.durationns));
+		return rv;
 	}
 	
 	/**

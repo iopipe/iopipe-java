@@ -28,6 +28,9 @@ public final class CustomMetric
 	/** Has a long value? */
 	protected final boolean haslong;
 	
+	/** Hashcode. */
+	private int _hashcode;
+	
 	/** String representation. */
 	private Reference<String> _string;
 	
@@ -111,7 +114,12 @@ public final class CustomMetric
 		if (!(__o instanceof CustomMetric))
 			return false;
 		
+		// Equal objects will have the same hash code
 		CustomMetric o = (CustomMetric)__o;
+		if (this.hashCode() != o.hashCode())
+			return false;
+		
+		// Check equality
 		return this.name.equals(o.name) &&
 			Objects.equals(this.stringvalue, o.stringvalue) &&
 			this.haslong == o.haslong &&
@@ -136,9 +144,16 @@ public final class CustomMetric
 	@Override
 	public int hashCode()
 	{
-		return (this.name.hashCode() ^
+		// Pre-cached?
+		int rv = this._hashcode;
+		if (rv != 0)
+			return rv;
+		
+		// Cache it
+		this._hashcode = (rv = (this.name.hashCode() ^
 			Objects.hashCode(this.stringvalue) ^
-			Long.hashCode(this.longvalue)) ^ (this.haslong ? ~0 : 0);
+			Long.hashCode(this.longvalue)) ^ (this.haslong ? ~0 : 0));
+		return rv;
 	}
 	
 	/**
