@@ -144,7 +144,8 @@ public final class IOpipeService
 		this._rsender = (rsender = new __RequestSender__(connection));
 		
 		// Setup timeout tracker
-		this._timeout = new __TimeOutTracker__(rsender);
+		this._timeout = new __TimeOutTracker__(rsender,
+			__config.getTimeOutWindow());
 		
 		// Store config and such
 		this.enabled = enabled;

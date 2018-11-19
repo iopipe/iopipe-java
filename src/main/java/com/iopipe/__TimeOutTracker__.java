@@ -11,9 +11,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 final class __TimeOutTracker__
 {
-	/** Threshold before a timeout is triggered, in milliseconds. */
-	static final long _THRESHOLD =
-		150;
+	/** The timeout window time. */
+	protected final int window;
 	
 	/** The thread our squirrel runs in. */
 	private final Thread _thread;
@@ -24,9 +23,12 @@ final class __TimeOutTracker__
 	/**
 	 * Initializes the tracker.
 	 *
+	 * @param __rs The sender for requests.
+	 * @param __tw The window for timeouts.
+	 * @throws NullPointerException On null arguments.
 	 * @since 2018/11/19
 	 */
-	__TimeOutTracker__(__RequestSender__ __rs)
+	__TimeOutTracker__(__RequestSender__ __rs, int __tw)
 		throws NullPointerException
 	{
 		if (__rs == null)
@@ -39,6 +41,7 @@ final class __TimeOutTracker__
 		t.start();
 		
 		// The tracker to report to
+		this.window = (__tw > 0 ? __tw : 0);
 		this._thread = t;
 		this._squirrel = sq;
 	}
@@ -60,6 +63,11 @@ final class __TimeOutTracker__
 		if (__c == null)
 			throw new NullPointerException();
 		
+		// If the timeout window is disabled, then do not track timeouts
+		int window = this.window;
+		if (window == 0)
+			return;
+		
 		// Do not keep track if there is no timeout or it is very far into
 		// the future (likely set by the mock context)
 		int rem = __c.getRemainingTimeInMillis();
@@ -68,7 +76,7 @@ final class __TimeOutTracker__
 		
 		// If the remaining time is too close within the threshold then it
 		// will likely have trouble firing when the time comes
-		rem -= _THRESHOLD;
+		rem -= window;
 		if (rem <= 0)
 			return;
 		
