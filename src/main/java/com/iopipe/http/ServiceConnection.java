@@ -54,6 +54,9 @@ public final class ServiceConnection
 	/** The socket address. */
 	protected final InetSocketAddress sockaddr;
 	
+	/** Use this SSL engine. */
+	protected final ServiceConnectionFactory.__SSL__ ssl;
+	
 	/** The host to send to (in the request). */
 	private final byte[] _hosty;
 	
@@ -68,14 +71,18 @@ public final class ServiceConnection
 	 *
 	 * @param __url The URL to connect to.
 	 * @param __auth The authentication code, is optional.
+	 * @param __ssl The SSL engine to use.
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/11/14
 	 */
-	public ServiceConnection(String __url, String __auth)
+	public ServiceConnection(String __url, String __auth,
+		ServiceConnectionFactory.__SSL__ __ssl)
 		throws NullPointerException
 	{
-		if (__url == null)
+		if (__url == null || __ssl == null)
 			throw new NullPointerException();
+		
+		this.ssl = __ssl;
 		
 		try
 		{
@@ -128,22 +135,20 @@ public final class ServiceConnection
 		if (__t == null || __r == null)
 			throw new NullPointerException();
 		
+		// Get SSL engine
+		SSLEngine engine = this.ssl.__getEngine();
+		if (engine == null)
+			return new RemoteResult(503, RemoteBody.MIMETYPE_JSON, new byte[0]);
+		
+		// Create socket to server
 		try (SocketChannel basechan = SocketChannel.open(this.sockaddr))
 		{
-			// Make it non-blocking
+			// Make it non-blocking, this is needed by SSLSocketChannel
 			basechan.configureBlocking(false);
 			
-			// Needs to explicitly be initialized!!
-			SSLContext sslc = SSLContext.getInstance("TLSv1.2");
-			sslc.init(null, null, null);
-			SSLEngine ssle = sslc.createSSLEngine();
-			
-			// We are NOT a server
-			ssle.setUseClientMode(true);
-			
 			// Open SSL connection to server
-			try (SocketChannel chan = new SSLSocketChannel(basechan, ssle,
-				_THREAD_POOL, null))
+			try (SocketChannel chan = new SSLSocketChannel(basechan,
+				engine, _THREAD_POOL, null))
 			{
 				// Build request to send to the server
 				byte[] sendy;
@@ -254,7 +259,7 @@ public final class ServiceConnection
 		}
 		
 		// Failed to read/write
-		catch (IOException|NoSuchAlgorithmException|KeyManagementException e)
+		catch (IOException/*|NoSuchAlgorithmException|KeyManagementException*/ e)
 		{
 			System.err.println("************** OOPS! ***************");
 			e.printStackTrace();
