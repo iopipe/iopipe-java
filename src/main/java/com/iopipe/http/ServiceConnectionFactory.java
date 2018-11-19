@@ -3,6 +3,7 @@ package com.iopipe.http;
 import java.util.concurrent.atomic.AtomicReference;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 
@@ -42,7 +43,7 @@ public final class ServiceConnectionFactory
 		implements Runnable
 	{
 		/** The engine to use. */
-		final AtomicReference<SSLEngine> _engine =
+		final AtomicReference<SSLContext> _context =
 			new AtomicReference<>();
 		
 		/** Did execution fail? */
@@ -72,12 +73,7 @@ public final class ServiceConnectionFactory
 				SSLContext c = SSLContext.getInstance("TLSv1.2");
 				c.init(null, null, null);
 				
-				// Setup engine
-				SSLEngine e = c.createSSLEngine();
-				e.setUseClientMode(true);
-				
-				// Store
-				this._engine.set(e);
+				this._context.set(c);
 			}
 			
 			// Could not initialize
@@ -96,16 +92,20 @@ public final class ServiceConnectionFactory
 		 */
 		final SSLEngine __getEngine()
 		{
-			AtomicReference<SSLEngine> atomic = this._engine;
+			AtomicReference<SSLContext> atomic = this._context;
 			
 			// Burn until it becomes available
-			SSLEngine rv = atomic.get();
-			while (rv == null)
+			SSLContext c = atomic.get();
+			while (c == null)
 			{
 				if (this._failed)
 					return null;
-				rv = atomic.get();
+				c = atomic.get();
 			}
+			
+			// Setup engine
+			SSLEngine rv = c.createSSLEngine();
+			rv.setUseClientMode(true);
 			
 			return rv;
 		}
