@@ -9,6 +9,7 @@ import org.pmw.tinylog.Logger;
  *
  * @since 2017/12/20
  */
+@Deprecated
 final class __TimeOutWatchDog__
 	implements Runnable
 {
