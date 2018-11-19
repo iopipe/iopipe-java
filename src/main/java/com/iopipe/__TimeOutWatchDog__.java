@@ -47,6 +47,9 @@ final class __TimeOutWatchDog__
 	/** The execution which is being watched. */
 	protected final IOpipeExecution execution;
 	
+	/** The sender for requests. */
+	private final __RequestSender__ _rsender;
+	
 	/** Has execution finished? */
 	private final AtomicBoolean _finished =
 		new AtomicBoolean();
@@ -64,18 +67,20 @@ final class __TimeOutWatchDog__
 	 * @param __wt The duration of the timeout window.
 	 * @param __cs Is this a cold start and thus the first execution ever
 	 * to run on the JVM?
-	 * @param  __exec The execution which the watch dog waits under.
+	 * @param __exec The execution which the watch dog waits under.
+	 * @param __rs The sender for our requests.
 	 * @throws NullPointerException On null arguments.
 	 * @since 2017/12/20
 	 */
 	__TimeOutWatchDog__(IOpipeService __sv, Context __context, Thread __src,
-		int __wt, boolean __cs, IOpipeExecution __exec)
+		int __wt, boolean __cs, IOpipeExecution __exec, __RequestSender__ __rs)
 		throws NullPointerException
 	{
 		if (__sv == null || __context == null || __src == null ||
-			__exec == null)
+			__exec == null || __rs == null)
 			throw new NullPointerException();
 		
+		this._rsender = __rs;
 		this.service = __sv;
 		this.config = __sv.config();
 		this.context = __context;
@@ -159,7 +164,7 @@ final class __TimeOutWatchDog__
 				
 				// Upload
 				if (exec instanceof __ActiveExecution__)
-					this.service.__sendRequest(
+					this._rsender.__send(
 						((__ActiveExecution__)exec).__buildRequest());
 				
 				// Do not need to execute anymore

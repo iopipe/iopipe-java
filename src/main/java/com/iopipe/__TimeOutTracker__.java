@@ -8,6 +8,9 @@ package com.iopipe;
  */
 final class __TimeOutTracker__
 {
+	/** The sender where requests go. */
+	final __RequestSender__ _rsender;
+	
 	/**
 	 * Initializes the tracker.
 	 *

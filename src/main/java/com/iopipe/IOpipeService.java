@@ -79,27 +79,17 @@ public final class IOpipeService
 	/** The configuration used to connect to the service. */
 	protected final IOpipeConfiguration config;
 	
-	/** The connection to the server. */
-	protected final RemoteConnection connection;
-	
 	/** Is the service enabled and working? */
 	protected final boolean enabled;
 	
 	/** The coldstart flag indicator to use. */
 	private final AtomicBoolean _coldstartflag;
 	
+	/** The sender where requests go. */
+	final __RequestSender__ _rsender;
+	
 	/** Plugin state. */
 	final __Plugins__ _plugins;
-	
-	/** The number of times this context has been executed. */
-	@Deprecated
-	private final AtomicInteger _execcount =
-		new AtomicInteger();
-	
-	/** The number of times the server replied with a code other than 2xx. */
-	@Deprecated
-	private final AtomicInteger _badresultcount =
-		new AtomicInteger();
 	
 	/**
 	 * Initializes the service using the default configuration.
@@ -146,8 +136,10 @@ public final class IOpipeService
 		if (!enabled || connection == null)
 			connection = new NullConnection();
 		
+		// This class manages sending all our requests
+		this._rsender = new __RequestSender__(connection);
+		
 		this.enabled = enabled;
-		this.connection = connection;
 		this.config = __config;
 		
 		// Detect all available plugins
@@ -168,20 +160,6 @@ public final class IOpipeService
 	public final IOpipeConfiguration config()
 	{
 		return this.config;
-	}
-	
-	/**
-	 * Returns the number of requests which would have been accepted by the
-	 * service if the configuration was correct and the service was enabled.
-	 *
-	 * @return The number of requests which would have been accepted by the
-	 * server.
-	 * @since 2017/12/18
-	 */
-	@Deprecated
-	public final int getBadResultCount()
-	{
-		return this._badresultcount.get();
 	}
 	
 	/**
@@ -330,9 +308,6 @@ public final class IOpipeService
 		long nowtime = System.currentTimeMillis(),
 			nowmono = System.nanoTime();
 		
-		// Count executions
-		int execcount = this._execcount.incrementAndGet();
-		
 		// Is this enabled?
 		boolean enabled = config.isEnabled();
 				
@@ -362,8 +337,6 @@ public final class IOpipeService
 		{
 			// Disabled lambdas could still rely on measurements, despite them
 			// not doing anything useful at all
-			this._badresultcount.incrementAndGet();
-			
 			try
 			{
 				return __func.apply(exec);
@@ -406,7 +379,8 @@ public final class IOpipeService
 		if ((windowtime = config.getTimeOutWindow()) > 0 &&
 			remainingtime > 0 && remainingtime < Integer.MAX_VALUE)
 			watchdog = new __TimeOutWatchDog__(this, __context,
-				Thread.currentThread(), windowtime, coldstarted, exec);
+				Thread.currentThread(), windowtime, coldstarted, exec,
+				this._rsender);
 		
 		// Run the function
 		R value = null;
@@ -449,7 +423,7 @@ public final class IOpipeService
 		// Generate and send result to server
 		if (watchdog == null || !watchdog._generated.getAndSet(true))
 			if (exec instanceof __ActiveExecution__)
-				this.__sendRequest(((__ActiveExecution__)exec).__buildRequest());
+				this._rsender.__send(((__ActiveExecution__)exec).__buildRequest());
 		
 		// Clear the last execution that is occuring, but only if ours was
 		// still associated with it
@@ -464,49 +438,6 @@ public final class IOpipeService
 			else
 				throw (RuntimeException)exception;
 		return value;
-	}
-	
-	/**
-	 * Sends the specified request to the server.
-	 *
-	 * @param __r The request to send to the server.
-	 * @return The result of the report.
-	 * @throws NullPointerException On null arguments.
-	 * @since 2017/12/15
-	 */
-	final RemoteResult __sendRequest(RemoteRequest __r)
-		throws NullPointerException
-	{
-		if (__r == null)
-			throw new NullPointerException();
-		
-		// Generate report
-		try
-		{
-			RemoteResult result = this.connection.send(RequestType.POST, __r);
-			
-			// Only the 200 range is valid for okay responses
-			int code = result.code();
-			if (!(code >= 200 && code < 300))
-			{
-				this._badresultcount.incrementAndGet();
-				
-				// Only emit errors for failed requests
-				Logger.error("Request {} failed with result {}.",
-					__r, result);
-			}
-			
-			return result;
-		}
-		
-		// Failed to write to the server
-		catch (RemoteException e)
-		{
-			Logger.error(e, "Request {} failed due to exception.", __r);
-			
-			this._badresultcount.incrementAndGet();
-			return new RemoteResult(503, RemoteBody.MIMETYPE_JSON, "");
-		}
 	}
 	
 	/**
@@ -525,28 +456,6 @@ public final class IOpipeService
 			_INSTANCE = (rv = new IOpipeService());
 		}
 		return rv;
-	}
-	
-	/**
-	 * Shows string representation of the body.
-	 *
-	 * @param __b The body to decode.
-	 * @return The string result.
-	 * @since 2018/02/24
-	 */
-	private static final String __debugBody(RemoteBody __b)
-	{
-		try
-		{
-			String rv = __b.bodyAsString();
-			if (rv.indexOf('\0') >= 0)
-				return "BINARY DATA";
-			return rv;
-		}
-		catch (Throwable t)
-		{
-			return "Could not decode!";
-		}
 	}
 	
 	/**
