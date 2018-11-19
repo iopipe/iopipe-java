@@ -90,8 +90,13 @@ final class __TimeOutTracker__
 			squirrel._track = t;
 			
 			// We do not need to notify, we can just interrupt because the
-			// squirrel is waiting for something to track.
-			// wait() is something that is handled by interrupts
+			// squirrel is waiting for something to track. The other thread
+			// wait()s. We WANT to interrupt here and not notify() because if
+			// we notify() then we lose our lock and then we have to WAIT for
+			// the other thread to release the lock. By just interrupting we
+			// can just exit this lock which when the other thread picks up
+			// that the monitor is both unlocked and the thread is interrupted
+			// it will continue
 			this._thread.interrupt();
 		}
 	}
