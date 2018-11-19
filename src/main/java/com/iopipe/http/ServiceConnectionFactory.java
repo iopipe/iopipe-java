@@ -71,7 +71,7 @@ public final class ServiceConnectionFactory
 			{
 				// Initialize context
 				SSLContext c = SSLContext.getInstance("TLSv1.2");
-				c.init(null, null, null);
+				c.init(null, null, new SecureRandom());
 				
 				this._context.set(c);
 			}
