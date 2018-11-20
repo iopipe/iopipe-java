@@ -32,6 +32,16 @@ final class __NoOpExecution__
 	
 	/**
 	 * {@inheritDoc}
+	 * @since 2018/11/20
+	 */
+	@Override
+	public final void addPerformanceEntry(PerformanceEntry __e)
+		throws NullPointerException
+	{
+	}
+	
+	/**
+	 * {@inheritDoc}
 	 * @since 2018/08/27
 	 */
 	@Override
@@ -52,12 +62,82 @@ final class __NoOpExecution__
 	
 	/**
 	 * {@inheritDoc}
+	 * @since 2018/11/20
+	 */
+	@Override
+	public final void customMetric(CustomMetric __cm)
+		throws NullPointerException
+	{
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @since 2018/11/20
+	 */
+	@Override
+	public final void customMetric(String __name, String __sv)
+		throws NullPointerException
+	{
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @since 2018/11/20
+	 */
+	@Override
+	public final void customMetric(String __name, long __lv)
+		throws NullPointerException
+	{
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @since 2018/11/20
+	 */
+	@Override
+	public final CustomMetric[] getCustomMetrics()
+	{
+		return new CustomMetric[0];
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @since 2018/11/20
+	 */
+	@Override
+	public final String[] getLabels()
+	{
+		return new String[0];
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @since 2018/11/20
+	 */
+	@Override
+	public final PerformanceEntry[] getPerformanceEntries()
+	{
+		return new PerformanceEntry[0];
+	}
+	
+	/**
+	 * {@inheritDoc}
 	 * @since 2018/08/27
 	 */
 	@Override
 	public final Object input()
 	{
 		return null;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @since 2018/11/20
+	 */
+	@Override
+	public final void label(String __s)
+		throws NullPointerException
+	{
 	}
 	
 	/**

@@ -11,11 +11,13 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.ref.WeakReference;
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -71,6 +73,21 @@ final class __ActiveExecution__
 		new AtomicReference<>();
 	
 	/**
+	 * Performance entries which have been added to the measurement, this
+	 * field is locked since multiple threads may be adding entries.
+	 */
+	private final Set<PerformanceEntry> _perfentries =
+		new LinkedHashSet<>();
+	
+	/** Custom metrics that have been added, locked for thread safety. */
+	private final Set<CustomMetric> _custmetrics =
+		new LinkedHashSet<>();
+	
+	/** Labels which have been added, locked for threading. */
+	private final Set<String> _labels =
+		new LinkedHashSet<>();
+	
+	/**
 	 * Initializes the execution information.
 	 *
 	 * @param __sv The service which initialized this.
@@ -109,6 +126,29 @@ final class __ActiveExecution__
 	 * @since 2018/01/19
 	 */
 	@Override
+	public final void addPerformanceEntry(PerformanceEntry __e)
+		throws NullPointerException
+	{
+		if (__e == null)
+			throw new NullPointerException();
+		
+		// Multiple threads could be adding entries
+		Set<PerformanceEntry> perfentries = this._perfentries;
+		synchronized (perfentries)
+		{
+			// Performance entry was defined, so just say that the plugin was
+			// used for tracing data
+			this.label("@iopipe/plugin-trace");
+			
+			perfentries.add(__e);
+		}
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @since 2018/01/19
+	 */
+	@Override
 	public final IOpipeConfiguration config()
 	{
 		return this.config;
@@ -126,12 +166,130 @@ final class __ActiveExecution__
 	
 	/**
 	 * {@inheritDoc}
+	 * @since 2018/01/20
+	 */
+	@Override
+	public final void customMetric(CustomMetric __cm)
+		throws NullPointerException
+	{
+		if (__cm == null)
+			throw new NullPointerException();
+		
+		// Multiple threads can add metrics at one time
+		Set<CustomMetric> custmetrics = this._custmetrics;
+		synchronized (custmetrics)
+		{
+			if (!__cm.name().startsWith("@iopipe/"))
+				this.label("@iopipe/metrics");
+			
+			custmetrics.add(__cm);
+		}
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @since 2018/01/30
+	 */
+	@Override
+	public final void customMetric(String __name, String __sv)
+		throws NullPointerException
+	{
+		if (__name == null || __sv == null)
+			throw new NullPointerException();
+		
+		this.customMetric(new CustomMetric(__name, __sv));
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @since 2018/01/30
+	 */
+	@Override
+	public final void customMetric(String __name, long __lv)
+		throws NullPointerException
+	{
+		if (__name == null)
+			throw new NullPointerException();
+		
+		this.customMetric(new CustomMetric(__name, __lv));
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @since 2018/03/15
+	 */
+	@Override
+	public final CustomMetric[] getCustomMetrics()
+	{
+		Collection<CustomMetric> custmetrics = this._custmetrics;
+		synchronized (custmetrics)
+		{
+			return custmetrics.<CustomMetric>toArray(
+				new CustomMetric[custmetrics.size()]);
+		}
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @since 2018/04/11
+	 */
+	@Override
+	public final String[] getLabels()
+	{
+		Set<String> labels = this._labels;
+		synchronized (labels)
+		{
+			return labels.<String>toArray(new String[labels.size()]);
+		}
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @since 2018/03/15
+	 */
+	@Override
+	public final PerformanceEntry[] getPerformanceEntries()
+	{
+		Collection<PerformanceEntry> perfentries = this._perfentries;
+		synchronized (perfentries)
+		{
+			return perfentries.<PerformanceEntry>toArray(
+				new PerformanceEntry[perfentries.size()]);
+		}
+	}
+	
+	/**
+	 * {@inheritDoc}
 	 * @since 2018/04/16
 	 */
 	@Override
 	public final Object input()
 	{
 		return this.input;
+	}
+
+	/**
+	 * Adds a single label which will be passed in the report.
+	 *
+	 * Labels are limited to the length specified in
+	 * {@link IOpipeConstants#NAME_CODEPOINT_LIMIT}.
+	 *
+	 * @param __s The label to add.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/04/11
+	*/
+	public final void label(String __s)
+		throws NullPointerException
+	{
+		if (__s == null)
+			throw new NullPointerException();
+
+		// Add it
+		Set<String> labels = this._labels;
+		synchronized (labels)
+		{
+			labels.add(__s);
+		}
 	}
 	
 	/**
