@@ -213,7 +213,6 @@ public final class SystemMeasurement
 		{
 		}
 		
-		// Linux keeps it in 
 		return new Memory(mt, mf);
 	}
 	
@@ -227,14 +226,66 @@ public final class SystemMeasurement
 	 */
 	public static Stat measureStat(int __id)
 	{
-		// Parse current process info
-		Map<String, String> pidstatus = __readMap(
-			Paths.get("/proc/" + (__id == SELF_PROCESS ? "self" : __id) +
-			"/status"));
-		return new Stat(__readInt(pidstatus.getOrDefault("Pid", "0")),
-			__readInt(pidstatus.getOrDefault("FDSize", "0")),
-			__readInt(pidstatus.getOrDefault("Threads", "0")),
-			__readInt(pidstatus.getOrDefault("VmRSS", "0")));
+		int pid = 0,
+			fdsize = 0,
+			threads = 0,
+			vmrss = 0;
+		
+		// Read in fields
+		int bits = 0;
+		try (BufferedReader br = new BufferedReader(new InputStreamReader(
+			Files.newInputStream(Paths.get("/proc/" +
+				(__id == SELF_PROCESS ? "self" : __id) + "/status"),
+			StandardOpenOption.READ))))
+		{
+			// While these are not read
+			while (bits != 0b1111)
+			{
+				String ln = br.readLine();
+				if (ln == null)
+					break;
+				
+				// Parse values
+				try
+				{
+					// PID
+					if ((bits & 0b0001) == 0 && ln.startsWith("Pid:"))
+					{
+						pid = Integer.parseInt(ln.substring(4).trim());
+						bits |= 0b0001;
+					}
+					
+					// FDSize
+					else if ((bits & 0b0010) == 0 && ln.startsWith("FDSize:"))
+					{
+						fdsize = Integer.parseInt(ln.substring(7).trim());
+						bits |= 0b0010;
+					}
+					
+					// Threads
+					else if ((bits & 0b0100) == 0 && ln.startsWith("Threads:"))
+					{
+						threads = Integer.parseInt(ln.substring(8).trim());
+						bits |= 0b0100;
+					}
+					
+					// VMRss
+					else if ((bits & 0b1000) == 0 && ln.startsWith("VmRSS:"))
+					{
+						vmrss = (int)(__readMemValue(ln.substring(8)) / 1024);
+						bits |= 0b1000;
+					}
+				}
+				catch (NumberFormatException e)
+				{
+				}
+			}
+		}
+		catch (IOException e)
+		{
+		}
+		
+		return new Stat(pid, fdsize, threads, vmrss);
 	}
 	
 	/**
@@ -270,16 +321,19 @@ public final class SystemMeasurement
 		if (__p == null)
 			throw new NullPointerException();
 		
-		try
+		try (BufferedReader br = new BufferedReader(new InputStreamReader(
+			Files.newInputStream(__p, StandardOpenOption.READ))))
 		{
-			for (String l : Files.readAllLines(__p))
+			for (;;)
 			{
-				l = l.trim();
-				if (!l.isEmpty())
-					return l;
+				String ln = br.readLine();
+				if (ln == null)
+					return __def;
+				
+				ln = ln.trim();
+				if (!ln.isEmpty())
+					return ln;
 			}
-			
-			return __def;
 		}
 		
 		catch (IOException e)
