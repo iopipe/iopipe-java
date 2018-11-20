@@ -116,7 +116,7 @@ final class __WrappedConnectionFactory__
 		{
 			// Remove this debug stuff!
 			if (__t == RequestType.POST)
-				Logger.debug(">>>>>> Request: {}", __r);
+				Logger.debug(">>>>>> Request: {}", new String(__r.body()));
 			
 			// Snoop the request being sent to the server to make sure it is
 			// being formed correctly

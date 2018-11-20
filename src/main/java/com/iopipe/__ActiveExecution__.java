@@ -37,10 +37,30 @@ import org.pmw.tinylog.Logger;
 final class __ActiveExecution__
 	extends IOpipeExecution
 {
+	/** The trace ID. */
+	private static final String _TRACE_ID =
+		Objects.toString(System.getenv("_X_AMZN_TRACE_ID"), "unknown");
+	
 	/** Is this a Linux system? */
 	private static final boolean _IS_LINUX =
 		"linux".compareToIgnoreCase(
 			System.getProperty("os.name", "unknown")) == 0;
+	
+	/** RT Version. */
+	private static final String _RT_VERSION =
+		System.getProperty("java.version", "");
+	
+	/** RT Vendor. */
+	private static final String _RT_VENDOR =
+		System.getProperty("java.vendor", "");
+	
+	/** VM Version. */
+	private static final String _VM_VERSION =
+		System.getProperty("java.vm.vendor", "");
+	
+	/** VM Vendor. */
+	private static final String _VM_VENDOR =
+		System.getProperty("java.vm.version", "");
 	
 	/** The service which invoked the method. */
 	protected final IOpipeService service;
@@ -421,7 +441,6 @@ final class __ActiveExecution__
 			gen.writeStartObject();
 
 			gen.write("client_id", config.getProjectToken());
-			// UNUSED: "projectId": "s"
 			gen.write("installMethod",
 				Objects.toString(config.getInstallMethod(), "unknown"));
 
@@ -430,158 +449,146 @@ final class __ActiveExecution__
 			gen.write("processId", __Shared__._PROCESS_ID.toString());
 			gen.write("timestamp", this.starttimemillis);
 			gen.write("timestampEnd", nowtimestamp);
+			gen.write("coldstart", this.isColdStarted());
 			
 			// AWS Context information
 			gen.writeStartObject("aws");
-
-			gen.write("functionName", aws.getFunctionName());
-			gen.write("functionVersion", aws.getFunctionVersion());
-			gen.write("awsRequestId", aws.getAwsRequestId());
-			gen.write("invokedFunctionArn", aws.getInvokedFunctionArn());
-			gen.write("logGroupName", aws.getLogGroupName());
-			gen.write("logStreamName", aws.getLogStreamName());
-			gen.write("memoryLimitInMB", aws.getMemoryLimitInMB());
-			gen.write("getRemainingTimeInMillis",
-				aws.getRemainingTimeInMillis());
-			gen.write("traceId", Objects.toString(
-				System.getenv("_X_AMZN_TRACE_ID"), "unknown"));
-
+			{
+				gen.write("functionName", aws.getFunctionName());
+				gen.write("functionVersion", aws.getFunctionVersion());
+				gen.write("awsRequestId", aws.getAwsRequestId());
+				gen.write("invokedFunctionArn", aws.getInvokedFunctionArn());
+				gen.write("logGroupName", aws.getLogGroupName());
+				gen.write("logStreamName", aws.getLogStreamName());
+				gen.write("memoryLimitInMB", aws.getMemoryLimitInMB());
+				gen.write("getRemainingTimeInMillis",
+					aws.getRemainingTimeInMillis());
+				gen.write("traceId", _TRACE_ID);
+			}
 			gen.writeEnd();
 
-			// Memory Usage -- UNUSED
-			/*gen.writeStartObject("memory");
-
-			gen.write("rssMiB", );
-			gen.write("totalMiB", );
-			gen.write("rssTotalPercentage", );
-
-			gen.writeEnd();*/
-			
-			// Disk usage
-			
+			// Disk usage			
 			SystemMeasurement.Disk tempdir = sysinfo.tempdir;
+			
 			gen.writeStartObject("disk");
-			gen.write("totalMiB", tempdir.totalmib);
-			gen.write("usedMiB", tempdir.usedmib);
-			gen.write("usedPercentage", tempdir.usedpercent * 100.0);
+			{
+				gen.write("totalMiB", tempdir.totalmib);
+				gen.write("usedMiB", tempdir.usedmib);
+				gen.write("usedPercentage", tempdir.usedpercent * 100.0);
+			}
 			gen.writeEnd();
 
 			// Environment start
 			gen.writeStartObject("environment");
+			{
+				// Agent
+				gen.writeStartObject("agent");
+				{
+					gen.write("runtime", "java");
+					gen.write("version", IOpipeConstants.AGENT_VERSION);
+					gen.write("load_time", IOpipeConstants.LOAD_TIME);
+				}
+				gen.writeEnd();
 
-			// Agent
-			gen.writeStartObject("agent");
-			gen.write("runtime", "java");
-			gen.write("version", IOpipeConstants.AGENT_VERSION);
-			gen.write("load_time", IOpipeConstants.LOAD_TIME);
+				// Runtime information
+				gen.writeStartObject("runtime");
+				{
+					gen.write("name", "java");
+					gen.write("version", _RT_VERSION);
+					gen.write("vendor", _RT_VENDOR);
+					gen.write("vmVendor", _VM_VERSION);
+					gen.write("vmVersion", _VM_VENDOR);
+				}
+				gen.writeEnd();
+				
+				// Unique operating system boot identifier
+				gen.writeStartObject("host");
+				{
+					gen.write("boot_id", SystemMeasurement.BOOTID);
+				}
+				gen.writeEnd();
+
+				// Operating System
+				gen.writeStartObject("os");
+				{
+					// Hostname
+					gen.write("hostname", SystemMeasurement.HOSTNAME);
+					
+					// Memory
+					SystemMeasurement.Memory memory = sysinfo.memory;
+					gen.write("totalmem", memory.totalbytes);
+					gen.write("freemem", memory.freebytes);
+					gen.write("usedmem", memory.usedbytes);
+
+					// CPUs
+					gen.writeStartArray("cpus");
+					for (SystemMeasurement.Cpu cpu : sysinfo.cpus)
+					{
+						gen.writeStartObject();
+						gen.writeStartObject("times");
+
+						gen.write("idle", cpu.idle);
+						gen.write("irq", cpu.irq);
+						gen.write("sys", cpu.sys);
+						gen.write("user", cpu.user);
+						gen.write("nice", cpu.nice);
+
+						gen.writeEnd();
+						gen.writeEnd();
+					}
+					gen.writeEnd();
+					
+					// Linux
+					gen.writeStartObject("linux");
+					{
+						// PID
+						gen.writeStartObject("pid");
+						{
+							// Self PID
+							gen.writeStartObject("self");
+							{
+								// Stat
+								gen.writeStartObject("stat");
+								{
+									SystemMeasurement.Times times = sysinfo.times;
+									gen.write("utime", times.utime);
+									gen.write("stime", times.stime);
+									gen.write("cutime", times.cutime);
+									gen.write("cstime", times.cstime);
+								}
+								gen.writeEnd();
+								
+								// Stat at invocation start
+								gen.writeStartObject("stat_start");
+								{
+									SystemMeasurement.Times times = IOpipeService._STAT_START;
+									gen.write("utime", times.utime);
+									gen.write("stime", times.stime);
+									gen.write("cutime", times.cutime);
+									gen.write("cstime", times.cstime);
+								}
+								gen.writeEnd();
+								
+								// Status
+								gen.writeStartObject("status");
+								{
+									gen.write("VmRSS", stat.vmrsskib);
+									gen.write("Threads", stat.threads);
+									gen.write("FDSize", stat.fdsize);
+								}
+								gen.writeEnd();
+					  		}
+				  			gen.writeEnd();
+						}
+						gen.writeEnd();
+					}
+					gen.writeEnd();
+				}
+				gen.writeEnd();
+			}
 			gen.writeEnd();
-
-			// Runtime information
-			gen.writeStartObject("runtime");
-			gen.write("name", "java");
-			gen.write("version", System.getProperty("java.version", ""));
-			gen.write("vendor", System.getProperty("java.vendor", ""));
-			gen.write("vmVendor", System.getProperty("java.vm.vendor", ""));
-			gen.write("vmVersion", System.getProperty("java.vm.version", ""));
-			gen.writeEnd();
-
-			// Unique operating system boot identifier
-			gen.writeStartObject("host");
-
-			gen.write("boot_id", SystemMeasurement.BOOTID);
-
-			gen.writeEnd();
-
-			// Operating System Start
-			gen.writeStartObject("os");
 			
-			gen.write("hostname", SystemMeasurement.HOSTNAME);
-
-			SystemMeasurement.Memory memory = sysinfo.memory;
-			gen.write("totalmem", memory.totalbytes);
-			gen.write("freemem", memory.freebytes);
-			gen.write("usedmem", memory.usedbytes);
-
-			// Start CPUs
-			gen.writeStartArray("cpus");
-
-			List<SystemMeasurement.Cpu> cpus = sysinfo.cpus;
-			for (int i = 0, n = cpus.size(); i < n; i++)
-			{
-				SystemMeasurement.Cpu cpu = cpus.get(i);
-
-				gen.writeStartObject();
-				gen.writeStartObject("times");
-
-				gen.write("idle", cpu.idle);
-				gen.write("irq", cpu.irq);
-				gen.write("sys", cpu.sys);
-				gen.write("user", cpu.user);
-				gen.write("nice", cpu.nice);
-
-				gen.writeEnd();
-				gen.writeEnd();
-			}
-
-			// End CPUs
-			gen.writeEnd();
-
-			// Linux information
-			if (_IS_LINUX)
-			{
-				// Start Linux
-				gen.writeStartObject("linux");
-
-				// Start PID
-				gen.writeStartObject("pid");
-
-				// Start self
-				gen.writeStartObject("self");
-
-				gen.writeStartObject("stat");
-
-				SystemMeasurement.Times times = sysinfo.times;
-				gen.write("utime", times.utime);
-				gen.write("stime", times.stime);
-				gen.write("cutime", times.cutime);
-				gen.write("cstime", times.cstime);
-
-				gen.writeEnd();
-
-				gen.writeStartObject("stat_start");
-
-				times = IOpipeService._STAT_START;
-				gen.write("utime", times.utime);
-				gen.write("stime", times.stime);
-				gen.write("cutime", times.cutime);
-				gen.write("cstime", times.cstime);
-
-				gen.writeEnd();
-
-				gen.writeStartObject("status");
-
-				gen.write("VmRSS", stat.vmrsskib);
-				gen.write("Threads", stat.threads);
-				gen.write("FDSize", stat.fdsize);
-
-				gen.writeEnd();
-
-      			// End self
-      			gen.writeEnd();
-
-				// End PID
-				gen.writeEnd();
-
-				// End Linux
-				gen.writeEnd();
-			}
-
-			// Operating System end
-			gen.writeEnd();
-
-			// Environment end
-			gen.writeEnd();
-
+			// Errors
 			Throwable thrown = this._thrown.get();
 			if (thrown != null)
 			{
@@ -595,27 +602,23 @@ final class __ActiveExecution__
 				}
 				
 				gen.writeStartObject("errors");
-
-				// Write the stack as if it were normally output on the console
-				StringWriter trace = new StringWriter();
-				try (PrintWriter pw = new PrintWriter(trace))
 				{
-					thrown.printStackTrace(pw);
+					// Write the stack as if it were normally output on the console
+					StringWriter trace = new StringWriter();
+					try (PrintWriter pw = new PrintWriter(trace))
+					{
+						thrown.printStackTrace(pw);
 
-					pw.flush();
+						pw.flush();
+					}
+
+					gen.write("stack", trace.toString());
+					gen.write("name", thrown.getClass().getName());
+					gen.write("message",
+						Objects.toString(thrown.getMessage(), ""));
 				}
-
-				gen.write("stack", trace.toString());
-				gen.write("name", thrown.getClass().getName());
-				gen.write("message",
-					Objects.toString(thrown.getMessage(), ""));
-				// UNUSED: "stackHash": "s",
-				// UNUSED: "count": "n"
-
 				gen.writeEnd();
 			}
-
-			gen.write("coldstart", this.isColdStarted());
 			
 			// Add custom metrics, which multiple threads could be adding at
 			// once
