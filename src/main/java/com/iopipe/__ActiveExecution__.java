@@ -217,6 +217,14 @@ final class __ActiveExecution__
 		if (__name == null || __sv == null)
 			throw new NullPointerException();
 		
+		// Ignore if either of these are too long
+		if (__name.length() > IOpipeConstants.NAME_CODEPOINT_LIMIT ||
+			__sv.length() > IOpipeConstants.VALUE_CODEPOINT_LIMIT)
+		{
+			Logger.warn("Custom metric name or value too long, it will not be reported.");
+			return;
+		}
+		
 		this.customMetric(new CustomMetric(__name, __sv));
 	}
 	
@@ -230,6 +238,13 @@ final class __ActiveExecution__
 	{
 		if (__name == null)
 			throw new NullPointerException();
+		
+		// Ignore if too long
+		if (__name.length() > IOpipeConstants.NAME_CODEPOINT_LIMIT)
+		{
+			Logger.warn("Custom metric name too long, it will not be reported.");
+			return;
+		}
 		
 		this.customMetric(new CustomMetric(__name, __lv));
 	}
@@ -303,7 +318,14 @@ final class __ActiveExecution__
 	{
 		if (__s == null)
 			throw new NullPointerException();
-
+		
+		// Ignore if it is too long
+		if (__s.length() > IOpipeConstants.NAME_CODEPOINT_LIMIT)
+		{
+			Logger.warn("Label name too long, it will not be reported.");
+			return;
+		}
+		
 		// Add it
 		Set<String> labels = this._labels;
 		synchronized (labels)
@@ -628,41 +650,20 @@ final class __ActiveExecution__
 			{
 				CustomMetric metric = custmetrics[i];
 				
-				// Check that the name is in the limit
+				// Name and value
 				String xname = metric.name();
-				if (!__ActiveExecution__.__isNameInLimit(xname))
-				{
-					Logger.warn("Metric name exceeds the {} codepoint " +
-						"length limit and will not be reported: {}",
-						IOpipeConstants.NAME_CODEPOINT_LIMIT, xname);
-					continue;
-				}
-				
-				// Check if the value is in range
-				String svalue;
-				if (metric.hasString())
-				{
-					svalue = metric.stringValue();
-					
-					if (!__ActiveExecution__.__isValueInLimit(svalue))
-					{
-						Logger.warn("Metric value exceeds the {} codepoint " +
-							"length limit and will not be reported: {}",
-							IOpipeConstants.VALUE_CODEPOINT_LIMIT, xname);
-						continue;
-					}	
-				}
-				else
-					svalue = null;
+				String svalue = (metric.hasString() ?
+					metric.stringValue() : null);
 				
 				// Write data
 				gen.writeStartObject();
 				
 				gen.write("name", xname);
 				
+				// Should have a long value otherwise
 				if (svalue != null)
 					gen.write("s", svalue);
-				if (metric.hasLong())
+				else
 					gen.write("n", metric.longValue());
 				
 				gen.writeEnd();
@@ -700,17 +701,7 @@ final class __ActiveExecution__
 			gen.writeStartArray("labels");
 			String[] labels = this.getLabels();
 			for (int i = 0, n = labels.length; i < n; i++)
-			{
-				String label = labels[i];
-				if (__ActiveExecution__.__isNameInLimit(label))
-					gen.write(label);
-				
-				// Emit warning
-				else
-					Logger.warn("Label exceeds the {} codepoint limit and " +
-						"will not be reported: {}",
-						IOpipeConstants.NAME_CODEPOINT_LIMIT, label);
-			}
+				gen.write(labels[i]);
 			
 			// End of labels
 			gen.writeEnd();
@@ -786,44 +777,6 @@ final class __ActiveExecution__
 		}
 
 		return new RemoteRequest(RemoteBody.MIMETYPE_JSON, out.toString());
-	}
-	
-	/**
-	 * Checks if the given string is within the name limit before it is
-	 * reported.
-	 *
-	 * @param __s The name to check.
-	 * @return If the name is short enough to be included.
-	 * @throws NullPointerException On null arguments.
-	 * @since 2018/04/11
-	 */
-	private static final boolean __isNameInLimit(String __s)
-		throws NullPointerException
-	{
-		if (__s == null)
-			throw new NullPointerException();
-		
-		return __s.codePointCount(0, __s.length()) <
-			IOpipeConstants.NAME_CODEPOINT_LIMIT;
-	}
-	
-	/**
-	 * Checks if the given string is within the value limit before it is
-	 * reported.
-	 *
-	 * @param __s The name to check.
-	 * @return If the name is short enough to be included.
-	 * @throws NullPointerException On null arguments.
-	 * @since 2018/05/03
-	 */
-	private static final boolean __isValueInLimit(String __s)
-		throws NullPointerException
-	{
-		if (__s == null)
-			throw new NullPointerException();
-		
-		return __s.codePointCount(0, __s.length()) <
-			IOpipeConstants.VALUE_CODEPOINT_LIMIT;
 	}
 	
 	/**

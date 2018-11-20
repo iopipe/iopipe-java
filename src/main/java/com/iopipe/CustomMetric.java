@@ -3,6 +3,7 @@ package com.iopipe;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
+import org.pmw.tinylog.Logger;
 
 /**
  * This represents a custom metric which may have a string or long value,
@@ -48,8 +49,10 @@ public final class CustomMetric
 		if (__name == null || __sv == null)
 			throw new NullPointerException();
 		
-		this.name = __name;
-		this.stringvalue = __sv;
+		this.name =
+			__limitLength(__name, IOpipeConstants.NAME_CODEPOINT_LIMIT);
+		this.stringvalue =
+			__limitLength(__sv, IOpipeConstants.VALUE_CODEPOINT_LIMIT);
 		this.longvalue = 0L;
 		this.haslong = false;
 	}
@@ -68,7 +71,8 @@ public final class CustomMetric
 		if (__name == null)
 			throw new NullPointerException();
 		
-		this.name = __name;
+		this.name = 
+			__limitLength(__name, IOpipeConstants.NAME_CODEPOINT_LIMIT);
 		this.stringvalue = null;
 		this.longvalue = __lv;
 		this.haslong = true;
@@ -227,6 +231,27 @@ public final class CustomMetric
 		}
 		
 		return rv;
+	}
+	
+	/**
+	 * Limit length of metric whatever to the given count.
+	 *
+	 * @param __in The input value.
+	 * @param __lim The length to limit.
+	 * @return The string with its limited length.
+	 * @since 2018/11/20
+	 */
+	static final String __limitLength(String __in, int __lim)
+	{
+		if (__in == null || __in.length() < __lim)
+			return __in;
+		
+		// Record it
+		Logger.warn("Label, custom metric name, or custom metric value " +
+			"exceeds the character length limitation of {} characters.", __lim);
+		
+		// Trim it
+		return __in.substring(0, __lim);
 	}
 }
 
