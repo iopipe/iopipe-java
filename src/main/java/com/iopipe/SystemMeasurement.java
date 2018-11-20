@@ -200,7 +200,7 @@ public final class SystemMeasurement
 					// Free memory
 					else if ((bits & 0b10) == 0 && ln.startsWith("MemFree:"))
 					{
-						mf = __readMemValue(ln.substring(9));
+						mf = __readMemValue(ln.substring(8));
 						bits |= 0b10;
 					}
 				}
@@ -272,7 +272,7 @@ public final class SystemMeasurement
 					// VMRss
 					else if ((bits & 0b1000) == 0 && ln.startsWith("VmRSS:"))
 					{
-						vmrss = (int)(__readMemValue(ln.substring(8)) / 1024);
+						vmrss = (int)(__readMemValue(ln.substring(6)) / 1024);
 						bits |= 0b1000;
 					}
 				}
@@ -472,17 +472,20 @@ public final class SystemMeasurement
 		if (__v == null)
 			return 0;
 		
+		// Trim first
+		__v = __v.trim();
+		
 		// Read multiplier
-		int mul;
+		long mul;
 		if (__v.endsWith("kB"))
 		{
 			mul = 1024;
-			__v = __v.substring(__v.length() - 2);
+			__v = __v.substring(0, __v.length() - 2).trim();
 		}
 		else
 			mul = 1;
 		
-		return Integer.parseInt(__v.trim(), 10) * mul;
+		return Long.parseLong(__v, 10) * mul;
 	}
 	
 	/**
