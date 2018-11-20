@@ -34,9 +34,12 @@ public final class FirehoseDecoder
 	 * @since 2018/04/23
 	 */
 	@Override
-	public final Class<?> decodes()
+	public final String[] decodes()
 	{
-		return KinesisFirehoseEvent.class;
+		return new String[]
+			{
+				"com.amazonaws.services.lambda.runtime.events.KinesisFirehoseEvent",
+			};
 	}
 	
 	/**

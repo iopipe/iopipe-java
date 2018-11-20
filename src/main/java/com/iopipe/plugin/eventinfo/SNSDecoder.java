@@ -63,9 +63,12 @@ public final class SNSDecoder
 	 * @since 2018/04/23
 	 */
 	@Override
-	public final Class<?> decodes()
+	public final String[] decodes()
 	{
-		return SNSEvent.class;
+		return new String[]
+			{
+				"com.amazonaws.services.lambda.runtime.events.SNSEvent",
+			};
 	}
 	
 	/**

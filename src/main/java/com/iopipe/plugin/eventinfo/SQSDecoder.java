@@ -62,9 +62,12 @@ public final class SQSDecoder
 	 * @since 2018/08/02
 	 */
 	@Override
-	public final Class<?> decodes()
+	public final String[] decodes()
 	{
-		return SQSEvent.class;
+		return new String[]
+			{
+				"com.amazonaws.services.lambda.runtime.events.SQSEvent",
+			};
 	}
 	
 	/**

@@ -78,9 +78,12 @@ public final class CloudFrontDecoder
 	 * @since 2018/04/23
 	 */
 	@Override
-	public final Class<?> decodes()
+	public final String[] decodes()
 	{
-		return CloudFrontEvent.class;
+		return new String[]
+			{
+				"com.amazonaws.services.lambda.runtime.events.CloudFrontEvent",
+			};
 	}
 	
 	/**

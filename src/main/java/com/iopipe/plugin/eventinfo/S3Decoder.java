@@ -95,9 +95,13 @@ public final class S3Decoder
 	 * @since 2018/04/23
 	 */
 	@Override
-	public final Class<?> decodes()
+	public final String[] decodes()
 	{
-		return S3EventNotification.class;
+		return new String[]
+			{
+				"com.amazonaws.services.lambda.runtime.events.S3Event",
+				"com.amazonaws.services.s3.event.S3EventNotification",
+			};
 	}
 	
 	/**

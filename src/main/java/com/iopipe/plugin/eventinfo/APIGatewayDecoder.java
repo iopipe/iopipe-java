@@ -48,9 +48,12 @@ public final class APIGatewayDecoder
 	 * @since 2018/04/22
 	 */
 	@Override
-	public final Class<?> decodes()
+	public final String[] decodes()
 	{
-		return APIGatewayProxyRequestEvent.class;
+		return new String[]
+			{
+				"com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent",
+			};
 	}
 	
 	/**
