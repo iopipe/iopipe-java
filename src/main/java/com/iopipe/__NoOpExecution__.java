@@ -145,13 +145,9 @@ final class __NoOpExecution__
 	 * @since 2018/08/27
 	 */
 	@Override
-	public final <C extends IOpipePluginExecution> C plugin(Class<C> __cl)
-		throws ClassCastException, NoSuchPluginException, NullPointerException
+	public final <C extends IOpipePluginExecution> C optionalPlugin(Class<C> __cl)
 	{
-		if (__cl == null)
-			throw new NullPointerException();
-		
-		throw new NoSuchPluginException("IOpipe is not currently active.");
+		return null;
 	}
 	
 	/**

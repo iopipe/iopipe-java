@@ -84,9 +84,13 @@ final class __ActiveExecution__
 	protected final Object input;
 	
 	/** Plugins which currently have an active exection state. */
-	private final Map<Class<? extends IOpipePluginExecution>,
-		IOpipePluginExecution> _active =
-		new HashMap<>();
+	private final __PluginState__[] _active;
+	
+	/** Plugin information. */
+	private final __Plugins__.__Info__[] _pinfos;
+	
+	/** Plugin execution to index. */
+	private final Map<Class<? extends IOpipePluginExecution>, Integer> _pxtoi;
 	
 	/** The exception which may have been thrown. */
 	private final AtomicReference<Throwable> _thrown =
@@ -119,18 +123,19 @@ final class __ActiveExecution__
 	 * executed.
 	 * @param __sns The start time in monotonic nanoseconds.
 	 * @param __cold Has this been coldstarted?
+	 * @param __p Plugin information.
 	 * @throws NullPointerException On null arguments except for
 	 * {@code __passed}.
 	 * @since 2018/01/19
 	 */
 	__ActiveExecution__(IOpipeService __sv, IOpipeConfiguration __conf,
 		Context __context, long __st,
-		Object __input, long __sns, boolean __cold)
+		Object __input, long __sns, boolean __cold, __Plugins__ __p)
 		throws NullPointerException
 	{
 		super(__cold);
 		
-		if (__sv == null || __conf == null || __context == null)
+		if (__sv == null || __conf == null || __context == null || __p == null)
 			throw new NullPointerException();
 		
 		this.service = __sv;
@@ -139,6 +144,15 @@ final class __ActiveExecution__
 		this.starttimemillis = __st;
 		this.input = __input;
 		this.starttimemononanos = __sns;
+		
+		// Initialize state and lookup for plugins
+		int numplugins = __p.numplugins;
+		__PluginState__[] active = new __PluginState__[numplugins];
+		for (int i = 0; i < numplugins; i++)
+			active[i] = new __PluginState__();
+		this._pxtoi = __p._xtoi;
+		this._active = active;
+		this._pinfos = __p._infos;
 	}
 	
 	/**
@@ -339,65 +353,65 @@ final class __ActiveExecution__
 	 * @since 2018/01/20
 	 */
 	@Override
-	public final <C extends IOpipePluginExecution> C plugin(Class<C> __cl)
-		throws ClassCastException, NoSuchPluginException, NullPointerException
+	public final <C extends IOpipePluginExecution> C optionalPlugin(Class<C> __cl)
 	{
 		if (__cl == null)
 			throw new NullPointerException();
 		
-		// Lock due to multiple threads
-		Map<Class<? extends IOpipePluginExecution>, IOpipePluginExecution>
-			active = this._active;
-		synchronized (active)
+		// Get the index of the plugin
+		Integer dxi = this._pxtoi.get(__cl);
+		if (dxi == null)
+			return null;
+		int dx = dxi;
+		
+		// Check state to see if it was initialized already
+		__PluginState__ state = this._active[dxi];
+		IOpipePluginExecution rv = state._exec;
+		if (rv != null)
+			return __cl.cast(rv);
+			
+		// Was not enabled or failed to initialize
+		if (state._disabledorfailed)
+			return null;
+		
+		// Lock on the state because other plugins can initialize at the
+		// same time
+		synchronized (state)
 		{
-			// Need to create the plugin if it does not exist
-			IOpipePluginExecution rv = active.get(__cl);
-			if (rv == null)
+			// Double check initialization
+			rv = state._exec;
+			if (rv != null)
+				return __cl.cast(rv);
+			
+			// Is the plugin disabled?
+			__Plugins__.__Info__ pinfo = this._pinfos[dx];
+			if (pinfo == null || !pinfo.isEnabled())
 			{
-				// Was pre-cached to not exist
-				if (active.containsKey(__cl))
-					throw new NoSuchPluginException(String.format(
-						"No plugin exists for %s, it is disabled, or it " +
-						"failed to be initialized.", __cl));
-				
-				// If the plugin fails to initialize due to some exception
-				// instead of just trying again treat it as if it were
-				// disabled.
-				__Plugins__.__Info__ info;
-				try
-				{
-					info = this.service._plugins.__get(__cl);
-				}
-				catch (Exception e)
-				{
-					info = null;
-					
-					// Just log it
-					Logger.error(e, "Failed to initialize plugin.");
-				}
-				
-				// It is possible that the plugin does not exist or is
-				// disabled, it could be requested multiple times so cache it
-				// Or initialization failed
-				if (info == null || !info.isEnabled())
-				{
-					active.put(__cl, null);
-					throw new NoSuchPluginException(String.format(
-						"No plugin exists for %s or it is disabled.", __cl));
-				}
-				
-				// Initialize the plugin's execution state
-				rv = info.plugin().execute(this);
-				if (rv == null)
-				{
-					active.put(__cl, null);
-					throw new NoSuchPluginException(String.format(
-						"Could create execution instance for plugin.", __cl));
-				}
-				active.put(__cl, rv);
+				state._disabledorfailed = true;
+				return null;
 			}
 			
-			return  __cl.cast(rv);
+			// Try to initialize the plugin
+			try
+			{
+				rv = pinfo.plugin().execute(this);
+				
+				// Store it for later use
+				state._exec = rv;
+			}
+			
+			// Could not initialize
+			catch (Throwable t)
+			{
+				// Set as disabled
+				state._disabledorfailed = true;
+				
+				// Log it
+				Logger.error(t, "Failed to initialize plugin {}.", __cl);
+			}
+			
+			// Return the execution
+			return __cl.cast(rv);
 		}
 	}
 	
@@ -707,15 +721,17 @@ final class __ActiveExecution__
 			gen.writeEnd();
 			
 			// Record plugins which are being used
-			Map<Class<? extends IOpipePluginExecution>, IOpipePluginExecution>
-				active = this._active;
-			__Plugins__.__Info__ plugins[] = this.service._plugins.__info();
+			__PluginState__[] pactive = this._active;
+			__Plugins__.__Info__ plugins[] = this._pinfos;
 			if (plugins.length > 0)
 			{
 				gen.writeStartArray("plugins");
 				
-				for (__Plugins__.__Info__ i : plugins)
+				for (int x = 0, n = plugins.length; x < n; x++)
 				{
+					__PluginState__ active = pactive[x];
+					__Plugins__.__Info__ i = plugins[x];
+					
 					gen.writeStartObject();
 					
 					gen.write("name", i.name());
@@ -739,11 +755,7 @@ final class __ActiveExecution__
 					{
 						// If a plugin was executed then it will have a state
 						// to which to obtain information from
-						IOpipePluginExecution iope;
-						synchronized (active)
-						{
-							iope = active.get(i.executionClass());
-						}
+						IOpipePluginExecution iope = active._exec;
 						
 						// If it does define an extra object then record all
 						// of the fields
@@ -788,6 +800,20 @@ final class __ActiveExecution__
 	void __setThrown(Throwable __t)
 	{
 		this._thrown.compareAndSet(null, __t);
+	}
+	
+	/**
+	 * Contains the state of the plugin.
+	 *
+	 * @since 2018/11/20
+	 */
+	static final class __PluginState__
+	{
+		/** The execution for the plugin. */
+		volatile IOpipePluginExecution _exec;
+		
+		/** Did the plugin fail to initialize or is disabled? */
+		boolean _disabledorfailed;
 	}
 }
 

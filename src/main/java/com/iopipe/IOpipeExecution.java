@@ -159,18 +159,19 @@ public abstract class IOpipeExecution
 	
 	/**
 	 * This returns an instance of a plugin based on the class type of its
-	 * interface.
+	 * interface, if the plugin does not exist then {@code null} is returned.
 	 *
 	 * @param <C> The class type of the execution state.
 	 * @param __cl The class object of the execution state.
-	 * @return The instance of the plugin's execution state.
+	 * @return The instance of the plugin's execution state or {@code null}
+	 * if no such plugin exists.
 	 * @throws ClassCastException If the class type is not valid.
-	 * @throws NoSuchPluginException If the plugin does not exist.
 	 * @throws NullPointerException On null arguments.
-	 * @since 2018/01/20
+	 * @since 2018/01/23
 	 */
-	public abstract <C extends IOpipePluginExecution> C plugin(Class<C> __cl)
-		throws ClassCastException, NoSuchPluginException, NullPointerException;
+	public abstract <C extends IOpipePluginExecution> C optionalPlugin(
+		Class<C> __cl)
+		throws ClassCastException, NullPointerException;
 	
 	/**
 	 * Returns the service which ran this execution.
@@ -253,28 +254,24 @@ public abstract class IOpipeExecution
 	
 	/**
 	 * This returns an instance of a plugin based on the class type of its
-	 * interface, if the plugin does not exist then {@code null} is returned.
+	 * interface.
 	 *
 	 * @param <C> The class type of the execution state.
 	 * @param __cl The class object of the execution state.
-	 * @return The instance of the plugin's execution state or {@code null}
-	 * if no such plugin exists.
+	 * @return The instance of the plugin's execution state.
 	 * @throws ClassCastException If the class type is not valid.
+	 * @throws NoSuchPluginException If the plugin does not exist.
 	 * @throws NullPointerException On null arguments.
-	 * @since 2018/01/23
+	 * @since 2018/01/20
 	 */
-	public final <C extends IOpipePluginExecution> C optionalPlugin(
-		Class<C> __cl)
-		throws ClassCastException, NullPointerException
+	public final <C extends IOpipePluginExecution> C plugin(Class<C> __cl)
+		throws ClassCastException, NoSuchPluginException, NullPointerException
 	{
-		try
-		{
-			return this.plugin(__cl);
-		}
-		catch (NoSuchPluginException e)
-		{
-			return null;
-		}
+		C rv = this.optionalPlugin(__cl);
+		if (rv == null)
+			throw new NoSuchPluginException("No plugin exists, it is disabled, " +
+				"or it failed to initialize for execution class " + __cl);
+		return rv;
 	}
 	
 	/**

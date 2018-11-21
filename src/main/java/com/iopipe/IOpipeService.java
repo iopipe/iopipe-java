@@ -324,8 +324,10 @@ public final class IOpipeService
 		boolean coldstarted = !this._coldstartflag.getAndSet(true);
 		
 		// Setup execution information
-		IOpipeExecution exec = new __ActiveExecution__(this, config, __context,
-			nowtime, __input, nowmono, coldstarted);
+		__Plugins__ plugins = this._plugins;
+		__Plugins__.__Info__[] pinfos = plugins.__info();
+		__ActiveExecution__ exec = new __ActiveExecution__(this, config,
+			__context, nowtime, __input, nowmono, coldstarted, plugins);
 		
 		// Use a reference to allow the execution to be garbage collected if
 		// it is no longer referred to or is in the stack of any method.
@@ -369,8 +371,7 @@ public final class IOpipeService
 			exec.label("@iopipe/coldstart");
 		
 		// Run pre-execution plugins
-		__Plugins__.__Info__[] plugins = this._plugins.__info();
-		for (__Plugins__.__Info__ i : plugins)
+		for (__Plugins__.__Info__ i : pinfos)
 			if (i.isEnabled())
 				try
 				{
@@ -404,7 +405,7 @@ public final class IOpipeService
 		}
 		
 		// Run post-execution plugins
-		for (__Plugins__.__Info__ i : plugins)
+		for (__Plugins__.__Info__ i : pinfos)
 			if (i.isEnabled())
 				try
 				{
