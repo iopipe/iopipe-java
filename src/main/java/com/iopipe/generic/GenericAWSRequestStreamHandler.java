@@ -37,7 +37,7 @@ public final class GenericAWSRequestStreamHandler
 	/**
 	 * Initializes the stream handler with the given entry point.
 	 *
-	 * @param __c The entry class.
+	 * @param __cl The entry class.
 	 * @param __m The entry method.
 	 * @throws InvalidEntryPointException If the entry point is not valid.
 	 * @throws NullPointerException On null arguments.

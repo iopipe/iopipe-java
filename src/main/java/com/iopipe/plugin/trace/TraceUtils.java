@@ -83,7 +83,6 @@ public final class TraceUtils
 	 *
 	 * @param __name The name of the measurement.
 	 * @param __func The function to call.
-	 * @return The return value of the function.
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/10/03
 	 */
