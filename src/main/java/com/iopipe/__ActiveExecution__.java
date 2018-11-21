@@ -575,8 +575,10 @@ final class __ActiveExecution__
 					gen.writeEnd();
 					
 					// Linux
-					gen.writeStartObject("linux");
+					if (_IS_LINUX)
 					{
+						gen.writeStartObject("linux");
+						
 						// PID
 						gen.writeStartObject("pid");
 						{
@@ -617,8 +619,10 @@ final class __ActiveExecution__
 				  			gen.writeEnd();
 						}
 						gen.writeEnd();
+						
+						// End of Linux
+						gen.writeEnd();
 					}
-					gen.writeEnd();
 				}
 				gen.writeEnd();
 			}
