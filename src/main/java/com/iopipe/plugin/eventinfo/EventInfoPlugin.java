@@ -14,8 +14,7 @@ import com.iopipe.plugin.IOpipePluginPreExecutable;
  * @since 2018/04/22
  */
 public class EventInfoPlugin
-	implements IOpipePlugin, IOpipePluginPostExecutable,
-		IOpipePluginPreExecutable
+	implements IOpipePlugin, IOpipePluginPostExecutable
 {
 	/** Default set of decoders, lazily initialized. */
 	private volatile EventInfoDecoders _decoders;
@@ -91,20 +90,6 @@ public class EventInfoPlugin
 			throw new NullPointerException();
 		
 		((EventInfoExecution)__e).__post();
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * @since 2018/04/23
-	 */
-	@Override
-	public void preExecute(IOpipePluginExecution __e)
-		throws NullPointerException
-	{
-		if (__e == null)
-			throw new NullPointerException();
-		
-		((EventInfoExecution)__e).__pre();
 	}
 	
 	/**

@@ -1,10 +1,13 @@
 package com.iopipe;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.FileStore;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -168,15 +171,49 @@ public final class SystemMeasurement
 	 */
 	public static Memory measureMemory()
 	{
-		// Memory information
-		Map<String, String> meminfo = __readMap(Paths.get("/proc/meminfo"));
-		long mtkib = (mtkib = __readInt(
-			meminfo.getOrDefault("MemTotal", "0")));
-		long mfkib = (mfkib = __readInt(
-			meminfo.getOrDefault("MemFree", "0")));
+		long mt = 0,
+			mf = 0;
 		
-		// Memory information is in KiB, so just multiply the values for now
-		return new Memory(mtkib * 1024L, mfkib * 1024L);
+		// Read in fields
+		int bits = 0;
+		try (BufferedReader br = new BufferedReader(new InputStreamReader(
+			Files.newInputStream(Paths.get("/proc/meminfo"),
+			StandardOpenOption.READ))))
+		{
+			// While these are not read
+			while (bits != 0b11)
+			{
+				String ln = br.readLine();
+				if (ln == null)
+					break;
+				
+				// Parse values
+				try
+				{
+					// Total memory
+					if ((bits & 0b01) == 0 && ln.startsWith("MemTotal:"))
+					{
+						mt = __readMemValue(ln.substring(9));
+						bits |= 0b01;
+					}
+					
+					// Free memory
+					else if ((bits & 0b10) == 0 && ln.startsWith("MemFree:"))
+					{
+						mf = __readMemValue(ln.substring(8));
+						bits |= 0b10;
+					}
+				}
+				catch (NumberFormatException e)
+				{
+				}
+			}
+		}
+		catch (IOException e)
+		{
+		}
+		
+		return new Memory(mt, mf);
 	}
 	
 	/**
@@ -189,14 +226,66 @@ public final class SystemMeasurement
 	 */
 	public static Stat measureStat(int __id)
 	{
-		// Parse current process info
-		Map<String, String> pidstatus = __readMap(
-			Paths.get("/proc/" + (__id == SELF_PROCESS ? "self" : __id) +
-			"/status"));
-		return new Stat(__readInt(pidstatus.getOrDefault("Pid", "0")),
-			__readInt(pidstatus.getOrDefault("FDSize", "0")),
-			__readInt(pidstatus.getOrDefault("Threads", "0")),
-			__readInt(pidstatus.getOrDefault("VmRSS", "0")));
+		int pid = 0,
+			fdsize = 0,
+			threads = 0,
+			vmrss = 0;
+		
+		// Read in fields
+		int bits = 0;
+		try (BufferedReader br = new BufferedReader(new InputStreamReader(
+			Files.newInputStream(Paths.get("/proc/" +
+				(__id == SELF_PROCESS ? "self" : __id) + "/status"),
+			StandardOpenOption.READ))))
+		{
+			// While these are not read
+			while (bits != 0b1111)
+			{
+				String ln = br.readLine();
+				if (ln == null)
+					break;
+				
+				// Parse values
+				try
+				{
+					// PID
+					if ((bits & 0b0001) == 0 && ln.startsWith("Pid:"))
+					{
+						pid = Integer.parseInt(ln.substring(4).trim());
+						bits |= 0b0001;
+					}
+					
+					// FDSize
+					else if ((bits & 0b0010) == 0 && ln.startsWith("FDSize:"))
+					{
+						fdsize = Integer.parseInt(ln.substring(7).trim());
+						bits |= 0b0010;
+					}
+					
+					// Threads
+					else if ((bits & 0b0100) == 0 && ln.startsWith("Threads:"))
+					{
+						threads = Integer.parseInt(ln.substring(8).trim());
+						bits |= 0b0100;
+					}
+					
+					// VMRss
+					else if ((bits & 0b1000) == 0 && ln.startsWith("VmRSS:"))
+					{
+						vmrss = (int)(__readMemValue(ln.substring(6)) / 1024);
+						bits |= 0b1000;
+					}
+				}
+				catch (NumberFormatException e)
+				{
+				}
+			}
+		}
+		catch (IOException e)
+		{
+		}
+		
+		return new Stat(pid, fdsize, threads, vmrss);
 	}
 	
 	/**
@@ -232,16 +321,19 @@ public final class SystemMeasurement
 		if (__p == null)
 			throw new NullPointerException();
 		
-		try
+		try (BufferedReader br = new BufferedReader(new InputStreamReader(
+			Files.newInputStream(__p, StandardOpenOption.READ))))
 		{
-			for (String l : Files.readAllLines(__p))
+			for (;;)
 			{
-				l = l.trim();
-				if (!l.isEmpty())
-					return l;
+				String ln = br.readLine();
+				if (ln == null)
+					return __def;
+				
+				ln = ln.trim();
+				if (!ln.isEmpty())
+					return ln;
 			}
-			
-			return __def;
 		}
 		
 		catch (IOException e)
@@ -366,6 +458,34 @@ public final class SystemMeasurement
 		}
 		
 		return rv;
+	}
+	
+	/**
+	 * Reads memory value.
+	 *
+	 * @param __v The input field value.
+	 * @return The read value.
+	 * @since 2018/11/20
+	 */
+	private static long __readMemValue(String __v)
+	{
+		if (__v == null)
+			return 0;
+		
+		// Trim first
+		__v = __v.trim();
+		
+		// Read multiplier
+		long mul;
+		if (__v.endsWith("kB"))
+		{
+			mul = 1024;
+			__v = __v.substring(0, __v.length() - 2).trim();
+		}
+		else
+			mul = 1;
+		
+		return Long.parseLong(__v, 10) * mul;
 	}
 	
 	/**

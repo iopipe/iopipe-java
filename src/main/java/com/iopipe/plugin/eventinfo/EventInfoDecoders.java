@@ -4,6 +4,7 @@ import com.iopipe.CustomMetric;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,12 +32,12 @@ import org.pmw.tinylog.Logger;
 public final class EventInfoDecoders
 {
 	/** Decoders which have been registered. */
-	private final Map<Class<?>, EventInfoDecoder> _decoders =
+	private final Map<String, EventInfoDecoder> _decoders =
 		new LinkedHashMap<>();
 	
-	/** Cache of classes that have been registered for type lookup. */
-	private volatile Class<?>[] _clcache =
-		new Class<?>[0];
+	/** Cache of strings that have been registered for type lookup. */
+	private volatile String[] _clcache =
+		new String[0];
 	
 	/** Cache of decoders that are available based on the class. */
 	private volatile EventInfoDecoder[] _decache =
@@ -44,6 +45,9 @@ public final class EventInfoDecoders
 	
 	/** The last decoder which was used. */
 	private EventInfoDecoder _last;
+	
+	/** The last class used. */
+	private String _lastname;
 	
 	/**
 	 * Initializes the event decoders with the default decoders.
@@ -140,31 +144,33 @@ public final class EventInfoDecoders
 		if (__cl == null)
 			throw new NullPointerException();
 		
+		// Get the name of this class
+		String clname = __cl.getName();
+		
 		// Check to see if the last decoder which was found matches this
 		// type so we do not need to look at every single class again if it is
 		// the same
 		EventInfoDecoder last = this._last;
 		if (last != null)
 		{
-			Class<?> decodestype = last.decodes();
+			String decodestype = this._lastname;
 			
-			// Same as or assignable from the last class
-			if (decodestype == __cl || decodestype.isAssignableFrom(__cl))
+			// Same as the last class?
+			if (clname.equals(decodestype))
 				return last;
 		}
 		
 		// Go through the cached set of classes and decoders and check each
 		// individual class
-		Class<?>[] clcache = this._clcache;
+		String[] clcache = this._clcache;
 		EventInfoDecoder[] decache = this._decache;
 		for (int n = Math.min(clcache.length, decache.length),
 			i = 0; i < n; i++)
 		{
-			Class<?> maybe = clcache[i];
+			String maybe = clcache[i];
 			
-			// Same as or is assignable from the class to check
-			if (maybe != null && (maybe == __cl ||
-				maybe.isAssignableFrom(__cl)))
+			// Same name as class
+			if (maybe != null && maybe.equals(clname))
 			{
 				EventInfoDecoder decoder = decache[i];
 				
@@ -172,6 +178,7 @@ public final class EventInfoDecoders
 				// more quickly recycles it rather than searching through the
 				// arrays
 				this._last = decoder;
+				this._lastname = clname;
 				
 				return decoder;
 			}
@@ -196,20 +203,21 @@ public final class EventInfoDecoders
 			throw new NullPointerException();
 		
 		// There must be a class to decode
-		Class<?> decodes = __d.decodes();
-		if (decodes == null)
+		String[] decodes = __d.decodes();
+		if (decodes == null || decodes.length == 0)
 			throw new IllegalStateException("Decoder decodes no class.");
 		
 		// Register it
-		Map<Class<?>, EventInfoDecoder> decoders = this._decoders;
+		Map<String, EventInfoDecoder> decoders = this._decoders;
 		synchronized (decoders)
 		{
-			decoders.put(decodes, __d);
+			for (String s : decodes)
+				decoders.put(s, __d);
 			
 			// Update class cache
 			int ds = decoders.size();
-			this._clcache = decoders.keySet().<Class<?>>toArray(
-				new Class<?>[ds]);
+			this._clcache = decoders.keySet().<String>toArray(
+				new String[ds]);
 			this._decache = _decoders.values().<EventInfoDecoder>toArray(
 				new EventInfoDecoder[ds]);
 		}

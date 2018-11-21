@@ -11,6 +11,7 @@ import com.iopipe.plugin.trace.TracePlugin;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -28,8 +29,16 @@ import org.pmw.tinylog.Logger;
 final class __Plugins__
 {
 	/** Plugin information per execution class. */
-	private final Map<Class<? extends IOpipePluginExecution>, __Info__> _info =
-		new LinkedHashMap<>();
+	private final Map<Class<? extends IOpipePluginExecution>, __Info__> _info;
+	
+	/** Execution to index. */
+	final Map<Class<? extends IOpipePluginExecution>, Integer> _xtoi;
+	
+	/** Infos. */
+	final __Info__[] _infos;
+	
+	/** The number of plugins available. */
+	protected final int numplugins;
 	
 	/**
 	 * Searches for and initializes the state of plugins.
@@ -45,9 +54,14 @@ final class __Plugins__
 		if (__conf == null)
 			throw new NullPointerException();
 		
+		// Execution class to index
+		Map<Class<? extends IOpipePluginExecution>, Integer> xtoi =
+			new HashMap<>();
+		int at = 0;
+		
 		// Load plugins from services
 		Map<Class<? extends IOpipePluginExecution>, __Info__> info =
-			this._info;
+			new LinkedHashMap<>();
 		for (IOpipePlugin p : __Plugins__.__searchPlugins())
 			try
 			{
@@ -56,7 +70,10 @@ final class __Plugins__
 				Class<? extends IOpipePluginExecution> xcl =
 					i.executionClass();
 				if (!info.containsKey(xcl))
+				{
 					info.put(xcl, i);
+					xtoi.put(xcl, at++);
+				}
 			}
 			
 			// Do not let plugin initailization fail
@@ -65,6 +82,15 @@ final class __Plugins__
 				Logger.error(e, "Failed to initialize plugin {}.",
 					p.getClass().getName());
 			}
+		
+		// Set info
+		this._infos = info.values().<__Info__>toArray(new __Info__[
+			info.size()]);
+		
+		// Count them
+		this._xtoi = xtoi;
+		this._info = info;
+		this.numplugins = info.size();
 	}
 	
 	/**

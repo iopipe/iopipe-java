@@ -21,12 +21,12 @@ public interface EventInfoDecoder
 		throws NullPointerException;
 	
 	/**
-	 * Returns the class this implements a decoder for.
+	 * Returns the class names which this provides a decoder for.
 	 *
-	 * @return The class this provides a decoder for.
-	 * @since 2018/04/22
+	 * @return The classes this decodes for.
+	 * @since 2018/11/20
 	 */
-	public abstract Class<?> decodes();
+	public abstract String[] decodes();
 	
 	/**
 	 * Returns the event type string this will be specified under.

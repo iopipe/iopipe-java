@@ -114,6 +114,10 @@ final class __WrappedConnectionFactory__
 		public RemoteResult send(RequestType __t, RemoteRequest __r)
 			throws NullPointerException, RemoteException
 		{
+			// Remove this debug stuff!
+			if (__t == RequestType.POST)
+				Logger.debug(">>>>>> Request: {}", new String(__r.body()));
+			
 			// Snoop the request being sent to the server to make sure it is
 			// being formed correctly
 			Single single = this.single;

@@ -3,8 +3,8 @@
  * with the IOpipe service.
  *
  * The {@link com.amazonaws.services.lambda.runtime.Context} object can be
- * obtained by invoking the {@link IOpipeExecution#context()} method in the
- * instance of an {@link IOpipeExecution}.
+ * obtained by invoking the {@link com.iopipe.IOpipeExecution#context()}
+ * method in the instance of an {@link com.iopipe.IOpipeExecution}.
  *
  * @since 2017/12/12
  */

@@ -79,25 +79,20 @@ public final class IOpipeService
 	/** The configuration used to connect to the service. */
 	protected final IOpipeConfiguration config;
 	
-	/** The connection to the server. */
-	protected final RemoteConnection connection;
-	
 	/** Is the service enabled and working? */
 	protected final boolean enabled;
 	
 	/** The coldstart flag indicator to use. */
 	private final AtomicBoolean _coldstartflag;
 	
+	/** The sender where requests go. */
+	final __RequestSender__ _rsender;
+	
+	/** The manager for timeouts. */
+	final __TimeOutTracker__ _timeout;
+	
 	/** Plugin state. */
 	final __Plugins__ _plugins;
-	
-	/** The number of times this context has been executed. */
-	private final AtomicInteger _execcount =
-		new AtomicInteger();
-	
-	/** The number of times the server replied with a code other than 2xx. */
-	private final AtomicInteger _badresultcount =
-		new AtomicInteger();
 	
 	/**
 	 * Initializes the service using the default configuration.
@@ -144,8 +139,16 @@ public final class IOpipeService
 		if (!enabled || connection == null)
 			connection = new NullConnection();
 		
+		// This class manages sending all our requests
+		__RequestSender__ rsender;
+		this._rsender = (rsender = new __RequestSender__(connection));
+		
+		// Setup timeout tracker
+		this._timeout = new __TimeOutTracker__(rsender,
+			__config.getTimeOutWindow());
+		
+		// Store config and such
 		this.enabled = enabled;
-		this.connection = connection;
 		this.config = __config;
 		
 		// Detect all available plugins
@@ -166,19 +169,6 @@ public final class IOpipeService
 	public final IOpipeConfiguration config()
 	{
 		return this.config;
-	}
-	
-	/**
-	 * Returns the number of requests which would have been accepted by the
-	 * service if the configuration was correct and the service was enabled.
-	 *
-	 * @return The number of requests which would have been accepted by the
-	 * server.
-	 * @since 2017/12/18
-	 */
-	public final int getBadResultCount()
-	{
-		return this._badresultcount.get();
 	}
 	
 	/**
@@ -327,9 +317,6 @@ public final class IOpipeService
 		long nowtime = System.currentTimeMillis(),
 			nowmono = System.nanoTime();
 		
-		// Count executions
-		int execcount = this._execcount.incrementAndGet();
-		
 		// Is this enabled?
 		boolean enabled = config.isEnabled();
 				
@@ -337,8 +324,10 @@ public final class IOpipeService
 		boolean coldstarted = !this._coldstartflag.getAndSet(true);
 		
 		// Setup execution information
-		IOpipeExecution exec = new __ActiveExecution__(this, config, __context,
-			nowtime, __input, nowmono, coldstarted);
+		__Plugins__ plugins = this._plugins;
+		__Plugins__.__Info__[] pinfos = plugins.__info();
+		__ActiveExecution__ exec = new __ActiveExecution__(this, config,
+			__context, nowtime, __input, nowmono, coldstarted, plugins);
 		
 		// Use a reference to allow the execution to be garbage collected if
 		// it is no longer referred to or is in the stack of any method.
@@ -359,8 +348,6 @@ public final class IOpipeService
 		{
 			// Disabled lambdas could still rely on measurements, despite them
 			// not doing anything useful at all
-			this._badresultcount.incrementAndGet();
-			
 			try
 			{
 				return __func.apply(exec);
@@ -373,13 +360,18 @@ public final class IOpipeService
 			}
 		}
 		
+		// Keep track of this execution and make sure that timeouts trigger
+		// if they occur, the atomic is so that only a single event is sent
+		AtomicBoolean execsent = new AtomicBoolean();
+		this._timeout.__track(__context, exec, execsent,
+			Thread.currentThread());
+		
 		// Add auto-label for coldstart
 		if (coldstarted)
 			exec.label("@iopipe/coldstart");
 		
 		// Run pre-execution plugins
-		__Plugins__.__Info__[] plugins = this._plugins.__info();
-		for (__Plugins__.__Info__ i : plugins)
+		for (__Plugins__.__Info__ i : pinfos)
 			if (i.isEnabled())
 				try
 				{
@@ -392,18 +384,6 @@ public final class IOpipeService
 					Logger.error(e, "Could not run pre-executable plugin {}.",
 						i);
 				}
-		
-		// Register timeout with this execution number so if execution takes
-		// longer than expected a timeout is generated
-		// Timeouts can be disabled if the timeout window is zero, but they
-		// may also be unsupported if the time remaining in the context is zero
-		__TimeOutWatchDog__ watchdog = null;
-		int windowtime,
-			remainingtime = __context.getRemainingTimeInMillis();
-		if ((windowtime = config.getTimeOutWindow()) > 0 &&
-			remainingtime > 0 && remainingtime < Integer.MAX_VALUE)
-			watchdog = new __TimeOutWatchDog__(this, __context,
-				Thread.currentThread(), windowtime, coldstarted, exec);
 		
 		// Run the function
 		R value = null;
@@ -424,12 +404,8 @@ public final class IOpipeService
 			exec.label("@iopipe/error");
 		}
 		
-		// It died, so stop the watchdog
-		if (watchdog != null)
-			watchdog.__finished();
-		
 		// Run post-execution plugins
-		for (__Plugins__.__Info__ i : plugins)
+		for (__Plugins__.__Info__ i : pinfos)
 			if (i.isEnabled())
 				try
 				{
@@ -443,10 +419,10 @@ public final class IOpipeService
 						i);
 				}
 		
-		// Generate and send result to server
-		if (watchdog == null || !watchdog._generated.getAndSet(true))
+		// Only send the request if the watchdog did not
+		if (execsent.compareAndSet(false, true))
 			if (exec instanceof __ActiveExecution__)
-				this.__sendRequest(((__ActiveExecution__)exec).__buildRequest());
+				this._rsender.__send(((__ActiveExecution__)exec).__buildRequest());
 		
 		// Clear the last execution that is occuring, but only if ours was
 		// still associated with it
@@ -461,49 +437,6 @@ public final class IOpipeService
 			else
 				throw (RuntimeException)exception;
 		return value;
-	}
-	
-	/**
-	 * Sends the specified request to the server.
-	 *
-	 * @param __r The request to send to the server.
-	 * @return The result of the report.
-	 * @throws NullPointerException On null arguments.
-	 * @since 2017/12/15
-	 */
-	final RemoteResult __sendRequest(RemoteRequest __r)
-		throws NullPointerException
-	{
-		if (__r == null)
-			throw new NullPointerException();
-		
-		// Generate report
-		try
-		{
-			RemoteResult result = this.connection.send(RequestType.POST, __r);
-			
-			// Only the 200 range is valid for okay responses
-			int code = result.code();
-			if (!(code >= 200 && code < 300))
-			{
-				this._badresultcount.incrementAndGet();
-				
-				// Only emit errors for failed requests
-				Logger.error("Request {} failed with result {}.",
-					__r, result);
-			}
-			
-			return result;
-		}
-		
-		// Failed to write to the server
-		catch (RemoteException e)
-		{
-			Logger.error(e, "Request {} failed due to exception.", __r);
-			
-			this._badresultcount.incrementAndGet();
-			return new RemoteResult(503, RemoteBody.MIMETYPE_JSON, "");
-		}
 	}
 	
 	/**
@@ -522,28 +455,6 @@ public final class IOpipeService
 			_INSTANCE = (rv = new IOpipeService());
 		}
 		return rv;
-	}
-	
-	/**
-	 * Shows string representation of the body.
-	 *
-	 * @param __b The body to decode.
-	 * @return The string result.
-	 * @since 2018/02/24
-	 */
-	private static final String __debugBody(RemoteBody __b)
-	{
-		try
-		{
-			String rv = __b.bodyAsString();
-			if (rv.indexOf('\0') >= 0)
-				return "BINARY DATA";
-			return rv;
-		}
-		catch (Throwable t)
-		{
-			return "Could not decode!";
-		}
 	}
 	
 	/**
