@@ -95,7 +95,7 @@ public final class IOpipeConfiguration
 	public static final IOpipeConfiguration DISABLED_CONFIG;
 	
 	/** Default configuration to use, cached. */
-	private static IOpipeConfiguration _DEFAULT_CONFIG;
+	public static final IOpipeConfiguration DEFAULT_CONFIG;
 	
 	/** Should the service be enabled? */
 	protected final boolean enabled;
@@ -171,6 +171,22 @@ public final class IOpipeConfiguration
 		cb.setSignerUrl(IOpipeConstants.DEFAULT_SIGNER_URL);
 		
 		DISABLED_CONFIG = cb.build();
+		
+		// Try to initialize a default configuration, if the configuration
+		// is not valid due to missing values then use the disabled one
+		IOpipeConfiguration use = DISABLED_CONFIG;
+		try
+		{
+			Logger.debug("Initializing default configuration.");
+			use = IOpipeConfiguration.byDefault();
+		}
+		catch (IllegalArgumentException|SecurityException e)
+		{
+			Logger.error(e, "Failed to initialize default configuration, " +
+				"your method will still run however it will not report " +
+				"anything to IOpipe.");
+		}
+		DEFAULT_CONFIG = use;
 	}
 	
 	/**
@@ -427,10 +443,6 @@ public final class IOpipeConfiguration
 	 */
 	public static final IOpipeConfiguration byDefault()
 	{
-		IOpipeConfiguration brv = _DEFAULT_CONFIG;
-		if (brv != null)
-			return brv;
-		
 		// Derive settings from environment variables
 		try
 		{
@@ -511,8 +523,7 @@ public final class IOpipeConfiguration
 			rv.setSignerUrl(IOpipeConstants.DEFAULT_SIGNER_URL);
 			
 			// Cache it for future calls
-			_DEFAULT_CONFIG = (brv = rv.build());
-			return brv;
+			return rv.build();
 		}
 		
 		// Prevent configuration code issues from taking down the lambda
@@ -521,7 +532,6 @@ public final class IOpipeConfiguration
 			Logger.error(e, "Failure building default configuration, disabling IOpipe.");
 			
 			// Use disabled configuration
-			_DEFAULT_CONFIG = IOpipeConfiguration.DISABLED_CONFIG;
 			return IOpipeConfiguration.DISABLED_CONFIG;
 		}
 	}
