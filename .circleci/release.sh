@@ -1,5 +1,22 @@
 #!/bin/sh -x
 
+# Environment variables used
+if [ -z "$BINTRAY_USER" ]
+then
+	echo "BINTRAY_USER not set".
+	exit 9
+fi
+if [ -z "$BINTRAY_APITOKEN" ]
+then
+	echo "BINTRAY_APITOKEN not set, this is your API key in your profile."
+	exit 9
+fi
+
+# Export these
+export BINTRAY_SUBJECT="iopipe"
+export BINTRAY_REPO="iopipe"
+export BINTRAY_PACKAGE="iopipe"
+
 # We need node
 if ! which node
 then
@@ -37,7 +54,7 @@ then
 fi
 
 # Create version first
-if ! ./bincreatever.js
+if ! ./bincreatever.js "$__pom_ver"
 then
 	echo "Failed to create version!"
 	exit 3
@@ -65,14 +82,14 @@ done
 rm -rvf "/tmp/$$/"
 
 # Publish everything
-if ! ./binpublish.js
+if ! ./binpublish.js "$__pom_ver"
 then
 	echo "Failed to publish!"
 	exit 5
 fi
 
 # Maven central sync
-if ! ./binmcsync.js
+if ! ./binmcsync.js "$__pom_ver"
 then
 	echo "Failed to sync to maven central!"
 	exit 5

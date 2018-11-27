@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 
+const util = require("util");
+const https = require("https");
+
 // The API is documented here:
 // https://www.jfrog.com/confluence/display/BT/Bintray+REST+API
 
@@ -15,5 +18,29 @@
 // }
 // RESULT -> Status: 201 Created
 // {Version get JSON response}
-throw "TODO";
+
+// Make request
+const req = https.request(
+	`https://bintray.com/api/v1/packages/${process.env.BINTRAY_SUBJECT}/${process.env.BINTRAY_REPO}/${process.env.BINTRAY_PACKAGE}/versions`,
+	{
+		"method": "POST",
+	},
+	(res) =>
+	{
+		console.log(res);
+	});
+
+// We just want to stop here
+req.on('error', (e) => {
+		console.error("oops " + e);
+		throw e;
+	});
+
+// Write request
+req.write(JSON.stringify(
+	{
+		"name": `${process.argv[0]}`,
+		"desc": `${process.argv[0]}`,
+	}));
+req.end();
 
