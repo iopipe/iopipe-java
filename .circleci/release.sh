@@ -1,5 +1,8 @@
 #!/bin/sh -x
 
+# The API is documented here:
+# https://www.jfrog.com/confluence/display/BT/Bintray+REST+API
+
 # Environment variables used
 if [ -z "$BINTRAY_USER" ]
 then
