@@ -27,6 +27,13 @@ then
 	exit 9
 fi
 
+# And curl
+if ! which curl
+then
+	echo "curl does not exist."
+	exit 9
+fi
+
 # And realpath
 if ! which realpath
 then
@@ -56,8 +63,20 @@ then
 	exit 2
 fi
 
-# Create version first
-if ! ./bincreatever.js "$__pom_ver"
+# *** Create new version
+# HTTP -> POST /packages/:subject/:repo/:package/versions
+# BODY -> {
+#   "name": "1.1.5",
+#   "released": "ISO8601 (yyyy-MM-dd'T'HH:mm:ss.SSSZ)", (optional)
+#   "desc": "This version...",
+#   "github_release_notes_file": "RELEASE.txt", (optional)
+#   "github_use_tag_release_notes": true, (optional)
+#   "vcs_tag": "1.1.5" (optional)
+# }
+# RESULT -> Status: 201 Created
+# {Version get JSON response}
+if ! echo '{"name":"'$__pom_ver'", "desc":"'$__pom_ver'"}' | curl --data-binary @- -f -XPOST -u "$BINTRAY_USER:$BINTRAY_APITOKEN" -H "Content-Type: application/json" \
+	"https://api.bintray.com/packages/$BINTRAY_SUBJECT/$BINTRAY_REPO/$BINTRAY_PACKAGE/versions"
 then
 	echo "Failed to create version!"
 	exit 3
