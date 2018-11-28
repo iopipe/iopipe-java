@@ -9,9 +9,9 @@ then
 	echo "BINTRAY_USER not set".
 	exit 9
 fi
-if [ -z "$BINTRAY_APITOKEN" ]
+if [ -z "$BINTRAY_API_KEY" ]
 then
-	echo "BINTRAY_APITOKEN not set, this is your API key in your profile."
+	echo "BINTRAY_API_KEY not set, this is your API key in your profile."
 	exit 9
 fi
 if [ -z "$SONATYPE_USERTOKEN" ]
@@ -79,7 +79,7 @@ fi
 # }
 # RESULT -> Status: 201 Created
 # {Version get JSON response}
-if ! echo '{"name":"'$__pom_ver'", "desc":"'$__pom_ver'"}' | curl --data-binary @- -f -XPOST -u "$BINTRAY_USER:$BINTRAY_APITOKEN" -H "Content-Type: application/json" \
+if ! echo '{"name":"'$__pom_ver'", "desc":"'$__pom_ver'"}' | curl --data-binary @- -f -XPOST -u "$BINTRAY_USER:$BINTRAY_API_KEY" -H "Content-Type: application/json" \
 	"https://api.bintray.com/packages/$BINTRAY_SUBJECT/$BINTRAY_REPO/$BINTRAY_PACKAGE/versions"
 then
 	echo "Failed to create version!"
@@ -99,7 +99,7 @@ do
 	# {
 	#  "message": "success"
 	# }
-	if ! curl --data-binary @- -f -XPUT -u "$BINTRAY_USER:$BINTRAY_APITOKEN" -H "Content-Type: application/octet-stream" "https://api.bintray.com/maven/$BINTRAY_SUBJECT/$BINTRAY_REPO/$BINTRAY_PACKAGE/$__as;publish=0" < "$__file"
+	if ! curl --data-binary @- -f -XPUT -u "$BINTRAY_USER:$BINTRAY_API_KEY" -H "Content-Type: application/octet-stream" "https://api.bintray.com/maven/$BINTRAY_SUBJECT/$BINTRAY_REPO/$BINTRAY_PACKAGE/$__as;publish=0" < "$__file"
 	then
 		echo "Failed to upload $__as"
 		
@@ -122,7 +122,7 @@ sleep 15
 # RESULT -> {
 #   "files": 39
 # }
-if ! curl -f -XPOST -u "$BINTRAY_USER:$BINTRAY_APITOKEN" "https://api.bintray.com/content/$BINTRAY_SUBJECT/$BINTRAY_REPO/$BINTRAY_PACKAGE/$__pom_ver/publish"
+if ! curl -f -XPOST -u "$BINTRAY_USER:$BINTRAY_API_KEY" "https://api.bintray.com/content/$BINTRAY_SUBJECT/$BINTRAY_REPO/$BINTRAY_PACKAGE/$__pom_ver/publish"
 then
 	echo "Failed to publish!"
 	exit 5
@@ -139,7 +139,7 @@ sleep 15
 #  "password": "passwordToken", // Sonatype OSS user password
 #  "close": "1" // Optional
 # }
-if ! echo '{"username":"'"$SONATYPE_USERTOKEN"'", "password":"'"$SONATYPE_PASSWORDTOKEN"'", "close", "1"}' | curl --data-binary @- -f -XPOST -u "$BINTRAY_USER:$BINTRAY_APITOKEN" -H "Content-Type: application/json" \
+if ! echo '{"username":"'"$SONATYPE_USERTOKEN"'", "password":"'"$SONATYPE_PASSWORDTOKEN"'", "close", "1"}' | curl --data-binary @- -f -XPOST -u "$BINTRAY_USER:$BINTRAY_API_KEY" -H "Content-Type: application/json" \
 	"https://api.bintray.com/maven_central_sync/$BINTRAY_SUBJECT/$BINTRAY_REPO/$BINTRAY_PACKAGE/versions/$__pom_ver"
 then
 	echo "Failed to sync to maven central!"
