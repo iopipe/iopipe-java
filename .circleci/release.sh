@@ -89,8 +89,13 @@ do
 	# We operate on the relative path here, so we want to lose dist
 	__as="$(realpath --relative-to="/tmp/$$/" "$__file")"
 	
-	# Now do the upload
-	if ! ./binupload.js "$__file" "$__as"
+	# *** Upload files for this version (USE THIS MAVEN PUBLISH?? WOULD IT WORK??)
+	# HTTP -> PUT /maven/:subject/:repo/:package/:file_path[;publish=0/1]
+	# RESULT -> Status: 201 Created
+	# {
+	#  "message": "success"
+	# }
+	if ! curl --data-binary @- -f -XPUT -u "$BINTRAY_USER:$BINTRAY_APITOKEN" -H "Content-Type: application/octet-stream" "https://api.bintray.com/maven/$BINTRAY_SUBJECT/$BINTRAY_REPO/$BINTRAY_PACKAGE/$__as;publish=0" < "$__file"
 	then
 		echo "Failed to upload $__as"
 		
