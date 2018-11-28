@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 
 # The API is documented here:
 # https://www.jfrog.com/confluence/display/BT/Bintray+REST+API
@@ -14,6 +14,17 @@ then
 	echo "BINTRAY_APITOKEN not set, this is your API key in your profile."
 	exit 9
 fi
+if [ -z "$SONATYPE_USERTOKEN" ]
+then
+	echo "SONATYPE_USERTOKEN not set."
+	exit 9
+fi
+
+if [ -z "$SONATYPE_PASSWORDTOKEN" ]
+then
+	echo "SONATYPE_PASSWORDTOKEN not set."
+	exit 9
+fi
 
 # Export these
 export BINTRAY_SUBJECT="iopipe"
@@ -24,13 +35,6 @@ export BINTRAY_PACKAGE="iopipe"
 if ! which node
 then
 	echo "NodeJS does not exist."
-	exit 9
-fi
-
-# And curl
-if ! which curl
-then
-	echo "curl does not exist."
 	exit 9
 fi
 
@@ -108,17 +112,39 @@ done
 # Do not need these files anymore
 rm -rvf "/tmp/$$/"
 
-# Publish everything
-if ! ./binpublish.js "$__pom_ver"
+# Allow bintray to settle for a bit
+echo "Settling..."
+sleep 15
+
+# *** Publish content
+# HTTP -> POST /content/:subject/:repo/:package/:version/publish
+# Status: 200 OK
+# RESULT -> {
+#   "files": 39
+# }
+if ! curl -f -XPOST -u "$BINTRAY_USER:$BINTRAY_APITOKEN" "https://api.bintray.com/content/$BINTRAY_SUBJECT/$BINTRAY_REPO/$BINTRAY_PACKAGE/$__pom_ver/publish"
 then
 	echo "Failed to publish!"
 	exit 5
 fi
 
-# Maven central sync
-if ! ./binmcsync.js "$__pom_ver"
+# Allow bintray to settle for a bit
+echo "Settling..."
+sleep 15
+
+# *** 
+# HTTP -> POST /maven_central_sync/:subject/:repo/:package/versions/:version
+# BODY -> {
+#  "username": "userToken", // Sonatype OSS user token
+#  "password": "passwordToken", // Sonatype OSS user password
+#  "close": "1" // Optional
+# }
+if ! echo '{"username":"'"$SONATYPE_USERTOKEN"'", "password":"'"$SONATYPE_PASSWORDTOKEN"'", "close", "1"}' | curl --data-binary @- -f -XPOST -u "$BINTRAY_USER:$BINTRAY_APITOKEN" -H "Content-Type: application/json" \
+	"https://api.bintray.com/maven_central_sync/$BINTRAY_SUBJECT/$BINTRAY_REPO/$BINTRAY_PACKAGE/versions/$__pom_ver"
 then
 	echo "Failed to sync to maven central!"
 	exit 5
 fi
+
+echo "Cool it worked!"
 
