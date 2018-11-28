@@ -40,7 +40,7 @@ jobs:
       - checkout
       - run:
           name: Maven release
-          command: mvn deploy -Drevision=$CIRCLE_TAG
+          command: .circleci/release.sh
 
 workflows:
   version: 2
