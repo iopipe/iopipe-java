@@ -53,8 +53,7 @@ echo "POM version: $__pom_ver" 1>&2
 
 # Build 
 mkdir -p "/tmp/$$/"
-__pwd="$(pwd)"
-if ! (cd .. && mvn deploy "-DaltDeploymentRepository=file::default::file:///tmp/$$/")
+if ! mvn deploy "-DaltDeploymentRepository=file::default::file:///tmp/$$/"
 then
 	echo "Failed to build distribution"
 	exit 2
