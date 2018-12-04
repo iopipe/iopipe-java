@@ -131,7 +131,7 @@ sleep 15
 #  "password": "passwordToken", // Sonatype OSS user password
 #  "close": "1" // Optional
 # }
-if ! echo '{"username":"'"$SONATYPE_USERTOKEN"'", "password":"'"$SONATYPE_PASSWORDTOKEN"'", "close", "1"}' | curl --data-binary @- -f -XPOST -u "$BINTRAY_USER:$BINTRAY_API_KEY" -H "Content-Type: application/json" \
+if ! echo '{"username":"'"$SONATYPE_USERTOKEN"'", "password":"'"$SONATYPE_PASSWORDTOKEN"'", "close": "1"}' | curl --data-binary @- -f -XPOST -u "$BINTRAY_USER:$BINTRAY_API_KEY" -H "Content-Type: application/json" \
 	"https://api.bintray.com/maven_central_sync/$BINTRAY_SUBJECT/$BINTRAY_REPO/$BINTRAY_PACKAGE/versions/$__pom_ver"
 then
 	echo "Failed to sync to maven central!"
