@@ -41,7 +41,7 @@ fi
 # Get the version from the POM
 # This should extract the version although it could also break in
 # another locale, so hopefully it is not too troublesome
-__pom_ver="`cd ..; MAVEN_OPTS="-Dorg.slf4j.simpleLogger.defaultLogLevel=OFF
+__pom_ver="`MAVEN_OPTS="-Dorg.slf4j.simpleLogger.defaultLogLevel=OFF
 	-Dorg.slf4j.simpleLogger.log.org.apache.maven.plugins.help=INFO"
 	mvn help:evaluate --batch-mode -Dexpression=project.version 2>&1 | \
 	grep -v '^\[INFO' | grep -v '^[dD]ownload' | \
