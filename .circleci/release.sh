@@ -31,13 +31,6 @@ export BINTRAY_SUBJECT="iopipe"
 export BINTRAY_REPO="iopipe"
 export BINTRAY_PACKAGE="iopipe"
 
-# We need node
-if ! which node
-then
-	echo "NodeJS does not exist."
-	exit 9
-fi
-
 # And realpath
 if ! which realpath
 then
