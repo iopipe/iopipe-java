@@ -222,7 +222,8 @@ environment variables.
    * If set to `false` then the plugin will be disabled.
    * If this is not set for a plugin then it will use the setting from the
      plugin if it should be enabled by default or not.
- * `com.iopipe.generichandler`, `IOPIPE_HANDLER`, or `IOPIPE_GENERIC_HANDLER`
+ * `com.iopipe.handler`/`com.iopipe.generichandler` or
+   `IOPIPE_HANDLER`/`IOPIPE_GENERIC_HANDLER`
    * This specifies the class (and optionally the method) to be used by the
      generic handler to wrap with IOpipe.
    * `com.example`, implies that the `requestHandler` method be used.
