@@ -224,10 +224,12 @@ public final class EntryPoint
 	public static final EntryPoint defaultAWSEntryPoint()
 	{
 		// This variable is very important
-		String pair = IOpipeConfiguration.getVariable("com.iopipe.generichandler",
-			"IOPIPE_GENERIC_HANDLER", null);
+		String pair = pair = IOpipeConfiguration.getVariable(
+			"com.iopipe.handler", "IOPIPE_HANDLER", IOpipeConfiguration.getVariable(
+				"com.iopipe.generichandler", "IOPIPE_GENERIC_HANDLER", null));
 		if (pair == null)
 			throw new InvalidEntryPointException("The environment variable " +
+				"IOPIPE_HANDLER or " +
 				"IOPIPE_GENERIC_HANDLER has not been set, execution cannot " +
 				"continue.");
 		
