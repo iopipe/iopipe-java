@@ -1,5 +1,12 @@
 #!/bin/sh -e
 
+# Need this to publish
+if ! which aws
+then
+	echo "No AWS command"
+	exit 1
+fi
+
 # Package JAR and place all dependencies into the target
 mvn clean
 mvn package -Dmaven.test.skip=true
