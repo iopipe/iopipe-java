@@ -50,6 +50,9 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Install Python PIP
+          command: sudo apt-get update && sudo apt-get install python-pip
+      - run:
           name: Install publish dependencies
           command: sudo pip install -U awscli
       - run:
