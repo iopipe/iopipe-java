@@ -41,6 +41,28 @@ jobs:
       - run:
           name: Maven release
           command: .circleci/release.sh
+  publish:
+    docker:
+      - image: circleci/openjdk:8-jdk
+    working_directory: ~/repo
+    environment:
+      MAVEN_OPTS: -Xmx3200m
+    steps:
+      - checkout
+      - run:
+          name: Install Python PIP
+          command: sudo apt-get update && sudo apt-get install python-pip
+      - run:
+          name: Install publish dependencies
+          command: sudo pip install -U awscli
+      - run:
+          name: Override AWS Credentials
+          command: |
+            echo 'export AWS_ACCESS_KEY_ID="$LAYER_AWS_ACCESS_KEY_ID"' >> $BASH_ENV
+            echo 'export AWS_SECRET_ACCESS_KEY="$LAYER_SECRET_ACCESS_KEY"' >> $BASH_ENV
+      - run:
+          name: Publish layers
+          command: .circleci/layers.sh
 
 workflows:
   version: 2
@@ -50,6 +72,16 @@ workflows:
   release:
     jobs:
       - release:
+          filters:
+            tags:
+              only:
+                - /^\d{1,}\.\d{1,}\.\d{1,}\w{0,}$/
+            branches:
+              ignore:
+                - /.*/
+  publish:
+    jobs:
+      - publish:
           filters:
             tags:
               only:
