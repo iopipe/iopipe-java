@@ -42,7 +42,7 @@ do
 	__ver="`aws lambda publish-layer-version \
 		--layer-name IOpipeJava8 \
 		--content "S3Bucket=$__bn,S3Key=$__s3" \
-		--description 'IOpipe Layer Java 8' 
+		--description 'IOpipe Layer Java 8' \
 		--compatible-runtimes java8 \
 		--license-info 'Apache 2.0' \
 		--region $__region \
