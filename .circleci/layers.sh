@@ -16,6 +16,7 @@ mvn dependency:copy-dependencies -DincludeScope=runtime -DoutputDirectory=target
 rm -rvf java
 mkdir -p java/lib/
 cp -v target/*.jar java/lib/
+rm -vf java/lib/*-sources.jar java/lib/*-javadoc.jar
 
 # ZIP it up
 rm -f java8.zip
