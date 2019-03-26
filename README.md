@@ -27,6 +27,7 @@ It is licensed under the Apache 2.0.
    * [Labels](#labels)
    * [Profiling](#profiling)
    * [Tracing](#tracing)
+   * [Logging](#logging)
  * [Resources](#resources)
 
 # Building With IOpipe
@@ -368,6 +369,16 @@ Disabling the plugin can be done as followed:
 
  * Setting the system property `com.iopipe.plugin.trace` to `false`.
  * Setting the environment variable `IOPIPE_TRACE_ENABLED` to `false`.
+
+## Logging
+
+You send synchronous logs to IOpipe, bypassing Cloudwatch. Note that this will incur additional overhead in your invocations. This can be useful for doing local development, or if you're unable to connect Cloudwatch logs to IOpipe for async no-overhead logging.
+
+If you are using Log4j2 you may read the setup instructions ![here](https://github.com/iopipe/iopipe-java-logger-log4j2).
+
+If you are using TinyLog you may read the setup instructions ![here](https://github.com/iopipe/https://github.com/iopipe/iopipe-java-logger-tinylog).
+
+Once you’re setup, you will need to configure IOpipe to enable the logging plugin. You can do this by setting the `IOPIPE_LOGGER_ENABLED` environment variable to `true` in the AWS Lambda configuration.
 
 # Resources
 
