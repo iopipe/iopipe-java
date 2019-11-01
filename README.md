@@ -1,3 +1,6 @@
+**✨Special Announcement: We've Joined New Relic Serverless!**
+**Get ready to function faster with full visibility into your serverless applications—and everything else. [Read our founders' note to learn more.](https://read.iopipe.com/founders-note-iopipe-new-relic-acquisition-c15eeda47151)**
+
 IOpipe Telemetry Agent for Java
 --------------------------------------------
 [![Download](https://api.bintray.com/packages/iopipe/iopipe/iopipe/images/download.svg) ](https://bintray.com/iopipe/iopipe/iopipe/_latestVersion)[![Build status](https://circleci.com/gh/iopipe/iopipe-java.svg?style=shield&circle-token=b9a08049964f555f38ab316ba535369aa5fe8252
